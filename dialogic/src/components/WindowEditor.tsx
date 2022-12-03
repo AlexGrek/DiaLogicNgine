@@ -2,15 +2,19 @@ import * as React from 'react';
 import Dialog, { DialogWindow } from '../game/Dialog';
 import EditIcon from '@rsuite/icons/Edit';
 import CloseIcon from '@rsuite/icons/Close';
-import { Button, ButtonGroup, Panel, Placeholder, Stack } from 'rsuite';
+import MoreIcon from '@rsuite/icons/More';
+import { Button, ButtonGroup, Panel, Placeholder, Stack, Col } from 'rsuite';
 import Renamer from './Renamer';
+import WindowWidgetContextMenu from './WindowWidgetContextMenu';
+import { IUpds } from '../App';
 
 export interface IWindowEditorProps {
   window: DialogWindow;
+  handlers: IUpds;
 }
 
 export interface IWindowEditorState {
-  renamerOpen: boolean;
+  confirmerOpen: boolean;
 }
 
 export default class WindowEditor extends React.Component<IWindowEditorProps, IWindowEditorState> {
@@ -19,36 +23,45 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
     super(props)
 
     this.state = {
-      renamerOpen: false
+      confirmerOpen: false
     }
   }
 
+  public textShortened(text: string, max: number): string {
+    if (text.length > max) {
+      return text.substring(0, max - 3) + "..."
+    }
+    else {
+      return text
+    }
+  }
+
+  strs = "some bullshit but a bit long text to test this shit, while still waiting for him to fuck your soul away from your body"
+
   public render() {
-    return <Panel header={
-      <Stack justifyContent="space-between">
-        <span><span>{this.props.window.uid}</span>
-          <Button style={{ "display": "inline" }}
-            size="xs"
-            appearance="link"
-            onClick={() => this.setState({ renamerOpen: !this.state.renamerOpen })}>
-            <EditIcon></EditIcon>
-          </Button>
-          <Button style={{ "display": "inline" }} size="xs" appearance="link">
-            <CloseIcon></CloseIcon>
-          </Button>
-        </span>
-
-        {/* <Renamer open={this.state.renamerOpen}></Renamer> */}
-
-        <ButtonGroup>
-          <Button active>Day</Button>
-          <Button>Week</Button>
-          <Button>Month</Button>
-        </ButtonGroup>
-      </Stack>
-    } bordered={true}>
-      <Placeholder.Paragraph />
-    </Panel>
+    return <Col md={6} sm={12}>
+      <div className="window-widget-main">
+        <div className="window-widget-header">
+          <Stack justifyContent='space-between'>
+            <span className='window-widget-ui-text'>{this.props.window.uid}</span>
+            <span className='window-widget-icons'></span>
+            <WindowWidgetContextMenu handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
+          </Stack>
+        </div>
+        <div className='window-widget-content'>
+          <p className='window-widget-content-text'>
+            {this.textShortened(this.props.window.text.toString(), 84)}
+          </p>
+        </div>
+        <div className='window-widget-footer'>
+          <li className='window-widget-links-list'>
+            <ul>Link 1</ul>
+            <ul>Link 2</ul>
+            <ul>Link 3 external</ul>
+          </li>
+        </div>
+      </div>
+    </Col>
   }
 }
 

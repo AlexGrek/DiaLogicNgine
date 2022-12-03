@@ -21,6 +21,11 @@ export interface IAppState {
 export interface IUpds {
   handleDialogEdit: (dialog: Dialog) => void;
   handleDialogCreate: (dialog: Dialog) => void;
+  handleDialogApplyChange: (func: DialogWindowListUpdater, dialog_uid: string | null) => void;
+}
+
+export interface DialogWindowListUpdater {
+  (inputDialogWindows: DialogWindow[]): DialogWindow[]
 }
 
 export default class App extends React.Component<IAppProps, IAppState> {
@@ -55,6 +60,22 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({game: {...this.state.game, dialogs: newDialogs}});
   }
 
+  private handleDialogApplyChange(func: DialogWindowListUpdater, dialog_uid: string | null) {
+    if (!dialog_uid) {
+      dialog_uid = this.state.activeDialog
+    }
+    let newDialogs = this.state.game.dialogs.map(d => {
+      if (d.name === dialog_uid) {
+        const dialogWindows = func(d.windows);
+        const newDialog = {...d, windows: dialogWindows }
+        console.log(`Dialog ${d.name} updated.`);
+        return newDialog;
+      }
+      return d;
+    })
+    this.setState({game: {...this.state.game, dialogs: newDialogs}});
+  }
+
   private handleDialogCreate(dialog: Dialog) {
     let newDialogs = this.state.game.dialogs.concat(dialog);
     this.setState({game: {...this.state.game, dialogs: newDialogs}})
@@ -63,14 +84,15 @@ export default class App extends React.Component<IAppProps, IAppState> {
   public render() {
     let updates = {
       handleDialogEdit: this.handleDialogEdit.bind(this),
-      handleDialogCreate: this.handleDialogCreate.bind(this)
+      handleDialogCreate: this.handleDialogCreate.bind(this),
+      handleDialogApplyChange: this.handleDialogApplyChange.bind(this)
     }
 
     let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);
     return (
       <CustomProvider theme="dark">
       <Container>
-    <Header>Header</Header>
+    <Header className='app-header-text'>DiaLogic Ngine</Header>
     <Container>
       <Sidebar>
         <SidePanel game={this.state.game}

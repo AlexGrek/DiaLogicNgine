@@ -37,7 +37,7 @@ export default class DialogEditor extends React.Component<IDialogEditorProps> {
 
   public renderWindows(windows: DialogWindow[]) {
     return windows.map(win =>
-      <WindowEditor window={win} key={win.uid}></WindowEditor>)
+      <WindowEditor window={win} key={win.uid} handlers={this.props.handlers}></WindowEditor>)
   }
 
   public renderDialog(windows: DialogWindow[]) {

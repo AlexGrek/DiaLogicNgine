@@ -28,11 +28,39 @@
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-header-text {
+  font-family: 'HeaderFont';
+  font-size: 22pt;
+}
+
+.window-widget-main {
+  margin: 12px;
+  min-height: 18pt;
+  background-color: black;
+  border-radius: 8pt;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+}
+
+.window-widget-header {
+  background-color: #282c34ce;
+  padding: 4pt 6pt;
+  border-radius: 8pt 8pt 0 0;
+  font-size: larger;
+}
+
+.window-widget-main:hover {
+  background-color: slategray;
+}
+
+.window-widget-content {
+  padding: 12pt;
+  margin-top: 1pt;
+  margin-bottom: 1pt;
+}
+
+.window-widget-footer {
+  background-color: #282c34ce;
+  padding: 5pt 3pt;
+  border-radius: 0pt 0pt 8pt 8pt;
+  font-size: small;
 }
