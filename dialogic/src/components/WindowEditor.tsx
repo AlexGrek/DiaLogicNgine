@@ -7,11 +7,14 @@ import { Button, ButtonGroup, Panel, Placeholder, Stack, Col } from 'rsuite';
 import Renamer from './Renamer';
 import WindowWidgetContextMenu from './WindowWidgetContextMenu';
 import { IUpds } from '../App';
+import { GameDescription } from '../game/GameDescription';
 
 export interface IWindowEditorProps {
   window: DialogWindow;
   dialog: Dialog;
   handlers: IUpds;
+  onWindowChosen: Function;
+  game: GameDescription;
 }
 
 export interface IWindowEditorState {
@@ -46,15 +49,15 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
           <Stack justifyContent='space-between'>
             <span className='window-widget-ui-text'>{this.props.window.uid}</span>
             <span className='window-widget-icons'></span>
-            <WindowWidgetContextMenu dialog={this.props.dialog} handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
+            <WindowWidgetContextMenu game={this.props.game} dialog={this.props.dialog} handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
           </Stack>
         </div>
-        <div className='window-widget-content'>
+        <div className='window-widget-content' onClick={() => this.props.onWindowChosen()}>
           <p className='window-widget-content-text'>
             {this.textShortened(this.props.window.text.toString(), 84)}
           </p>
         </div>
-        <div className='window-widget-footer'>
+        <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
           <li className='window-widget-links-list'>
             <ul>Link 1</ul>
             <ul>Link 2</ul>

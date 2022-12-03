@@ -5,11 +5,13 @@ import { Dropdown } from 'rsuite';
 import ConfirmationDialog from './ConfirmationDialog';
 import { IUpds } from '../App';
 import ChangeTextDialog from './ChangeTextDialog';
+import { GameDescription } from '../game/GameDescription';
 
 export interface IWindowWidgetContextMenuProps {
   window: DialogWindow;
   dialog: Dialog;
   handlers: IUpds;
+  game: GameDescription;
 }
 
 export interface IWindowWidgetContextMenuState {
@@ -30,15 +32,15 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
     }
   }
 
-  deleteClick = (e: any) => {
+  deleteClick = () => {
     this.setState({deleteOpen: true})
   }
 
-  renameClick = (e: any) => {
+  renameClick = () => {
     this.setState({renameOpen: true})
   }
 
-  copyRenameClick = (e: any) => {
+  copyRenameClick = () => {
     this.setState({copyRenameOpen: true})
   }
 
@@ -94,9 +96,9 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
       {this.confirmationMenu()}
       <Dropdown noCaret title={<span><MoreIcon/></span>}>
       <Dropdown.Item>Duplicate</Dropdown.Item>
-      <Dropdown.Item onClick={this.renameClick.bind(this)}>Rename</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.renameClick()}}>Rename</Dropdown.Item>
       <Dropdown.Item>Copy and rename</Dropdown.Item>
-      <Dropdown.Item onClick={this.deleteClick.bind(this)}>Delete</Dropdown.Item>
+      <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.deleteClick()}}>Delete</Dropdown.Item>
     </Dropdown>
     </div>
   }

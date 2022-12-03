@@ -22,6 +22,7 @@ export interface IUpds {
   handleDialogEdit: (dialog: Dialog) => void;
   handleDialogCreate: (dialog: Dialog) => void;
   handleDialogApplyChange: (func: DialogWindowListUpdater, dialog_uid: string | null) => void;
+  handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null) => void;
 }
 
 export interface DialogWindowListUpdater {
@@ -76,6 +77,18 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({game: {...this.state.game, dialogs: newDialogs}});
   }
 
+  private handleDialogWindowChange(window: DialogWindow, dialog_uid: string | null) {
+    const uid = window.uid
+    const dialogWindowListChanger = (lst: DialogWindow[]) => {
+      return lst.map((element) => {
+        if (element.uid === uid) {
+          return window
+        } else return element;
+      })
+    }
+    this.handleDialogApplyChange(dialogWindowListChanger, dialog_uid);
+  }
+
   private handleDialogCreate(dialog: Dialog) {
     let newDialogs = this.state.game.dialogs.concat(dialog);
     this.setState({game: {...this.state.game, dialogs: newDialogs}})
@@ -85,7 +98,8 @@ export default class App extends React.Component<IAppProps, IAppState> {
     let updates = {
       handleDialogEdit: this.handleDialogEdit.bind(this),
       handleDialogCreate: this.handleDialogCreate.bind(this),
-      handleDialogApplyChange: this.handleDialogApplyChange.bind(this)
+      handleDialogApplyChange: this.handleDialogApplyChange.bind(this),
+      handleDialogWindowChange: this.handleDialogWindowChange.bind(this)
     }
 
     let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);
@@ -101,7 +115,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
           handlers={updates}></SidePanel>
       </Sidebar>
       <Content>
-        <DialogEditor handlers={updates} dialog={chosenDialog}/>
+        <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog}/>
       </Content>
     </Container>
     <Footer>Footer</Footer>

@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  height: 100%;
 }
 
 .App-logo {
@@ -42,7 +43,7 @@
 }
 
 .window-widget-header {
-  background-color: #282c34ce;
+  background-color: #282c30;
   padding: 4pt 6pt;
   border-radius: 8pt 8pt 0 0;
   font-size: larger;
@@ -53,9 +54,14 @@
 }
 
 .window-widget-content {
-  padding: 12pt;
+  padding: 6pt;
   margin-top: 1pt;
   margin-bottom: 1pt;
+  cursor: pointer;
+}
+
+.window-widget-content-text {
+  overflow: hidden;
 }
 
 .window-widget-footer {
@@ -63,4 +69,58 @@
   padding: 5pt 3pt;
   border-radius: 0pt 0pt 8pt 8pt;
   font-size: small;
+  cursor: pointer;
+}
+
+.highlighted {
+  outline: 2px solid yellow;
+}
+
+.window-editor-grid {
+  width: 100%;
+  height: 100%;
+}
+
+.window-editor-grid-header {
+  width: 100%;
+  text-align: center;
+  font-weight: 200;
+  font-size: large;
+  margin-bottom: 4pt;
+  margin-top: 5pt;
+}
+
+.window-editor-drawer-body {
+  padding: 0;
+}
+
+.window-editor-grid-content {
+  background-color: #4c52603b;
+  height: 100%;
+  border-radius: 0 0 8pt 8pt;
+  padding-bottom: 12pt;
+}
+
+.link-short-view {
+  min-height: 4em;
+  width: 100%;
+  margin: 3pt;
+  border-radius: 4pt;
+  background-color: #4c52603b;
+  cursor: pointer;
+}
+
+.link-short-view:hover {
+  background-color: rgba(86, 98, 112, 0.3);
+}
+
+.link-editor-body {
+  background-color: #4c52603b;
+  padding: 4pt;
+  border-radius: 4pt;
+}
+
+.links-editor-panel {
+  padding-right: 3pt;
+  overflow-x: hidden;
 }

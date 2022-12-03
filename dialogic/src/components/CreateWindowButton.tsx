@@ -19,7 +19,7 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
     }
 
     createWindow(name: string) {
-        return {uid: name, text: ""};
+        return {uid: name, text: "", links: []};
     }
 
     inputHandler(update: string) {
@@ -36,7 +36,7 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
         if (event.key === 'Enter') {
             if (this.state.uid.length > 0) {
                 let newWindow = this.createWindow(this.state.uid);
-                this.setState({ uid: "" })
+                this.setState({ uid: "" });
                 this.props.createHandler(newWindow);
             }
         }
@@ -51,7 +51,7 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
                         onChange={this.inputHandler.bind(this)}
                         onKeyDown={this.handleKeyPress.bind(this)}
                          />
-                    <InputGroup.Button disabled={this.state.uid.length == 0}
+                    <InputGroup.Button disabled={this.state.uid.length === 0}
                         onClick={this.handleAddClick.bind(this)}>
                         <PlusRound />
                     </InputGroup.Button>
