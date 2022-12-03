@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Dialog, { DialogWindow } from '../game/Dialog';
+import Dialog, { DialogWindow, renameDialogWindow } from '../game/Dialog';
 import MoreIcon from '@rsuite/icons/More';
 import { Dropdown } from 'rsuite';
 import ConfirmationDialog from './ConfirmationDialog';
@@ -77,14 +77,14 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
             if (el.uid !== uid)
               return el;
             else {
-              return el.renamed(newString);
+              return renameDialogWindow(el, newString);
             }
           })
         }
         this.props.handlers.handleDialogApplyChange(rename, null)
       }
       return (
-        <ChangeTextDialog validator={validator} text_prompt="UID must be unique" text_initial={uid} header={textOf} onConfirm={(str: string) => console.warn(str)} onClose={closeAllbinded}></ChangeTextDialog>)
+        <ChangeTextDialog validator={validator} text_prompt="UID must be unique" text_initial={uid} header={textOf} onConfirm={renameEvent} onClose={closeAllbinded}></ChangeTextDialog>)
     }
     return "";
   }

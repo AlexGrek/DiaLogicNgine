@@ -3,24 +3,17 @@ export default interface Dialog {
     windows: DialogWindow[];
 }
 
-export class SimpleTextGenerator {
-    text = "";
-
-    constructor(text: string) {
-        this.text = text;
-    }
+export interface SimpleTextGenerator {
+    text: string;
 }
 
-export class DialogWindow {
-    public text: SimpleTextGenerator;
+export interface DialogWindow {
+    text: string;
     uid: string;
-
-    constructor(uid: string, text: string) {
-        this.text = new SimpleTextGenerator(text);
-        this.uid = uid;
-    }
-
-    public renamed(newName: string) {
-        return new DialogWindow(newName, this.text.text)
-    }
 }
+
+const renameDialogWindow = (old: DialogWindow, newName: string) => {
+    return {...old, uid: newName}
+}
+
+export { renameDialogWindow };

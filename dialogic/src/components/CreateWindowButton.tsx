@@ -18,20 +18,24 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
         this.state = { uid: "" }
     }
 
+    createWindow(name: string) {
+        return {uid: name, text: ""};
+    }
+
     inputHandler(update: string) {
         this.setState({ uid: update });
     }
 
     handleAddClick(_: any) {
-        let newWindow = new DialogWindow(this.state.uid, "");
-        this.setState({ uid: "" })
+        let newWindow = this.createWindow(this.state.uid);
+        this.setState({ uid: "" });
         this.props.createHandler(newWindow);
     }
 
     handleKeyPress(event: React.KeyboardEvent<HTMLInputElement>) {
         if (event.key === 'Enter') {
             if (this.state.uid.length > 0) {
-                let newWindow = new DialogWindow(this.state.uid, "");
+                let newWindow = this.createWindow(this.state.uid);
                 this.setState({ uid: "" })
                 this.props.createHandler(newWindow);
             }
