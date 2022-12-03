@@ -19,4 +19,8 @@ export class DialogWindow {
         this.text = new SimpleTextGenerator(text);
         this.uid = uid;
     }
+
+    public renamed(newName: string) {
+        return new DialogWindow(newName, this.text.text)
+    }
 }

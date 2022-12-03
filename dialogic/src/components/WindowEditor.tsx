@@ -10,6 +10,7 @@ import { IUpds } from '../App';
 
 export interface IWindowEditorProps {
   window: DialogWindow;
+  dialog: Dialog;
   handlers: IUpds;
 }
 
@@ -45,7 +46,7 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
           <Stack justifyContent='space-between'>
             <span className='window-widget-ui-text'>{this.props.window.uid}</span>
             <span className='window-widget-icons'></span>
-            <WindowWidgetContextMenu handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
+            <WindowWidgetContextMenu dialog={this.props.dialog} handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
           </Stack>
         </div>
         <div className='window-widget-content'>

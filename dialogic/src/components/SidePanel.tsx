@@ -79,7 +79,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
                 <Nav.Item>
                   <InputGroup>
                     <Input placeholder="Add dialog" value={this.state.newDialogname} onChange={this.addDialogInputHandler.bind(this)} />
-                    <InputGroup.Button disabled={this.state.newDialogname.length == 0} onClick={this.handleCreateDialog.bind(this)}>
+                    <InputGroup.Button disabled={this.state.newDialogname.length === 0} onClick={this.handleCreateDialog.bind(this)}>
                       <PlusRound />
                     </InputGroup.Button>
                   </InputGroup>

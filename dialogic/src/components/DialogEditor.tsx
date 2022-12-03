@@ -35,9 +35,9 @@ export default class DialogEditor extends React.Component<IDialogEditorProps> {
     }
   }
 
-  public renderWindows(windows: DialogWindow[]) {
+  public renderWindows(windows: DialogWindow[], dialog: Dialog) {
     return windows.map(win =>
-      <WindowEditor window={win} key={win.uid} handlers={this.props.handlers}></WindowEditor>)
+      <WindowEditor dialog={dialog} window={win} key={win.uid} handlers={this.props.handlers}></WindowEditor>)
   }
 
   public renderDialog(windows: DialogWindow[]) {
@@ -48,7 +48,10 @@ export default class DialogEditor extends React.Component<IDialogEditorProps> {
         </p>
         <CreateWindowButton createHandler={this.createDialogHandler.bind(this)}></CreateWindowButton>
         <div>
-          {this.renderWindows(windows)}
+          {
+            this.props.dialog ?
+              this.renderWindows(windows, this.props.dialog) : ""
+          }
         </div>
       </div>
     );
