@@ -33,6 +33,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     const onCreateNew = () => {
         const updater = (window: DialogWindow) => { return { ...window, links: [...window.links, createDialogLink() ] } }
         onChange(updater);
+        setEditingIndex(links.length);
     }
 
     const onEditingDone = () => {
