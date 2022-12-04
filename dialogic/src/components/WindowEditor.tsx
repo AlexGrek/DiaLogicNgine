@@ -1,10 +1,6 @@
 import * as React from 'react';
 import Dialog, { DialogWindow } from '../game/Dialog';
-import EditIcon from '@rsuite/icons/Edit';
-import CloseIcon from '@rsuite/icons/Close';
-import MoreIcon from '@rsuite/icons/More';
-import { Button, ButtonGroup, Panel, Placeholder, Stack, Col } from 'rsuite';
-import Renamer from './Renamer';
+import { Stack, Col } from 'rsuite';
 import WindowWidgetContextMenu from './WindowWidgetContextMenu';
 import { IUpds } from '../App';
 import { GameDescription } from '../game/GameDescription';
