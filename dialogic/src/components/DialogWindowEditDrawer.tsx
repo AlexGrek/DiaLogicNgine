@@ -23,6 +23,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
 
     useEffect(() => {
         setWindow(window);
+        setChanges(false);
     }, [window]);
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {

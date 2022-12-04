@@ -1,6 +1,6 @@
 import React from 'react';
 import 'animate.css';
-import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Form, IconButton, Input, Stack, Tag, Tooltip, Whisper } from 'rsuite';
+import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Form, IconButton, Input, InputPicker, Stack, Tag, Tooltip, Whisper } from 'rsuite';
 import PagePreviousIcon from '@rsuite/icons/PagePrevious';
 import TrashIcon from '@rsuite/icons/Trash';
 import Dialog, { createDialog, createDialogLink, createWindow, DialogLink, DialogWindow, LinkType } from '../../game/Dialog';
@@ -34,7 +34,7 @@ const TooltipText = {
     [LinkType.Push]: "Move to next level, possible to another dialog (one level down)"
 }
 
-const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, 
+const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
     onEditingDone, onLinkRemove, dialogHandlers }) => {
 
     const editingDone = () => {
@@ -79,10 +79,10 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         <span>Not found. <Button disabled={!link.direction} onClick={() => link.direction ? onCreateLocalDialog(link.direction) : null} appearance='link'>Create?</Button></span>
 
     const onGotoLocalLink = (link: string) => {
-        const window = dialog.windows.find(el => el.uid === link);
-        if (window) {
+        const foundWindow = dialog.windows.find(el => el.uid === link);
+        if (foundWindow) {
             handlers.handleDialogWindowChange(window, null);
-            dialogHandlers.openAnotherWindowHandler(window);
+            dialogHandlers.openAnotherWindowHandler(foundWindow);
         }
         else{
             console.warn("Attempt to open non-existent link " + link)
@@ -95,8 +95,9 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     const directionEditor = () => {
         if (link.type === LinkType.Local) {
             const data = dialog.windows.map(d => d.uid);
+            const formattedData = data.map(d => ({value: d, label: d}));
             return <Form.Group>
-                <AutoComplete data={data} value={link.direction} onChange={editLocalDirection}></AutoComplete>
+                <InputPicker onCreate={(value, item, event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={link.direction} onChange={editLocalDirection}></InputPicker>
                 <p>{data.includes(link.direction || "") ? gotoLink() : createLink()}</p>
             </Form.Group>
         }

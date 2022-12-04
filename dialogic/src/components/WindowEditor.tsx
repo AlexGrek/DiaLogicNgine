@@ -8,6 +8,7 @@ import Renamer from './Renamer';
 import WindowWidgetContextMenu from './WindowWidgetContextMenu';
 import { IUpds } from '../App';
 import { GameDescription } from '../game/GameDescription';
+import LinkTypeTag from './LinkTypeTag';
 
 export interface IWindowEditorProps {
   window: DialogWindow;
@@ -40,8 +41,6 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
     }
   }
 
-  strs = "some bullshit but a bit long text to test this shit, while still waiting for him to fuck your soul away from your body"
-
   public render() {
     return <Col md={6} sm={12}>
       <div className="window-widget-main">
@@ -58,11 +57,11 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
           </p>
         </div>
         <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
-          <li className='window-widget-links-list'>
-            <ul>Link 1</ul>
-            <ul>Link 2</ul>
-            <ul>Link 3 external</ul>
-          </li>
+          <ul className='window-widget-links-list'>
+            {this.props.window.links.map((el, i) => {
+              return <li key={i}><LinkTypeTag value={el.type}/><span>{el.direction}</span></li>
+            })}
+          </ul>
         </div>
       </div>
     </Col>

@@ -78,11 +78,12 @@ export default class App extends React.Component<IAppProps, IAppState> {
   }
 
   private handleDialogWindowChange(window: DialogWindow, dialog_uid: string | null) {
-    const uid = window.uid
+    const uid = window.uid;
+    console.warn("Handling dialog window change: " + JSON.stringify(window))
     const dialogWindowListChanger = (lst: DialogWindow[]) => {
       return lst.map((element) => {
         if (element.uid === uid) {
-          return window
+          return window;
         } else return element;
       })
     }
