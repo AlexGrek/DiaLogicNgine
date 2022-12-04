@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import 'animate.css';
 import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Form, IconButton, Input, InputPicker, Stack, Tag, Tooltip, Whisper } from 'rsuite';
 import PagePreviousIcon from '@rsuite/icons/PagePrevious';
@@ -36,6 +36,14 @@ const TooltipText = {
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
     onEditingDone, onLinkRemove, dialogHandlers }) => {
+
+    const txtInput = useRef<any>(null);
+
+    useEffect(() => {
+        if (txtInput.current) {
+            setTimeout(() => txtInput.current.focus(), 300);
+          }
+    }, [])
 
     const editingDone = () => {
         onEditingDone()
@@ -96,10 +104,10 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         if (link.type === LinkType.Local) {
             const data = dialog.windows.map(d => d.uid);
             const formattedData = data.map(d => ({value: d, label: d}));
-            return <Form.Group>
+            return <div>
                 <InputPicker onCreate={(value, item, event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={link.direction} onChange={editLocalDirection}></InputPicker>
                 <p>{data.includes(link.direction || "") ? gotoLink() : createLink()}</p>
-            </Form.Group>
+            </div>
         }
         return <div></div>
     }
@@ -115,15 +123,15 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             </Stack>
             <Divider></Divider>
             <p>Text:</p>
-            <Input onChange={editText} placeholder="Answer text" value={link.text}></Input>
+            <Input onChange={editText} ref={txtInput} placeholder="Answer text" value={link.text}></Input>
 
-            <Form>
+            <div className="link-editor-direction">
                 <p>Direction:</p>
                 <ButtonToolbar>
                     <ButtonPanelSelector tooltips={TooltipText} chosen={link.type} variants={enumKeys} buttonData={enumNames} onValueChanged={editType} ></ButtonPanelSelector>
                 </ButtonToolbar>
                 {directionEditor()}
-            </Form>
+            </div>
         </div>
 
     );

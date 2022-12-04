@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Drawer, Input, Grid, Row, Col, Checkbox } from 'rsuite';
 import { IUpds } from '../App';
 import Dialog, { DialogWindow } from '../game/Dialog';
@@ -20,10 +20,18 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
     handlers, onClose, game, dialogHandlers }) => {
     const [windowState, setWindow] = useState<DialogWindow>(window);
     const [changesMade, setChanges] = useState<boolean>(false);
+    const txtInput = useRef<any>(null);
 
     useEffect(() => {
         setWindow(window);
         setChanges(false);
+        if (txtInput.current) {
+            txtInput.current.focus();
+            console.log("autofocus triggered")
+          }
+        else {
+            console.log("Cannot autofocus")
+        }
     }, [window]);
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {
@@ -73,7 +81,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Content
                             </div>
-                            <Input as="textarea" value={windowState.text} onChange={onTextChange} rows={5}></Input>
+                            <Input  as="textarea" value={windowState.text} ref={txtInput} onChange={onTextChange} rows={5}></Input>
                         </Col>
                         <Col xs={6}>
                             <div className='window-editor-grid-header'>
