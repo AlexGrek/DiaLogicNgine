@@ -66,7 +66,6 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
             return <LinkShortView index={index} key={index} link={el} onLinkClick={onLinkClick} dialog={dialog}></LinkShortView>
         })
         linksEditorContent = <div>
-            <p>Total links: {links.length}</p>
             {linksList}
             <Button onClick={() => onCreateNew()}>ADD</Button>
         </div>
