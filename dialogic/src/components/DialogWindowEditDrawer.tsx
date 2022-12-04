@@ -3,6 +3,7 @@ import { Button, Drawer, Input, Grid, Row, Col, Checkbox } from 'rsuite';
 import { IUpds } from '../App';
 import Dialog, { DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
+import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
 
 interface DialogWindowEditDrawerProps {
@@ -11,10 +12,12 @@ interface DialogWindowEditDrawerProps {
     open: boolean;
     handlers: IUpds;
     onClose: Function;
-    game: GameDescription
+    game: GameDescription;
+    dialogHandlers: DialogHandlers;
 }
 
-const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window, dialog, open, handlers, onClose, game }) => {
+const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window, dialog, open,
+    handlers, onClose, game, dialogHandlers }) => {
     const [windowState, setWindow] = useState<DialogWindow>(window);
     const [changesMade, setChanges] = useState<boolean>(false);
 
@@ -75,7 +78,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Links
                             </div>
-                            <LinksEditorPanel onChange={modifyWindowBy} links={windowState.links} dialog={dialog} game={game}></LinksEditorPanel>
+                            <LinksEditorPanel window_uid={window.uid} dialogHandlers={dialogHandlers} onChange={modifyWindowBy} links={windowState.links} dialog={dialog} game={game} handlers={handlers} window={windowState}></LinksEditorPanel>
                         </Col>
                     </Row>
                 </Grid>

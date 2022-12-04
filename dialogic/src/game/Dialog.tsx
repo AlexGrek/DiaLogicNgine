@@ -3,6 +3,10 @@ export default interface Dialog {
     windows: DialogWindow[];
 }
 
+export function createDialog(name: string) {
+    let dialog = { name: name, windows: [] }
+    return dialog;
+}
 export interface SimpleTextGenerator {
     text: string;
 }
@@ -34,8 +38,10 @@ export interface DialogWindow {
     links: DialogLink[];
 }
 
-const renameDialogWindow = (old: DialogWindow, newName: string) => {
-    return {...old, uid: newName}
+export const createWindow = (uid: string) => {
+        return {uid: uid, text: "", links: []};
 }
 
-export { renameDialogWindow };
+export const renameDialogWindow = (old: DialogWindow, newName: string) => {
+    return {...old, uid: newName}
+}

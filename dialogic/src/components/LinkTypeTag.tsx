@@ -14,16 +14,16 @@ const Colors = {
 }
 
 const Icons = {
-    [LinkType.Local]: "A",
-    [LinkType.Pop]: "B",
-    [LinkType.Push]: "C"
+    [LinkType.Local]: "$",
+    [LinkType.Pop]: "J",
+    [LinkType.Push]: "\""
 }
 
 const LinkTypeTag: React.FC<LinkTypeTagProps> = ({ value }) => {
     const color: Color = Colors[value];
 
     return (
-        <Tag color={color} className='link-type-tag-regular'><span className='link-type-tag-icon'>Icons[value]</span></Tag>
+        <Tag color={color} className='link-type-tag-regular'><span className='link-type-tag-icon'>{Icons[value]}</span></Tag>
     );
 };
 

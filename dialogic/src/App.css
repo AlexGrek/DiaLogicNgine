@@ -108,6 +108,16 @@
   border-radius: 4pt;
   background-color: #4c52603b;
   cursor: pointer;
+  padding: 2pt 4pt;
+}
+
+.link-short-view-text {
+  font-size: 14pt;
+}
+
+.link-short-view-target {
+  width: 100%;
+  text-align: right;
 }
 
 .link-short-view:hover {
@@ -123,4 +133,18 @@
 .links-editor-panel {
   padding-right: 3pt;
   overflow-x: hidden;
+}
+
+.link-type-tag-icon {
+  font-family: 'IconFont';
+  font-size: 10pt;
+}
+
+.link-type-tag-regular {
+  padding: 0 3pt;
+}
+
+.link-editor-toolbar {
+  width: 100%;
+  align-items: flex-end;
 }

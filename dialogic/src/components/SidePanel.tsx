@@ -3,7 +3,7 @@ import { Input, InputGroup, Nav, Sidenav } from 'rsuite';
 import DashboardIcon from '@rsuite/icons/legacy/Dashboard';
 import MagicIcon from '@rsuite/icons/legacy/Magic';
 import { GameDescription } from '../game/GameDescription';
-import Dialog from '../game/Dialog';
+import Dialog, { createDialog } from '../game/Dialog';
 import PlusRound from '@rsuite/icons/PlusRound';
 import { stringToObject } from 'rsuite/esm/utils';
 import { IUpds } from '../App';
@@ -50,13 +50,8 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
   private handleCreateDialog(_: any) {
     let name = this.state.newDialogname;
     this.setState({ newDialogname: "" })
-    let dialog = this.createDialog(name);
+    let dialog = createDialog(name);
     this.props.handlers.handleDialogCreate(dialog);
-  }
-
-  private createDialog(name: string) {
-    let dialog = { name: name, windows: [] }
-    return dialog;
   }
 
   addDialogInputHandler(update: string) {

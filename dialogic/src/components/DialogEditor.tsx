@@ -7,6 +7,13 @@ import { IUpds } from '../App';
 import DialogWindowEditDrawer from './DialogWindowEditDrawer';
 import { GameDescription } from '../game/GameDescription';
 
+export interface DialogHandlers {
+  createDialogWindowHandler: (newWindow: DialogWindow) => void;
+  windowChosenHandler: (window: DialogWindow) => void;
+  openAnotherWindowHandler: (window: DialogWindow) => void;
+  closeWindowEditorHandler: Function;
+}
+
 export interface IDialogEditorProps {
   dialog?: Dialog;
   handlers: IUpds;
@@ -40,7 +47,7 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
 
   private itemReference = React.createRef<HTMLDivElement>()
 
-  public createDialogHandler(newWindow: DialogWindow) {
+  public createDialogWindowHandler(newWindow: DialogWindow) {
     if (this.props.dialog) {
       console.log(`Creating new dialog window: {newWindow}`)
       let updatedWinList = this.props.dialog.windows.concat(newWindow);
@@ -55,8 +62,17 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
     this.setState({ editingWindow: window, editorOpen: true })
   }
 
-  private closeWindowEditorHandler() {
-    this.setState({editorOpen: false})
+  private openAnotherWindowHandler(window: DialogWindow) {
+    this.setState({ editorOpen: false });
+    console.log(this.state);
+    setTimeout(() => {
+      console.log(this.state)
+      this.setState({ editingWindow: window, editorOpen: true })
+    }, 300);
+  }
+
+  private closeWindowEditorHandler(window: DialogWindow) {
+    this.setState({editorOpen: false});
   }
 
   public renderWindows(windows: DialogWindow[], dialog: Dialog) {
@@ -65,19 +81,26 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
   }
 
   public renderDialog(windows: DialogWindow[]) {
+    const dialogHandlers = {
+      createDialogWindowHandler: this.createDialogWindowHandler.bind(this),
+      windowChosenHandler: this.windowChosenHandler.bind(this),
+      closeWindowEditorHandler: this.closeWindowEditorHandler.bind(this),
+      openAnotherWindowHandler: this.openAnotherWindowHandler.bind(this)
+    } 
+
     return (
       <div ref={this.itemReference}>
         <p>
           {JSON.stringify(this.props.dialog)}
         </p>
-        <CreateWindowButton createHandler={this.createDialogHandler.bind(this)}></CreateWindowButton>
+        <CreateWindowButton createHandler={this.createDialogWindowHandler.bind(this)}></CreateWindowButton>
         <div>
           {
             this.props.dialog ?
               this.renderWindows(windows, this.props.dialog) : ""
           }
         </div>
-        {(this.state.editingWindow && this.props.dialog) ? <DialogWindowEditDrawer game={this.props.game} open={this.state.editorOpen} window={this.state.editingWindow} dialog={this.props.dialog} onClose={this.closeWindowEditorHandler.bind(this)} handlers={this.props.handlers}></DialogWindowEditDrawer> : ""}
+        {(this.state.editingWindow && this.props.dialog) ?<DialogWindowEditDrawer dialogHandlers={dialogHandlers} game={this.props.game} open={this.state.editorOpen} window={this.state.editingWindow} dialog={this.props.dialog} onClose={this.closeWindowEditorHandler.bind(this)} handlers={this.props.handlers}></DialogWindowEditDrawer> : ""}
       </div>
     );
   }

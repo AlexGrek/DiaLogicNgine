@@ -27,4 +27,8 @@ function asColor(color: Color): Color {
     return color;
 }
 
-export { allEnumValuesOf, allEnumPairsOf, asColor }
+function removeByIndex<T>(array: T[], index: Number) {
+    return array.filter((_, i) => i !== index);
+}
+
+export { allEnumValuesOf, allEnumPairsOf, asColor, removeByIndex }

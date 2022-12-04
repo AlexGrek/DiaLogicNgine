@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PlusRound from '@rsuite/icons/PlusRound';
 import { Input, InputGroup } from 'rsuite';
-import { DialogWindow } from '../game/Dialog';
+import { createWindow, DialogWindow } from '../game/Dialog';
 
 export interface ICreateWindowButtonProps {
     createHandler: (w: DialogWindow) => void;
@@ -18,16 +18,12 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
         this.state = { uid: "" }
     }
 
-    createWindow(name: string) {
-        return {uid: name, text: "", links: []};
-    }
-
     inputHandler(update: string) {
         this.setState({ uid: update });
     }
 
     handleAddClick(_: any) {
-        let newWindow = this.createWindow(this.state.uid);
+        let newWindow = createWindow(this.state.uid);
         this.setState({ uid: "" });
         this.props.createHandler(newWindow);
     }
@@ -35,7 +31,7 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
     handleKeyPress(event: React.KeyboardEvent<HTMLInputElement>) {
         if (event.key === 'Enter') {
             if (this.state.uid.length > 0) {
-                let newWindow = this.createWindow(this.state.uid);
+                let newWindow = createWindow(this.state.uid);
                 this.setState({ uid: "" });
                 this.props.createHandler(newWindow);
             }
