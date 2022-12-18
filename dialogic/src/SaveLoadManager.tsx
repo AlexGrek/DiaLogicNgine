@@ -1,19 +1,53 @@
+import { keyboard } from "@testing-library/user-event/dist/keyboard"
 import { LocalStorage } from "storage-manager-js"
+import { GameDescription } from "./game/GameDescription"
+import { KeyValuePair } from "./Utils"
+
+export interface GameList {
+    games: {[key: string] : GameDescription}
+}
 
 export class SaveLoadManager {
-    save(name: string, value: any) {
-
+    private readLs(key: string, initial: any) {
+        if (LocalStorage.has(key)) {
+            return LocalStorage.get(key)
+        }
+        else {
+            return initial
+        }
     }
 
-    load(name: string) {
-
+    private saveLs(key: string, data: any) {
+        LocalStorage.set(key, data)
     }
 
-    list() {
+    private readGameList(): GameList {
+        return this.readLs("gameList", {games: {}})
+    }
 
+    saveGameDescr(name: string, value: GameDescription) {
+        const gameList = this.readGameList()
+        gameList.games[name] = value
+        this.saveLs("gameList", gameList)
+    }
+
+    loadGameDescr(name: string) {
+        const gameList = this.readGameList()
+        return gameList.games[name]
+    }
+
+    listGameDescr(): KeyValuePair<string, GameDescription>[] {
+        const gameList = this.readGameList()
+        return Object.entries(gameList.games).map(([key, value]) => ({key: key, value: value}))
+    }
+
+    listGameNames(): string[] {
+        const gameList = this.readGameList()
+        return Object.entries(gameList.games).map(([key, _]) => key)
     }
 
     exists(name: string) {
-        
+        const gameList = this.readGameList()
+        return gameList.games.hasOwnProperty(name)
     }
 }

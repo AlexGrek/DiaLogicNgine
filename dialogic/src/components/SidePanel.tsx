@@ -5,7 +5,12 @@ import MagicIcon from '@rsuite/icons/legacy/Magic';
 import { GameDescription } from '../game/GameDescription';
 import Dialog, { createDialog } from '../game/Dialog';
 import PlusRound from '@rsuite/icons/PlusRound';
-import { stringToObject } from 'rsuite/esm/utils';
+import SettingHorizontalIcon from '@rsuite/icons/SettingHorizontal';
+import ToolsIcon from '@rsuite/icons/Tools';
+import AttachmentIcon from '@rsuite/icons/Attachment';
+import IdMappingIcon from '@rsuite/icons/IdMapping';
+import FunnelTimeIcon from '@rsuite/icons/FunnelTime';
+import ExploreIcon from '@rsuite/icons/Explore';
 import { IUpds } from '../App';
 
 export interface ISidePanelProps {
@@ -64,11 +69,11 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
         <Sidenav defaultOpenKeys={['3', '4']}>
           <Sidenav.Body>
             <Nav activeKey={this.props.activeDialog}>
-              <Nav.Item eventKey="1" icon={<DashboardIcon />}>
-                Dashboard
+              <Nav.Item eventKey="1" icon={<AttachmentIcon />}>
+                Save / Load
               </Nav.Item>
-              <Nav.Item eventKey="2" icon={<DashboardIcon />}>
-                Next
+              <Nav.Item eventKey="2" icon={<SettingHorizontalIcon />}>
+                Game properties
               </Nav.Item>
               <Nav.Menu eventKey="3" title="Dialogs" icon={<MagicIcon />}>
                 <Nav.Item>
@@ -81,6 +86,18 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
                 </Nav.Item>
                 {this.dialogs(this.props.game.dialogs)}
               </Nav.Menu>
+              <Nav.Item eventKey="4" icon={<ToolsIcon />}>
+                Scripts
+              </Nav.Item>
+              <Nav.Item eventKey="5" icon={<IdMappingIcon />}>
+                Characters
+              </Nav.Item>
+              <Nav.Item eventKey="6" icon={<ExploreIcon />}>
+                Locations
+              </Nav.Item>
+              <Nav.Item eventKey="7" icon={<FunnelTimeIcon />}>
+                Facts
+              </Nav.Item>
             </Nav>
           </Sidenav.Body>
         </Sidenav>

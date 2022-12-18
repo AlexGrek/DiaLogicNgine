@@ -14,9 +14,12 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame }) => {
     }, [currentGame]);
 
     return (
-        <>
-            
-        </>
+        <div>
+            <h1>Save/Load menu</h1>
+            <p>Name: {name}</p>
+            <p>Game: <code>{JSON.stringify(game)}</code></p>
+            <p>endgame.</p>
+        </div>
     );
 };
 

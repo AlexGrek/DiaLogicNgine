@@ -95,6 +95,14 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({game: {...this.state.game, dialogs: newDialogs}})
   }
 
+  private renderContent(updates: IUpds, chosenDialog: Dialog | undefined) {
+    if (chosenDialog) {
+      return <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog}/>
+    } else {
+      return <div></div>
+    }
+  }
+
   public render() {
     let updates = {
       handleDialogEdit: this.handleDialogEdit.bind(this),
@@ -116,7 +124,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
           handlers={updates}></SidePanel>
       </Sidebar>
       <Content>
-        <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog}/>
+        {this.renderContent(updates, chosenDialog)}
       </Content>
     </Container>
     <Footer>Footer</Footer>
