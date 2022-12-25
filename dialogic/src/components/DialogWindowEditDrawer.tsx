@@ -27,10 +27,6 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         setChanges(false);
         if (txtInput.current) {
             txtInput.current.focus();
-            console.log("autofocus triggered")
-          }
-        else {
-            console.log("Cannot autofocus")
         }
     }, [window]);
 
@@ -40,10 +36,6 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         const newWindow = modificator(windowState);
         console.log(JSON.stringify(newWindow));
         setWindow(newWindow); // update window changes
-    }
-
-    const doNothing = (_: any) => {
-        console.log("nothing done");
     }
 
     const onTextChange = (s: string) => {
@@ -81,7 +73,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Content
                             </div>
-                            <Input  as="textarea" value={windowState.text} ref={txtInput} onChange={onTextChange} rows={5}></Input>
+                            <Input as="textarea" value={windowState.text} ref={txtInput} onChange={onTextChange} rows={5}></Input>
                         </Col>
                         <Col xs={6}>
                             <div className='window-editor-grid-header'>

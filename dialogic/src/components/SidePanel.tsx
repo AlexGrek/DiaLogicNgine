@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Input, InputGroup, Nav, Sidenav } from 'rsuite';
-import DashboardIcon from '@rsuite/icons/legacy/Dashboard';
 import MagicIcon from '@rsuite/icons/legacy/Magic';
 import { GameDescription } from '../game/GameDescription';
 import Dialog, { createDialog } from '../game/Dialog';
@@ -18,6 +17,8 @@ export interface ISidePanelProps {
   activeDialog?: string;
   onDialogChange: (s: string) => void
   handlers: IUpds
+  onMenuSwitch: (s: string) => void
+  activeMenu: string
 }
 
 interface ISidePanelState {
@@ -64,12 +65,17 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
   }
 
   public render() {
+    let activeKey = this.props.activeMenu;
+    if (activeKey === "dialog" && this.props.activeDialog) {
+      activeKey = this.props.activeDialog
+    }
+
     return (
       <div style={{ width: 240 }}>
         <Sidenav defaultOpenKeys={['3', '4']}>
           <Sidenav.Body>
-            <Nav activeKey={this.props.activeDialog}>
-              <Nav.Item eventKey="1" icon={<AttachmentIcon />}>
+            <Nav activeKey={activeKey}>
+              <Nav.Item eventKey="saveload" icon={<AttachmentIcon />} onClick={() => this.props.onMenuSwitch("saveload")}>
                 Save / Load
               </Nav.Item>
               <Nav.Item eventKey="2" icon={<SettingHorizontalIcon />}>

@@ -1,4 +1,3 @@
-import { keyboard } from "@testing-library/user-event/dist/keyboard"
 import { LocalStorage } from "storage-manager-js"
 import { GameDescription } from "./game/GameDescription"
 import { KeyValuePair } from "./Utils"

@@ -8,6 +8,9 @@ import Dialog, { DialogWindow } from './game/Dialog';
 
 import * as React from 'react';
 import DialogEditor from './components/DialogEditor';
+import SaveLoadMenu from './components/menuitems/SaveLoadMenu';
+import { Notification, NotificationType, NotifyCallback } from './UiNotifications';
+import NotificationViewPanel from './components/notification/NotificationViewPanel';
 
 export interface IAppProps {
 
@@ -15,7 +18,9 @@ export interface IAppProps {
 
 export interface IAppState {
   activeDialog: string
+  menu: string
   game: GameDescription
+  notifications: Notification[]
 }
 
 export interface IUpds {
@@ -23,6 +28,7 @@ export interface IUpds {
   handleDialogCreate: (dialog: Dialog) => void;
   handleDialogApplyChange: (func: DialogWindowListUpdater, dialog_uid: string | null) => void;
   handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null) => void;
+  notify: NotifyCallback
 }
 
 export interface DialogWindowListUpdater {
@@ -34,20 +40,26 @@ export default class App extends React.Component<IAppProps, IAppState> {
   constructor(props: IAppProps, state: IAppState) {
     super(props);
 
-    
-    let d1 = {name: "dialog1", windows: []};
-    let d2 = {name: "anotherone", windows: []};
-    let game = {dialogs: [ d1, d2 ], facts: []};
+
+    let d1 = { name: "dialog1", windows: [] };
+    let d2 = { name: "anotherone", windows: [] };
+    let game = { dialogs: [d1, d2], facts: [], version: 1 };
 
     this.state = {
       activeDialog: '1',
-      game: game
+      game: game,
+      menu: "dialog",
+      notifications: []
     };
   }
 
   private handleChangeDialog(newDialog: string) {
     console.log(newDialog)
-    this.setState({activeDialog: newDialog});
+    this.setState({ activeDialog: newDialog, menu: "dialog" });
+  }
+
+  private handleMenuSwitch(newMenu: string) {
+    this.setState({ menu: newMenu })
   }
 
   private handleDialogEdit(dialog: Dialog) {
@@ -58,7 +70,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       }
       return d;
     })
-    this.setState({game: {...this.state.game, dialogs: newDialogs}});
+    this.setState({ game: { ...this.state.game, dialogs: newDialogs } });
   }
 
   private handleDialogApplyChange(func: DialogWindowListUpdater, dialog_uid: string | null) {
@@ -68,13 +80,13 @@ export default class App extends React.Component<IAppProps, IAppState> {
     let newDialogs = this.state.game.dialogs.map(d => {
       if (d.name === dialog_uid) {
         const dialogWindows = func(d.windows);
-        const newDialog = {...d, windows: dialogWindows }
+        const newDialog = { ...d, windows: dialogWindows }
         console.log(`Dialog ${d.name} updated.`);
         return newDialog;
       }
       return d;
     })
-    this.setState({game: {...this.state.game, dialogs: newDialogs}});
+    this.setState({ game: { ...this.state.game, dialogs: newDialogs } });
   }
 
   private handleDialogWindowChange(window: DialogWindow, dialog_uid: string | null) {
@@ -92,15 +104,30 @@ export default class App extends React.Component<IAppProps, IAppState> {
 
   private handleDialogCreate(dialog: Dialog) {
     let newDialogs = this.state.game.dialogs.concat(dialog);
-    this.setState({game: {...this.state.game, dialogs: newDialogs}})
+    this.setState({ game: { ...this.state.game, dialogs: newDialogs } })
+  }
+
+  private displayStyle(name: string) {
+    return {
+      display: this.state.menu === name ? "block" : "none"
+    }
+  }
+
+  private handleNotify(type: NotificationType, text: string, header: string | null) {
+    const notif = new Notification(type, text, header);
+    const notifications = [...this.state.notifications, notif]
+    this.setState({ notifications: notifications })
   }
 
   private renderContent(updates: IUpds, chosenDialog: Dialog | undefined) {
-    if (chosenDialog) {
-      return <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog}/>
-    } else {
-      return <div></div>
-    }
+    return <div>
+      <div style={this.displayStyle("dialog")}>
+        <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog} />
+      </div>
+      <div style={this.displayStyle("saveload")}>
+        <SaveLoadMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} currentGame={this.state.game}></SaveLoadMenu>
+      </div>
+    </div>
   }
 
   public render() {
@@ -108,27 +135,31 @@ export default class App extends React.Component<IAppProps, IAppState> {
       handleDialogEdit: this.handleDialogEdit.bind(this),
       handleDialogCreate: this.handleDialogCreate.bind(this),
       handleDialogApplyChange: this.handleDialogApplyChange.bind(this),
-      handleDialogWindowChange: this.handleDialogWindowChange.bind(this)
+      handleDialogWindowChange: this.handleDialogWindowChange.bind(this),
+      notify: this.handleNotify.bind(this)
     }
 
     let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);
     return (
       <CustomProvider theme="dark">
-      <Container>
-    <Header className='app-header-text'>DiaLogic Ngine</Header>
-    <Container>
-      <Sidebar>
-        <SidePanel game={this.state.game}
-          activeDialog={this.state.activeDialog}
-          onDialogChange={this.handleChangeDialog.bind(this)}
-          handlers={updates}></SidePanel>
-      </Sidebar>
-      <Content>
-        {this.renderContent(updates, chosenDialog)}
-      </Content>
-    </Container>
-    <Footer>Footer</Footer>
-  </Container>
-  </CustomProvider>);
+        <Container>
+          <Header className='app-header-text'>DiaLogic Ngine</Header>
+          <NotificationViewPanel notifications={this.state.notifications}></NotificationViewPanel>
+          <Container>
+            <Sidebar>
+              <SidePanel game={this.state.game}
+                activeMenu={this.state.menu}
+                activeDialog={this.state.activeDialog}
+                onDialogChange={this.handleChangeDialog.bind(this)}
+                onMenuSwitch={this.handleMenuSwitch.bind(this)}
+                handlers={updates}></SidePanel>
+            </Sidebar>
+            <Content>
+              {this.renderContent(updates, chosenDialog)}
+            </Content>
+          </Container>
+          <Footer>Footer</Footer>
+        </Container>
+      </CustomProvider>);
   }
 }
