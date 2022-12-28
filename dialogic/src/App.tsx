@@ -2,7 +2,7 @@ import './App.css';
 import SidePanel from './components/SidePanel';
 import { Container, Header, Content, Footer, Sidebar } from 'rsuite';
 import { CustomProvider } from 'rsuite';
-import { GameDescription } from './game/GameDescription';
+import { createDefaultGame, GameDescription } from './game/GameDescription';
 import Dialog, { DialogWindow } from './game/Dialog';
 
 
@@ -11,6 +11,8 @@ import DialogEditor from './components/DialogEditor';
 import SaveLoadMenu from './components/menuitems/SaveLoadMenu';
 import { Notification, NotificationType, NotifyCallback } from './UiNotifications';
 import NotificationViewPanel from './components/notification/NotificationViewPanel';
+import Player from './components/player/Player';
+import ConfigurationMenu from './components/menuitems/configuration/ConfigurationMenu';
 
 export interface IAppProps {
 
@@ -41,9 +43,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
     super(props);
 
 
-    let d1 = { name: "dialog1", windows: [] };
-    let d2 = { name: "anotherone", windows: [] };
-    let game = { dialogs: [d1, d2], facts: [], version: 1 };
+    let game = createDefaultGame()
 
     this.state = {
       activeDialog: '1',
@@ -124,8 +124,14 @@ export default class App extends React.Component<IAppProps, IAppState> {
       <div style={this.displayStyle("dialog")}>
         <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog} />
       </div>
+      <div style={this.displayStyle("player")}>
+        <Player game={this.state.game} handlers={updates} visible={this.state.menu === "player"} />
+      </div>
       <div style={this.displayStyle("saveload")}>
         <SaveLoadMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} currentGame={this.state.game}></SaveLoadMenu>
+      </div>
+      <div style={this.displayStyle("config")}>
+        <ConfigurationMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game}/>
       </div>
     </div>
   }

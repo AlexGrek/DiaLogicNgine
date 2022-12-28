@@ -1,26 +1,25 @@
+import Dialog, { DialogWindow } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { State } from "./GameState";
 
 export class GameExecManager {
-    state: State
-    stateHistory: State[]
+    
     game: GameDescription
 
     constructor(game: GameDescription) {
         this.game = game
-        this.state = this.createInitialState(game)
-        this.stateHistory = []
     }
 
-    createInitialState(game: GameDescription): State {
-        // TODO: later
-        return {
-            position: {
-                dialog: "a",
-                window: "a"
-            },
-            positionStack: [],
-            props: {}
+    getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
+        switch (state.position.kind) {
+            case "window":
+                const dialog = this.game.dialogs.find(d => d.name === state.position.dialog)
+                if (dialog === undefined)
+                    return null
+                const window = dialog?.windows.find(w => w.uid === state.position.window)
+                if (window === undefined)
+                    return null
+                return [dialog, window]
         }
     }
 }

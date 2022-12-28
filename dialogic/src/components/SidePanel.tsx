@@ -78,10 +78,13 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               <Nav.Item eventKey="saveload" icon={<AttachmentIcon />} onClick={() => this.props.onMenuSwitch("saveload")}>
                 Save / Load
               </Nav.Item>
-              <Nav.Item eventKey="2" icon={<SettingHorizontalIcon />}>
+              <Nav.Item eventKey="config" icon={<SettingHorizontalIcon />} onClick={() => this.props.onMenuSwitch("config")}>
                 Game properties
               </Nav.Item>
-              <Nav.Menu eventKey="3" title="Dialogs" icon={<MagicIcon />}>
+              <Nav.Item eventKey="player" icon={<IdMappingIcon />} onClick={() => this.props.onMenuSwitch("player")}>
+                Play
+              </Nav.Item>
+              <Nav.Menu eventKey="4" title="Dialogs" icon={<MagicIcon />}>
                 <Nav.Item>
                   <InputGroup>
                     <Input placeholder="Add dialog" value={this.state.newDialogname} onChange={this.addDialogInputHandler.bind(this)} />
@@ -92,16 +95,16 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
                 </Nav.Item>
                 {this.dialogs(this.props.game.dialogs)}
               </Nav.Menu>
-              <Nav.Item eventKey="4" icon={<ToolsIcon />}>
+              <Nav.Item eventKey="scripts" icon={<ToolsIcon />}>
                 Scripts
               </Nav.Item>
-              <Nav.Item eventKey="5" icon={<IdMappingIcon />}>
+              <Nav.Item eventKey="chars" icon={<IdMappingIcon />}>
                 Characters
               </Nav.Item>
-              <Nav.Item eventKey="6" icon={<ExploreIcon />}>
+              <Nav.Item eventKey="locs" icon={<ExploreIcon />}>
                 Locations
               </Nav.Item>
-              <Nav.Item eventKey="7" icon={<FunnelTimeIcon />}>
+              <Nav.Item eventKey="facts" icon={<FunnelTimeIcon />}>
                 Facts
               </Nav.Item>
             </Nav>
