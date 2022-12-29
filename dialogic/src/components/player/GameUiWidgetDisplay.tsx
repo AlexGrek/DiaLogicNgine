@@ -21,7 +21,7 @@ const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, 
     }
 
     return (
-        <div>
+        <div className="game-ui-widget-unknown">
             <h2>Unknown UI widget</h2>
             <Input as="textarea" value={JSON.stringify(state)} readOnly rows={12}></Input>
         </div>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Button, ButtonGroup } from 'rsuite';
 import { IUpds } from '../../App';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { createInitialState, State } from '../../exec/GameState';
 import { GameDescription } from '../../game/GameDescription';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
+import "./player.css"
 
 interface PlayerProps {
     game: GameDescription;
@@ -26,9 +28,17 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
     }
 
     return !visible ? <p></p> : (
-        <div>
-            <h1>Player</h1>
-            <GameUiWidgetDisplay game={gameExecutor} state={gameState} onStateUpd={onStateUpd}></GameUiWidgetDisplay>
+        <div className='player-window'>
+            <div className='player-top-panel'>
+                <ButtonGroup>
+                    <Button>Restart</Button>
+                    <Button>State</Button>
+                    <Button>Go to</Button>
+                </ButtonGroup>
+            </div>
+            <div className="player-main">
+                <GameUiWidgetDisplay game={gameExecutor} state={gameState} onStateUpd={onStateUpd}></GameUiWidgetDisplay>
+            </div>
         </div>
     );
 };

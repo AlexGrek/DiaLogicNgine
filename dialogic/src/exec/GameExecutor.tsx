@@ -1,4 +1,5 @@
-import Dialog, { DialogWindow } from "../game/Dialog";
+import lodash from "lodash";
+import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { State } from "./GameState";
 
@@ -20,6 +21,24 @@ export class GameExecManager {
                 if (window === undefined)
                     return null
                 return [dialog, window]
+        }
+    }
+
+    private goToLocalLink(directionName: string, prevState: State) {
+        var newState = lodash.cloneDeep(prevState)
+        newState.position.window = directionName
+        return newState
+    }
+
+    dialogVariantApply(state: State, link: DialogLink): State {
+        switch (link.type) {
+            case (LinkType.Local):
+                if (link.direction)
+                    return this.goToLocalLink(link.direction, state)
+                else
+                    return state
+            default:
+                return state
         }
     }
 }

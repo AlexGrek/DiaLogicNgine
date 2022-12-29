@@ -1,0 +1,52 @@
+.player-main {
+    margin: 12pt;
+    max-width: 85%;
+    max-height: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: black;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-radius: 6px;
+}
+
+.dialog-window-view {
+    width: 100%;
+    height: 100%;
+    padding-top: 40pt;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Times New Roman', Times, serif;
+    justify-content: space-evenly;
+}
+
+.dialog-text {
+    width: 100%;
+    text-align: right;
+}
+
+.dialog-text p {
+    font-size: 22px;
+    margin-right: 12pt;
+    background-color: rgba(100, 100, 111, 0.2);
+    padding: 10pt;
+}
+
+.dialog-variants {
+    font-size: 20px;
+    width: 100%;
+    text-align: right;
+    margin: 15pt 0 15pt -15pt;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.dialog-variants button {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 4pt 22pt;
+}
+
+.dialog-variants button:hover {
+    outline: 1px solid grey;
+    color: rgba(255, 255, 255, 1);
+}
