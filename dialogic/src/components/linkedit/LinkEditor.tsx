@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import 'animate.css';
 import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Form, IconButton, Input, InputPicker, Stack, Tag, Tooltip, Whisper } from 'rsuite';
 import PagePreviousIcon from '@rsuite/icons/PagePrevious';
@@ -12,6 +12,25 @@ import LinkTypeTag from '../LinkTypeTag';
 import { GameDescription } from '../../game/GameDescription';
 import { IUpds } from '../../App';
 import { DialogHandlers } from '../DialogEditor';
+import { createDialogWindowId } from '../../exec/GameState';
+import DialogWindowPicker from '../common/DialogWindowPicker';
+import PopupCodeEditor from '../common/code_editor/PopupCodeEditor';
+import CodeSampleButton from '../common/CodeSampleButton';
+
+const CODE_EDITOR_UI = {
+    arguments: {
+        "state": "state object, can be modified",
+        "state.position": "UiObjectId, current position",
+        "state.positionStack": "stacked positions",
+        "state.props" : "{ [key: string]: number | string }, game properties"
+    },
+    "functionName": "afterLinkFollowed",
+    "functionTemplates": {
+        "no action": "",
+        "log": "console.log(state);"
+    },
+    "header": "action code edit"
+}
 
 interface LinkEditorProps {
     link: DialogLink;
@@ -38,6 +57,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     onEditingDone, onLinkRemove, dialogHandlers }) => {
 
     const txtInput = useRef<any>(null);
+    const [codeEditorOpen, setCodeEditorOpen] = useState<boolean>(false);
 
     useEffect(() => {
         if (txtInput.current) {
@@ -49,9 +69,19 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         onEditingDone()
     }
 
+    const openCloseCodeEditor = (next: boolean) => {
+        setCodeEditorOpen(next);
+    }
+
     const editText = (s: string) => {
         const linkUpdate = { ...link, text: s };
         onLinkChange(linkUpdate, index);
+    }
+
+    const editCode = (s: string) => {
+        const linkUpdate = { ...link, actionCode: s };
+        onLinkChange(linkUpdate, index);
+        setCodeEditorOpen(false);
     }
 
     const editType = (type: LinkType) => {
@@ -62,6 +92,14 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     const editLocalDirection = (str: string) => {
         const linkUpdate = { ...link, direction: str };
         onLinkChange(linkUpdate, index);
+    }
+
+    const editPushDirection = (d: string | null, w: string | null) => {
+        if (d && w) {
+            const id = createDialogWindowId(d, w);
+            const linkUpd = { ...link, qualifiedDirection: id }
+            onLinkChange(linkUpd, index);
+        }
     }
 
     const linkRemoved = () => {
@@ -109,6 +147,12 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 <p>{data.includes(link.direction || "") ? gotoLink() : createLink()}</p>
             </div>
         }
+        if (link.type === LinkType.Push) {
+            if (link.qualifiedDirection === undefined) {
+                link.qualifiedDirection = game.startupDialog
+            }
+            return <DialogWindowPicker dialogs={game.dialogs} chosen={[link.qualifiedDirection.dialog, link.qualifiedDirection.window]} onValueChange={editPushDirection}></DialogWindowPicker>
+        }
         return <div></div>
     }
 
@@ -131,6 +175,8 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                     <ButtonPanelSelector tooltips={TooltipText} chosen={link.type} variants={enumKeys} buttonData={enumNames} onValueChanged={editType} ></ButtonPanelSelector>
                 </ButtonToolbar>
                 {directionEditor()}
+                <CodeSampleButton onClick={() => openCloseCodeEditor(true)} name='action' code={link.actionCode || ''}></CodeSampleButton>
+                <PopupCodeEditor ui={CODE_EDITOR_UI} code={link.actionCode || ""} onSaveClose={editCode} open={codeEditorOpen}></PopupCodeEditor>
             </div>
         </div>
 

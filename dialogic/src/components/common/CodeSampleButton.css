@@ -1,0 +1,18 @@
+.button-content-cs {
+    text-align: left;
+    min-width: 16em;
+    padding: 0;
+    margin: 0;
+}
+
+.header-cs {
+    text-align: justify;
+    text-decoration: dashed;
+    font-size: 12pt;
+}
+
+.name-cs {
+    font-variant-caps: all-small-caps;
+    font-weight: bolder;
+    margin-left: .6em;
+} 

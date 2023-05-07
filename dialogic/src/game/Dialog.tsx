@@ -1,3 +1,5 @@
+import { DialogWindowId } from "../exec/GameState";
+
 export default interface Dialog {
     name: string;
     windows: DialogWindow[];
@@ -24,12 +26,13 @@ export interface DialogLink {
     enabled: LinkEnabled;
     text: string;
     direction?: string;
+    qualifiedDirection: DialogWindowId;
     textProcessingCode?: string;
     actionCode?: string;
 }
 
 export const createDialogLink = () => {
-    return {type: LinkType.Local, direction: "", text: "", enabled: LinkEnabled.Enabled}
+    return {type: LinkType.Local, direction: "", text: "", enabled: LinkEnabled.Enabled} as DialogLink
 }
 
 export interface DialogWindow {
