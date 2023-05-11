@@ -1,4 +1,4 @@
-.editor-content {
+.editor-content-code {
     min-height: 200pt;
     display: flex;
     flex-direction: row;
@@ -6,20 +6,20 @@
     height: 100%;
 }
 
-.micro-header {
+.micro-header-code {
     text-align: center;
     font-size: 14pt;
     font-variant: small-caps;
 }
 
-.side-panel {
+.side-panel-code {
     width: 300pt;
     display: flex;
     flex-direction: column;
     align-items: stretch;
 }
 
-.editor-panel {
+.editor-panel-code {
     width: 100%;
     padding: 6pt;
     background-color: rgba(0, 0, 0, .4);;
@@ -28,15 +28,28 @@
     font-family: ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace;
 }
 
-.object-navi {
+.object-navi-code {
     height: 100%;
     width: 100%;
 }
 
-.object-docs {
+.object-docs-code {
     min-height: 20pt;
     max-height: 240pt;
     background-color: rgba(200, 200, 200, .2);
     padding: 4pt;
     margin-right: 3pt;
+}
+
+.load-example-btn-code {
+    border: none;
+    background: none;
+    color: white;
+    text-decoration: underline;
+    margin-left: 3pt;
+    display: inline-block;
+}
+
+.load-example-btn-code:hover {
+    background-color: darkblue;
 }

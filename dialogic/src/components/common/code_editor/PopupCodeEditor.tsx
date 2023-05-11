@@ -27,7 +27,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }, [code, ui]);
 
     const renderEditor = () => {
-        return <CodeEditor value={codeVal} language="js" placeholder="Please enter JS code." data-color-mode="dark" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
+        return <CodeEditor value={codeVal} language="js" placeholder="Please enter JS code or leave blank for no action." data-color-mode="dark" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
         padding={10}
         style={{
             fontSize: 14,
@@ -58,6 +58,16 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
         setCode(codeVal + name);
     }
 
+    const renderExamples = () => {
+        const applyCodeTemplate = (name: string) => {
+            setCode(ui.functionTemplates[name])
+        }
+        return Object.entries(ui.functionTemplates).map(example => {
+            const [name, code] = example
+            return <button className="load-example-btn-code" onClick={() => applyCodeTemplate(name)} key={name}>{name}</button>
+        })
+    }
+
     const argumentsCommaSeparated = (argsObj: {[key: string]: string}) => {
         const keys = Object.keys(argsObj)
         const keysRootOnly = keys.filter(val => val.indexOf(".") < 0)
@@ -65,25 +75,28 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     return open ? (
-        <Modal size={'full'} open={open} onClose={() => onSaveClose(codeVal)}>
+        <Modal size={'full'} open={open} onClose={() => onSaveClose(codeVal)} backdrop={true}>
             <Modal.Header>
                 <Modal.Title>{ui.header}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className="editor-content">
-                    <div className='side-panel'>
-                        <div className='object-navi'>
-                            <h3 className='micro-header'>Available objects</h3>
+                <div className="editor-content-code">
+                    <div className='side-panel-code'>
+                        <div className='object-navi-code'>
+                            <h3 className='micro-header-code'>Available objects</h3>
                             <AccessibleObjects objectDescrMap={ui.arguments} onObjectClick={accessibleObjectClick} onAddClick={accessibleObjectAddClick}/>
                         </div>
-                        <div className='object-docs'>
+                        <div className='object-docs-code'>
                             {renderDoc()}
                         </div>
                     </div>
-                    <div className='editor-panel'>
+                    <div className='editor-panel-code'>
                         function {ui.functionName}({argumentsCommaSeparated(ui.arguments)}) {"{"}
                         {renderEditor()}
                         {"}"}
+                        <br/>
+                        <br/>
+                        <span className="load-examples-code">{"// Load examples: "}{renderExamples()}</span>
                     </div>
                 </div>
 

@@ -175,9 +175,11 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                     <ButtonPanelSelector tooltips={TooltipText} chosen={link.type} variants={enumKeys} buttonData={enumNames} onValueChanged={editType} ></ButtonPanelSelector>
                 </ButtonToolbar>
                 {directionEditor()}
-                <CodeSampleButton onClick={() => openCloseCodeEditor(true)} name='action' code={link.actionCode || ''}></CodeSampleButton>
-                <PopupCodeEditor ui={CODE_EDITOR_UI} code={link.actionCode || ""} onSaveClose={editCode} open={codeEditorOpen}></PopupCodeEditor>
             </div>
+            <Divider></Divider>
+            <p>Scripting:</p>
+            <CodeSampleButton onClick={() => openCloseCodeEditor(true)} name='action' code={link.actionCode || ''}></CodeSampleButton>
+            <PopupCodeEditor ui={CODE_EDITOR_UI} code={link.actionCode || ""} onSaveClose={editCode} open={codeEditorOpen}></PopupCodeEditor>
         </div>
 
     );

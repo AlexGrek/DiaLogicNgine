@@ -54,7 +54,7 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
     }, [objectDescrMap]);
 
     const renderArrow = (isOpen: boolean) => {
-        if (isOpen) {
+        if (!isOpen) {
             return <ArrowRightIcon></ArrowRightIcon>
         } else {
             return <ArrowDownIcon></ArrowDownIcon>

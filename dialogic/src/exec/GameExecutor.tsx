@@ -1,9 +1,10 @@
 import lodash from "lodash";
 import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
-import { DialogWindowId, State } from "./GameState";
+import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { evaluateAsStateProcessor } from "./Runtime"
 
+const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
     
     game: GameDescription
@@ -68,8 +69,22 @@ export class GameExecManager {
         }
     }
 
-    dialogVariantApply(state: State, link: DialogLink): State {
-        var followed = this.followLink(state, link)
-        return evaluateAsStateProcessor("console.warn(this); return state;", followed)
+    withUpdatedHistory(state: State, clickData: HistoryRecord): State {
+        // also changes step value
+        var s = lodash.cloneDeep(state)
+        s.stepCount = s.stepCount + 1
+        if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
+            s.shortHistory.shift() // remove latest entry
+        }
+        s.shortHistory.push(clickData)
+        return s
+    }
+
+    dialogVariantApply(state: State, link: DialogLink, clickData: HistoryRecord): State {
+        var followed = this.withUpdatedHistory(this.followLink(state, link), clickData)
+        if (link.actionCode) {
+            return evaluateAsStateProcessor(link.actionCode, followed)
+        }
+        return followed;
     }
 }
