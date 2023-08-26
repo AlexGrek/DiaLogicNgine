@@ -32,7 +32,7 @@ export interface DialogLink {
 }
 
 export const createDialogLink = () => {
-    return {type: LinkType.Local, direction: "", text: "", enabled: LinkEnabled.Enabled} as DialogLink
+    return { type: LinkType.Local, direction: "", text: "", enabled: LinkEnabled.Enabled } as DialogLink
 }
 
 export interface DialogWindow {
@@ -44,9 +44,9 @@ export interface DialogWindow {
 }
 
 export const createWindow = (uid: string) => {
-        return {uid: uid, text: "", links: []};
+    return { uid: uid, text: "", links: [] };
 }
 
 export const renameDialogWindow = (old: DialogWindow, newName: string) => {
-    return {...old, uid: newName}
+    return { ...old, uid: newName }
 }

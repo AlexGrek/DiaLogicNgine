@@ -6,13 +6,18 @@ export interface DialogWindowId {
     window: string
 }
 
+export interface LocationID {
+    kind: "location"
+    location: string
+}
+
 export function createDialogWindowId(dialog: string, window: string): DialogWindowId {
     return {
         kind: "window", dialog: dialog, window: window
     }
 }
 
-export type UiObjectId = DialogWindowId
+export type UiObjectId = DialogWindowId | LocationID
 
 export interface FatalError {
     message: string

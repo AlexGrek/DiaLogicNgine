@@ -1,4 +1,4 @@
-import { createDialogWindowId, UiObjectId } from "../exec/GameState";
+import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
 import Character from "./Character";
 import Dialog from "./Dialog";
 import Fact from "./Fact";
@@ -10,7 +10,7 @@ export interface GameDescription {
     chars: Character[]
     locs: Loc[]
     version: number
-    startupDialog: UiObjectId
+    startupDialog: DialogWindowId
 }
 
 export function createDefaultGame(): GameDescription {

@@ -3,10 +3,11 @@ import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { evaluateAsStateProcessor } from "./Runtime"
+import Loc from "../game/Loc";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
-    
+
     game: GameDescription
 
     constructor(game: GameDescription) {
@@ -14,21 +15,38 @@ export class GameExecManager {
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
-        switch (state.position.kind) {
-            case "window":
-                const dialog = this.game.dialogs.find(d => d.name === state.position.dialog)
-                if (dialog === undefined)
-                    return null
-                const window = dialog?.windows.find(w => w.uid === state.position.window)
-                if (window === undefined)
-                    return null
-                return [dialog, window]
+        if (state.position.kind === "window") {
+            const expectedDialog = state.position.dialog
+            const expectedWindow = state.position.window
+            const dialog = this.game.dialogs.find(d => d.name === expectedDialog)
+            if (dialog === undefined)
+                return null
+            const window = dialog?.windows.find(w => w.uid === expectedWindow)
+            if (window === undefined)
+                return null
+            return [dialog, window]
         }
+        return null
+    }
+
+    getCurrentLocation(state: State): Readonly<Loc> | null {
+        if (state.position.kind === "location") {
+            const expectedWindow = state.position.location
+            const found = this.game.locs.find(loc => loc.uid === expectedWindow)
+            if (!found) {
+                console.error(`Location ${expectedWindow} was not found in ${JSON.stringify(this.game.locs)}`)
+                return null
+            }
+            return found
+        }
+        return null;
     }
 
     private goToLocalLink(directionName: string, prevState: State) {
         var newState = lodash.cloneDeep(prevState)
-        newState.position.window = directionName
+        if (newState.position.kind === "window") {
+            newState.position.window = directionName
+        }
         return newState
     }
 
@@ -46,8 +64,25 @@ export class GameExecManager {
             newState.position = prevPosition
             return newState
         } else {
-            throw new Error("Attempt to pop while UI stack is empty: " + newState.position.dialog)
+            throw new Error("Attempt to pop while UI stack is empty: " + newState.position)
         }
+    }
+
+    private goToLocation(prevState: State, direction?: string) {
+        // remove all the stack
+        var newState = lodash.cloneDeep(prevState)
+        if (!direction) {
+            console.error("Direction is not defined for a location")
+            return prevState
+        }
+        newState.positionStack = []
+        // remove all the short history
+        newState.shortHistory = []
+        newState.position = {
+            location: direction,
+            kind: "location"
+        }
+        return newState;
     }
 
     private followLink(state: State, link: DialogLink): State {
@@ -64,6 +99,8 @@ export class GameExecManager {
                     return state
             case (LinkType.Pop):
                 return this.popLink(state)
+            case (LinkType.NavigateToLocation):
+                return this.goToLocation(state, link.direction)
             default:
                 return state
         }
