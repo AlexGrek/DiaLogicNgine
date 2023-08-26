@@ -10,13 +10,17 @@ interface LinkTypeTagProps {
 const Colors = {
     [LinkType.Local]: asColor("blue"),
     [LinkType.Pop]: asColor("violet"),
-    [LinkType.Push]: asColor("orange")
+    [LinkType.Push]: asColor("orange"),
+    [LinkType.NavigateToLocation]: asColor("cyan"),
+    [LinkType.TalkToPerson]: asColor("green")
 }
 
 const Icons = {
     [LinkType.Local]: "$",
     [LinkType.Pop]: "J",
-    [LinkType.Push]: "\""
+    [LinkType.Push]: "\"",
+    [LinkType.NavigateToLocation]: "\ue01c",
+    [LinkType.TalkToPerson]: "\ue066"
 }
 
 const LinkTypeTag: React.FC<LinkTypeTagProps> = ({ value }) => {

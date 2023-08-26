@@ -8,6 +8,7 @@ import SettingHorizontalIcon from '@rsuite/icons/SettingHorizontal';
 import ToolsIcon from '@rsuite/icons/Tools';
 import AttachmentIcon from '@rsuite/icons/Attachment';
 import IdMappingIcon from '@rsuite/icons/IdMapping';
+import PlayOutlineIcon from '@rsuite/icons/PlayOutline';
 import FunnelTimeIcon from '@rsuite/icons/FunnelTime';
 import ExploreIcon from '@rsuite/icons/Explore';
 import { IUpds } from '../App';
@@ -55,7 +56,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
 
   private handleCreateDialog(_: any) {
     let name = this.state.newDialogname;
-    this.setState({ newDialogname: "" })
+    this.setState({ newDialogname: "" });
     let dialog = createDialog(name);
     this.props.handlers.handleDialogCreate(dialog);
   }
@@ -81,7 +82,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               <Nav.Item eventKey="config" icon={<SettingHorizontalIcon />} onClick={() => this.props.onMenuSwitch("config")}>
                 Game properties
               </Nav.Item>
-              <Nav.Item eventKey="player" icon={<IdMappingIcon />} onClick={() => this.props.onMenuSwitch("player")}>
+              <Nav.Item eventKey="player" icon={<PlayOutlineIcon />} onClick={() => this.props.onMenuSwitch("player")}>
                 Play
               </Nav.Item>
               <Nav.Menu eventKey="4" title="Dialogs" icon={<MagicIcon />}>
@@ -101,7 +102,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               <Nav.Item eventKey="chars" icon={<IdMappingIcon />}>
                 Characters
               </Nav.Item>
-              <Nav.Item eventKey="locs" icon={<ExploreIcon />}>
+              <Nav.Item eventKey="locs" icon={<ExploreIcon />} onClick={() => this.props.onMenuSwitch("locs")}>
                 Locations
               </Nav.Item>
               <Nav.Item eventKey="facts" icon={<FunnelTimeIcon />}>

@@ -13,6 +13,8 @@ import { Notification, NotificationType, NotifyCallback } from './UiNotification
 import NotificationViewPanel from './components/notification/NotificationViewPanel';
 import Player from './components/player/Player';
 import ConfigurationMenu from './components/menuitems/configuration/ConfigurationMenu';
+import Loc from './game/Loc';
+import LocationMenu from './components/menuitems/locedit/LocationMenu';
 
 export interface IAppProps {
 
@@ -30,6 +32,7 @@ export interface IUpds {
   handleDialogCreate: (dialog: Dialog) => void;
   handleDialogApplyChange: (func: DialogWindowListUpdater, dialog_uid: string | null) => void;
   handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null) => void;
+  handleLocChange: (locs: Loc[]) => void;
   notify: NotifyCallback
 }
 
@@ -107,6 +110,10 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({ game: { ...this.state.game, dialogs: newDialogs } })
   }
 
+  private handleLocChange(locs: Loc[]) {
+    this.setState({ game: { ...this.state.game, locs: locs } })
+  }
+
   private displayStyle(name: string) {
     return {
       display: this.state.menu === name ? "block" : "none"
@@ -133,6 +140,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       <div style={this.displayStyle("config")}>
         <ConfigurationMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game}/>
       </div>
+      <div style={this.displayStyle("locs")}>
+        <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+      </div>
     </div>
   }
 
@@ -142,6 +152,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       handleDialogCreate: this.handleDialogCreate.bind(this),
       handleDialogApplyChange: this.handleDialogApplyChange.bind(this),
       handleDialogWindowChange: this.handleDialogWindowChange.bind(this),
+      handleLocChange: this.handleLocChange.bind(this),
       notify: this.handleNotify.bind(this)
     }
 

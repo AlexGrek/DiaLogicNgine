@@ -64,8 +64,18 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
         return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1))
     }
 
+    const styleWithImage = (background?: string) => {
+        if (background) {
+            return { 
+                backgroundImage: `url("game_assets/${background}")`
+            }
+        }
+        else
+            return {}
+    }
+
     return (
-        <div className="dialog-window-view">
+        <div className="dialog-window-view" style={styleWithImage(state.background)}>
             <div className="dialog-short-history" id="dialog-short-history-scrollable">
                 {renderShortHistory()}
             </div>

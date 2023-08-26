@@ -5,6 +5,8 @@ import Dialog, { DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
 import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
+import PublicFileUrl, { IMAGES } from './common/PublicFileUrl';
+
 
 interface DialogWindowEditDrawerProps {
     window: DialogWindow;
@@ -32,7 +34,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {
         setChanges(true);
-        console.log("window changed");
+        // console.log("window changed");
         const newWindow = modificator(windowState);
         console.log(JSON.stringify(newWindow));
         setWindow(newWindow); // update window changes
@@ -46,6 +48,13 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
     const onCloseHandler = (a: boolean) => {
         handlers.handleDialogWindowChange(windowState, null);
         onClose();
+    }
+
+    const onBackgroundChange = (val?: string) => {
+        const upd = val && val != "" ? val : undefined;
+        return modifyWindowBy(window => {
+            return { ...window, background: upd }
+        })
     }
 
     return (
@@ -74,6 +83,9 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                                 Content
                             </div>
                             <Input as="textarea" value={windowState.text} ref={txtInput} onChange={onTextChange} rows={5}></Input>
+                            <p>Background image URL</p>
+                            <PublicFileUrl extensions={IMAGES} value={windowState.background} onChange={onBackgroundChange}></PublicFileUrl>
+
                         </Col>
                         <Col xs={6}>
                             <div className='window-editor-grid-header'>

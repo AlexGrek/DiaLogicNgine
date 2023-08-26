@@ -16,6 +16,7 @@ import { createDialogWindowId } from '../../exec/GameState';
 import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor from '../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../common/CodeSampleButton';
+import Loc from '../../game/Loc';
 
 const CODE_EDITOR_UI = {
     arguments: {
@@ -50,7 +51,9 @@ interface LinkEditorProps {
 const TooltipText = {
     [LinkType.Local]: "Move to another window in same dialog",
     [LinkType.Pop]: "Move to previous level (one level back)",
-    [LinkType.Push]: "Move to next level, possible to another dialog (one level down)"
+    [LinkType.Push]: "Move to next level, possible to another dialog (one level down)",
+    [LinkType.NavigateToLocation]: "Move to location, clearing all dialog stack",
+    [LinkType.TalkToPerson]: "Talk to person"
 }
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
@@ -135,6 +138,10 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         }
     }
 
+    const makeLocationsPickerData = (locs: Loc[]) => {
+        return locs.map(d => ({value: d.uid, label: d.displayName}))
+    }
+
     const gotoLink = () =>
         <span><Button appearance='link' onClick={() => onGotoLocalLink(link.direction || "")}>Go to link</Button></span>
 
@@ -152,6 +159,9 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 link.qualifiedDirection = game.startupDialog
             }
             return <DialogWindowPicker dialogs={game.dialogs} chosen={[link.qualifiedDirection.dialog, link.qualifiedDirection.window]} onValueChange={editPushDirection}></DialogWindowPicker>
+        }
+        if (link.type === LinkType.NavigateToLocation) {
+            return <InputPicker creatable={false} data={makeLocationsPickerData(game.locs)} value={link.direction} onChange={editLocalDirection}></InputPicker>
         }
         return <div></div>
     }

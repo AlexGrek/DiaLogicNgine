@@ -54,7 +54,7 @@
 }
 
 .window-widget-content {
-  padding: 6pt;
+  padding: 8pt;
   margin-top: 1pt;
   margin-bottom: 1pt;
   cursor: pointer;
@@ -64,9 +64,25 @@
   overflow: hidden;
 }
 
+.window-widget-links-list {
+  margin-top: 2pt;
+  margin-left: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.window-widget-links-list > li {
+  margin-left: 6pt;
+  margin-top: 4pt;
+}
+
+.window-widget-link-direction-text {
+  margin-left: 6pt;
+}
+
 .window-widget-footer {
   background-color: #282c34ce;
-  padding: 5pt 3pt;
+  padding: 5pt 0pt;
   border-radius: 0pt 0pt 8pt 8pt;
   font-size: small;
   cursor: pointer;

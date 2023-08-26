@@ -34,6 +34,7 @@ export interface State {
     fatalError?: FatalError | null
     shortHistory: HistoryRecord[]
     gameVersion: string
+    background?: string
 }
 
 export function createInitialState(game: GameDescription): State {

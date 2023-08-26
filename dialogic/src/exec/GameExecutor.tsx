@@ -80,11 +80,28 @@ export class GameExecManager {
         return s
     }
 
-    dialogVariantApply(state: State, link: DialogLink, clickData: HistoryRecord): State {
+    executeWindowOnEntry(state: State): State {
+        const dw = this.getCurrentDialogWindow(state)
+        if (dw != null) {
+            const [_, window] = dw
+            if (window.background) {
+                state.background = window.background
+            }
+        }
+        return state
+    }
+
+    applyLink(state: State, link: DialogLink, clickData: HistoryRecord): State {
         var followed = this.withUpdatedHistory(this.followLink(state, link), clickData)
         if (link.actionCode) {
             return evaluateAsStateProcessor(link.actionCode, followed)
         }
         return followed;
+    }
+
+    dialogVariantApply(state: State, link: DialogLink, clickData: HistoryRecord): State {
+        const afterLink = this.applyLink(state, link, clickData)
+        const afterWindowUpd = this.executeWindowOnEntry(afterLink)
+        return afterWindowUpd
     }
 }

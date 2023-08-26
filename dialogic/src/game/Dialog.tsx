@@ -14,7 +14,7 @@ export interface SimpleTextGenerator {
 }
 
 export enum LinkType {
-    Local, Push, Pop
+    Local, Push, Pop, NavigateToLocation, TalkToPerson
 }
 
 export enum LinkEnabled {
@@ -39,6 +39,8 @@ export interface DialogWindow {
     text: string;
     uid: string;
     links: DialogLink[];
+    background?: string;
+    entryScript?: string
 }
 
 export const createWindow = (uid: string) => {
