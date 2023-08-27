@@ -56,7 +56,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }
             
             handlers.handleLocChange(updatedLocArray)
         }
-        return <LocEditor loc={loc} open={editingIndex >= 0} onUpdateLocation={editThisLoc} onClose={() => setEditingIndex(-1)}></LocEditor>
+        return <LocEditor game={game} handlers={handlers} loc={loc} open={editingIndex >= 0} onUpdateLocation={editThisLoc} onClose={() => setEditingIndex(-1)}></LocEditor>
     }
 
     return (

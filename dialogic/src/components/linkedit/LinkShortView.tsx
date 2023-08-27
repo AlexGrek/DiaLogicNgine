@@ -7,7 +7,6 @@ interface LinkShortViewProps {
     index: number;
     link: DialogLink;
     onLinkClick: (i: number) => void;
-    dialog: Dialog;
 }
 
 const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick }) => {

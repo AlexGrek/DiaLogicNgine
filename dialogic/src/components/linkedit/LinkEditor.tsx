@@ -7,7 +7,7 @@ import Dialog, { createDialog, createDialogLink, createWindow, DialogLink, Dialo
 import { Divider } from 'rsuite';
 import ExitIcon from '@rsuite/icons/Exit';
 import ButtonPanelSelector from '../ButtonPanelSelector';
-import { allEnumPairsOf } from '../../Utils';
+import { KeyValuePair, stringEnumEntries } from '../../Utils';
 import LinkTypeTag from '../LinkTypeTag';
 import { GameDescription } from '../../game/GameDescription';
 import { IUpds } from '../../App';
@@ -17,13 +17,14 @@ import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor from '../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../common/CodeSampleButton';
 import Loc from '../../game/Loc';
+import lodash from 'lodash';
 
 const CODE_EDITOR_UI = {
     arguments: {
         "state": "state object, can be modified",
         "state.position": "UiObjectId, current position",
         "state.positionStack": "stacked positions",
-        "state.props" : "{ [key: string]: number | string }, game properties"
+        "state.props": "{ [key: string]: number | string }, game properties"
     },
     "functionName": "afterLinkFollowed",
     "functionTemplates": {
@@ -38,17 +39,17 @@ interface LinkEditorProps {
     index: number;
     onLinkChange: (link: DialogLink, index: number) => void;
     onLinkRemove: (index: number) => void;
-    
+
     onEditingDone: Function;
     // need to be able to do anything
-    dialog: Dialog;
-    window: DialogWindow;
+    dialog: Dialog | null;
+    window: DialogWindow | null;
     game: GameDescription;
     handlers: IUpds;
-    dialogHandlers: DialogHandlers;
+    dialogHandlers?: DialogHandlers;
 }
 
-const TooltipText = {
+const TooltipText: {[key: string]:string} = {
     [LinkType.Local]: "Move to another window in same dialog",
     [LinkType.Pop]: "Move to previous level (one level back)",
     [LinkType.Push]: "Move to next level, possible to another dialog (one level down)",
@@ -65,7 +66,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     useEffect(() => {
         if (txtInput.current) {
             setTimeout(() => txtInput.current.focus(), 300);
-          }
+        }
     }, [])
 
     const editingDone = () => {
@@ -110,10 +111,19 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         onLinkRemove(index);
     }
 
-    const linkTypes = allEnumPairsOf(LinkType);
-    const enumKeys = linkTypes.map(el => el.key);
+    const isAllowedLinkType = (linkType: LinkType) => {
+        if (dialog != null) {
+            return true;
+        }
+        // we are not in dialog, local and pop links are not available
+        return !(linkType == LinkType.Local || linkType == LinkType.Pop)
+
+    }
+
+    const linkTypes = stringEnumEntries(LinkType).filter((el) => isAllowedLinkType(el.value))
+    const enumKeys = linkTypes.map(el => el.value);
     const enumNames = linkTypes.map(el => {
-        const key: LinkType = el.key
+        const key = el.value
         const tooltip = <Tooltip>{TooltipText[key]}</Tooltip>
         return <Whisper placement="top" controlId="control-id-hover" trigger="hover" speaker={tooltip}>
             <LinkTypeTag value={key}></LinkTypeTag>
@@ -121,34 +131,39 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     });
 
     const onCreateLocalDialog = (str: string) => {
-        dialogHandlers.createDialogWindowHandler(createWindow(str))
+        if (dialogHandlers)
+            dialogHandlers.createDialogWindowHandler(createWindow(str))
     }
 
     const createLink = () =>
         <span>Not found. <Button disabled={!link.direction} onClick={() => link.direction ? onCreateLocalDialog(link.direction) : null} appearance='link'>Create?</Button></span>
 
     const onGotoLocalLink = (link: string) => {
+        if (!dialog || !window) {
+            return;
+        }
         const foundWindow = dialog.windows.find(el => el.uid === link);
         if (foundWindow) {
             handlers.handleDialogWindowChange(window, null);
-            dialogHandlers.openAnotherWindowHandler(foundWindow);
+            if (dialogHandlers)
+                dialogHandlers.openAnotherWindowHandler(foundWindow);
         }
-        else{
+        else {
             console.warn("Attempt to open non-existent link " + link)
         }
     }
 
     const makeLocationsPickerData = (locs: Loc[]) => {
-        return locs.map(d => ({value: d.uid, label: d.displayName}))
+        return locs.map(d => ({ value: d.uid, label: d.displayName }))
     }
 
     const gotoLink = () =>
         <span><Button appearance='link' onClick={() => onGotoLocalLink(link.direction || "")}>Go to link</Button></span>
 
     const directionEditor = () => {
-        if (link.type === LinkType.Local) {
+        if (dialog != null && link.type === LinkType.Local) {
             const data = dialog.windows.map(d => d.uid);
-            const formattedData = data.map(d => ({value: d, label: d}));
+            const formattedData = data.map(d => ({ value: d, label: d }));
             return <div>
                 <InputPicker onCreate={(value, item, event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={link.direction} onChange={editLocalDirection}></InputPicker>
                 <p>{data.includes(link.direction || "") ? gotoLink() : createLink()}</p>
@@ -166,6 +181,10 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         return <div></div>
     }
 
+    const tooltips = lodash.cloneDeep(TooltipText)
+    const filteredTooltips = Object.fromEntries(Object.entries(tooltips));
+    
+
     return (
         <div className="link-editor-body animate__animated animate__fadeInRight animate__faster">
             <Stack alignItems="center" justifyContent='space-between' className="link-editor-toolbar">
@@ -182,7 +201,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             <div className="link-editor-direction">
                 <p>Direction:</p>
                 <ButtonToolbar>
-                    <ButtonPanelSelector tooltips={TooltipText} chosen={link.type} variants={enumKeys} buttonData={enumNames} onValueChanged={editType} ></ButtonPanelSelector>
+                    <ButtonPanelSelector tooltips={filteredTooltips} chosen={link.type} variants={enumKeys} buttonData={enumNames} onValueChanged={editType} ></ButtonPanelSelector>
                 </ButtonToolbar>
                 {directionEditor()}
             </div>

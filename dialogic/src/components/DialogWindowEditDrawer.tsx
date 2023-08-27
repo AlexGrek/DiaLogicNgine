@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Drawer, Input, Grid, Row, Col, Checkbox } from 'rsuite';
 import { IUpds } from '../App';
-import Dialog, { DialogWindow } from '../game/Dialog';
+import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
 import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
@@ -38,6 +38,11 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         const newWindow = modificator(windowState);
         console.log(JSON.stringify(newWindow));
         setWindow(newWindow); // update window changes
+    }
+
+    const onLinkChange = (links: DialogLink[]) => {
+        const updater = (window: DialogWindow) => { return { ...window, links: links } };
+        modifyWindowBy(updater)
     }
 
     const onTextChange = (s: string) => {
@@ -91,7 +96,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Links
                             </div>
-                            <LinksEditorPanel window_uid={window.uid} dialogHandlers={dialogHandlers} onChange={modifyWindowBy} links={windowState.links} dialog={dialog} game={game} handlers={handlers} window={windowState}></LinksEditorPanel>
+                            <LinksEditorPanel window_uid={window.uid} dialogHandlers={dialogHandlers} onChange={onLinkChange} links={windowState.links} dialog={dialog} game={game} handlers={handlers} window={windowState}></LinksEditorPanel>
                         </Col>
                     </Row>
                 </Grid>

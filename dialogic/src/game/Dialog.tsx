@@ -14,11 +14,12 @@ export interface SimpleTextGenerator {
 }
 
 export enum LinkType {
-    Local, Push, Pop, NavigateToLocation, TalkToPerson
+    Local = "local", Push = "push", Pop = "pop", 
+    NavigateToLocation = "tolocation", TalkToPerson = "toperson"
 }
 
 export enum LinkEnabled {
-    Enabled, Disabled, Invisible
+    Enabled = "enabled", Disabled = "disabled", Invisible = "invisible"
 }
 
 export interface DialogLink {

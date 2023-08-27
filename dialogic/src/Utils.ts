@@ -11,14 +11,14 @@ export interface KeyValuePair<K, V> {
     value: V;
 }
 
-function allEnumPairsOf(type: any): KeyValuePair<number, string>[] {
-    const values = Object.values(type).filter((item) => {
-        return !isNaN(Number(item));
-    });
-    return values.map((el: any) => {
-        const numeric = Number(el);
-        return { key: numeric, value: type[numeric] };
-    });
+export function stringEnumEntries<T extends Object>(type: T) {
+    const arr = Object.keys(type).map((name) => {
+        return {
+          name,
+          value: type[name as keyof typeof type],
+        };
+      });
+    return arr
 }
 
 export type Color = 'red' | 'orange' | 'yellow' | 'green' | 'cyan' | 'blue' | 'violet';
@@ -31,4 +31,4 @@ function removeByIndex<T>(array: T[], index: Number) {
     return array.filter((_, i) => i !== index);
 }
 
-export { allEnumValuesOf, allEnumPairsOf, asColor, removeByIndex }
+export { allEnumValuesOf, asColor, removeByIndex }

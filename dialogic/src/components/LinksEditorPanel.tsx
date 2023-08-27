@@ -10,12 +10,12 @@ import LinkShortView from './linkedit/LinkShortView';
 
 interface LinksEditorPanelProps {
     links: DialogLink[];
-    dialog: Dialog;
+    dialog: Dialog | null;
     handlers: IUpds;
     game: GameDescription;
-    onChange: (modificator: (input: DialogWindow) => DialogWindow) => void;
-    window: DialogWindow;
-    dialogHandlers: DialogHandlers;
+    onChange: (links: DialogLink[]) => void;
+    window: DialogWindow | null;
+    dialogHandlers?: DialogHandlers;
     window_uid: string;
 }
 
@@ -31,8 +31,8 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     }
 
     const onCreateNew = () => {
-        const updater = (window: DialogWindow) => { return { ...window, links: [...window.links, createDialogLink() ] } }
-        onChange(updater);
+        const newLinks = [...links, createDialogLink() ]
+        onChange(newLinks);
         setEditingIndex(links.length);
     }
 
@@ -43,14 +43,12 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     const onLinkChange = (link: DialogLink, index: number) => {
         const newLinkList = links.slice();
         newLinkList[index] = link;
-        const updater = (window: DialogWindow) => { return { ...window, links: newLinkList } };
-        onChange(updater);
+        onChange(newLinkList);
     }
 
     const onLinkRemove = (index: Number) => {
         const newLinkList = removeByIndex(links, index);
-        const updater = (window: DialogWindow) => { return { ...window, links: newLinkList } };
-        onChange(updater);
+        onChange(newLinkList);
     }
 
     let linksEditorContent = null
@@ -63,7 +61,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
         // view mode
         let linksList = links.map((el, index) => {
             console.log(`Link: ${el}`)
-            return <LinkShortView index={index} key={index} link={el} onLinkClick={onLinkClick} dialog={dialog}></LinkShortView>
+            return <LinkShortView index={index} key={index} link={el} onLinkClick={onLinkClick}></LinkShortView>
         })
         linksEditorContent = <div>
             {linksList}

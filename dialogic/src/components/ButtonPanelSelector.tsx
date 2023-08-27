@@ -6,15 +6,15 @@ interface ButtonPanelSelectorProps<T> {
     variants: T[];
     buttonData?: ReactNode[] | string[] | undefined;
     onValueChanged: (a: T) => void;
-    tooltips?: { [id: number]: string; };
+    tooltips?: { [id: string]: string; };
 }
 
 function ButtonPanelSelector<T>(props: ButtonPanelSelectorProps<T>) {
     return (<ButtonGroup>{props.variants.map((el, i) => {
         const active = el === props.chosen
         const button = <Button key={i} active={active} onClick={() => props.onValueChanged(el)}>{props.buttonData ? props.buttonData[i] : String(el)}</Button>
-        if (props.tooltips && props.tooltips[i]) {
-            const tooltip = <Tooltip>{props.tooltips[i]}</Tooltip>
+        if (props.tooltips && props.tooltips[`${el}`]) {
+            const tooltip = <Tooltip>{props.tooltips[`${el}`]}</Tooltip>
             return <Whisper key={i} placement="top" controlId="control-id-hover" trigger="hover" speaker={tooltip}>
                 {button}
             </Whisper>
