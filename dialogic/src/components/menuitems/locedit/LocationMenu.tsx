@@ -30,7 +30,11 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }
             displayName: "",
             uid: "",
             goto: [],
-            links: []
+            links: [],
+            text: { 
+                main: "",
+                list: []
+            }
         }
         setCreatingNew(true)
         setEditingIndex(game.locs.length)
@@ -47,7 +51,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }
         const loc = game.locs[index]
         const editThisLoc = (update: Loc) => {
             let updatedLocArray = game.locs
-            if (update.uid == '') {
+            if (update.uid === '') {
                 // remove this location
                 updatedLocArray.splice(index, 1)
             } else {

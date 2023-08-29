@@ -1,4 +1,5 @@
 import { DialogLink } from "./Dialog"
+import { TextList } from "./TextList"
 
 export default interface Loc {
     displayName: string
@@ -6,5 +7,6 @@ export default interface Loc {
     background?: string
     thumbnail?: string
     goto: string[]
+    text: TextList
     links: DialogLink[]
 }
