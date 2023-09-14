@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { TextList } from '../../../game/TextList';
-import { Input, Nav } from 'rsuite';
+import { Button, Input, InputGroup, Nav, Stack } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
+import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
 
 interface TextListEditorProps {
@@ -36,6 +37,18 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange }) =
         onChange(copy)
     }
 
+    const onRemoveTab = () => {
+        const copy = lodash.cloneDeep(textList)
+        if (editingIndex < 0) {
+            console.warn("remove while on unnamed tab")
+        }
+        else {
+            copy.list.splice(editingIndex, 1)
+            setEditingIndex(editingIndex - 1)
+        }
+        onChange(copy)
+    }
+
     const onSelect = (selected: string) => {
         const selected_int = parseInt(selected)
         if (selected_int === CREATE_INDEX) {
@@ -62,9 +75,14 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange }) =
 
     const nameEditingPanel = (name?: string) => {
         const viewName = name ? name : ""
-        return <div>
-            <Input value={viewName} onChange={onNameChange}></Input>
-        </div>
+        return (
+            <InputGroup>
+            <InputGroup.Addon>Name</InputGroup.Addon>
+            <Input value={viewName} onChange={onNameChange} size="sm" style={{width: "42em"}}></Input>
+            <InputGroup.Button onClick={onRemoveTab}>
+            <TrashIcon/>
+            </InputGroup.Button>
+            </InputGroup>)
     }
 
     const editor = 

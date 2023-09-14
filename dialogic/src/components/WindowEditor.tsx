@@ -49,7 +49,7 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
         </div>
         <div className='window-widget-content' onClick={() => this.props.onWindowChosen()}>
           <p className='window-widget-content-text'>
-            {this.textShortened(this.props.window.text.toString(), 84)}
+            {this.textShortened(this.props.window.text.main.toString(), 84)}
           </p>
         </div>
         <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>

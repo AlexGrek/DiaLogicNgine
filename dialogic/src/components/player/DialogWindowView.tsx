@@ -33,7 +33,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
     }
 
     const getActualWindowText = (state: State, window: DialogWindow) => {
-        return window.text  // TODO: add text processing logic
+        return window.text.main  // TODO: add text processing logic
     }
 
     const text = getActualWindowText(state, window)
@@ -84,7 +84,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
                     {prevText}
                 </p>
                 <p className='dialog-current-text' key={state.stepCount << 1}>
-                    {state.fatalError ? state.fatalError.message : window.text}
+                    {state.fatalError ? state.fatalError.message : text}
                 </p>
             </div>
             <div className="dialog-variants">

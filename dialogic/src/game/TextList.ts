@@ -7,3 +7,7 @@ export interface TextList {
     main: string,
     list: TextListEntry[]
 }
+
+export function emptyTextList(): TextList {
+    return {main: "", list: []}
+}

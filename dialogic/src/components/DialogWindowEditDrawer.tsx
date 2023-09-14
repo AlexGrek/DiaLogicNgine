@@ -6,6 +6,8 @@ import { GameDescription } from '../game/GameDescription';
 import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
 import PublicFileUrl, { IMAGES } from './common/PublicFileUrl';
+import TextListEditor from './common/text_list/TextListEditor';
+import { TextList } from '../game/TextList';
 
 
 interface DialogWindowEditDrawerProps {
@@ -22,14 +24,10 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
     handlers, onClose, game, dialogHandlers }) => {
     const [windowState, setWindow] = useState<DialogWindow>(window);
     const [changesMade, setChanges] = useState<boolean>(false);
-    const txtInput = useRef<any>(null);
 
     useEffect(() => {
         setWindow(window);
         setChanges(false);
-        if (txtInput.current) {
-            txtInput.current.focus();
-        }
     }, [window]);
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {
@@ -45,7 +43,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         modifyWindowBy(updater)
     }
 
-    const onTextChange = (s: string) => {
+    const onTextChange = (s: TextList) => {
         setChanges(true);
         setWindow({ ...windowState, text: s });
     }
@@ -87,7 +85,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Content
                             </div>
-                            <Input as="textarea" value={windowState.text} ref={txtInput} onChange={onTextChange} rows={5}></Input>
+                            <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
                             <p>Background image URL</p>
                             <PublicFileUrl extensions={IMAGES} value={windowState.background} onChange={onBackgroundChange}></PublicFileUrl>
 

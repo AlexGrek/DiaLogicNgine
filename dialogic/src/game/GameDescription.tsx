@@ -15,7 +15,7 @@ export interface GameDescription {
 
 export function createDefaultGame(): GameDescription {
     let d1 = { name: "dialog1", windows: [
-        { "uid": "welcome", "text": "Welcome to the new game!", "links": [ ] },
+        { "uid": "welcome", "text": {"main": "Welcome to the game!", "list": []}, "links": [ ] },
     ] };
     let game = { 
         dialogs: [d1],

@@ -1,4 +1,5 @@
 import { DialogWindowId } from "../exec/GameState";
+import { TextList, emptyTextList } from "./TextList";
 
 export default interface Dialog {
     name: string;
@@ -37,7 +38,7 @@ export const createDialogLink = () => {
 }
 
 export interface DialogWindow {
-    text: string;
+    text: TextList;
     uid: string;
     links: DialogLink[];
     background?: string;
@@ -45,7 +46,7 @@ export interface DialogWindow {
 }
 
 export const createWindow = (uid: string) => {
-    return { uid: uid, text: "", links: [] };
+    return { uid: uid, text: emptyTextList(), links: [] };
 }
 
 export const renameDialogWindow = (old: DialogWindow, newName: string) => {
