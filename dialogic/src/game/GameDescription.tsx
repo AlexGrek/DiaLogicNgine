@@ -9,9 +9,9 @@ export interface GameDescription {
     facts: Fact[]
     chars: Character[]
     locs: Loc[]
-    version: number
+    buildVersion: number
     startupDialog: DialogWindowId
-    engineVersion: number
+    engineVersion: string
 }
 
 export function createDefaultGame(): GameDescription {
@@ -23,9 +23,9 @@ export function createDefaultGame(): GameDescription {
         facts: [],
         chars: [],
         locs: [],
-        version: 1,
+        buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
-        engineVersion: 0.2
+        engineVersion: "0.3"
     };
 
     return game
