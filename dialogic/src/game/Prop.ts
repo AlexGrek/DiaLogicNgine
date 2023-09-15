@@ -20,13 +20,13 @@ export interface StringProp {
 }
 
 export interface VariantProp {
-    datatype: "string"
+    datatype: "variant"
     name: string
     defaultValue: string
     variants: string[]
 }
 
 
-type Prop = NumberProp | BoolProp | StringProp
+type Prop = NumberProp | BoolProp | StringProp | VariantProp
 
 export default Prop

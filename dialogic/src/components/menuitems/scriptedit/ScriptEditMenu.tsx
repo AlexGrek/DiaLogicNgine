@@ -4,6 +4,8 @@ import { IUpds } from '../../../App';
 import { Button } from 'rsuite';
 import StaticTabs from '../../common/StaticTabs';
 import PropsEditMenu from './PropsEditMenu';
+import Prop from '../../../game/Prop';
+import lodash from 'lodash';
 
 interface ScriptEditMenuProps {
     game: GameDescription;
@@ -18,10 +20,15 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
         setEditingIndex(editingIndex);
     }, [game]);
 
+    const onSetGameProps = (props: Prop[]) => {
+        const gameUpd = { ...game, props: props}
+        onSetGame(gameUpd)
+    }
+
     const createPropsEditorTab = () => {
         return {
             header: "Props",
-            content: <PropsEditMenu game={game} onSetGame={onSetGame} handlers={handlers}></PropsEditMenu>
+            content: <PropsEditMenu props={game.props} onSetProps={onSetGameProps} handlers={handlers}></PropsEditMenu>
         }
     }
 
