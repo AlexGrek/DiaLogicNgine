@@ -19,22 +19,26 @@ export enum LinkType {
     NavigateToLocation = "tolocation", TalkToPerson = "toperson"
 }
 
-export enum LinkEnabled {
-    Enabled = "enabled", Disabled = "disabled", Invisible = "invisible"
+export interface DialogLinkDirection {
+    direction?: string;
+    qualifiedDirection: DialogWindowId;
+    type: LinkType;
 }
 
 export interface DialogLink {
-    type: LinkType;
-    enabled: LinkEnabled;
+    mainDirection: DialogLinkDirection;
+    alternativeDirections: DialogLinkDirection[];
     text: string;
-    direction?: string;
-    qualifiedDirection: DialogWindowId;
     textProcessingCode?: string;
     actionCode?: string;
+    isVisible?: string;
+    isEnabled?: string;
+    isAlternativeLink?: boolean;
+    useAlternativeWhen?: string;
 }
 
 export const createDialogLink = () => {
-    return { type: LinkType.Local, direction: "", text: "", enabled: LinkEnabled.Enabled } as DialogLink
+    return { mainDirection: { type: LinkType.Local, direction: ""}, text: "" } as DialogLink
 }
 
 export interface DialogWindow {

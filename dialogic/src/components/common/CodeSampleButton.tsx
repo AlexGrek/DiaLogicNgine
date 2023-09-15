@@ -7,7 +7,7 @@ const MAX_LINE_LENGTH = 30
 
 interface CodeSampleButtonProps {
     name: string;
-    code: string;
+    code?: string;
     onClick: () => void
 }
 
@@ -46,7 +46,7 @@ const CodeSampleButton: React.FC<CodeSampleButtonProps> = ({ name, code, onClick
                 <p className="header-cs"><ReadyRoundIcon style={{ fontSize: '1em' }} />
                     <span className="name-cs">{name}</span>
                 </p>
-                <pre>{shortenCode(code)}</pre>
+                <pre>{shortenCode(code || "")}</pre>
             </div>
         </Button>
     );

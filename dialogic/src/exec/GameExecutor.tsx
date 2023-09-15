@@ -86,21 +86,22 @@ export class GameExecManager {
     }
 
     private followLink(state: State, link: DialogLink): State {
-        switch (link.type) {
+        const directionFromLink = link.mainDirection // TODO: make it possible to choose
+        switch (directionFromLink.type) {
             case (LinkType.Local):
-                if (link.direction)
-                    return this.goToLocalLink(link.direction, state)
+                if (directionFromLink.direction)
+                    return this.goToLocalLink(directionFromLink.direction, state)
                 else
                     return state
             case (LinkType.Push):
-                if (link.qualifiedDirection)
-                    return this.pushLink(link.qualifiedDirection, state)
+                if (directionFromLink.qualifiedDirection)
+                    return this.pushLink(directionFromLink.qualifiedDirection, state)
                 else
                     return state
             case (LinkType.Pop):
                 return this.popLink(state)
             case (LinkType.NavigateToLocation):
-                return this.goToLocation(state, link.direction)
+                return this.goToLocation(state, directionFromLink.direction)
             default:
                 return state
         }

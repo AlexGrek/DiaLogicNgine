@@ -4,11 +4,18 @@ import CodeEditor from '@uiw/react-textarea-code-editor';
 import "./PopupCodeEditor.css"
 import AccessibleObjects from './AccessibleObjects';
 
-interface PopupCodeEditorUi {
+export interface PopupCodeEditorUi {
     arguments: { [key: string]: string };
     functionName: string;
     functionTemplates: { [key: string]: string }
     header: string;
+}
+
+export const DEFAULT_ARGS = {
+    "state": "state object, can be modified",
+    "state.position": "UiObjectId, current position",
+    "state.positionStack": "stacked positions",
+    "state.props": "{ [key: string]: number | string }, game properties"
 }
 
 interface PopupCodeEditorProps {

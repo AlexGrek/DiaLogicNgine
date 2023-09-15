@@ -11,6 +11,7 @@ export interface GameDescription {
     locs: Loc[]
     version: number
     startupDialog: DialogWindowId
+    engineVersion: number
 }
 
 export function createDefaultGame(): GameDescription {
@@ -23,7 +24,8 @@ export function createDefaultGame(): GameDescription {
         chars: [],
         locs: [],
         version: 1,
-        startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid)
+        startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
+        engineVersion: 0.2
     };
 
     return game

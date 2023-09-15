@@ -55,8 +55,8 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
         <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
           <ul className='window-widget-links-list'>
             {this.props.window.links.map((el, i) => {
-              const direction = el.type != LinkType.Push ? el.direction : (el.qualifiedDirection ? `${el.qualifiedDirection.dialog}.${el.qualifiedDirection.window}` : "?")
-              return <li key={i}><LinkTypeTag value={el.type}/><span className='window-widget-link-direction-text'>{direction}</span></li>
+              const direction = el.mainDirection.type != LinkType.Push ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
+              return <li key={i}><LinkTypeTag value={el.mainDirection.type}/><span className='window-widget-link-direction-text'>{direction}</span></li>
             })}
           </ul>
         </div>

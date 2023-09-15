@@ -18,7 +18,7 @@ const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick 
     return (
         <div className='link-short-view animate__animated animate__fadeInLeft animate__faster' onClick={clickHandler}>
             <p className='link-short-view-text'>{link.text}</p>
-            <p className='link-short-view-target'><LinkTypeTag value={link.type}/>{link.direction}</p>
+            <p className='link-short-view-target'><LinkTypeTag value={link.mainDirection.type}/>{link.mainDirection.direction}</p>
         </div>
             
         
