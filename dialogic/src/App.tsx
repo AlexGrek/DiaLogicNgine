@@ -15,6 +15,8 @@ import Player from './components/player/Player';
 import ConfigurationMenu from './components/menuitems/configuration/ConfigurationMenu';
 import Loc from './game/Loc';
 import LocationMenu from './components/menuitems/locedit/LocationMenu';
+import Prop from './game/Prop';
+import ScriptEditMenu from './components/menuitems/scriptedit/ScriptEditMenu';
 
 export interface IAppProps {
 
@@ -33,6 +35,7 @@ export interface IUpds {
   handleDialogApplyChange: (func: DialogWindowListUpdater, dialog_uid: string | null) => void;
   handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null) => void;
   handleLocChange: (locs: Loc[]) => void;
+  handlePropChange: (props: Prop[]) => void;
   notify: NotifyCallback
 }
 
@@ -114,6 +117,10 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({ game: { ...this.state.game, locs: locs } })
   }
 
+  private handlePropChange(prps: Prop[]) {
+    this.setState({ game: { ...this.state.game, props: prps } })
+  }
+
   private displayStyle(name: string) {
     return {
       display: this.state.menu === name ? "block" : "none"
@@ -143,6 +150,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       <div style={this.displayStyle("locs")}>
         <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
       </div>
+      <div style={this.displayStyle("scripts")}>
+        <ScriptEditMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+      </div>
     </div>
   }
 
@@ -153,6 +163,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       handleDialogApplyChange: this.handleDialogApplyChange.bind(this),
       handleDialogWindowChange: this.handleDialogWindowChange.bind(this),
       handleLocChange: this.handleLocChange.bind(this),
+      handlePropChange: this.handlePropChange.bind(this),
       notify: this.handleNotify.bind(this)
     }
 

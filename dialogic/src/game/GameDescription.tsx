@@ -3,12 +3,14 @@ import Character from "./Character";
 import Dialog from "./Dialog";
 import Fact from "./Fact";
 import Loc from "./Loc";
+import Prop from "./Prop";
 
 export interface GameDescription {
     dialogs: Dialog[]
     facts: Fact[]
     chars: Character[]
     locs: Loc[]
+    props: Prop[]
     buildVersion: number
     startupDialog: DialogWindowId
     engineVersion: string
@@ -23,6 +25,7 @@ export function createDefaultGame(): GameDescription {
         facts: [],
         chars: [],
         locs: [],
+        props: [],
         buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
         engineVersion: "0.3"

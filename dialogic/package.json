@@ -20,7 +20,7 @@
     "react-accessible-treeview": "^2.4.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "rsuite": "^5.17.1",
+    "rsuite": "^5.40.0",
     "storage-manager-js": "^4.0.7",
     "typescript": "^4.8.2",
     "web-vitals": "^2.1.4"
