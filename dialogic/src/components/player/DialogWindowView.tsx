@@ -33,7 +33,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
     }
 
     const getActualWindowText = (state: State, window: DialogWindow) => {
-        return window.text.main  // TODO: add text processing logic
+        return game.getCurrentWindowText(state, window)
     }
 
     const text = getActualWindowText(state, window)

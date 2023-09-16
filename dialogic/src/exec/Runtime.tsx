@@ -134,3 +134,25 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevSt
         return {state: { ...prevState, fatalError: { message: `Error in user code (bool processor): ${exception}`, exception: exception } }, decision: false}
     }
 }
+
+export function evaluateAsAnyProcessor(game: GameDescription, s: string, prevState: State) {
+    const body = `(function (rt, state, props) { ${s} })`
+    console.log(body)
+    var state = prevState
+    var stateCopy = lodash.cloneDeep(prevState)
+    const rt = createRtObject(game, stateCopy)
+    try {
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        if (stateIsValid(stateCopy))
+            state = stateCopy
+        else {
+            console.warn(`User code damaged state object, old state returned instead`)
+        }
+        return {state: state, decision: boolResult}
+    } catch (exception) {
+        console.warn("Exception while processing user code")
+        console.error(exception)
+        return {state: { ...prevState, fatalError: { message: `Error in user code (bool processor): ${exception}`, exception: exception } }, decision: false}
+    }
+}
+

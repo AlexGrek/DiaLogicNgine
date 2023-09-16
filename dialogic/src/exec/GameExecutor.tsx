@@ -2,8 +2,9 @@ import lodash from "lodash";
 import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
-import { evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
+import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
 import Loc from "../game/Loc";
+import { chooseText } from "../game/TextList";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -27,6 +28,15 @@ export class GameExecManager {
             return [dialog, window]
         }
         return null
+    }
+
+    getCurrentWindowText(instate: State, window: DialogWindow) {
+        if (window.chooseTextScript) {
+            // NOTE: All state changes are IGNORED here! Use other functions to change state
+            const {state, decision} = evaluateAsAnyProcessor(this.game, window.chooseTextScript, instate)
+            return chooseText(window.text, decision)
+        }
+        return window.text.main
     }
 
     getCurrentLocation(state: State): Readonly<Loc> | null {
