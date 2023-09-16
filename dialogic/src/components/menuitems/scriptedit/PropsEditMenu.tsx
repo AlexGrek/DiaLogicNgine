@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Input, InputGroup, RadioTile, RadioTileGroup } from 'rsuite';
+import { ButtonGroup, Input, InputGroup, RadioTile, RadioTileGroup } from 'rsuite';
 import { IUpds } from '../../../App';
 import { Button, Stack, Table } from 'rsuite';
 import ListIcon from '@rsuite/icons/List';
 import OffIcon from '@rsuite/icons/Off';
 import ParagraphIcon from '@rsuite/icons/Paragraph';
 import NumbersIcon from '@rsuite/icons/Numbers';
-import Prop from '../../../game/Prop';
+import PlusIcon from '@rsuite/icons/Plus';
+import GearIcon from '@rsuite/icons/Gear';
+import TrashIcon from '@rsuite/icons/Trash';
+
+import Prop, { createBoolProp, createNumberProp, createStringProp, createVariantProp } from '../../../game/Prop';
+import { isValidJsIdentifier } from '../../../Utils';
+import lodash from 'lodash';
+import PropsEditorDrawer from './PropsEditorDrawer';
 
 interface PropsEditMenuProps {
     props: Prop[];
@@ -18,23 +25,54 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
+    const [createTypeChange, setCreateTypeChange] = useState<string>("none");
     useEffect(() => {
         setEditingIndex(editingIndex);
     }, [props]);
 
-    const createPropsEditorTab = () => {
-        return {
-            header: "Props",
-            content: <p>props tab!</p>
+    const deleteProp = (id: number) => {
+        const copy = lodash.cloneDeep(props)
+        copy.splice(id, 1)
+        onSetProps(copy)
+    }
+
+    const editProp = (id: number) => {
+        setCreatingNew(false)
+        setEditingIndex(id)
+    }
+
+    const updateProp = (index: number, value: Prop) => {
+        console.log(`Got value: ${JSON.stringify(value)} at index ${index}`)
+        const copy = lodash.cloneDeep(props)
+        copy[index] = value
+        console.log(`Updating: ${JSON.stringify(copy)}`)
+        onSetProps(copy)
+    }
+
+    const createProp = () => {
+        const copy = lodash.cloneDeep(props)
+        var create = null;
+        switch(createTypeChange) {
+            case "numeric":
+                create = createNumberProp(createName, 0);
+                break;
+            case "string":
+                create = createStringProp(createName, "");
+                break;
+            case "boolean":
+                create = createBoolProp(createName, false)
+                break;
+            case "variant":
+                create = createVariantProp(createName, ["default"], "default")
+                break;
+        }
+        if (create) {
+            copy.push(create)
+            onSetProps(copy)
+            editProp(copy.length - 1)
         }
     }
 
-    const createPropssEditorTab = () => {
-        return {
-            header: "Propsing",
-            content: <p>scripts tab!</p>
-        }
-    }
 
     const convertTableRow = (p: Prop, i: number) => {
         const name = p.name
@@ -52,35 +90,15 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
     }
 
     return (
-        <Stack>
-            <Table
-                height={400}
-                data={createTableData()}>
-                <Table.Column width={45}>
-                    <Table.HeaderCell>ID</Table.HeaderCell>
-                    <Table.Cell dataKey="index" />
-                </Table.Column>
-                <Table.Column width={150}>
-                    <Table.HeaderCell>Name</Table.HeaderCell>
-                    <Table.Cell dataKey="name" />
-                </Table.Column>
-                <Table.Column width={150}>
-                    <Table.HeaderCell>Value</Table.HeaderCell>
-                    <Table.Cell dataKey="value" />
-                </Table.Column>
-                <Table.Column width={150}>
-                    <Table.HeaderCell>Data type</Table.HeaderCell>
-                    <Table.Cell dataKey="type" />
-                </Table.Column>
-            </Table>
+        <div>
             <div>
                 <InputGroup>
-                <InputGroup.Addon> Name:</InputGroup.Addon>
-                <Input value={createName} placeholder="unique js identifier" onChange={setCreateName}></Input>
-                <InputGroup.Button></InputGroup.Button>
+                    <InputGroup.Addon> Name </InputGroup.Addon>
+                    <Input value={createName} placeholder="unique js identifier" onChange={setCreateName}></Input>
+                    <InputGroup.Button onClick={createProp} disabled={createTypeChange === "none" || !isValidJsIdentifier(createName)}><PlusIcon /></InputGroup.Button>
                 </InputGroup>
-                
-                <RadioTileGroup defaultValue="blank" inline aria-label="Create new prop type">
+
+                <RadioTileGroup defaultValue="blank" inline aria-label="Create new prop type" onChange={(val, ev) => setCreateTypeChange(val.toString())}>
                     <RadioTile
                         icon={<NumbersIcon></NumbersIcon>}
                         label="Number"
@@ -90,31 +108,64 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
 
                     </RadioTile>
                     <RadioTile
-                        icon={<ParagraphIcon/>}
+                        icon={<ParagraphIcon />}
                         label="String"
                         value="string"
                     >
                         any text
                     </RadioTile>
                     <RadioTile
-                        icon={<OffIcon/>}
+                        icon={<OffIcon />}
                         label="Boolean"
                         value="boolean"
                     >
                         true or false
                     </RadioTile>
                     <RadioTile
-                        icon={<ListIcon/>}
+                        icon={<ListIcon />}
                         label="Variant"
                         value="variant"
                     >
                         can contain one of the predefined string values
                     </RadioTile>
                 </RadioTileGroup>
-                <Button>Create</Button>
-
             </div>
-        </Stack>
+            <Table
+                data={createTableData()}>
+                <Table.Column width={35}>
+                    <Table.HeaderCell>ID</Table.HeaderCell>
+                    <Table.Cell dataKey="index" />
+                </Table.Column>
+                <Table.Column width={150}>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.Cell dataKey="name" />
+                </Table.Column>
+                <Table.Column width={150}>
+                    <Table.HeaderCell>Default</Table.HeaderCell>
+                    <Table.Cell dataKey="value" />
+                </Table.Column>
+                <Table.Column width={150}>
+                    <Table.HeaderCell>Data type</Table.HeaderCell>
+                    <Table.Cell dataKey="type" />
+                </Table.Column>
+                <Table.Column width={150}>
+                    <Table.HeaderCell>Actions</Table.HeaderCell>
+                    <Table.Cell style={{ padding: '6px' }}>
+                        {rowData => (
+                            <ButtonGroup>
+                            <Button onClick={() => editProp(rowData.index)}>
+                                 <GearIcon/>
+                            </Button>
+                            <Button onClick={() => deleteProp(rowData.index)}>
+                                 <TrashIcon/>
+                            </Button>
+                            </ButtonGroup>
+                        )}
+                    </Table.Cell>
+                </Table.Column>
+            </Table>
+            {editingIndex >= 0 ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
+        </div>
     );
 };
 

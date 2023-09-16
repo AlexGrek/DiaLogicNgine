@@ -1,4 +1,4 @@
-
+const isValidIdentifier = require('is-valid-identifier')
 
 function allEnumValuesOf(type: any) {
     return Object.keys(type).filter((item) => {
@@ -32,3 +32,10 @@ function removeByIndex<T>(array: T[], index: Number) {
 }
 
 export { allEnumValuesOf, asColor, removeByIndex }
+
+export function isValidJsIdentifier(id?: string) {
+    if (!id) {
+        return false;
+    }
+    return isValidIdentifier(id)
+}

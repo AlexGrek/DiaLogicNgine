@@ -3,7 +3,7 @@ import Character from "./Character";
 import Dialog from "./Dialog";
 import Fact from "./Fact";
 import Loc from "./Loc";
-import Prop from "./Prop";
+import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
 export interface GameDescription {
     dialogs: Dialog[]
@@ -25,7 +25,10 @@ export function createDefaultGame(): GameDescription {
         facts: [],
         chars: [],
         locs: [],
-        props: [],
+        props: [
+            createNumberProp("testNumProp", 42),
+            createVariantProp("testVariantProp", ["a", "b", "c"], "b")
+        ],
         buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
         engineVersion: "0.3"
