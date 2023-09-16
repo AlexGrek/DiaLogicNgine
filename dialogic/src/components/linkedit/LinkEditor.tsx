@@ -18,6 +18,7 @@ import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code
 import CodeSampleButton from '../common/CodeSampleButton';
 import Loc from '../../game/Loc';
 import lodash from 'lodash';
+import LocationPicker from './LocationPicker';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -240,10 +241,6 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         }
     }
 
-    const makeLocationsPickerData = (locs: Loc[]) => {
-        return locs.map(d => ({ value: d.uid, label: d.displayName }))
-    }
-
     const gotoLink = (linkdir: DialogLinkDirection) =>
         <span><Button appearance='link' onClick={() => onGotoLocalLink(linkdir.direction || "")}>Go to link</Button></span>
 
@@ -263,7 +260,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)}></DialogWindowPicker>
         }
         if (linkdir.type === LinkType.NavigateToLocation) {
-            return <InputPicker creatable={false} data={makeLocationsPickerData(game.locs)} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)}></InputPicker>
+            return <LocationPicker locs={game.locs} value={linkdir.direction || ''} onLocChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)}/>
         }
         return <div></div>
     }
