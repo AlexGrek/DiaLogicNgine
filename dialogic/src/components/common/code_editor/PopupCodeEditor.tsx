@@ -15,7 +15,10 @@ export const DEFAULT_ARGS = {
     "state": "state object, can be modified",
     "state.position": "UiObjectId, current position",
     "state.positionStack": "stacked positions",
-    "state.props": "{ [key: string]: number | string }, game properties"
+    "state.props": "{ [key: string]: number | string }, game properties",
+    "rt": "collection of useful runtime functions",
+    "props": "all props available as objects",
+    "rt.props": "all props available as objects",
 }
 
 interface PopupCodeEditorProps {

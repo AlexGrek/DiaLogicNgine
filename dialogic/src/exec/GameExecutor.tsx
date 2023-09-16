@@ -2,7 +2,7 @@ import lodash from "lodash";
 import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
-import { evaluateAsStateProcessor } from "./Runtime"
+import { evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
 import Loc from "../game/Loc";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
@@ -85,25 +85,34 @@ export class GameExecManager {
         return newState;
     }
 
-    private followLink(state: State, link: DialogLink): State {
-        const directionFromLink = link.mainDirection // TODO: make it possible to choose
+    private followLink(prevState: State, link: DialogLink): State {
+        var newState = prevState
+        var directionFromLink = link.mainDirection
+        if (link.isAlternativeLink && link.alternativeDirections.length > 0 && link.useAlternativeWhen) {
+            const {state, decision} = evaluateAsBoolProcessor(this.game, link.useAlternativeWhen, newState)
+            newState = state
+            if (decision) {
+                directionFromLink = link.alternativeDirections[0]
+            }
+        }
+
         switch (directionFromLink.type) {
             case (LinkType.Local):
                 if (directionFromLink.direction)
-                    return this.goToLocalLink(directionFromLink.direction, state)
+                    return this.goToLocalLink(directionFromLink.direction, newState)
                 else
-                    return state
+                    return newState
             case (LinkType.Push):
                 if (directionFromLink.qualifiedDirection)
-                    return this.pushLink(directionFromLink.qualifiedDirection, state)
+                    return this.pushLink(directionFromLink.qualifiedDirection, newState)
                 else
-                    return state
+                    return newState
             case (LinkType.Pop):
-                return this.popLink(state)
+                return this.popLink(newState)
             case (LinkType.NavigateToLocation):
-                return this.goToLocation(state, directionFromLink.direction)
+                return this.goToLocation(newState, directionFromLink.direction)
             default:
-                return state
+                return newState
         }
     }
 
@@ -132,7 +141,7 @@ export class GameExecManager {
     applyLink(state: State, link: DialogLink, clickData: HistoryRecord): State {
         var followed = this.withUpdatedHistory(this.followLink(state, link), clickData)
         if (link.actionCode) {
-            return evaluateAsStateProcessor(link.actionCode, followed)
+            return evaluateAsStateProcessor(this.game, link.actionCode, followed)
         }
         return followed;
     }

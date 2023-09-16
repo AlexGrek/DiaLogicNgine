@@ -35,7 +35,7 @@ export interface State {
     position: UiObjectId
     stepCount: number
     positionStack: UiObjectId[]
-    props: { [key: string]: number | string }
+    props: { [key: string]: any }
     fatalError?: FatalError | null
     shortHistory: HistoryRecord[]
     gameVersion: string
