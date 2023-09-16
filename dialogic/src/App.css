@@ -120,6 +120,10 @@
   padding-bottom: 12pt;
 }
 
+.window-editor-code-editors-stack {
+  display: flex;
+}
+
 .link-short-view {
   min-height: 4em;
   width: 100%;

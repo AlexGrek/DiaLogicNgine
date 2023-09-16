@@ -151,11 +151,11 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
                             <p>Background image URL</p>
                             <PublicFileUrl extensions={IMAGES} value={windowState.background} onChange={onBackgroundChange}></PublicFileUrl>
-                            <Stack direction='row'>
+                            <div className='window-editor-code-editors-stack'>
                                 <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript}/>
                                 <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript}/>
                                 <CodeSampleButton onClick={() => codeEdit("onEntry")} name='onEntry' code={windowState.entryScript}/>
-                            </Stack>
+                            </div>
                         </Col>
                         <Col xs={6}>
                             <div className='window-editor-grid-header'>
