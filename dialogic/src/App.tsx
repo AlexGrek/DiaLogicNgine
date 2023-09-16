@@ -1,22 +1,22 @@
+import { Container, Content, CustomProvider, Footer, Header, Sidebar } from 'rsuite';
 import './App.css';
 import SidePanel from './components/SidePanel';
-import { Container, Header, Content, Footer, Sidebar } from 'rsuite';
-import { CustomProvider } from 'rsuite';
-import { createDefaultGame, GameDescription } from './game/GameDescription';
 import Dialog, { DialogWindow } from './game/Dialog';
+import { GameDescription, createDefaultGame } from './game/GameDescription';
 
 
 import * as React from 'react';
+import { Notification, NotificationType, NotifyCallback } from './UiNotifications';
 import DialogEditor from './components/DialogEditor';
 import SaveLoadMenu from './components/menuitems/SaveLoadMenu';
-import { Notification, NotificationType, NotifyCallback } from './UiNotifications';
+import CharEditorTabs from './components/menuitems/charedit/CharEditorTabs';
+import ConfigurationMenu from './components/menuitems/configuration/ConfigurationMenu';
+import LocationMenu from './components/menuitems/locedit/LocationMenu';
+import ScriptEditMenu from './components/menuitems/scriptedit/ScriptEditMenu';
 import NotificationViewPanel from './components/notification/NotificationViewPanel';
 import Player from './components/player/Player';
-import ConfigurationMenu from './components/menuitems/configuration/ConfigurationMenu';
 import Loc from './game/Loc';
-import LocationMenu from './components/menuitems/locedit/LocationMenu';
 import Prop from './game/Prop';
-import ScriptEditMenu from './components/menuitems/scriptedit/ScriptEditMenu';
 
 export interface IAppProps {
 
@@ -149,6 +149,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       </div>
       <div style={this.displayStyle("locs")}>
         <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+      </div>
+      <div style={this.displayStyle("chars")}>
+        <CharEditorTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
       </div>
       <div style={this.displayStyle("scripts")}>
         <ScriptEditMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>

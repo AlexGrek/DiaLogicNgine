@@ -9,4 +9,5 @@ export default interface Proxy {
     // Proxy is a portal to other dialogs/windows/anything
     destinations: ProxyDest[]
     proxyRouterScript: string
+    onEntryScript?: string
 }

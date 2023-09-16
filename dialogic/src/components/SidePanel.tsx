@@ -99,7 +99,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               <Nav.Item eventKey="scripts" icon={<ToolsIcon />} onClick={() => this.props.onMenuSwitch("scripts")}>
                 Scripts
               </Nav.Item>
-              <Nav.Item eventKey="chars" icon={<IdMappingIcon />}>
+              <Nav.Item eventKey="chars" icon={<IdMappingIcon />} onClick={() => this.props.onMenuSwitch("chars")}>
                 Characters
               </Nav.Item>
               <Nav.Item eventKey="locs" icon={<ExploreIcon />} onClick={() => this.props.onMenuSwitch("locs")}>
