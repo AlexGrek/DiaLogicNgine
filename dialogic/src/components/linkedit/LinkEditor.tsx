@@ -77,7 +77,7 @@ interface LinkEditorProps {
 
 type CodeEditMenu = "actionCode" | "isVisible" | "isEnabled" | "alternative"
 
-const TooltipText: {[key: string]:string} = {
+const TooltipText: { [key: string]: string } = {
     [LinkType.Local]: "Move to another window in same dialog",
     [LinkType.Pop]: "Move to previous level (one level back)",
     [LinkType.Push]: "Move to next level, possible to another dialog (one level down)",
@@ -111,6 +111,17 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         setCodeEditorOpen(next);
     }
 
+    const swithAlternativeLink = (enable: boolean) => {
+        const linkCopy = lodash.cloneDeep(link)
+        if (enable && link.alternativeDirections.length < 1) {
+            linkCopy.alternativeDirections.push({ type: LinkType.Local, direction: "" })
+        }
+        if (!enable && link.alternativeDirections.length === 1) {
+            linkCopy.alternativeDirections = []
+        }
+        onLinkChange({ ...linkCopy, isAlternativeLink: enable }, index)
+    }
+
     const editText = (s: string) => {
         const linkUpdate = { ...link, text: s };
         onLinkChange(linkUpdate, index);
@@ -130,8 +141,8 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 linkUpdate = { ...link, isEnabled: updateOrUndef };
                 break;
             case "isVisible":
-                    linkUpdate = { ...link, isVisible: updateOrUndef };
-                    break;
+                linkUpdate = { ...link, isVisible: updateOrUndef };
+                break;
             case "alternative":
                 linkUpdate = { ...link, useAlternativeWhen: updateOrUndef }
         }
@@ -140,39 +151,42 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         setCodeEditorOpen(false);
     }
 
-    const editType = (linkdir: DialogLinkDirection, isMain: boolean, type: LinkType) => {
+    const editType = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, type: LinkType) => {
         const linkDirUpdate = { ...linkdir, type: type };
 
         var linkUpdate = lodash.cloneDeep(link)
-            if (isMain) {
-                linkUpdate.mainDirection = linkDirUpdate
-            }
+        if (isMain) {
+            linkUpdate.mainDirection = linkDirUpdate
+        } else {
+            linkUpdate.alternativeDirections[aindex] = linkDirUpdate
+        }
 
-            onLinkChange(linkUpdate, index);
-
-        
         onLinkChange(linkUpdate, index);
     }
 
-    const editLocalDirection = (linkdir: DialogLinkDirection, isMain: boolean, str: string) => {
+    const editLocalDirection = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, str: string) => {
         const linkDirUpdate = { ...linkdir, direction: str };
 
         var linkUpdate = lodash.cloneDeep(link)
         if (isMain) {
             linkUpdate.mainDirection = linkDirUpdate
+        } else {
+            linkUpdate.alternativeDirections[aindex] = linkDirUpdate
         }
-        
+
         onLinkChange(linkUpdate, index);
     }
 
-    const editPushDirection = (linkdir: DialogLinkDirection, isMain: boolean, d: string | null, w: string | null) => {
+    const editPushDirection = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, d: string | null, w: string | null) => {
         if (d && w) {
             const id = createDialogWindowId(d, w);
             const linkDirUpdate = { ...linkdir, qualifiedDirection: id }
-            
+
             var linkUpdate = lodash.cloneDeep(link)
             if (isMain) {
                 linkUpdate.mainDirection = linkDirUpdate
+            } else {
+                linkUpdate.alternativeDirections[aindex] = linkDirUpdate
             }
 
             onLinkChange(linkUpdate, index);
@@ -233,12 +247,12 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     const gotoLink = (linkdir: DialogLinkDirection) =>
         <span><Button appearance='link' onClick={() => onGotoLocalLink(linkdir.direction || "")}>Go to link</Button></span>
 
-    const directionEditor = (linkdir: DialogLinkDirection, isMainLink: boolean) => {
+    const directionEditor = (linkdir: DialogLinkDirection, isMainLink: boolean, aindex: number) => {
         if (dialog != null && linkdir.type === LinkType.Local) {
             const data = dialog.windows.map(d => d.uid);
             const formattedData = data.map(d => ({ value: d, label: d }));
             return <div>
-                <InputPicker onCreate={(value, item, event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, value)}></InputPicker>
+                <InputPicker onCreate={(value, item, event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)}></InputPicker>
                 <p>{data.includes(linkdir.direction || "") ? gotoLink(linkdir) : createLink(linkdir)}</p>
             </div>
         }
@@ -246,17 +260,17 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             if (linkdir.qualifiedDirection === undefined) {
                 linkdir.qualifiedDirection = game.startupDialog
             }
-            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, d, w)}></DialogWindowPicker>
+            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)}></DialogWindowPicker>
         }
         if (linkdir.type === LinkType.NavigateToLocation) {
-            return <InputPicker creatable={false} data={makeLocationsPickerData(game.locs)} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, value)}></InputPicker>
+            return <InputPicker creatable={false} data={makeLocationsPickerData(game.locs)} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)}></InputPicker>
         }
         return <div></div>
     }
 
     const tooltips = lodash.cloneDeep(TooltipText)
     const filteredTooltips = Object.fromEntries(Object.entries(tooltips));
-    
+
     const renderCodeEditor = (menu: CodeEditMenu) => {
         var code: string | undefined = ""
         var onSaveClose = editCode
@@ -271,15 +285,31 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 ui = CODE_EDITOR_UI_ISVISIBLE
                 break;
             case "isEnabled":
-                    code = link.isEnabled
-                    ui = CODE_EDITOR_UI_ISENABLED
-                    break;
+                code = link.isEnabled
+                ui = CODE_EDITOR_UI_ISENABLED
+                break;
             case "alternative":
-                        code = link.useAlternativeWhen
-                        ui = CODE_EDITOR_UI_ALTERNATIVE
-                        break;
+                code = link.useAlternativeWhen
+                ui = CODE_EDITOR_UI_ALTERNATIVE
+                break;
         }
         return <PopupCodeEditor ui={ui} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+    }
+
+    const getAlternativeDirection = (index?: number) => {
+        const i = index ? index : 0
+        return link.alternativeDirections[i]
+    }
+
+    const linkEditorDirection = (isMainDirection: boolean, alternativeDirectionIndex: number) => {
+        const dir = isMainDirection ? link.mainDirection : getAlternativeDirection(alternativeDirectionIndex);
+        return <div className="link-editor-direction">
+            <p>Direction:</p>
+            <ButtonToolbar>
+                <ButtonPanelSelector tooltips={filteredTooltips} chosen={dir.type} variants={enumKeys} buttonData={enumNames} onValueChanged={(value) => editType(dir, isMainDirection, alternativeDirectionIndex, value)} ></ButtonPanelSelector>
+            </ButtonToolbar>
+            {directionEditor(dir, isMainDirection, alternativeDirectionIndex)}
+        </div>
     }
 
     return (
@@ -295,21 +325,16 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             <p>Text:</p>
             <Input onChange={editText} ref={txtInput} placeholder="Answer text" value={link.text}></Input>
 
-            <div className="link-editor-direction">
-                <p>Direction:</p>
-                <ButtonToolbar>
-                    <ButtonPanelSelector tooltips={filteredTooltips} chosen={link.mainDirection.type} variants={enumKeys} buttonData={enumNames} onValueChanged={(value) => editType(link.mainDirection, true, value)} ></ButtonPanelSelector>
-                </ButtonToolbar>
-                {directionEditor(link.mainDirection, true)}
-            </div>
+            {linkEditorDirection(true, 0)}
             <Divider></Divider>
             <p>Scripting:</p>
             <CodeSampleButton onClick={() => codeEdit("actionCode")} name='action' code={link.actionCode}></CodeSampleButton>
             <CodeSampleButton onClick={() => codeEdit("isVisible")} name='isVisible' code={link.isVisible}></CodeSampleButton>
             <CodeSampleButton onClick={() => codeEdit("isEnabled")} name='isEnabled' code={link.isEnabled}></CodeSampleButton>
             <div className='link-editor-section'>
-                <Toggle checked={link.isAlternativeLink} onChange={value => onLinkChange({...link, isAlternativeLink: value}, index)}></Toggle> Alternative direction
-                { link.isAlternativeLink ? <CodeSampleButton onClick={() => codeEdit("alternative")} name='useAlternativeWhen' code={link.useAlternativeWhen}></CodeSampleButton> : null }
+                <Toggle checked={link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
+                {link.isAlternativeLink ? <CodeSampleButton onClick={() => codeEdit("alternative")} name='useAlternativeWhen' code={link.useAlternativeWhen}></CodeSampleButton> : null}
+                {link.isAlternativeLink ? linkEditorDirection(false, 0) : null}
             </div>
             {renderCodeEditor(codeEditorMenu)}
         </div>

@@ -21,7 +21,7 @@ export enum LinkType {
 
 export interface DialogLinkDirection {
     direction?: string;
-    qualifiedDirection: DialogWindowId;
+    qualifiedDirection?: DialogWindowId;
     type: LinkType;
 }
 
@@ -37,8 +37,8 @@ export interface DialogLink {
     useAlternativeWhen?: string;
 }
 
-export const createDialogLink = () => {
-    return { mainDirection: { type: LinkType.Local, direction: ""}, text: "" } as DialogLink
+export function createDialogLink(): DialogLink {
+    return { mainDirection: { type: LinkType.Local, direction: "" }, text: "", alternativeDirections: [] }
 }
 
 export interface DialogWindow {
