@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Drawer, Input, Grid, Row, Col, Checkbox } from 'rsuite';
+import { Button, Drawer, Input, Grid, Row, Col, Checkbox, Stack } from 'rsuite';
 import { IUpds } from '../App';
 import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
@@ -8,7 +8,22 @@ import LinksEditorPanel from './LinksEditorPanel';
 import PublicFileUrl, { IMAGES } from './common/PublicFileUrl';
 import TextListEditor from './common/text_list/TextListEditor';
 import { TextList } from '../game/TextList';
+import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from './common/code_editor/PopupCodeEditor';
+import CodeSampleButton from './common/CodeSampleButton';
 
+const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
+    arguments: DEFAULT_ARGS,
+    "functionName": "chooseAltText",
+    "functionTemplates": {
+        "no action": "",
+        "always main": "return 0;",
+        "always first alternative": "return 1;"
+    },
+    "header": "alternative text choose"
+  }
+
+
+  type CodeEditMenu = "chooseText" | "chooseBackground" | "onEntry"
 
 interface DialogWindowEditDrawerProps {
     window: DialogWindow;
@@ -24,11 +39,59 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
     handlers, onClose, game, dialogHandlers }) => {
     const [windowState, setWindow] = useState<DialogWindow>(window);
     const [changesMade, setChanges] = useState<boolean>(false);
+    const [codeEditMenu, setCodeEditMenu] = useState<CodeEditMenu>("chooseText");
+    const [codeEditorOpen, setCodeEditorOpen] = useState<boolean>(false);
 
     useEffect(() => {
         setWindow(window);
         setChanges(false);
     }, [window]);
+
+    const codeEdit = (menu: CodeEditMenu) => {
+        setCodeEditMenu(menu)
+        setCodeEditorOpen(true)
+    }
+
+    const editCode = (menu: CodeEditMenu, val: string) => {
+        const upd = val === "" ? undefined : val;
+        switch (menu) {
+            case "chooseText":
+                const updater = (window: DialogWindow) => { return { ...window, chooseTextScript: upd } };
+                modifyWindowBy(updater);
+                break;
+            case "chooseBackground":
+                const updaterBg = (window: DialogWindow) => { return { ...window, chooseBackgroundScript: upd } };
+                modifyWindowBy(updaterBg);
+                break;
+            case "onEntry":
+                const updaterOnEntr = (window: DialogWindow) => { return { ...window, entryScript: upd } };
+                modifyWindowBy(updaterOnEntr);
+                break;
+        }
+        
+        setCodeEditorOpen(false);
+      }
+
+      const renderCodeEditor = (menu: CodeEditMenu) => {
+        var code: string | undefined = ""
+        var onSaveClose = editCode
+        var ui = CODE_EDITOR_UI_TEXTSELECTOR
+        switch (menu) {
+            case "chooseText":
+                code = windowState.chooseTextScript
+                ui = CODE_EDITOR_UI_TEXTSELECTOR
+                break;
+            case "chooseBackground":
+                code = windowState.chooseBackgroundScript
+                ui = CODE_EDITOR_UI_TEXTSELECTOR
+                break;
+            case "onEntry":
+                code = windowState.entryScript
+                ui = CODE_EDITOR_UI_TEXTSELECTOR
+                break;
+        }
+        return <PopupCodeEditor ui={ui} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+    }
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {
         setChanges(true);
@@ -88,7 +151,11 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
                             <p>Background image URL</p>
                             <PublicFileUrl extensions={IMAGES} value={windowState.background} onChange={onBackgroundChange}></PublicFileUrl>
-
+                            <Stack direction='row'>
+                                <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript}/>
+                                <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript}/>
+                                <CodeSampleButton onClick={() => codeEdit("onEntry")} name='onEntry' code={windowState.entryScript}/>
+                            </Stack>
                         </Col>
                         <Col xs={6}>
                             <div className='window-editor-grid-header'>
@@ -98,6 +165,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                         </Col>
                     </Row>
                 </Grid>
+                {renderCodeEditor(codeEditMenu)}
             </Drawer.Body>
         </Drawer>
     );

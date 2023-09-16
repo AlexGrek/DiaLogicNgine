@@ -42,11 +42,13 @@ export function createDialogLink(): DialogLink {
 }
 
 export interface DialogWindow {
-    text: TextList;
-    uid: string;
-    links: DialogLink[];
-    background?: string;
+    text: TextList
+    uid: string
+    links: DialogLink[]
+    background?: string
     entryScript?: string
+    chooseTextScript?: string
+    chooseBackgroundScript?: string
 }
 
 export const createWindow = (uid: string) => {

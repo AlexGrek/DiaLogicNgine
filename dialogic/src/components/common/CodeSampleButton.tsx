@@ -3,7 +3,7 @@ import { Button } from 'rsuite';
 import ReadyRoundIcon from '@rsuite/icons/ReadyRound';
 import './CodeSampleButton.css'
 
-const MAX_LINE_LENGTH = 30
+const MAX_LINE_LENGTH = 80
 
 interface CodeSampleButtonProps {
     name: string;
