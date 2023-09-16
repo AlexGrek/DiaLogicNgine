@@ -141,8 +141,8 @@ export class GameExecManager {
         const dw = this.getCurrentDialogWindow(state)
         if (dw != null) {
             const [_, window] = dw
-            if (window.background) {
-                state.background = window.background
+            if (window.backgrounds.main) {
+                state.background = window.backgrounds.main
             }
         }
         return state

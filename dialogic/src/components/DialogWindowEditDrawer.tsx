@@ -10,6 +10,8 @@ import TextListEditor from './common/text_list/TextListEditor';
 import { TextList } from '../game/TextList';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from './common/code_editor/PopupCodeEditor';
 import CodeSampleButton from './common/CodeSampleButton';
+import { ImageList } from '../game/ImageList';
+import ImageListEditor from './common/text_list/ImageListEditor';
 
 const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -116,10 +118,9 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         onClose();
     }
 
-    const onBackgroundChange = (val?: string) => {
-        const upd = val && val != "" ? val : undefined;
+    const onBackgroundChange = (val: ImageList) => {
         return modifyWindowBy(window => {
-            return { ...window, background: upd }
+            return { ...window, backgrounds: val }
         })
     }
 
@@ -150,7 +151,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             </div>
                             <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
                             <p>Background image URL</p>
-                            <PublicFileUrl extensions={IMAGES} value={windowState.background} onChange={onBackgroundChange}></PublicFileUrl>
+                            <ImageListEditor textList={windowState.backgrounds} onChange={onBackgroundChange}/>
                             <div className='window-editor-code-editors-stack'>
                                 <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript}/>
                                 <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript}/>
