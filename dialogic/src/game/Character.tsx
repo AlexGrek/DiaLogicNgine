@@ -20,3 +20,15 @@ export default interface Character {
     props: Prop[]
     startDialog?: Proxy
 }
+
+export function createEmptyCharacter(uid: string): Character {
+    return {
+        uid: uid,
+        displayName: {
+            main: "",
+            list: []
+        },
+        traits: [],
+        props: []
+    }
+}

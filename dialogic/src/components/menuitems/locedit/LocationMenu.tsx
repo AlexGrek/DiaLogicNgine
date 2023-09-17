@@ -3,7 +3,7 @@ import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import Loc from '../../../game/Loc';
 import LocationPreview from './LocationPreview';
-import { Button } from 'rsuite';
+import { Button, Notification } from 'rsuite';
 import './loc.css'
 import LocEditor from './LocEditor';
 
@@ -65,7 +65,9 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }
 
     return (
         <div>
-          Editing index = {editingIndex.toString()}
+          <Notification closable style={{ height: 70 }}>
+                    Create locations that can contain paths to other locations and NPCs
+            </Notification>
           {editingIndex >= 0 ? editor(editingIndex) : null}
           <div className="locItems">
             {locItems(game.locs)}

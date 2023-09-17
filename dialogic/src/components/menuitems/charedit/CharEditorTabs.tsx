@@ -14,6 +14,22 @@ interface CharEditorTabsProps {
 }
 
 const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handlers }) => {
+    const createRolesEditorTab = () => {
+        return {
+            header: "Roles",
+            content: <div/>,
+            disabled: true
+        }
+    }
+
+    const createTraitsEditorTab = () => {
+        return {
+            header: "Traits",
+            content: <div/>,
+            disabled: true
+        }
+    }
+
     const createCharsEditorTab = () => {
         return {
             header: "Characters",
@@ -22,7 +38,7 @@ const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handle
     }
 
     return (
-        <StaticTabs tabs={[createCharsEditorTab()]}/>
+        <StaticTabs tabs={[createCharsEditorTab(), createRolesEditorTab(), createTraitsEditorTab()]}/>
     );
 };
 

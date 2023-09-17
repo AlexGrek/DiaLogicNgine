@@ -5,6 +5,7 @@ import { Nav } from 'rsuite';
 export interface StaticTab {
     header: string;
     content?: React.ReactNode
+    disabled?: boolean
 }
 
 interface StaticTabsProps {
@@ -19,7 +20,7 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs }) => {
 
     const prepareTabs = (tb: StaticTab[]) => {
         return tb.map((tab, i) => {
-            return <Nav.Item eventKey={i.toString()}>{tab.header}</Nav.Item>
+            return <Nav.Item disabled={tab.disabled} eventKey={i.toString()}>{tab.header}</Nav.Item>
         })
     }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button, Drawer, Input, Grid, Row, Col, Checkbox, Stack } from 'rsuite';
+import { Button, Drawer, Input, Grid, Row, Col, Checkbox, Stack, PanelGroup, Panel } from 'rsuite';
 import { IUpds } from '../App';
 import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
@@ -149,14 +149,25 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Content
                             </div>
-                            <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
-                            <p>Background image URL</p>
-                            <ImageListEditor textList={windowState.backgrounds} onChange={onBackgroundChange}/>
-                            <div className='window-editor-code-editors-stack'>
+                            <PanelGroup accordion bordered>
+                                <Panel header="Text" defaultExpanded>
+                                <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
+                                </Panel>
+                                <Panel header="Background image">
+                                <ImageListEditor textList={windowState.backgrounds} onChange={onBackgroundChange}/>
+                                </Panel>
+                                <Panel header="Scripting">
+                                <div className='window-editor-code-editors-stack'>
                                 <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript}/>
                                 <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript}/>
                                 <CodeSampleButton onClick={() => codeEdit("onEntry")} name='onEntry' code={windowState.entryScript}/>
                             </div>
+                                </Panel>
+                            </PanelGroup>
+                            
+                            
+                            
+                            
                         </Col>
                         <Col xs={6}>
                             <div className='window-editor-grid-header'>
