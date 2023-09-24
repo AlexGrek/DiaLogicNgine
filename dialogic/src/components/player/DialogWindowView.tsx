@@ -3,6 +3,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
 import Dialog, { DialogLink, DialogWindow } from '../../game/Dialog';
 import "./player.css"
+import InGameControlPad from './InGameControlPad';
 
 interface DialogWindowViewProps {
     game: GameExecManager;
@@ -48,7 +49,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
 
         return window.links.map(link => {
             const textOfLink = getActualLinkText(state, link)
-            return (<div key={link.text}><button onClick={() => click(link, textOfLink)}>{textOfLink}</button></div>)
+            return (<div key={link.text} className="dialog-variant-button-container"><button onClick={() => click(link, textOfLink)}>{textOfLink}</button></div>)
         })
     }
 
@@ -66,7 +67,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
 
     const styleWithImage = (background?: string) => {
         if (background) {
-            return { 
+            return {
                 backgroundImage: `url("game_assets/${background}")`
             }
         }
@@ -74,21 +75,34 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
             return {}
     }
 
+    const onFullScreen = () => {
+
+    }
+
     return (
-        <div className="dialog-window-view" style={styleWithImage(state.background)}>
-            <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                {renderShortHistory()}
-            </div>
-            <div className="dialog-text">
-                <p className='dialog-prev-text' key={state.stepCount}>
-                    {prevText}
-                </p>
-                <p className='dialog-current-text' key={state.stepCount << 1}>
-                    {state.fatalError ? state.fatalError.message : text}
-                </p>
-            </div>
-            <div className="dialog-variants">
-                {state.fatalError ? [] : dialogVariants()}
+        <div className="dialog-window-view-old-bg">
+            <div className="dialog-window-view-top-bg" style={styleWithImage(state.background)}>
+                <div className="dialog-window-view">
+                    <div className="dialog-control-pad">
+                        <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
+                    </div>
+                    <div className="dialog-short-history" id="dialog-short-history-scrollable">
+                        {renderShortHistory()}
+                    </div>
+                    <div className='dialog-controls'>
+                        <div className="dialog-text">
+                            <p className='dialog-prev-text' key={state.stepCount}>
+                                {prevText}
+                            </p>
+                            <p className='dialog-current-text' key={state.stepCount << 1}>
+                                {state.fatalError ? state.fatalError.message : text}
+                            </p>
+                        </div>
+                        <div className="dialog-variants">
+                            {state.fatalError ? [] : dialogVariants()}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
