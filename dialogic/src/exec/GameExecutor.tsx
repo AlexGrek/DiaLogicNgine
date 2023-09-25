@@ -5,6 +5,7 @@ import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
 import Loc from "../game/Loc";
 import { chooseText } from "../game/TextList";
+import { tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -16,18 +17,7 @@ export class GameExecManager {
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
-        if (state.position.kind === "window") {
-            const expectedDialog = state.position.dialog
-            const expectedWindow = state.position.window
-            const dialog = this.game.dialogs.find(d => d.name === expectedDialog)
-            if (dialog === undefined)
-                return null
-            const window = dialog?.windows.find(w => w.uid === expectedWindow)
-            if (window === undefined)
-                return null
-            return [dialog, window]
-        }
-        return null
+        return tryGetDialogWindowById(this.game, state.position);
     }
 
     getCurrentWindowText(instate: State, window: DialogWindow) {
@@ -40,16 +30,7 @@ export class GameExecManager {
     }
 
     getCurrentLocation(state: State): Readonly<Loc> | null {
-        if (state.position.kind === "location") {
-            const expectedWindow = state.position.location
-            const found = this.game.locs.find(loc => loc.uid === expectedWindow)
-            if (!found) {
-                console.error(`Location ${expectedWindow} was not found in ${JSON.stringify(this.game.locs)}`)
-                return null
-            }
-            return found
-        }
-        return null;
+        return tryGetLocationById(this.game, state.position) 
     }
 
     private goToLocalLink(directionName: string, prevState: State) {
