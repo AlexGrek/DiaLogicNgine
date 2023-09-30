@@ -5,64 +5,64 @@ import UserBadgeIcon from '@rsuite/icons/UserBadge';
 import PlusIcon from '@rsuite/icons/Plus';
 import { Button, Col, Dropdown, Input, InputGroup, Nav, Notification } from 'rsuite';
 import lodash from 'lodash';
-import Character, { createEmptyCharacter } from '../../../game/Character';
+import Character, { Role, createEmptyRole } from '../../../game/Character';
 import { isValidJsIdentifier } from '../../../Utils';
-import CharEditing from './CharEditing';
 import './charmenu.css'
+import RoleEditing from './RoleEditing';
 
-interface CharMenuProps {
+interface RolesMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
 }
 
-const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds }) => {
+const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingUID, setCreatingUID] = useState<string>("");
 
-    const chars = game.chars
+    const roles = game.roles
 
     const navItems = () => {
-        return chars.map((item, i) => {
-            return <Nav.Item key={i} eventKey={i.toString()} icon={<UserBadgeIcon />}>{item.displayName.main || item.uid}</Nav.Item>
+        return roles.map((item, i) => {
+            return <Nav.Item key={i} eventKey={i.toString()} icon={<UserBadgeIcon />}>{item.name}</Nav.Item>
         })
     }
 
-    const updateCharacterList = (chars: Character[]) => {
-        onSetGame({ ...game, chars: chars })
+    const updateRoles = (chars: Role[]) => {
+        onSetGame({ ...game, roles: chars })
     }
 
-    const createCharacter = () => {
+    const createRole = () => {
         const name = creatingUID
         setCreatingUID("")
-        const copy = lodash.cloneDeep(chars)
-        copy.push(createEmptyCharacter(name))
-        updateCharacterList(copy)
+        const copy = lodash.cloneDeep(roles)
+        copy.push(createEmptyRole(name))
+        updateRoles(copy)
     }
 
     const onSelectTab = (selected: string) => {
         const editingIndex = Number.parseInt(selected)
-        if (!lodash.isNaN(editingIndex) && editingIndex >= 0 && editingIndex < chars.length) {
+        if (!lodash.isNaN(editingIndex) && editingIndex >= 0 && editingIndex < roles.length) {
             setEditingIndex(editingIndex)
         }
     }
 
-    const setCharacter = (i: number, value: Character) => {
-        const copy = lodash.cloneDeep(chars)
+    const setRole = (i: number, value: Role) => {
+        const copy = lodash.cloneDeep(roles)
         copy[i] = value
-        updateCharacterList(copy)
+        updateRoles(copy)
     }
 
     const tab = (i: number) => {
-        const char = chars[i]
-        return <CharEditing game={game} char={char} onCharacterChange={value => setCharacter(i, value)}></CharEditing>
+        const char = roles[i]
+        return <RoleEditing game={game} role={char} onRoleChange={value => setRole(i, value)}></RoleEditing>
     }
 
     return (
         <div>
             <div className='char-menu-top-panel'>
                 <Notification closable style={{ height: 70 }}>
-                    Create non-payable characters with roles and traits assigned, that can use proxy to trigger any dialog
+                    Create a role for NPCs that contain properties and functions, that can be used by NPCs, and can be overriden by NPCs
                 </Notification>
             </div>
             <div className='char-menu-tab-host'>
@@ -70,8 +70,8 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
                     <Dropdown title="Create">
                         <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                             <InputGroup>
-                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createCharacter} value={creatingUID} onChange={setCreatingUID}></Input>
-                                <InputGroup.Button onClick={() => createCharacter()} disabled={!isValidJsIdentifier(creatingUID)}><PlusIcon /></InputGroup.Button>
+                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createRole} value={creatingUID} onChange={setCreatingUID}></Input>
+                                <InputGroup.Button onClick={() => createRole()} disabled={!isValidJsIdentifier(creatingUID)}><PlusIcon /></InputGroup.Button>
                             </InputGroup>
                         </Dropdown.Item>
                     </Dropdown>
@@ -88,4 +88,4 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
     );
 };
 
-export default CharMenu;
+export default RolesMenu;

@@ -32,20 +32,20 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
 
     const deleteProp = (id: number) => {
         const copy = lodash.cloneDeep(props)
+        console.log(`Delete prop ${id} of ${JSON.stringify(props)} total ${props.length}`)
         copy.splice(id, 1)
         onSetProps(copy)
     }
 
     const editProp = (id: number) => {
+        console.log(`Editing prop ${id} of ${JSON.stringify(props)} total ${props.length}`)
         setCreatingNew(false)
         setEditingIndex(id)
     }
 
     const updateProp = (index: number, value: Prop) => {
-        console.log(`Got value: ${JSON.stringify(value)} at index ${index}`)
         const copy = lodash.cloneDeep(props)
         copy[index] = value
-        console.log(`Updating: ${JSON.stringify(copy)}`)
         onSetProps(copy)
     }
 
@@ -69,6 +69,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
         if (create) {
             copy.push(create)
             onSetProps(copy)
+            console.log(`Creating prop ${copy.length - 1} of ${JSON.stringify(copy)} total ${copy.length}`)
             editProp(copy.length - 1)
         }
     }
@@ -102,7 +103,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     <RadioTile
                         icon={<NumbersIcon></NumbersIcon>}
                         label="Number"
-                        value="number"
+                        value="numeric"
                     >
                         any int or float
 
@@ -141,12 +142,12 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     <Table.Cell dataKey="name" />
                 </Table.Column>
                 <Table.Column width={150}>
-                    <Table.HeaderCell>Default</Table.HeaderCell>
-                    <Table.Cell dataKey="value" />
-                </Table.Column>
-                <Table.Column width={150}>
                     <Table.HeaderCell>Data type</Table.HeaderCell>
                     <Table.Cell dataKey="type" />
+                </Table.Column>
+                <Table.Column width={150}>
+                    <Table.HeaderCell>Default</Table.HeaderCell>
+                    <Table.Cell dataKey="value" />
                 </Table.Column>
                 <Table.Column width={150}>
                     <Table.HeaderCell>Actions</Table.HeaderCell>
@@ -164,7 +165,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     </Table.Cell>
                 </Table.Column>
             </Table>
-            {editingIndex >= 0 ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
+            {editingIndex >= 0 && props.length > editingIndex ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
         </div>
     );
 };

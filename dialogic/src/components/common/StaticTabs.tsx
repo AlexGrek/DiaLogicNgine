@@ -10,13 +10,14 @@ export interface StaticTab {
 
 interface StaticTabsProps {
     tabs: StaticTab[];
+    keepOpen?: boolean
 }
 
-const StaticTabs: React.FC<StaticTabsProps> = ({ tabs }) => {
+const StaticTabs: React.FC<StaticTabsProps> = ({ tabs, keepOpen }) => {
     const [openTabIndex, setOpenTab] = useState<number>(0);
-    useEffect(() => {
-        setOpenTab(0);
-    }, [tabs]);
+    // useEffect(() => {
+    //     setOpenTab(0);
+    // }, [tabs]);
 
     const prepareTabs = (tb: StaticTab[]) => {
         return tb.map((tab, i) => {
@@ -29,7 +30,7 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs }) => {
         setOpenTab(intvalue)
     }
 
-    const renderContent = () => {
+    const renderContentSingleTab = () => {
         if (tabs.length === 0) {
             return <div><p><mark>ERROR: no tabs to render</mark></p></div>
         }
@@ -43,12 +44,29 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs }) => {
         }
     }
 
+    const renderContentAllTabs = () => {
+        if (tabs.length === 0) {
+            return <div><p><mark>ERROR: no tabs to render</mark></p></div>
+        }
+        if (openTabIndex < 0 || openTabIndex > tabs.length - 1) {
+            return <div><p><mark>ERROR: cannot open tab {openTabIndex.toString()}</mark></p></div>
+        }
+        return tabs.map((tab, index) => {
+            const visible = index === openTabIndex
+            if (tab.content) {
+                return <div key={index} style={{ display: visible ? "block" : "none" }}>{tabs[openTabIndex].content}</div>
+            } else {
+                return <div key={index} style={{ display: visible ? "block" : "none" }}></div>
+            }
+        })
+    }
+
     return (
         <div>
-        <Nav appearance='subtle' activeKey={openTabIndex.toString()} onSelect={changeTab}>
-            {prepareTabs(tabs)}
-        </Nav>
-        {renderContent()}
+            <Nav appearance='subtle' activeKey={openTabIndex.toString()} onSelect={changeTab}>
+                {prepareTabs(tabs)}
+            </Nav>
+            {keepOpen ? renderContentAllTabs() : renderContentSingleTab()}
         </div>
     );
 };

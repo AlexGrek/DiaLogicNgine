@@ -10,6 +10,7 @@ export interface Trait {
 
 export interface Role {
     name: string
+    description?: string
     props: Prop[]
 }
 
@@ -18,6 +19,7 @@ export default interface Character {
     displayName: TextList
     traits: string[]
     props: Prop[]
+    overrideProps: Prop[]
     startDialog?: Proxy
 }
 
@@ -29,6 +31,14 @@ export function createEmptyCharacter(uid: string): Character {
             list: []
         },
         traits: [],
+        props: [],
+        overrideProps: []
+    }
+}
+
+export function createEmptyRole(uid: string): Role {
+    return {
+        name: uid,
         props: []
     }
 }
