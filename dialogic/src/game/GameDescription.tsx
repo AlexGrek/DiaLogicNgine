@@ -22,12 +22,21 @@ export function createDefaultGame(): GameDescription {
         { "uid": "welcome", "text": {"main": "Welcome to the game!", "list": []},
         "backgrounds": {"list": []}, "links": [ ] },
     ] };
+    const agedRole: Role = { name: "aged", props: [ { name: "age", datatype: "number", defaultValue: 30 } ] }
+    const narratorCharacter: Character =   {
+        uid: "narrator",
+        displayName: { "main": "Narrator", "list": [] },
+        traits: [],
+        props: [ { "datatype": "variant", "name": "mood", "variants": [ "bored", "happy" ], "defaultValue": "bored" } ],
+        overrideProps: [ { "name": "age", "datatype": "number", "defaultValue": 27 } ],
+        roles: [ "aged" ]
+      }
     let game = { 
         dialogs: [d1],
         facts: [],
-        chars: [],
+        chars: [ narratorCharacter ],
         locs: [],
-        roles: [],
+        roles: [ agedRole ],
         props: [
             createNumberProp("testNumProp", 42),
             createVariantProp("testVariantProp", ["a", "b", "c"], "b")

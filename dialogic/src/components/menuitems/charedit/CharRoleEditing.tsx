@@ -220,10 +220,9 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
     return (
         <div className='char-role-editing'>
             <div className='char-role-add'>
-                <InputPicker size="lg" placeholder="add" data={dataForNewRoleAdd} onChange={addRole} />
+                <InputPicker size="lg" placeholder="Assign role" data={dataForNewRoleAdd} onChange={addRole} />
             </div>
             <div className='char-role-display'>
-
                 {renderAppliedRoleEditor(editingIndex)}
                 <div className='char-role-applied-container'>
                     {rolesApplied.map((role, i) => renderAppliedRole(role, i))}
