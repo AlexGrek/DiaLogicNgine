@@ -1,0 +1,19 @@
+.prop-editor-drawer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.prop-editor-drawer-content > div {
+    min-width: 300pt;
+    margin: 6pt;
+    padding: 8pt;
+    background-color: rgba(0, 0, 0, .1);
+    border-radius: 4pt;
+}
+
+.prop-editor-tip {
+    opacity: .5;
+    font-size: smaller;
+
+}

@@ -3,6 +3,7 @@ import { AutoComplete, Button, Col, Drawer, Grid, Input, InputNumber, Row, Toggl
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import Prop from '../../../game/Prop';
+import './propeditor.css'
 
 interface PropsEditorDrawerProps {
     value: Prop;
@@ -61,11 +62,12 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                 setProp({...prop, variants: decoded})
                 setListOfVariantsAsString(listAsCommaSepStr)
             }
-            return <div>
+            return <div className='prop-editor-long'>
                 <p>Default value</p>
                 <AutoComplete data={prop.variants}  value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}/>
-                <p>Variants:</p>
+                <p>Variants</p>
                 <Input readOnly={onlyDefault} placeholder='comma-separated list of values' value={listOfVariantsAsString} onChange={updateList}></Input>
+                <p className='prop-editor-tip'>Comma-separated values. Example: <code>a,b,c</code></p>
             </div>
         }
     }
@@ -83,8 +85,10 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                     </Button>
                 </Drawer.Actions>
             </Drawer.Header>
-            <Drawer.Body className="window-editor-drawer-body">
-                {renderEditor()}
+            <Drawer.Body>
+                <div className="prop-editor-drawer-content">
+                    {renderEditor()}
+                </div>
             </Drawer.Body>
         </Drawer>
     );
