@@ -9,9 +9,10 @@ interface PropsEditorDrawerProps {
     open: boolean;
     onUpdateProp: (updates: Prop) => void;
     onClose: () => void;
+    onlyDefault?: boolean
 }
 
-const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose }) => {
+const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose, onlyDefault }) => {
     const [prop, setProp] = useState<Prop>(value);
     const [listOfVariantsAsString, setListOfVariantsAsString] = useState<string>("")
     useEffect(() => {
@@ -31,6 +32,7 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
     const renderEditor = () => {
         if (prop.datatype === "string") {
             return <div>
+                <p>Default</p>
                 <Input placeholder='default value' value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}></Input>
             </div>
         }
@@ -43,11 +45,13 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                 }
             }
             return <div>
+                <p>Default</p>
                 <InputNumber placeholder='default value' value={prop.defaultValue} onChange={setNumber}></InputNumber>
             </div>
         }
         if (prop.datatype === "boolean") {
             return <div>
+                <p>Default value</p>
                 <Toggle size="lg" checkedChildren="true" unCheckedChildren="false" checked={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}/>
             </div>
         }
@@ -58,9 +62,10 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                 setListOfVariantsAsString(listAsCommaSepStr)
             }
             return <div>
+                <p>Default value</p>
                 <AutoComplete data={prop.variants}  value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}/>
                 <p>Variants:</p>
-                <Input placeholder='comma-separated list of values' value={listOfVariantsAsString} onChange={updateList}></Input>
+                <Input readOnly={onlyDefault} placeholder='comma-separated list of values' value={listOfVariantsAsString} onChange={updateList}></Input>
             </div>
         }
     }

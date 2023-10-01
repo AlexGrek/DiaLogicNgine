@@ -21,6 +21,7 @@ export default interface Character {
     props: Prop[]
     overrideProps: Prop[]
     startDialog?: Proxy
+    roles: string[]
 }
 
 export function createEmptyCharacter(uid: string): Character {
@@ -32,7 +33,8 @@ export function createEmptyCharacter(uid: string): Character {
         },
         traits: [],
         props: [],
-        overrideProps: []
+        overrideProps: [],
+        roles: []
     }
 }
 

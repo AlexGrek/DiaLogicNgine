@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import diff from 'deep-diff'
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import UserBadgeIcon from '@rsuite/icons/UserBadge';
@@ -20,10 +21,8 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingUID, setCreatingUID] = useState<string>("");
 
-    const chars = game.chars
-
     const navItems = () => {
-        return chars.map((item, i) => {
+        return game.chars.map((item, i) => {
             return <Nav.Item key={i} eventKey={i.toString()} icon={<UserBadgeIcon />}>{item.displayName.main || item.uid}</Nav.Item>
         })
     }
@@ -35,27 +34,29 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
     const createCharacter = () => {
         const name = creatingUID
         setCreatingUID("")
-        const copy = lodash.cloneDeep(chars)
+        const copy = lodash.cloneDeep(game.chars)
         copy.push(createEmptyCharacter(name))
         updateCharacterList(copy)
     }
 
     const onSelectTab = (selected: string) => {
         const editingIndex = Number.parseInt(selected)
-        if (!lodash.isNaN(editingIndex) && editingIndex >= 0 && editingIndex < chars.length) {
+        if (!lodash.isNaN(editingIndex) && editingIndex >= 0 && editingIndex < game.chars.length) {
             setEditingIndex(editingIndex)
         }
     }
 
     const setCharacter = (i: number, value: Character) => {
-        const copy = lodash.cloneDeep(chars)
+        const copy = lodash.cloneDeep(game.chars)
+        const difference = diff(copy[i], value)
+        console.log(`upd char from ${JSON.stringify(copy[i])} to ${JSON.stringify(value)}, diff: ${JSON.stringify(difference)}`)
         copy[i] = value
         updateCharacterList(copy)
     }
 
     const tab = (i: number) => {
-        const char = chars[i]
-        return <CharEditing game={game} char={char} onCharacterChange={value => setCharacter(i, value)}></CharEditing>
+        const char = game.chars[i]
+        return <CharEditing key={char.uid} game={game} char={char} onCharacterChange={value => setCharacter(i, value)}></CharEditing>
     }
 
     return (

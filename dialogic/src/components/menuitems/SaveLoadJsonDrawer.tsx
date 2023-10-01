@@ -32,7 +32,7 @@ const SaveLoadJsonDrawer: React.FC<SaveLoadJsonDrawerProps> = ({ gameInput, visi
   }, [gameInput, visible]);
 
   return (
-    <Drawer size='lg' placement='top' open={visible} onClose={() => onClose()}>
+    <Drawer size='full' placement='top' open={visible} onClose={() => onClose()}>
       <Drawer.Header>
         <Drawer.Title>JSON import and export</Drawer.Title>
         <Drawer.Actions>
@@ -43,7 +43,7 @@ const SaveLoadJsonDrawer: React.FC<SaveLoadJsonDrawerProps> = ({ gameInput, visi
         </Drawer.Actions>
       </Drawer.Header>
       <Drawer.Body>
-        <Input as="textarea" value={text} ref={txtInput} onChange={setText} rows={12}></Input>
+        <Input as="textarea" value={text} ref={txtInput} onChange={setText} rows={28}></Input>
         <Button color="blue" appearance="ghost" onClick={() => copy(text)}>
           Copy to clipboard
         </Button>

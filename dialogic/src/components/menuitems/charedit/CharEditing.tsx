@@ -24,6 +24,10 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
         onCharacterChange(ch)
     }
 
+    const forceUpdate = (ch: Character) => {
+        onCharacterChange(ch)
+    }
+
     return (
         <div className='char-editing-main-container' onBlur={save}>
             <h3>{ch.uid}</h3>
@@ -32,12 +36,12 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })}/>
                 </Panel>
                 <Panel header="Roles">
-                <CharRoleEditing game={game} char={ch} onCharacterChange={setCh} />
+                <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />
                 </Panel>
                 <Panel header="Personal props">
                     <PropsEditMenu props={ch.props} onSetProps={p => setCh({ ...ch, props: p })} />
                 </Panel>
-                <Panel header="Display description" defaultExpanded>
+                <Panel header="Display description">
                     <TextListEditor singleLine={false} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })}/>
                 </Panel>
             </PanelGroup>
