@@ -2,6 +2,7 @@ import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
 import Character, { Role } from "./Character";
 import Dialog from "./Dialog";
 import Fact from "./Fact";
+import { emptyImageList } from "./ImageList";
 import Loc from "./Loc";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
@@ -29,7 +30,9 @@ export function createDefaultGame(): GameDescription {
         traits: [],
         props: [ { "datatype": "variant", "name": "mood", "variants": [ "bored", "happy" ], "defaultValue": "bored" } ],
         overrideProps: [ { "name": "age", "datatype": "number", "defaultValue": 27 } ],
-        roles: [ "aged" ]
+        roles: [ "aged" ],
+        avatar: emptyImageList(),
+        description: { main: "", list: []}
       }
     let game = { 
         dialogs: [d1],
@@ -43,7 +46,7 @@ export function createDefaultGame(): GameDescription {
         ],
         buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
-        engineVersion: "0.3"
+        engineVersion: "0.4"
     };
 
     return game

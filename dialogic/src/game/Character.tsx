@@ -1,6 +1,7 @@
 import Prop from "./Prop";
 import { TextList } from "./TextList";
 import Proxy from "./Proxy"
+import { ImageList, emptyImageList } from "./ImageList";
 
 export interface Trait {
     name: string
@@ -21,7 +22,12 @@ export default interface Character {
     props: Prop[]
     overrideProps: Prop[]
     startDialog?: Proxy
-    roles: string[]
+    roles: string[],
+    chooseNameScript?: string
+    chooseDescriptionScript?: string
+    chooseAvatarScript?: string
+    avatar: ImageList
+    description: TextList
 }
 
 export function createEmptyCharacter(uid: string): Character {
@@ -34,7 +40,11 @@ export function createEmptyCharacter(uid: string): Character {
         traits: [],
         props: [],
         overrideProps: [],
-        roles: []
+        roles: [],
+        avatar: emptyImageList(),
+        description: {
+            main: "", list: []
+        }
     }
 }
 
