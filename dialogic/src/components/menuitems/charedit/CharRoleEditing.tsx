@@ -1,6 +1,6 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
-import Character, { Role } from '../../../game/Character';
+import Character, { Role, roleByUid } from '../../../game/Character';
 import './charediting.css';
 import { Button, ButtonGroup, InputPicker, Panel, PanelGroup, Table } from 'rsuite';
 import TextListEditor from '../../common/text_list/TextListEditor';
@@ -26,14 +26,6 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
     const [editingIndex, setEditingIndex] = useState<number>(-1)
     const [editingStyle, setEditingStyle] = useState<CSSProperties>({})
     const [defaultValueEditing, setDefaultValueEditing] = useState<Prop | null>(null)
-
-    const roleByUid = (uid: string) => {
-        const found = game.roles.find((r) => r.name === uid)
-        if (found === undefined) {
-            console.error("Cannot find role by UID=" + found)
-        }
-        return found
-    }
 
     const addRole = (uid: string) => {
         const update = {
@@ -63,7 +55,7 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
 
     const rolesAppliedUids = char.roles
 
-    const rolesApplied = rolesAppliedUids.map(role => roleByUid(role))
+    const rolesApplied = rolesAppliedUids.map(role => roleByUid(role, game))
 
     const rolesNotApplied = game.roles.filter(r => !char.roles.includes(r.name))
 

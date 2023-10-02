@@ -2,6 +2,7 @@ import Prop from "./Prop";
 import { TextList } from "./TextList";
 import Proxy from "./Proxy"
 import { ImageList, emptyImageList } from "./ImageList";
+import { GameDescription } from "./GameDescription";
 
 export interface Trait {
     name: string
@@ -13,6 +14,14 @@ export interface Role {
     name: string
     description?: string
     props: Prop[]
+}
+
+export function roleByUid(uid: string, game: GameDescription) {
+    const found = game.roles.find((r) => r.name === uid)
+    if (found === undefined) {
+        console.error("Cannot find role by UID=" + found)
+    }
+    return found
 }
 
 export default interface Character {
