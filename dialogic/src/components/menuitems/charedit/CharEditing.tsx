@@ -9,6 +9,8 @@ import { Panel, PanelGroup } from 'rsuite';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../../common/CodeSampleButton';
+import ImageListEditor from '../../common/text_list/ImageListEditor';
+import { ImageList } from '../../../game/ImageList';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -68,12 +70,23 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
         return <CodeSampleButton onClick={() => codeEdit(prop)} name={displayName} code={ch[prop]}/>
     }
 
+    const avatar = (img: ImageList) => {
+        if (img.main === undefined) {
+            return null
+        }
+        const uri = img.main
+        return <img alt="background image preview" height="128" src={`game_assets/${uri}`}></img>
+    }
+
     return (
         <div className='char-editing-main-container' onBlur={save}>
-            <h3>{ch.uid}</h3>
+            <p>{avatar(ch.avatar)}{ch.uid}</p>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Display name" defaultExpanded>
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })}/>
+                </Panel>
+                <Panel header="Avatar Image">
+                    <ImageListEditor imageList={char.avatar} onChange={value => setCh({ ...ch, avatar: value})}/>
                 </Panel>
                 <Panel header="Roles">
                 <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />
