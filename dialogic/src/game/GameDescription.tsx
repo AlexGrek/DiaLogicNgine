@@ -21,10 +21,10 @@ export interface GameDescription {
 export function createDefaultGame(): GameDescription {
     let d1 = { name: "dialog1", windows: [
         { "uid": "welcome", "text": {"main": "Welcome to the game!", "list": []},
-        "backgrounds": {"list": []}, "links": [ ] },
+        "backgrounds": {"list": []}, "links": [ ], tags: [] },
     ] };
     const agedRole: Role = { name: "aged", props: [ { name: "age", datatype: "number", defaultValue: 30 } ] }
-    const narratorCharacter: Character =   {
+    const narratorCharacter: Character =  {
         uid: "narrator",
         displayName: { "main": "Narrator", "list": [] },
         traits: [],
@@ -34,7 +34,7 @@ export function createDefaultGame(): GameDescription {
         avatar: emptyImageList(),
         description: { main: "", list: []}
       }
-    let game = { 
+    let game: GameDescription = { 
         dialogs: [d1],
         facts: [],
         chars: [ narratorCharacter ],

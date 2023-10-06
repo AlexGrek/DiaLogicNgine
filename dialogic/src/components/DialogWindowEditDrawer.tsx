@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Drawer, Input, Grid, Row, Col, Checkbox, Stack, PanelGroup, Panel } from 'rsuite';
 import { IUpds } from '../App';
-import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
+import Dialog, { Actor, DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
 import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
@@ -12,6 +12,7 @@ import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from './common/code_
 import CodeSampleButton from './common/CodeSampleButton';
 import { ImageList } from '../game/ImageList';
 import ImageListEditor from './common/text_list/ImageListEditor';
+import ActorEditor from './common/actor/ActorEditor';
 
 const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -141,9 +142,17 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Related
                             </div>
-                            <p>Display as JSON:</p>
+                            <PanelGroup accordion bordered>
+                                <Panel header="Actor" defaultExpanded>
+                                    <ActorEditor value={windowState.actor} game={game} onChange={(actor) => setWindow({...windowState, actor: actor})}/>
+                                </Panel>
+                                <Panel header="Technical info">
+                                <p>Display as JSON:</p>
                             <Input as='textarea' rows={6} readOnly value={JSON.stringify(windowState)}></Input>
                             <Checkbox checked={changesMade}>changes</Checkbox>
+                                </Panel>
+                            </PanelGroup>
+                            
                         </Col>
                         <Col xs={12} className="window-editor-grid-content">
                             <div className='window-editor-grid-header'>

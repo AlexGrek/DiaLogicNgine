@@ -5,6 +5,7 @@ import HomeIcon from '@rsuite/icons/legacy/Home';
 import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
 import PublicFileUrl, { IMAGES } from '../PublicFileUrl';
+import { generateImageUrl } from '../../../Utils';
 
 interface ImageListEditorProps {
     imageList: ImageList;
@@ -91,7 +92,7 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange }
 
     const displayImage = (uri: string) => {
         return <div>
-            <img alt="image preview" height="128" src={`game_assets/${uri}`}/>
+            <img alt="image preview" height="128" src={generateImageUrl(uri)}/>
         </div>
     }
 

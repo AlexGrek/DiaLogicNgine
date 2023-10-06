@@ -42,6 +42,18 @@ export function createDialogLink(): DialogLink {
     return { mainDirection: { type: LinkType.Local, direction: "" }, text: "", alternativeDirections: [] }
 }
 
+export interface Actor {
+    character: string
+    avatar: string | number | undefined
+}
+
+export const createActor = (): Actor => {
+    return {
+        character: "",
+        avatar: undefined
+    }
+}
+
 export interface DialogWindow {
     text: TextList
     uid: string
@@ -50,10 +62,12 @@ export interface DialogWindow {
     entryScript?: string
     chooseTextScript?: string
     chooseBackgroundScript?: string
+    actor?: Actor
+    tags: string[]
 }
 
 export const createWindow = (uid: string) => {
-    const window: DialogWindow = { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList() }
+    const window: DialogWindow = { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList(), tags: [] }
     return window;
 }
 

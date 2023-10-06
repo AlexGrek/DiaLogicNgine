@@ -39,3 +39,7 @@ export function isValidJsIdentifier(id?: string) {
     }
     return isValidIdentifier(id)
 }
+
+export function generateImageUrl(uri: string) {
+    return `game_assets/${uri}`
+}
