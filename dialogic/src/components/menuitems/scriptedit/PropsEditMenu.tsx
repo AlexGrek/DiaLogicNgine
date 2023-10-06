@@ -8,6 +8,7 @@ import ParagraphIcon from '@rsuite/icons/Paragraph';
 import NumbersIcon from '@rsuite/icons/Numbers';
 import PlusIcon from '@rsuite/icons/Plus';
 import GearIcon from '@rsuite/icons/Gear';
+import ExploreIcon from '@rsuite/icons/Explore';
 import TrashIcon from '@rsuite/icons/Trash';
 
 import Prop, { createBoolProp, createLocationProp, createNumberProp, createStringProp, createVariantProp } from '../../../game/Prop';
@@ -54,7 +55,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
     const createProp = () => {
         const copy = lodash.cloneDeep(props)
         var create = null;
-        switch(createTypeChange) {
+        switch (createTypeChange) {
             case "numeric":
                 create = createNumberProp(createName, 0);
                 break;
@@ -134,7 +135,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                         can contain one of the predefined string values
                     </RadioTile>
                     <RadioTile
-                        icon={<ListIcon />}
+                        icon={<ExploreIcon />}
                         label="Location"
                         value="location"
                     >
@@ -165,18 +166,18 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                     <Table.Cell style={{ padding: '6px' }}>
                         {rowData => (
                             <ButtonGroup>
-                            <Button onClick={() => editProp(rowData.index)}>
-                                 <GearIcon/>
-                            </Button>
-                            <Button onClick={() => deleteProp(rowData.index)}>
-                                 <TrashIcon/>
-                            </Button>
+                                <Button onClick={() => editProp(rowData.index)}>
+                                    <GearIcon />
+                                </Button>
+                                <Button onClick={() => deleteProp(rowData.index)}>
+                                    <TrashIcon />
+                                </Button>
                             </ButtonGroup>
                         )}
                     </Table.Cell>
                 </Table.Column>
             </Table>
-            {editingIndex >= 0 && props.length > editingIndex ? <PropsEditorDrawer game={game} value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
+            {editingIndex >= 0 && props.length > editingIndex ? <PropsEditorDrawer game={game} value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)} /> : null}
         </div>
     );
 };
