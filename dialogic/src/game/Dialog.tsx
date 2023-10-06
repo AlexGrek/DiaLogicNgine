@@ -53,7 +53,8 @@ export interface DialogWindow {
 }
 
 export const createWindow = (uid: string) => {
-    return { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList() };
+    const window: DialogWindow = { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList() }
+    return window;
 }
 
 export const renameDialogWindow = (old: DialogWindow, newName: string) => {

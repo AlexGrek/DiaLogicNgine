@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Dialog, { DialogWindow, LinkType } from '../game/Dialog';
-import { Stack, Col } from 'rsuite';
+import { Stack } from 'rsuite';
 import WindowWidgetContextMenu from './WindowWidgetContextMenu';
 import { IUpds } from '../App';
 import { GameDescription } from '../game/GameDescription';
@@ -38,30 +38,28 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
   }
 
   public render() {
-    return <Col md={6} sm={12}>
-      <div className="window-widget-main">
-        <div className="window-widget-header">
-          <Stack justifyContent='space-between'>
-            <span className='window-widget-ui-text'>{this.props.window.uid}</span>
-            <span className='window-widget-icons'></span>
-            <WindowWidgetContextMenu game={this.props.game} dialog={this.props.dialog} handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
-          </Stack>
-        </div>
-        <div className='window-widget-content' onClick={() => this.props.onWindowChosen()}>
-          <p className='window-widget-content-text'>
-            {this.textShortened(this.props.window.text.main.toString(), 84)}
-          </p>
-        </div>
-        <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
-          <ul className='window-widget-links-list'>
-            {this.props.window.links.map((el, i) => {
-              const direction = el.mainDirection.type != LinkType.Push ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
-              return <li key={i}><LinkTypeTag value={el.mainDirection.type}/><span className='window-widget-link-direction-text'>{direction}</span></li>
-            })}
-          </ul>
-        </div>
+    return <div className="window-widget-main">
+      <div className="window-widget-header">
+        <Stack justifyContent='space-between'>
+          <span className='window-widget-ui-text'>{this.props.window.uid}</span>
+          <span className='window-widget-icons'></span>
+          <WindowWidgetContextMenu game={this.props.game} dialog={this.props.dialog} handlers={this.props.handlers} window={this.props.window}></WindowWidgetContextMenu>
+        </Stack>
       </div>
-    </Col>
+      <div className='window-widget-content' onClick={() => this.props.onWindowChosen()}>
+        <p className='window-widget-content-text'>
+          {this.textShortened(this.props.window.text.main.toString(), 84)}
+        </p>
+      </div>
+      <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
+        <ul className='window-widget-links-list'>
+          {this.props.window.links.map((el, i) => {
+            const direction = el.mainDirection.type != LinkType.Push ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
+            return <li key={i}><LinkTypeTag value={el.mainDirection.type} /><span className='window-widget-link-direction-text'>{direction}</span></li>
+          })}
+        </ul>
+      </div>
+    </div>
   }
 }
 
