@@ -220,7 +220,7 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
                     {rolesApplied.map((role, i) => renderAppliedRole(role, i))}
                 </div>
             </div>
-            <PropsEditorDrawer value={defaultValueEditing || createBoolProp("placeholder", false)} open={defaultValueEditing !== null} onUpdateProp={onChangeDefaultValue} onClose={() => setDefaultValueEditing(null)}/>
+            <PropsEditorDrawer game={game} value={defaultValueEditing || createBoolProp("placeholder", false)} open={defaultValueEditing !== null} onUpdateProp={onChangeDefaultValue} onClose={() => setDefaultValueEditing(null)}/>
         </div>
     );
 };

@@ -29,7 +29,7 @@ const RoleEditing: React.FC<RoleEditingProps> = ({ game, role, onRoleChange }) =
             <h3>{ch.name}</h3>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Role props" defaultExpanded>
-                    <PropsEditMenu props={ch.props} onSetProps={p => onRoleChange({ ...ch, props: p })} />
+                    <PropsEditMenu game={game} props={ch.props} onSetProps={p => onRoleChange({ ...ch, props: p })} />
                 </Panel>
                 <Panel header="Display description">
                     <Input value={ch.description} onChange={s => setCh({...ch, description: s})}></Input>

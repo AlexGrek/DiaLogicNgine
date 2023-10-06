@@ -4,16 +4,18 @@ import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import Prop from '../../../game/Prop';
 import './propeditor.css'
+import LocationPicker from '../../linkedit/LocationPicker';
 
 interface PropsEditorDrawerProps {
     value: Prop;
     open: boolean;
     onUpdateProp: (updates: Prop) => void;
     onClose: () => void;
-    onlyDefault?: boolean
+    onlyDefault?: boolean;
+    game: GameDescription
 }
 
-const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose, onlyDefault }) => {
+const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose, onlyDefault, game }) => {
     const [prop, setProp] = useState<Prop>(value);
     const [listOfVariantsAsString, setListOfVariantsAsString] = useState<string>("")
     useEffect(() => {
@@ -35,6 +37,12 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
             return <div>
                 <p>Default</p>
                 <Input placeholder='default value' value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}></Input>
+            </div>
+        }
+        if (prop.datatype === "location") {
+            return <div>
+                <p>Default</p>
+                <LocationPicker locs={game.locs}  value={prop.defaultValue} onLocChange={v => setProp({...prop, defaultValue: v})}></LocationPicker>
             </div>
         }
         if (prop.datatype === "number") {

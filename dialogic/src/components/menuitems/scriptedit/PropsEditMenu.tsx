@@ -10,18 +10,20 @@ import PlusIcon from '@rsuite/icons/Plus';
 import GearIcon from '@rsuite/icons/Gear';
 import TrashIcon from '@rsuite/icons/Trash';
 
-import Prop, { createBoolProp, createNumberProp, createStringProp, createVariantProp } from '../../../game/Prop';
+import Prop, { createBoolProp, createLocationProp, createNumberProp, createStringProp, createVariantProp } from '../../../game/Prop';
 import { isValidJsIdentifier } from '../../../Utils';
 import lodash from 'lodash';
 import PropsEditorDrawer from './PropsEditorDrawer';
+import { GameDescription } from '../../../game/GameDescription';
 
 interface PropsEditMenuProps {
     props: Prop[];
     onSetProps: (props: Prop[]) => void;
+    game: GameDescription
     handlers?: IUpds;
 }
 
-const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handlers }) => {
+const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
@@ -65,6 +67,8 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
             case "variant":
                 create = createVariantProp(createName, ["default"], "default")
                 break;
+            case "location":
+                create = createLocationProp(createName, "")
         }
         if (create) {
             copy.push(create)
@@ -129,6 +133,13 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     >
                         can contain one of the predefined string values
                     </RadioTile>
+                    <RadioTile
+                        icon={<ListIcon />}
+                        label="Location"
+                        value="location"
+                    >
+                        can contain location
+                    </RadioTile>
                 </RadioTileGroup>
             </div>
             <Table
@@ -165,7 +176,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     </Table.Cell>
                 </Table.Column>
             </Table>
-            {editingIndex >= 0 && props.length > editingIndex ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
+            {editingIndex >= 0 && props.length > editingIndex ? <PropsEditorDrawer game={game} value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
         </div>
     );
 };

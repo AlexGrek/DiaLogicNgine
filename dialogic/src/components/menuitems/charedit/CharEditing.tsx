@@ -92,7 +92,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                 <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />
                 </Panel>
                 <Panel header="Personal props">
-                    <PropsEditMenu props={ch.props} onSetProps={p => setCh({ ...ch, props: p })} />
+                    <PropsEditMenu game={game} props={ch.props} onSetProps={p => setCh({ ...ch, props: p })} />
                 </Panel>
                 <Panel header="Scripting">
                     {renderCodeEditButton("chooseNameScript")}
