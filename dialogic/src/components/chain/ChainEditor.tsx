@@ -69,7 +69,7 @@ const ChainEditor: React.FC<ChainEditorProps> = ({ visible, onSetVisible, onAppl
             if (i < stubs.length - 1) {
                 // add link to next
                 const link = createDialogLink()
-                link.text = stub.text
+                link.text = stub.nextButton
                 link.mainDirection.direction = genUid(i + 1)
 
                 dialogWindow.links = [
