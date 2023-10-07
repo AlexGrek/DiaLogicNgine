@@ -146,13 +146,13 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, prevS
 }
 
 export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props) { ${s} })`
+    const body = `(function (rt, state, props, ch) { ${s} })`
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch);
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
@@ -171,13 +171,13 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevSt
 }
 
 export function evaluateAsAnyProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props) { ${s} })`
+    const body = `(function (rt, state, props, ch) { ${s} })`
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch);
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
