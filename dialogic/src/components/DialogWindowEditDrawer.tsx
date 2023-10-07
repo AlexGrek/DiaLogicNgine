@@ -93,7 +93,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                 ui = CODE_EDITOR_UI_TEXTSELECTOR
                 break;
         }
-        return <PopupCodeEditor ui={ui} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor ui={ui} code={code || ""} game={game} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
     }
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {

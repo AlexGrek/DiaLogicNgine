@@ -52,7 +52,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     const renderCodeEditor = (menu: CodeEditMenu) => {
         const code = ch[menu]
-        return <PopupCodeEditor ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
     }
 
     const editCode = (menu: CodeEditMenu, val: string) => {

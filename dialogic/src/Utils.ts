@@ -43,3 +43,7 @@ export function isValidJsIdentifier(id?: string) {
 export function generateImageUrl(uri: string) {
     return `game_assets/${uri}`
 }
+
+export function mergeDicts<T>(dict1: T, dict2: T): T {
+    return { ...dict1, ...dict2 };
+}

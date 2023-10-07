@@ -3,6 +3,9 @@ import { Button, Modal } from 'rsuite';
 import CodeEditor from '@uiw/react-textarea-code-editor';
 import "./PopupCodeEditor.css"
 import AccessibleObjects from './AccessibleObjects';
+import { GameDescription } from '../../../game/GameDescription';
+import { createRtDoc } from './RtObjectTraverse';
+import { mergeDicts } from '../../../Utils';
 
 export interface PopupCodeEditorUi {
     arguments: { [key: string]: string };
@@ -25,16 +28,28 @@ interface PopupCodeEditorProps {
     code: string;
     ui: PopupCodeEditorUi;
     open: boolean;
-    onSaveClose: (c: string) => void
+    onSaveClose: (c: string) => void;
+    game?: GameDescription;
 }
 
-const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose }) => {
+const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose, game }) => {
     const [codeVal, setCode] = useState<string>(code);
     const [docOpenFor, setDocOpenFor] = useState<string | null>(null)
     useEffect(() => {
         setCode(code);
         setDocOpenFor(null);
     }, [code, ui]);
+
+    const rt = () => game ? createRtDoc(game) : null
+    
+    const getArguments = () => {
+        const rtData = rt()
+        if (rtData) {
+            return mergeDicts(ui.arguments, rtData)
+        } else {
+            return ui.arguments
+        }
+    }
 
     const renderEditor = () => {
         return <CodeEditor value={codeVal} language="js" placeholder="Please enter JS code or leave blank for no action." data-color-mode="dark" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
@@ -47,6 +62,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     const renderDoc = () => {
+        const args = getArguments()
         if (!docOpenFor) {
             return <p>
                 Select available object to see it's documentation.
@@ -54,7 +70,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
         } else {
             return <p>
                 <mark>{docOpenFor}</mark><br/>
-                <span>{docOpenFor in ui.arguments ? ui.arguments[docOpenFor] : "missing documentation"}</span>
+                <span>{docOpenFor in args ? args[docOpenFor] : "missing documentation"}</span>
             </p>
         }
     }
@@ -94,14 +110,14 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                     <div className='side-panel-code'>
                         <div className='object-navi-code'>
                             <h3 className='micro-header-code'>Available objects</h3>
-                            <AccessibleObjects objectDescrMap={ui.arguments} onObjectClick={accessibleObjectClick} onAddClick={accessibleObjectAddClick}/>
+                            <AccessibleObjects objectDescrMap={getArguments()} onObjectClick={accessibleObjectClick} onAddClick={accessibleObjectAddClick}/>
                         </div>
                         <div className='object-docs-code'>
                             {renderDoc()}
                         </div>
                     </div>
                     <div className='editor-panel-code'>
-                        function {ui.functionName}({argumentsCommaSeparated(ui.arguments)}) {"{"}
+                        function {ui.functionName}({argumentsCommaSeparated(getArguments())}) {"{"}
                         {renderEditor()}
                         {"}"}
                         <br/>

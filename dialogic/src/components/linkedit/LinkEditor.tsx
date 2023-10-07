@@ -290,7 +290,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 ui = CODE_EDITOR_UI_ALTERNATIVE
                 break;
         }
-        return <PopupCodeEditor ui={ui} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor ui={ui} game={game} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
     }
 
     const getAlternativeDirection = (index?: number) => {

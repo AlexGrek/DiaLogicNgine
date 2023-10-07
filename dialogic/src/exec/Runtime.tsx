@@ -48,6 +48,8 @@ function addProp(stateProvider: StateProvider, object: any, prop: Prop, prefix: 
     }
 
     Object.defineProperty(object, prop.name, {
+        configurable: true,
+        enumerable: true,
         get: function () { return getOrDefault(stateProvider, object, prop.name, prefix, prop.defaultValue) },
         set: function (value: any) { setToState(stateProvider, object, prop, prefix, value) }
     });
@@ -103,7 +105,7 @@ export class RuntimeRt {
     }
 }
 
-export function createRtObject(game: GameDescription, state: State) {
+export function createRtObject(game: GameDescription, state?: State) {
     const propsHost: any = {}
     const charsHost: any = {}
     addProps(propsHost, game)
@@ -124,12 +126,12 @@ export function stateIsValid(stateCandidate: any) {
 }
 
 export function evaluateAsStateProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props) { ${s} })`
+    const body = `(function (rt, state, props, ch) { ${s} })`
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch);
         if (stateIsValid(newState))
             return newState as State
         else {
