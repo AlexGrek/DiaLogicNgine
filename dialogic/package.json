@@ -32,6 +32,9 @@
     "prestart": "node scripts/update_public_files.js",
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "prerelease": "node scripts/make_release.js",
+    "release": "react-scripts build",
+    "postrelease": "node scripts/make_release_after.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

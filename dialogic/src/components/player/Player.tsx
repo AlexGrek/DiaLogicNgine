@@ -9,7 +9,7 @@ import "./player.css"
 
 interface PlayerProps {
     game: GameDescription;
-    handlers: IUpds;
+    handlers?: IUpds;
     visible: boolean
 }
 
