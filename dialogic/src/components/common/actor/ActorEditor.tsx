@@ -84,7 +84,6 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
     }
 
     const generateStyle = (image: string | number | undefined) => {
-        console.log(`Generating style: ${image}`)
         if (image === undefined) {
             if (value?.character) {
                 const char = game.chars.find(item => item.uid === value.character)
@@ -126,7 +125,6 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
         if (!imageUri) {
             return {}
         }
-        console.log(`Setting image: ${imageUri}`)
         return {backgroundImage: `url("${generateImageUrl(imageUri)}")`}
     }
 

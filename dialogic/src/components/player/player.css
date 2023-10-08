@@ -158,7 +158,7 @@
     position: relative;
     scroll-behavior: smooth;
     overflow: auto;
-
+    opacity: .6;
 }
 
 .dialog-controls {
@@ -184,8 +184,31 @@
 }
 
 .dialog-history-record-ans {
+
     font-size: 13pt;
     color: rgb(120, 120, 120);
     margin-left: auto; 
     margin-right: 4pt;
+}
+
+.dialog-actor-container {
+    position: relative;
+    right: 10%;
+    bottom: -10pt;
+    text-align: center;
+    width: fit-content;
+    background-color: rgba(6, 1, 35, 0.142);
+    padding: 2pt;
+    border-radius: 2pt;
+}
+
+.dialog-actor-container img {
+    max-width: 100pt;
+    max-height: 130pt;
+    display: block;
+    border-radius: 2pt;
+}
+
+.dialog-actor-name {
+    color: lightblue;
 }

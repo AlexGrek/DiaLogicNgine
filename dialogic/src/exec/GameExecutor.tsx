@@ -6,6 +6,7 @@ import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcess
 import Loc from "../game/Loc";
 import { chooseText } from "../game/TextList";
 import { tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
+import { chooseImage } from "../game/ImageList";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -27,6 +28,50 @@ export class GameExecManager {
             return chooseText(window.text, decision)
         }
         return window.text.main
+    }
+
+    public getCurrentWindowActor(instate: State, window: DialogWindow) {
+
+        const actor = window.actor
+        if (!actor) {
+            return null
+        }
+        
+        const character = this.game.chars.find(item => item.uid === actor.character)
+        if (character === undefined) {
+            console.error("Cannot find character " + actor.character)
+            return null
+        }
+
+        var avatar = character.avatar.main
+        
+        // get avatar from character script
+        if (character.chooseAvatarScript) {
+            // eslint-disable-next-line
+            const {state, decision} = evaluateAsAnyProcessor(this.game, character.chooseAvatarScript, instate)
+            avatar = chooseImage(character.avatar, decision)
+        }
+
+        if (actor.avatar !== undefined) {
+            // redefined avatar
+            console.log("redefined avatar")
+            avatar = chooseImage(character.avatar, actor.avatar)
+        }
+
+        var name = character.displayName.main
+
+        if (character.chooseNameScript) {
+            // eslint-disable-next-line
+            const {state, decision} = evaluateAsAnyProcessor(this.game, character.chooseNameScript, instate)
+            name = chooseText(character.displayName, decision)
+        }
+
+        return {
+            actor: actor,
+            avatar: avatar,
+            name: name,
+            char: character
+        }
     }
 
     getCurrentLocation(state: State): Readonly<Loc> | null {
