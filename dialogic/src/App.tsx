@@ -17,6 +17,7 @@ import NotificationViewPanel from './components/notification/NotificationViewPan
 import Player from './components/player/Player';
 import Loc from './game/Loc';
 import Prop from './game/Prop';
+import FactsObjectivesTabs from './components/menuitems/factsobjectives/FactsObjectivesTabs';
 
 export interface IAppProps {
 
@@ -36,6 +37,7 @@ export interface IUpds {
   handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null) => void;
   handleLocChange: (locs: Loc[]) => void;
   handlePropChange: (props: Prop[]) => void;
+  createProp: (prop: Prop) => void;
   notify: NotifyCallback
 }
 
@@ -121,6 +123,11 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({ game: { ...this.state.game, props: prps } })
   }
 
+  private createProp(prop: Prop) {
+    this.setState({ game: { ...this.state.game, props: [...this.state.game.props, prop] } })
+  }
+
+
   private displayStyle(name: string) {
     return {
       display: this.state.menu === name ? "block" : "none"
@@ -156,6 +163,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       <div style={this.displayStyle("scripts")}>
         <ScriptEditMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
       </div>
+      <div style={this.displayStyle("facts")}>
+        <FactsObjectivesTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+      </div>
     </div>
   }
 
@@ -167,6 +177,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       handleDialogWindowChange: this.handleDialogWindowChange.bind(this),
       handleLocChange: this.handleLocChange.bind(this),
       handlePropChange: this.handlePropChange.bind(this),
+      createProp: this.createProp.bind(this),
       notify: this.handleNotify.bind(this)
     }
 

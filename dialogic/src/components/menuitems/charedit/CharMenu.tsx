@@ -33,6 +33,9 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
     }
 
     const createCharacter = () => {
+        if (!isValidJsIdentifier(creatingUID)) {
+            return
+        }
         const name = creatingUID
         setCreatingUID("")
         const copy = lodash.cloneDeep(game.chars)
@@ -82,7 +85,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
                     <Dropdown title="Create">
                         <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                             <InputGroup>
-                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createCharacter} value={creatingUID} onChange={setCreatingUID}></Input>
+                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createCharacter()} value={creatingUID} onChange={setCreatingUID}></Input>
                                 <InputGroup.Button onClick={() => createCharacter()} disabled={!isValidJsIdentifier(creatingUID)}><PlusIcon /></InputGroup.Button>
                             </InputGroup>
                         </Dropdown.Item>
