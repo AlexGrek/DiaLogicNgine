@@ -85,14 +85,47 @@ function addChars(chars: any, game: GameDescription) {
     return chars
 }
 
+class RuntimeFact {
+    stateProvider!: () => State;
+    uid!: string;
+
+    constructor(stateProvider: () => State, uid: string) {
+        this.uid = uid
+        this.stateProvider = stateProvider
+    }
+
+    public get known() {
+        const state = this.stateProvider()
+        return state.knownFacts.includes(this.uid)
+    }
+
+    public know() {
+        if (this.known) {
+            return
+        }
+        const state = this.stateProvider()
+        state.knownFacts.push(this.uid)
+    }
+}
+
+function addFacts(factsHost: any, game: GameDescription) {
+    game.facts.forEach(fact => {
+        const stateProvider = () => factsHost.state
+        const rtfact = new RuntimeFact(stateProvider, fact.uid)
+        factsHost[fact.uid] = rtfact
+    })
+}
+
 export class RuntimeRt {
     state?: State
     props: any
     ch: any
+    facts: any
 
-    constructor(props: any, chars: any, state?: State) {
+    constructor(props: any, chars: any, facts: any, state?: State) {
         this.props = props
         this.ch = chars
+        this.facts = facts
         if (state)
             this.setState(state)
     }
@@ -102,15 +135,18 @@ export class RuntimeRt {
         console.log("Setting state")
         this.props.state = this.state
         this.ch.state = this.state
+        this.facts.state = this.state
     }
 }
 
 export function createRtObject(game: GameDescription, state?: State) {
     const propsHost: any = {}
     const charsHost: any = {}
+    const factsHost: any = {}
     addProps(propsHost, game)
     addChars(charsHost, game)
-    var rt = new RuntimeRt(propsHost, charsHost, state)
+    addFacts(factsHost, game)
+    var rt = new RuntimeRt(propsHost, charsHost, factsHost, state)
     return rt
 }
 
@@ -125,13 +161,17 @@ export function stateIsValid(stateCandidate: any) {
     return expectedProps.every((prp) => keys.includes(prp))
 }
 
+function makeFunctionBody(s: string) {
+    return `(function (rt, state, props, ch, facts) { ${s} })`
+}
+
 export function evaluateAsStateProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props, ch) { ${s} })`
+    const body = makeFunctionBody(s)
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch);
+        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(newState))
             return newState as State
         else {
@@ -146,13 +186,13 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, prevS
 }
 
 export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props, ch) { ${s} })`
+    const body = makeFunctionBody(s)
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch);
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
@@ -171,13 +211,13 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevSt
 }
 
 export function evaluateAsAnyProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props, ch) { ${s} })`
+    const body = makeFunctionBody(s)
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch);
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {

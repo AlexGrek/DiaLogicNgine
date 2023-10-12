@@ -74,6 +74,24 @@ export class GameExecManager {
         }
     }
 
+    getLinkVisible(prevState: State, link: DialogLink): boolean {
+        if (link.isVisible) {
+            const {state, decision} = evaluateAsBoolProcessor(this.game, link.isVisible, prevState)
+            return decision;
+        } else {
+            return true;
+        }
+    }
+
+    getLinkEnabled(prevState: State, link: DialogLink): boolean {
+        if (link.isEnabled) {
+            const {state, decision} = evaluateAsBoolProcessor(this.game, link.isEnabled, prevState)
+            return decision;
+        } else {
+            return true;
+        }
+    }
+
     getCurrentLocation(state: State): Readonly<Loc> | null {
         return tryGetLocationById(this.game, state.position) 
     }

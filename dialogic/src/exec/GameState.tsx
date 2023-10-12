@@ -40,6 +40,7 @@ export interface State {
     shortHistory: HistoryRecord[]
     gameVersion: string
     background?: string
+    knownFacts: string[]
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -50,6 +51,7 @@ export function createInitialState(game: GameDescription): State {
         stepCount: 0,
         fatalError: null,
         shortHistory: [],
-        gameVersion: "0.0.1"
+        gameVersion: "0.0.1",
+        knownFacts: []
     }
 }
