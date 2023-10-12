@@ -6,6 +6,10 @@ import { emptyImageList } from "./ImageList";
 import Loc from "./Loc";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
+export interface StartMenuConfiguration {
+    menuBackground?: string
+}
+
 export interface GameDescription {
     dialogs: Dialog[]
     facts: Fact[]
@@ -16,6 +20,7 @@ export interface GameDescription {
     buildVersion: number
     startupDialog: DialogWindowId
     engineVersion: string
+    startMenu: StartMenuConfiguration
 }
 
 export function createDefaultGame(): GameDescription {
@@ -46,7 +51,8 @@ export function createDefaultGame(): GameDescription {
         ],
         buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
-        engineVersion: "0.4"
+        engineVersion: "0.4",
+        startMenu: {}
     };
 
     return game

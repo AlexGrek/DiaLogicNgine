@@ -6,6 +6,7 @@ import LocationPreview from './LocationPreview';
 import { Button, Notification } from 'rsuite';
 import './loc.css'
 import LocEditor from './LocEditor';
+import { emptyImageList } from '../../../game/ImageList';
 
 interface LocationMenuProps {
     game: GameDescription;
@@ -34,7 +35,9 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }
             text: { 
                 main: "",
                 list: []
-            }
+            },
+            routes: [],
+            backgrounds: emptyImageList()
         }
         setCreatingNew(true)
         setEditingIndex(game.locs.length)

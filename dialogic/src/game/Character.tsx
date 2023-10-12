@@ -3,6 +3,7 @@ import { TextList } from "./TextList";
 import Proxy from "./Proxy"
 import { ImageList, emptyImageList } from "./ImageList";
 import { GameDescription } from "./GameDescription";
+import { DialogWindowId } from "../exec/GameState";
 
 export interface Trait {
     name: string
@@ -24,6 +25,18 @@ export function roleByUid(uid: string, game: GameDescription) {
     return found
 }
 
+export interface Reaction {
+    simpleText: TextList
+    chooseSimpleTextScript?: string
+    dialogWindow?: DialogWindowId
+}
+
+export interface FactReactionMap {
+    reactionType: string | null // use null for default reaction type
+    customReactions: {[factid: string]: Reaction}
+}
+
+
 export default interface Character {
     uid: string
     displayName: TextList
@@ -37,7 +50,9 @@ export default interface Character {
     chooseAvatarScript?: string
     avatar: ImageList
     description: TextList
+    factReactionMap?: FactReactionMap
 }
+
 
 export function createEmptyCharacter(uid: string): Character {
     return {
