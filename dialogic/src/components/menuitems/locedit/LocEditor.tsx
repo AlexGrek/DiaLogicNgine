@@ -121,9 +121,9 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
             if (!loc) {
                 console.warn(`Location ${route} was not found, but has a route from ${location.uid}`)
                 deleteRoute(route)
-                return <Divider />
+                return <Divider key={i}/>
             }
-            return <div className='loc-route'>
+            return <div className='loc-route' key={i}>
                 <p>{loc.displayName}</p>
                 {bidirectional ? <VerifyRoundIcon color='green' style={{ fontSize: '3em' }} /> : <IconButton color='green' icon={<VerifyRoundIcon />} onClick={() => { addRouteFromTo(route, location.uid) }}></IconButton>}
                 <Button color='red' appearance="link" onClick={() => deleteRoute(route)}>Remove</Button>
