@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { GameDescription } from '../../../game/GameDescription';
-import Character from '../../../game/Character';
-import './charediting.css';
-import CharRoleEditing from './CharRoleEditing';
-import PropsEditMenu from '../scriptedit/PropsEditMenu';
-import Prop from '../../../game/Prop';
+import React, { useEffect, useState } from 'react';
 import { Panel, PanelGroup } from 'rsuite';
-import TextListEditor from '../../common/text_list/TextListEditor';
-import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
-import CodeSampleButton from '../../common/CodeSampleButton';
-import ImageListEditor from '../../common/text_list/ImageListEditor';
+import Character from '../../../game/Character';
+import { GameDescription } from '../../../game/GameDescription';
 import { ImageList } from '../../../game/ImageList';
+import CodeSampleButton from '../../common/CodeSampleButton';
+import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
+import ImageListEditor from '../../common/text_list/ImageListEditor';
+import TextListEditor from '../../common/text_list/TextListEditor';
+import PropsEditMenu from '../scriptedit/PropsEditMenu';
+import CharRoleEditing from './CharRoleEditing';
+import './charediting.css';
+import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
+import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -27,11 +28,12 @@ interface CharEditingProps {
     game: GameDescription;
     char: Character
     onCharacterChange: (char: Character) => void
+    onDelete: (uid: string) => void
 }
 
 type CodeEditMenu = "chooseAvatarScript" | "chooseNameScript" | "chooseDescriptionScript"
 
-const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange }) => {
+const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange, onDelete }) => {
     const [ch, setCh] = useState<Character>(char);
 
     // enable code editor props
@@ -75,12 +77,16 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
             return null
         }
         const uri = img.main
-        return <img alt="background image preview" height="128" src={`game_assets/${uri}`}></img>
+        return <img alt="background preview" height="128" src={`game_assets/${uri}`}></img>
+    }
+
+    const renderDeleteButton = () => {
+        return <ConfirmDeleteButtonSmall onConfirm={() => onDelete(char.uid)}/>
     }
 
     return (
         <div className='char-editing-main-container' onBlur={save}>
-            <p>{avatar(ch.avatar)}{ch.uid}</p>
+            <p>{avatar(ch.avatar)}{ch.uid}{renderDeleteButton()}</p>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Display name" defaultExpanded>
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })}/>

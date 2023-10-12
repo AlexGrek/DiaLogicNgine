@@ -28,7 +28,8 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
     }
 
     const updateCharacterList = (chars: Character[]) => {
-        onSetGame({ ...game, chars: chars })
+        const newGame = { ...game, chars: chars }
+        onSetGame(newGame)
     }
 
     const createCharacter = () => {
@@ -37,6 +38,16 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
         const copy = lodash.cloneDeep(game.chars)
         copy.push(createEmptyCharacter(name))
         updateCharacterList(copy)
+    }
+
+    const deleteCharacter = (uid: string) => {
+        console.warn("deleting character " + uid)
+        const chars = game.chars
+        const updatedCharList = chars.filter((ch) => ch.uid !== uid)
+        console.warn(`Before: ${game.chars}, after: ${updatedCharList}`)
+        updateCharacterList(updatedCharList)
+        setCreatingUID("")
+        setEditingIndex(0)
     }
 
     const onSelectTab = (selected: string) => {
@@ -56,7 +67,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
 
     const tab = (i: number) => {
         const char = game.chars[i]
-        return <CharEditing key={char.uid} game={game} char={char} onCharacterChange={value => setCharacter(i, value)}></CharEditing>
+        return <CharEditing onDelete={deleteCharacter} key={char.uid} game={game} char={char} onCharacterChange={value => setCharacter(i, value)}></CharEditing>
     }
 
     return (
@@ -81,7 +92,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
                     </Nav>
                 </div>
                 <div className='char-menu-tab-editor'>
-                    {editingIndex >= 0 ? tab(editingIndex) : null}
+                    {editingIndex >= 0 && editingIndex < game.chars.length ? tab(editingIndex) : null}
                 </div>
             </div>
         </div>
