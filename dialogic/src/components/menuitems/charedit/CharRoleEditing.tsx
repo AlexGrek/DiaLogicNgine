@@ -1,6 +1,6 @@
 import React, { useState, useEffect, CSSProperties } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
-import Character, { Role, roleByUid } from '../../../game/Character';
+import Character, { Role, createEmptyRole, roleByUid } from '../../../game/Character';
 import './charediting.css';
 import { Button, ButtonGroup, InputPicker, Panel, PanelGroup, Table } from 'rsuite';
 import TextListEditor from '../../common/text_list/TextListEditor';
@@ -55,7 +55,13 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
 
     const rolesAppliedUids = char.roles
 
-    const rolesApplied = rolesAppliedUids.map(role => roleByUid(role, game))
+    const rolesApplied = rolesAppliedUids.map(role => {
+        const roleFound = roleByUid(role, game)
+        if (roleFound === undefined) {
+            console.warn("Needs to be cleaned up role: " + role)
+        }
+        return roleFound
+    })
 
     const rolesNotApplied = game.roles.filter(r => !char.roles.includes(r.name))
 

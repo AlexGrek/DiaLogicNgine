@@ -44,10 +44,8 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
     }
 
     const deleteCharacter = (uid: string) => {
-        console.warn("deleting character " + uid)
         const chars = game.chars
         const updatedCharList = chars.filter((ch) => ch.uid !== uid)
-        console.warn(`Before: ${game.chars}, after: ${updatedCharList}`)
         updateCharacterList(updatedCharList)
         setCreatingUID("")
         setEditingIndex(0)

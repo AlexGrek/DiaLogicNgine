@@ -185,7 +185,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
     return (
       <CustomProvider theme="dark">
         <Container>
-          <Header className='app-header-text'>DiaLogic Ngine</Header>
+          <Header className='app-header-text'>🇺🇦 DiaLogic Ngine</Header>
           <NotificationViewPanel notifications={this.state.notifications}></NotificationViewPanel>
           <Container>
             <Sidebar>

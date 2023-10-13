@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { GameDescription } from '../../../game/GameDescription';
-import { IUpds } from '../../../App';
-import UserBadgeIcon from '@rsuite/icons/UserBadge';
+import PeoplesMapIcon from '@rsuite/icons/PeoplesMap';
 import PlusIcon from '@rsuite/icons/Plus';
-import { Button, Col, Dropdown, Input, InputGroup, Nav, Notification } from 'rsuite';
 import lodash from 'lodash';
-import Character, { Role, createEmptyRole } from '../../../game/Character';
+import React, { useState } from 'react';
+import { Dropdown, Input, InputGroup, Nav, Notification } from 'rsuite';
+import { IUpds } from '../../../App';
 import { isValidJsIdentifier } from '../../../Utils';
-import './charmenu.css'
+import { Role, createEmptyRole } from '../../../game/Character';
+import { GameDescription } from '../../../game/GameDescription';
 import RoleEditing from './RoleEditing';
+import './charmenu.css';
 
 interface RolesMenuProps {
     game: GameDescription;
@@ -24,7 +24,7 @@ const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds 
 
     const navItems = () => {
         return roles.map((item, i) => {
-            return <Nav.Item key={i} eventKey={i.toString()} icon={<UserBadgeIcon />}>{item.name}</Nav.Item>
+            return <Nav.Item key={i} eventKey={i.toString()} icon={<PeoplesMapIcon />}>{item.name}</Nav.Item>
         })
     }
 
@@ -32,7 +32,17 @@ const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds 
         onSetGame({ ...game, roles: chars })
     }
 
+    const deleteRole = (uid: string) => {
+        const upd = game.roles.filter((ch) => ch.name !== uid)
+        updateRoles(upd)
+        setCreatingUID("")
+        setEditingIndex(0)
+    }
+
     const createRole = () => {
+        if (!isValidJsIdentifier(creatingUID)) {
+            return
+        }
         const name = creatingUID
         setCreatingUID("")
         const copy = lodash.cloneDeep(roles)
@@ -55,7 +65,7 @@ const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds 
 
     const tab = (i: number) => {
         const char = roles[i]
-        return <RoleEditing game={game} role={char} onRoleChange={value => setRole(i, value)}></RoleEditing>
+        return <RoleEditing game={game} onDelete={deleteRole} role={char} onRoleChange={value => setRole(i, value)}></RoleEditing>
     }
 
     return (
@@ -70,7 +80,7 @@ const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds 
                     <Dropdown title="Create">
                         <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                             <InputGroup>
-                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createRole} value={creatingUID} onChange={setCreatingUID}></Input>
+                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createRole()} value={creatingUID} onChange={setCreatingUID}></Input>
                                 <InputGroup.Button onClick={() => createRole()} disabled={!isValidJsIdentifier(creatingUID)}><PlusIcon /></InputGroup.Button>
                             </InputGroup>
                         </Dropdown.Item>
@@ -80,7 +90,7 @@ const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds 
                     </Nav>
                 </div>
                 <div className='char-menu-tab-editor'>
-                    {editingIndex >= 0 ? tab(editingIndex) : null}
+                    {editingIndex >= 0 && editingIndex < game.roles.length ? tab(editingIndex) : null}
                 </div>
             </div>
         </div>
