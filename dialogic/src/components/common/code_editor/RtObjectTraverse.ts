@@ -28,6 +28,5 @@ export function createRtDoc(game: GameDescription): {[key: string]: string}  {
     variables.forEach((el) => {
         initial[el] = "custom property"
     })
-    console.log(initial)
     return initial
 }

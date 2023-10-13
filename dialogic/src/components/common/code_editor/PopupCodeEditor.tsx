@@ -22,6 +22,10 @@ export const DEFAULT_ARGS = {
     "rt": "collection of useful runtime functions",
     "props": "all props available as objects",
     "rt.props": "all props available as objects",
+    "rt.ch": "all claracters",
+    "ch": "all claracters",
+    "rt.facts": "all facts",
+    "facts": "all facts"
 }
 
 interface PopupCodeEditorProps {
@@ -43,11 +47,23 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     const rt = () => game ? createRtDoc(game) : null
     
     const getArguments = () => {
+        let args = ui.arguments
+        if (game && game.facts.length > 0) {
+            game.facts.forEach(fact => {
+                const toMerge = {
+                    [`facts.${fact.uid}`]: `Fact: ${fact.short}`,
+                    [`facts.${fact.uid}.known`]: `boolean prop: is '${fact.short}' fact known`,
+                    [`facts.${fact.uid}.know()`]: `Make fact known: ${fact.short}`,
+                }
+                args = mergeDicts(args, toMerge)
+            })
+        }
+
         const rtData = rt()
         if (rtData) {
-            return mergeDicts(ui.arguments, rtData)
+            return mergeDicts(args, rtData)
         } else {
-            return ui.arguments
+            return args
         }
     }
 
