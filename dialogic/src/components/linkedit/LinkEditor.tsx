@@ -108,10 +108,6 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         setCodeEditorOpen(true)
     }
 
-    const openCloseCodeEditor = (next: boolean) => {
-        setCodeEditorOpen(next);
-    }
-
     const swithAlternativeLink = (enable: boolean) => {
         const linkCopy = lodash.cloneDeep(link)
         if (enable && link.alternativeDirections.length < 1) {
@@ -331,7 +327,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 </Panel>
                 <Panel header="Alternatives">
                     <div className='link-editor-section'>
-                        <Toggle checked={link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
+                        <Toggle checked={link.isAlternativeLink === undefined ? false : link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
                         {link.isAlternativeLink ? <CodeSampleButton onClick={() => codeEdit("alternative")} name='useAlternativeWhen' code={link.useAlternativeWhen}></CodeSampleButton> : null}
                         {link.isAlternativeLink ? linkEditorDirection(false, 0) : null}
                     </div>
