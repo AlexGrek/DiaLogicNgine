@@ -111,6 +111,15 @@ export class GameExecManager {
         return newState
     }
 
+    private jumpLink(direction: DialogWindowId, prevState: State, reset?: boolean) {
+        var newState = lodash.cloneDeep(prevState)
+        if (reset) {
+            newState.positionStack = []
+        }
+        newState.position = direction
+        return newState
+    }
+
     private popLink(prevState: State) {
         var newState = lodash.cloneDeep(prevState)
         var prevPosition = newState.positionStack.pop()
@@ -161,6 +170,16 @@ export class GameExecManager {
                     return this.pushLink(directionFromLink.qualifiedDirection, newState)
                 else
                     return newState
+            case (LinkType.Jump):
+                        if (directionFromLink.qualifiedDirection)
+                            return this.jumpLink(directionFromLink.qualifiedDirection, newState, false)
+                        else
+                            return newState
+            case (LinkType.ResetJump):
+                                if (directionFromLink.qualifiedDirection)
+                                    return this.jumpLink(directionFromLink.qualifiedDirection, newState, true)
+                                else
+                                    return newState
             case (LinkType.Pop):
                 return this.popLink(newState)
             case (LinkType.NavigateToLocation):

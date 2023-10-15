@@ -16,8 +16,9 @@ export interface SimpleTextGenerator {
 }
 
 export enum LinkType {
-    Local = "local", Push = "push", Pop = "pop", 
-    NavigateToLocation = "tolocation", TalkToPerson = "toperson"
+    Local = "local", Push = "push", Pop = "pop",
+    Jump = "jump", ResetJump = "resetjump",
+    NavigateToLocation = "tolocation", TalkToPerson = "toperson",
 }
 
 export interface DialogLinkDirection {

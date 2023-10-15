@@ -25,6 +25,15 @@ export function roleByUid(uid: string, game: GameDescription) {
     return found
 }
 
+export interface SpeakingModel {
+    agree: string[]
+    deny: string[]
+    bye: string[]
+    hello: string[]
+    dontKnowObject: string[]
+    dontKnowChar: string[]
+}
+
 export interface Reaction {
     simpleText: TextList
     chooseSimpleTextScript?: string

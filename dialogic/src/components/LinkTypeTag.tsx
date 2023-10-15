@@ -12,7 +12,9 @@ const Colors = {
     [LinkType.Pop]: asColor("violet"),
     [LinkType.Push]: asColor("orange"),
     [LinkType.NavigateToLocation]: asColor("cyan"),
-    [LinkType.TalkToPerson]: asColor("green")
+    [LinkType.TalkToPerson]: asColor("green"),
+    [LinkType.Jump]: asColor("red"),
+    [LinkType.ResetJump]: asColor("red")
 }
 
 const Icons = {
@@ -20,7 +22,9 @@ const Icons = {
     [LinkType.Pop]: "J",
     [LinkType.Push]: "\"",
     [LinkType.NavigateToLocation]: "\ue01c",
-    [LinkType.TalkToPerson]: "\ue066"
+    [LinkType.TalkToPerson]: "\ue066",
+    [LinkType.Jump]: "5",
+    [LinkType.ResetJump]: "9"
 }
 
 const LinkTypeTag: React.FC<LinkTypeTagProps> = ({ value }) => {

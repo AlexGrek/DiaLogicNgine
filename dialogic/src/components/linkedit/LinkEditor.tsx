@@ -79,11 +79,13 @@ interface LinkEditorProps {
 type CodeEditMenu = "actionCode" | "isVisible" | "isEnabled" | "alternative"
 
 const TooltipText: { [key: string]: string } = {
-    [LinkType.Local]: "Move to another window in same dialog",
-    [LinkType.Pop]: "Move to previous level (one level back)",
-    [LinkType.Push]: "Move to next level, possible to another dialog (one level down)",
-    [LinkType.NavigateToLocation]: "Move to location, clearing all dialog stack",
-    [LinkType.TalkToPerson]: "Talk to person"
+    [LinkType.Local]: "Move to another window in same dialogm keeping the stack",
+    [LinkType.Pop]: "Move to previous level (one level back), pop stack",
+    [LinkType.Push]: "Move to next level, possible to another dialog (one level down), push stack",
+    [LinkType.NavigateToLocation]: "Move to location, clearing all the stack",
+    [LinkType.TalkToPerson]: "Talk to person, push stack",
+    [LinkType.Jump]: "Move to another dialog/window keeping the stack",
+    [LinkType.ResetJump]: "Move to another dialog/window clearing the stack"
 }
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
@@ -249,7 +251,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 <p>{data.includes(linkdir.direction || "") ? gotoLink(linkdir) : createLink(linkdir)}</p>
             </div>
         }
-        if (linkdir.type === LinkType.Push) {
+        if (linkdir.type === LinkType.Push || linkdir.type === LinkType.Jump || linkdir.type === LinkType.ResetJump) {
             if (linkdir.qualifiedDirection === undefined) {
                 linkdir.qualifiedDirection = game.startupDialog
             }
