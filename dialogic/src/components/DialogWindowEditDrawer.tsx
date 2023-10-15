@@ -13,6 +13,7 @@ import CodeSampleButton from './common/CodeSampleButton';
 import { ImageList } from '../game/ImageList';
 import ImageListEditor from './common/text_list/ImageListEditor';
 import ActorEditor from './common/actor/ActorEditor';
+import LocationPicker from './linkedit/LocationPicker';
 
 const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -125,6 +126,20 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         })
     }
 
+    const onChangeLocationInBgCheck = (val: boolean) => {
+        const newValue = val ? "" : undefined
+        return modifyWindowBy(window => {
+            return { ...window, changeLocationInBg: newValue }
+        })
+    }
+
+    const onChangeLocationInBg = (val: string) => {
+        const newValue = val
+        return modifyWindowBy(window => {
+            return { ...window, changeLocationInBg: newValue }
+        })
+    }
+
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(false)}>
             <Drawer.Header>
@@ -145,6 +160,10 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <PanelGroup accordion bordered>
                                 <Panel header="Actor" defaultExpanded>
                                     <ActorEditor value={windowState.actor} game={game} onChange={(actor) => setWindow({...windowState, actor: actor})}/>
+                                </Panel>
+                                <Panel header="Misc">
+                                    <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                                    {windowState.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={windowState.changeLocationInBg} onLocChange={onChangeLocationInBg} /> }
                                 </Panel>
                                 <Panel header="Technical info">
                                 <p>Display as JSON:</p>

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Dialog, { DialogWindow, LinkType } from '../game/Dialog';
-import { Stack } from 'rsuite';
+import { Stack, Tag } from 'rsuite';
 import WindowWidgetContextMenu from './WindowWidgetContextMenu';
 import { IUpds } from '../App';
 import { GameDescription } from '../game/GameDescription';
@@ -28,13 +28,34 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
     }
   }
 
-  public textShortened(text: string, max: number): string {
+  private textShortened(text: string, max: number): string {
     if (text.length > max) {
       return text.substring(0, max - 3) + "..."
     }
     else {
       return text
     }
+  }
+
+  private renderTags() {
+    const tags = []
+    if (this.props.window.entryScript) {
+      const tag = <Tag color="green">code</Tag>
+      tags.push(tag)
+    }
+    if (this.props.window.actor) {
+      const tag = <Tag color="blue">actor</Tag>
+      tags.push(tag)
+    }
+    if (this.props.window.backgrounds.main) {
+      const tag = <Tag color="orange">bg</Tag>
+      tags.push(tag)
+    }
+    if (this.props.window.changeLocationInBg) {
+      const tag = <Tag color="cyan">loc</Tag>
+      tags.push(tag)
+    }
+    return tags
   }
 
   public render() {
@@ -54,10 +75,11 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
       <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
         <ul className='window-widget-links-list'>
           {this.props.window.links.map((el, i) => {
-            const direction = el.mainDirection.type != LinkType.Push ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
+            const direction = ![LinkType.Push, LinkType.Jump, LinkType.ResetJump].includes(el.mainDirection.type) ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
             return <li key={i}><LinkTypeTag value={el.mainDirection.type} /><span className='window-widget-link-direction-text'>{direction}</span></li>
           })}
         </ul>
+        <div className='window-tag-list'>{this.renderTags()}</div>
       </div>
     </div>
   }

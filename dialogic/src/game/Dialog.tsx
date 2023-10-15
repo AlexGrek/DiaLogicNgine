@@ -37,6 +37,7 @@ export interface DialogLink {
     isEnabled?: string;
     isAlternativeLink?: boolean;
     useAlternativeWhen?: string;
+    changeLocationInBg?: string
 }
 
 export function createDialogLink(): DialogLink {
@@ -65,6 +66,7 @@ export interface DialogWindow {
     chooseBackgroundScript?: string
     actor?: Actor
     tags: string[]
+    changeLocationInBg?: string
 }
 
 export const createWindow = (uid: string) => {

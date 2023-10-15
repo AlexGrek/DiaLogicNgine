@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import 'animate.css';
-import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Form, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Tag, Toggle, Tooltip, Whisper } from 'rsuite';
+import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Checkbox, Form, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Tag, Toggle, Tooltip, Whisper } from 'rsuite';
 import PagePreviousIcon from '@rsuite/icons/PagePrevious';
 import TrashIcon from '@rsuite/icons/Trash';
 import Dialog, { createDialog, createDialogLink, createWindow, DialogLink, DialogLinkDirection, DialogWindow, LinkType } from '../../game/Dialog';
@@ -306,6 +306,16 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         </div>
     }
 
+    const onChangeLocationInBgCheck = (value: boolean) => {
+        const newValue = value ? "" : undefined
+        onLinkChange({...link, changeLocationInBg: newValue}, index)
+    }
+
+    const onChangeLocationInBg = (value: string) => {
+        onLinkChange({...link, changeLocationInBg: value}, index)
+    }
+
+
     return (
         <div className="link-editor-body animate__animated animate__fadeInRight animate__faster">
             <Stack alignItems="center" justifyContent='space-between' className="link-editor-toolbar">
@@ -327,6 +337,10 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                     <CodeSampleButton onClick={() => codeEdit("isVisible")} name='isVisible' code={link.isVisible}></CodeSampleButton>
                     <CodeSampleButton onClick={() => codeEdit("isEnabled")} name='isEnabled' code={link.isEnabled}></CodeSampleButton>
                 </Panel>
+                <Panel header="Misc">
+                                    <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                                    {link.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={link.changeLocationInBg} onLocChange={onChangeLocationInBg} /> }
+                                </Panel>
                 <Panel header="Alternatives">
                     <div className='link-editor-section'>
                         <Toggle checked={link.isAlternativeLink === undefined ? false : link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
