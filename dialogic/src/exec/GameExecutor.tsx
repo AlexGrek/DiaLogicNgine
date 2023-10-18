@@ -131,6 +131,7 @@ export class GameExecManager {
                 location: prevState.location,
                 kind: "location"
             }
+            return newState
         } else {
             throw new Error("Attempt to pop while UI stack is empty: " + newState.position)
         }
