@@ -8,7 +8,7 @@ import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import { TextList } from '../../../game/TextList';
-import { generateImageUrl } from '../../../Utils';
+import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
 import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
 import './loc.css'
 import lodash from 'lodash';
@@ -170,7 +170,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                     <Button onClick={() => onCloseHandler(false)} appearance="ghost" color="blue">
                         Discard
                     </Button>
-                    <Button onClick={() => onCloseHandler(true)} appearance="primary">
+                    <Button disabled={location.uid === "" || !isValidJsIdentifier(location.uid)} onClick={() => onCloseHandler(true)} appearance="primary">
                         Save
                     </Button>
                 </Drawer.Actions>
@@ -182,13 +182,13 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                         <Col xs={6}>
                             <div className='location-params'>
                                 <p>UID (has to be unique)</p>
-                                <Input value={location.uid} onChange={uidNameChange}></Input>
+                                <Input value={location.uid} readOnly={loc.uid !== ""} onChange={uidNameChange}></Input>
                                 <p>Thumbnail image</p>
                                 <img className='location-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
                                 <PublicFileUrl extensions={IMAGES} value={location.thumbnail} onChange={thumbChange}></PublicFileUrl>
                                 <Divider>Routes</Divider>
                                 <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>
-                                <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1}>Make routes</Button>
+                                <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1 || loc.uid === ""}>Make routes</Button>
                                 {renderRoutes()}
                             </div>
                         </Col>

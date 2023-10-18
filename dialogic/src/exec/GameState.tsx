@@ -35,6 +35,7 @@ export interface State {
     position: UiObjectId
     stepCount: number
     positionStack: UiObjectId[]
+    location: string | null
     props: { [key: string]: any }
     fatalError?: FatalError | null
     shortHistory: HistoryRecord[]
@@ -47,6 +48,7 @@ export function createInitialState(game: GameDescription): State {
     return {
         position: game.startupDialog,
         positionStack: [],
+        location: null,
         props: {},
         stepCount: 0,
         fatalError: null,

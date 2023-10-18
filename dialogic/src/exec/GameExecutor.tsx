@@ -126,6 +126,11 @@ export class GameExecManager {
         if (prevPosition) {
             newState.position = prevPosition
             return newState
+        } else if (prevState.location) {
+            newState.position = {
+                location: prevState.location,
+                kind: "location"
+            }
         } else {
             throw new Error("Attempt to pop while UI stack is empty: " + newState.position)
         }
@@ -145,6 +150,7 @@ export class GameExecManager {
             location: direction,
             kind: "location"
         }
+        newState.location = direction
         return newState;
     }
 
