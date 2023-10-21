@@ -14,14 +14,17 @@ import Prop, { createBoolProp, createNumberProp, createStringProp, createVariant
 import { isValidJsIdentifier } from '../../../Utils';
 import lodash from 'lodash';
 import PropsEditorDrawer from './PropsEditorDrawer';
+import { GameDescription } from '../../../game/GameDescription';
 
 interface PropsEditMenuProps {
     props: Prop[];
+    game: GameDescription;
     onSetProps: (props: Prop[]) => void;
     handlers?: IUpds;
+    creatable?: boolean
 }
 
-const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handlers }) => {
+const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handlers, creatable }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
@@ -29,6 +32,8 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
     useEffect(() => {
         setEditingIndex(editingIndex);
     }, [props]);
+
+    const canCreate = creatable !== undefined ? creatable : true;
 
     const deleteProp = (id: number) => {
         const copy = lodash.cloneDeep(props)
@@ -52,7 +57,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
     const createProp = () => {
         const copy = lodash.cloneDeep(props)
         var create = null;
-        switch(createTypeChange) {
+        switch (createTypeChange) {
             case "numeric":
                 create = createNumberProp(createName, 0);
                 break;
@@ -89,47 +94,51 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
         return props.map(convertTableRow)
     }
 
+    const createMenu = () => {
+        return <div>
+            <InputGroup>
+                <InputGroup.Addon> Name </InputGroup.Addon>
+                <Input value={createName} placeholder="unique js identifier" onChange={setCreateName}></Input>
+                <InputGroup.Button onClick={createProp} disabled={createTypeChange === "none" || !isValidJsIdentifier(createName)}><PlusIcon /></InputGroup.Button>
+            </InputGroup>
+
+            <RadioTileGroup defaultValue="blank" inline aria-label="Create new prop type" onChange={(val, ev) => setCreateTypeChange(val.toString())}>
+                <RadioTile
+                    icon={<NumbersIcon></NumbersIcon>}
+                    label="Number"
+                    value="number"
+                >
+                    any int or float
+
+                </RadioTile>
+                <RadioTile
+                    icon={<ParagraphIcon />}
+                    label="String"
+                    value="string"
+                >
+                    any text
+                </RadioTile>
+                <RadioTile
+                    icon={<OffIcon />}
+                    label="Boolean"
+                    value="boolean"
+                >
+                    true or false
+                </RadioTile>
+                <RadioTile
+                    icon={<ListIcon />}
+                    label="Variant"
+                    value="variant"
+                >
+                    can contain one of the predefined string values
+                </RadioTile>
+            </RadioTileGroup>
+        </div>
+    }
+
     return (
         <div>
-            <div>
-                <InputGroup>
-                    <InputGroup.Addon> Name </InputGroup.Addon>
-                    <Input value={createName} placeholder="unique js identifier" onChange={setCreateName}></Input>
-                    <InputGroup.Button onClick={createProp} disabled={createTypeChange === "none" || !isValidJsIdentifier(createName)}><PlusIcon /></InputGroup.Button>
-                </InputGroup>
-
-                <RadioTileGroup defaultValue="blank" inline aria-label="Create new prop type" onChange={(val, ev) => setCreateTypeChange(val.toString())}>
-                    <RadioTile
-                        icon={<NumbersIcon></NumbersIcon>}
-                        label="Number"
-                        value="number"
-                    >
-                        any int or float
-
-                    </RadioTile>
-                    <RadioTile
-                        icon={<ParagraphIcon />}
-                        label="String"
-                        value="string"
-                    >
-                        any text
-                    </RadioTile>
-                    <RadioTile
-                        icon={<OffIcon />}
-                        label="Boolean"
-                        value="boolean"
-                    >
-                        true or false
-                    </RadioTile>
-                    <RadioTile
-                        icon={<ListIcon />}
-                        label="Variant"
-                        value="variant"
-                    >
-                        can contain one of the predefined string values
-                    </RadioTile>
-                </RadioTileGroup>
-            </div>
+            {canCreate ? createMenu() : null}
             <Table
                 data={createTableData()}>
                 <Table.Column width={35}>
@@ -153,18 +162,18 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     <Table.Cell style={{ padding: '6px' }}>
                         {rowData => (
                             <ButtonGroup>
-                            <Button onClick={() => editProp(rowData.index)}>
-                                 <GearIcon/>
-                            </Button>
-                            <Button onClick={() => deleteProp(rowData.index)}>
-                                 <TrashIcon/>
-                            </Button>
+                                <Button onClick={() => editProp(rowData.index)}>
+                                    <GearIcon />
+                                </Button>
+                                <Button onClick={() => deleteProp(rowData.index)}>
+                                    <TrashIcon />
+                                </Button>
                             </ButtonGroup>
                         )}
                     </Table.Cell>
                 </Table.Column>
             </Table>
-            {editingIndex >= 0 ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)}/> : null}
+            {editingIndex >= 0 ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)} /> : null}
         </div>
     );
 };

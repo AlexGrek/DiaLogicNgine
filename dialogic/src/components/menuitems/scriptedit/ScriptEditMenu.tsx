@@ -28,7 +28,7 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
     const createPropsEditorTab = () => {
         return {
             header: "Props",
-            content: <PropsEditMenu props={game.props} onSetProps={onSetGameProps} handlers={handlers}></PropsEditMenu>
+            content: <PropsEditMenu game={game} props={game.props} onSetProps={onSetGameProps} handlers={handlers}></PropsEditMenu>
         }
     }
 
