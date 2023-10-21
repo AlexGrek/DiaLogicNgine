@@ -118,7 +118,7 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
               this.renderWindows(windows, this.props.dialog) : ""
           }
         </div>
-        <ChainEditor dialog={this.props.dialog || createDialog("")} visible={this.state.chainOpen} dialogName={this.props.dialog?.name} onSetVisible={(vis) => this.setState({ chainOpen: vis })} onApply={this.addMultipleDialogWindowsHandler.bind(this)} />
+        <ChainEditor game={this.props.game} dialog={this.props.dialog || createDialog("")} visible={this.state.chainOpen} dialogName={this.props.dialog?.name} onSetVisible={(vis) => this.setState({ chainOpen: vis })} onApply={this.addMultipleDialogWindowsHandler.bind(this)} />
         {(this.state.editingWindow && this.props.dialog) ? <DialogWindowEditDrawer dialogHandlers={dialogHandlers} game={this.props.game} open={this.state.editorOpen} window={this.state.editingWindow} dialog={this.props.dialog} onClose={this.closeWindowEditorHandler.bind(this)} handlers={this.props.handlers}></DialogWindowEditDrawer> : ""}
       </div>
     );

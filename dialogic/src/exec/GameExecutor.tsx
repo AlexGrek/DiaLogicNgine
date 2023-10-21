@@ -4,9 +4,10 @@ import { GameDescription } from "../game/GameDescription";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
 import Loc from "../game/Loc";
-import { chooseText } from "../game/TextList";
+import { TextList, chooseText } from "../game/TextList";
 import { tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
 import { chooseImage } from "../game/ImageList";
+import { ActorView } from "./RenderView";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -22,15 +23,19 @@ export class GameExecManager {
     }
 
     getCurrentWindowText(instate: State, window: DialogWindow) {
-        if (window.chooseTextScript) {
-            // NOTE: All state changes are IGNORED here! Use other functions to change state
-            const {state, decision} = evaluateAsAnyProcessor(this.game, window.chooseTextScript, instate)
-            return chooseText(window.text, decision)
-        }
-        return window.text.main
+        return this.getCurrentText(window.text, instate, window.chooseTextScript)
     }
 
-    public getCurrentWindowActor(instate: State, window: DialogWindow) {
+    getCurrentText(tlist: TextList, inState: State, script?: string) {
+        if (script) {
+            // NOTE: All state changes are IGNORED here! Use other functions to change state
+            const {state, decision} = evaluateAsAnyProcessor(this.game, script, inState)
+            return chooseText(tlist, decision)
+        }
+        return tlist.main
+    }
+
+    public getCurrentWindowActor(instate: State, window: DialogWindow): ActorView | null {
 
         const actor = window.actor
         if (!actor) {
