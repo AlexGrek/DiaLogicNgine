@@ -133,12 +133,14 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                     label="Variant"
                     value="variant"
                 >
+                    one of predefined string values
+                </RadioTile>
                 <RadioTile
-                        icon={<ExploreIcon />}
-                        label="Location"
-                        value="location"
-                    >
-                    can contain one of the predefined string values
+                    icon={<ExploreIcon />}
+                    label="Location"
+                    value="location"
+                >
+                    location or none
                 </RadioTile>
             </RadioTileGroup>
         </div>
@@ -170,12 +172,12 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                     <Table.Cell style={{ padding: '6px' }}>
                         {rowData => (
                             <ButtonGroup>
-                            <Button onClick={() => editProp(rowData.index)}>
-                                 <GearIcon/>
-                            </Button>
-                            <Button onClick={() => deleteProp(rowData.index)}>
-                                 <TrashIcon/>
-                            </Button>
+                                <Button onClick={() => editProp(rowData.index)}>
+                                    <GearIcon />
+                                </Button>
+                                <Button onClick={() => deleteProp(rowData.index)}>
+                                    <TrashIcon />
+                                </Button>
                             </ButtonGroup>
                         )}
                     </Table.Cell>
