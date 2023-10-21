@@ -1,0 +1,25 @@
+.ingame-control-panel {
+    margin-top: 1pt;
+    margin-left: 4pt;
+    padding: 0;
+    opacity: .3;
+    transition: opacity 4s;
+}
+
+.ingame-control-panel:hover {
+    opacity: 1;
+    transition: opacity .2s;
+}
+
+.ingame-control-button {
+    background: none;
+    text-shadow: black 1px 0 10px;
+    opacity: .7;
+    color: white;
+    font-family: 'IconFont';
+}
+
+.ingame-control-button:hover {
+    text-shadow: white 1px 0 10px;
+    opacity: 1;
+}

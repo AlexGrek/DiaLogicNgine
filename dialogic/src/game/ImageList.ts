@@ -19,7 +19,8 @@ export function chooseImage(list: ImageList, i: any): string | undefined {
     // null | undefined | -1 - to pick main text
     // integer from 0 to list.length-1 - to pick alt text by index
     // non-empty string - to pick text by it's name property if it is defined
-    // any other value will cause text with '! ERROR:' come instead 
+    // any other value will cause text with '! ERROR:' come instead
+
     if (lodash.isUndefined(i) || lodash.isNull(i)) {
         return list.main
     }

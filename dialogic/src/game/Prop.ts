@@ -43,6 +43,20 @@ export function createStringProp(name: string, defaultValue: string): StringProp
     }
 }
 
+export interface LocProp {
+    datatype: "location"
+    name: string
+    defaultValue: string
+}
+
+export function createLocationProp(name: string, defaultValue: string): LocProp {
+    return {
+        datatype: "location",
+        name: name,
+        defaultValue: defaultValue
+    }
+}
+
 export interface VariantProp {
     datatype: "variant"
     name: string
@@ -63,6 +77,6 @@ export function createVariantProp(name: string, variants: string[], defaultValue
 }
 
 
-type Prop = NumberProp | BoolProp | StringProp | VariantProp
+type Prop = NumberProp | BoolProp | StringProp | VariantProp | LocProp
 
 export default Prop

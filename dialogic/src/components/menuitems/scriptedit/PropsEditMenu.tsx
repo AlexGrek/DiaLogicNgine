@@ -8,9 +8,10 @@ import ParagraphIcon from '@rsuite/icons/Paragraph';
 import NumbersIcon from '@rsuite/icons/Numbers';
 import PlusIcon from '@rsuite/icons/Plus';
 import GearIcon from '@rsuite/icons/Gear';
+import ExploreIcon from '@rsuite/icons/Explore';
 import TrashIcon from '@rsuite/icons/Trash';
 
-import Prop, { createBoolProp, createNumberProp, createStringProp, createVariantProp } from '../../../game/Prop';
+import Prop, { createBoolProp, createLocationProp, createNumberProp, createStringProp, createVariantProp } from '../../../game/Prop';
 import { isValidJsIdentifier } from '../../../Utils';
 import lodash from 'lodash';
 import PropsEditorDrawer from './PropsEditorDrawer';
@@ -24,7 +25,7 @@ interface PropsEditMenuProps {
     creatable?: boolean
 }
 
-const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handlers, creatable }) => {
+const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers, creatable }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
@@ -70,6 +71,8 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
             case "variant":
                 create = createVariantProp(createName, ["default"], "default")
                 break;
+            case "location":
+                create = createLocationProp(createName, "")
         }
         if (create) {
             copy.push(create)
@@ -130,6 +133,11 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     label="Variant"
                     value="variant"
                 >
+                <RadioTile
+                        icon={<ExploreIcon />}
+                        label="Location"
+                        value="location"
+                    >
                     can contain one of the predefined string values
                 </RadioTile>
             </RadioTileGroup>
@@ -162,18 +170,18 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, handle
                     <Table.Cell style={{ padding: '6px' }}>
                         {rowData => (
                             <ButtonGroup>
-                                <Button onClick={() => editProp(rowData.index)}>
-                                    <GearIcon />
-                                </Button>
-                                <Button onClick={() => deleteProp(rowData.index)}>
-                                    <TrashIcon />
-                                </Button>
+                            <Button onClick={() => editProp(rowData.index)}>
+                                 <GearIcon/>
+                            </Button>
+                            <Button onClick={() => deleteProp(rowData.index)}>
+                                 <TrashIcon/>
+                            </Button>
                             </ButtonGroup>
                         )}
                     </Table.Cell>
                 </Table.Column>
             </Table>
-            {editingIndex >= 0 ? <PropsEditorDrawer value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)} /> : null}
+            {editingIndex >= 0 && props.length > editingIndex ? <PropsEditorDrawer game={game} value={props[editingIndex]} open={true} onUpdateProp={upd => updateProp(editingIndex, upd)} onClose={() => setEditingIndex(-1)} /> : null}
         </div>
     );
 };

@@ -4,7 +4,10 @@ import { GameDescription } from "../game/GameDescription";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
 import Loc from "../game/Loc";
-import { chooseText } from "../game/TextList";
+import { TextList, chooseText } from "../game/TextList";
+import { tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
+import { chooseImage } from "../game/ImageList";
+import { ActorView } from "./RenderView";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -16,40 +19,86 @@ export class GameExecManager {
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
-        if (state.position.kind === "window") {
-            const expectedDialog = state.position.dialog
-            const expectedWindow = state.position.window
-            const dialog = this.game.dialogs.find(d => d.name === expectedDialog)
-            if (dialog === undefined)
-                return null
-            const window = dialog?.windows.find(w => w.uid === expectedWindow)
-            if (window === undefined)
-                return null
-            return [dialog, window]
-        }
-        return null
+        return tryGetDialogWindowById(this.game, state.position);
     }
 
     getCurrentWindowText(instate: State, window: DialogWindow) {
-        if (window.chooseTextScript) {
+        return this.getCurrentText(window.text, instate, window.chooseTextScript)
+    }
+
+    getCurrentText(tlist: TextList, inState: State, script?: string) {
+        if (script) {
             // NOTE: All state changes are IGNORED here! Use other functions to change state
-            const {state, decision} = evaluateAsAnyProcessor(this.game, window.chooseTextScript, instate)
-            return chooseText(window.text, decision)
+            const {state, decision} = evaluateAsAnyProcessor(this.game, script, inState)
+            return chooseText(tlist, decision)
         }
-        return window.text.main
+        return tlist.main
+    }
+
+    public getCurrentWindowActor(instate: State, window: DialogWindow): ActorView | null {
+
+        const actor = window.actor
+        if (!actor) {
+            return null
+        }
+        
+        const character = this.game.chars.find(item => item.uid === actor.character)
+        if (character === undefined) {
+            console.error("Cannot find character " + actor.character)
+            return null
+        }
+
+        var avatar = character.avatar.main
+        
+        // get avatar from character script
+        if (character.chooseAvatarScript) {
+            // eslint-disable-next-line
+            const {state, decision} = evaluateAsAnyProcessor(this.game, character.chooseAvatarScript, instate)
+            avatar = chooseImage(character.avatar, decision)
+        }
+
+        if (actor.avatar !== undefined) {
+            // redefined avatar
+            console.log("redefined avatar")
+            avatar = chooseImage(character.avatar, actor.avatar)
+        }
+
+        var name = character.displayName.main
+
+        if (character.chooseNameScript) {
+            // eslint-disable-next-line
+            const {state, decision} = evaluateAsAnyProcessor(this.game, character.chooseNameScript, instate)
+            name = chooseText(character.displayName, decision)
+        }
+
+        return {
+            actor: actor,
+            avatar: avatar,
+            name: name,
+            char: character
+        }
+    }
+
+    getLinkVisible(prevState: State, link: DialogLink): boolean {
+        if (link.isVisible) {
+            const {state, decision} = evaluateAsBoolProcessor(this.game, link.isVisible, prevState)
+            return decision;
+        } else {
+            return true;
+        }
+    }
+
+    getLinkEnabled(prevState: State, link: DialogLink): boolean {
+        if (link.isEnabled) {
+            const {state, decision} = evaluateAsBoolProcessor(this.game, link.isEnabled, prevState)
+            return decision;
+        } else {
+            return true;
+        }
     }
 
     getCurrentLocation(state: State): Readonly<Loc> | null {
-        if (state.position.kind === "location") {
-            const expectedWindow = state.position.location
-            const found = this.game.locs.find(loc => loc.uid === expectedWindow)
-            if (!found) {
-                console.error(`Location ${expectedWindow} was not found in ${JSON.stringify(this.game.locs)}`)
-                return null
-            }
-            return found
-        }
-        return null;
+        return tryGetLocationById(this.game, state.position) 
     }
 
     private goToLocalLink(directionName: string, prevState: State) {
@@ -67,11 +116,26 @@ export class GameExecManager {
         return newState
     }
 
+    private jumpLink(direction: DialogWindowId, prevState: State, reset?: boolean) {
+        var newState = lodash.cloneDeep(prevState)
+        if (reset) {
+            newState.positionStack = []
+        }
+        newState.position = direction
+        return newState
+    }
+
     private popLink(prevState: State) {
         var newState = lodash.cloneDeep(prevState)
         var prevPosition = newState.positionStack.pop()
         if (prevPosition) {
             newState.position = prevPosition
+            return newState
+        } else if (prevState.location) {
+            newState.position = {
+                location: prevState.location,
+                kind: "location"
+            }
             return newState
         } else {
             throw new Error("Attempt to pop while UI stack is empty: " + newState.position)
@@ -92,6 +156,7 @@ export class GameExecManager {
             location: direction,
             kind: "location"
         }
+        newState.location = direction
         return newState;
     }
 
@@ -117,6 +182,16 @@ export class GameExecManager {
                     return this.pushLink(directionFromLink.qualifiedDirection, newState)
                 else
                     return newState
+            case (LinkType.Jump):
+                        if (directionFromLink.qualifiedDirection)
+                            return this.jumpLink(directionFromLink.qualifiedDirection, newState, false)
+                        else
+                            return newState
+            case (LinkType.ResetJump):
+                                if (directionFromLink.qualifiedDirection)
+                                    return this.jumpLink(directionFromLink.qualifiedDirection, newState, true)
+                                else
+                                    return newState
             case (LinkType.Pop):
                 return this.popLink(newState)
             case (LinkType.NavigateToLocation):

@@ -16,8 +16,9 @@ export interface SimpleTextGenerator {
 }
 
 export enum LinkType {
-    Local = "local", Push = "push", Pop = "pop", 
-    NavigateToLocation = "tolocation", TalkToPerson = "toperson"
+    Local = "local", Push = "push", Pop = "pop",
+    Jump = "jump", ResetJump = "resetjump",
+    NavigateToLocation = "tolocation", TalkToPerson = "toperson",
 }
 
 export interface DialogLinkDirection {
@@ -36,10 +37,23 @@ export interface DialogLink {
     isEnabled?: string;
     isAlternativeLink?: boolean;
     useAlternativeWhen?: string;
+    changeLocationInBg?: string
 }
 
 export function createDialogLink(): DialogLink {
     return { mainDirection: { type: LinkType.Local, direction: "" }, text: "", alternativeDirections: [] }
+}
+
+export interface Actor {
+    character: string
+    avatar: string | number | undefined
+}
+
+export const createActor = (): Actor => {
+    return {
+        character: "",
+        avatar: undefined
+    }
 }
 
 export interface DialogWindow {
@@ -50,10 +64,14 @@ export interface DialogWindow {
     entryScript?: string
     chooseTextScript?: string
     chooseBackgroundScript?: string
+    actor?: Actor
+    tags: string[]
+    changeLocationInBg?: string
 }
 
 export const createWindow = (uid: string) => {
-    return { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList() };
+    const window: DialogWindow = { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList(), tags: [] }
+    return window;
 }
 
 export const renameDialogWindow = (old: DialogWindow, newName: string) => {

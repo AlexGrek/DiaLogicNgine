@@ -1,6 +1,72 @@
 .char-editing-main-container {
     background-color: #1a1d24;
-    min-height: 100%;
+    min-height: 400pt;
     width: 100%;
     outline: 1px solid #373a3f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+.char-editing-main-menu {
+    margin: 1em 8pt;
+    box-shadow: -1px 0px 5px 0px rgba(0,0,0,0.75);
+    max-width: 800pt;
+    width: 100%;
+}
+
+.char-role-editing {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    min-height:250pt;
+}
+
+.applied-role-item {
+    width: 230px;
+    font-size: 16pt;
+    height: 100px;
+    margin: 4pt;
+    padding: 4pt;
+    cursor: pointer;
+    border-radius: 4pt;
+    background-color: #282c34;
+    transition: all .3s;
+    z-index: 2;
+}
+
+.char-role-applied-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.applied-role-editor {
+    position: absolute;
+    z-index: 10;
+    height: 70%;
+    width: 90%;
+    background-color: #20242b;
+    transition-duration: .5s;
+    transition-timing-function: ease-out;
+    transform: translate(0px, 0px);
+    display: none;
+    box-shadow: -1px 0px 5px 0px rgba(0,0,0,0.55);
+
+}
+
+.applied-role-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 4pt;
+}
+
+.applied-role-header p {
+    font-size: 16pt;
+}
+
+.applied-role-item:hover {
+    background-color: #282c3477;
+}
+
+

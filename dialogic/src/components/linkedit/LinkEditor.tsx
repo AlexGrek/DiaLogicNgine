@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import 'animate.css';
-import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Form, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Tag, Toggle, Tooltip, Whisper } from 'rsuite';
+import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Checkbox, Form, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Tag, Toggle, Tooltip, Whisper } from 'rsuite';
 import PagePreviousIcon from '@rsuite/icons/PagePrevious';
 import TrashIcon from '@rsuite/icons/Trash';
 import Dialog, { createDialog, createDialogLink, createWindow, DialogLink, DialogLinkDirection, DialogWindow, LinkType } from '../../game/Dialog';
@@ -79,11 +79,13 @@ interface LinkEditorProps {
 type CodeEditMenu = "actionCode" | "isVisible" | "isEnabled" | "alternative"
 
 const TooltipText: { [key: string]: string } = {
-    [LinkType.Local]: "Move to another window in same dialog",
-    [LinkType.Pop]: "Move to previous level (one level back)",
-    [LinkType.Push]: "Move to next level, possible to another dialog (one level down)",
-    [LinkType.NavigateToLocation]: "Move to location, clearing all dialog stack",
-    [LinkType.TalkToPerson]: "Talk to person"
+    [LinkType.Local]: "Move to another window in same dialogm keeping the stack",
+    [LinkType.Pop]: "Move to previous level (one level back), pop stack",
+    [LinkType.Push]: "Move to next level, possible to another dialog (one level down), push stack",
+    [LinkType.NavigateToLocation]: "Move to location, clearing all the stack",
+    [LinkType.TalkToPerson]: "Talk to person, push stack",
+    [LinkType.Jump]: "Move to another dialog/window keeping the stack",
+    [LinkType.ResetJump]: "Move to another dialog/window clearing the stack"
 }
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
@@ -106,10 +108,6 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
     const codeEdit = (menu: CodeEditMenu) => {
         setCodeEditorMenu(menu)
         setCodeEditorOpen(true)
-    }
-
-    const openCloseCodeEditor = (next: boolean) => {
-        setCodeEditorOpen(next);
     }
 
     const swithAlternativeLink = (enable: boolean) => {
@@ -253,7 +251,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 <p>{data.includes(linkdir.direction || "") ? gotoLink(linkdir) : createLink(linkdir)}</p>
             </div>
         }
-        if (linkdir.type === LinkType.Push) {
+        if (linkdir.type === LinkType.Push || linkdir.type === LinkType.Jump || linkdir.type === LinkType.ResetJump) {
             if (linkdir.qualifiedDirection === undefined) {
                 linkdir.qualifiedDirection = game.startupDialog
             }
@@ -290,7 +288,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 ui = CODE_EDITOR_UI_ALTERNATIVE
                 break;
         }
-        return <PopupCodeEditor ui={ui} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor ui={ui} game={game} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
     }
 
     const getAlternativeDirection = (index?: number) => {
@@ -307,6 +305,16 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             {directionEditor(dir, isMainDirection, alternativeDirectionIndex)}
         </div>
     }
+
+    const onChangeLocationInBgCheck = (value: boolean) => {
+        const newValue = value ? "" : undefined
+        onLinkChange({...link, changeLocationInBg: newValue}, index)
+    }
+
+    const onChangeLocationInBg = (value: string) => {
+        onLinkChange({...link, changeLocationInBg: value}, index)
+    }
+
 
     return (
         <div className="link-editor-body animate__animated animate__fadeInRight animate__faster">
@@ -329,9 +337,13 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                     <CodeSampleButton onClick={() => codeEdit("isVisible")} name='isVisible' code={link.isVisible}></CodeSampleButton>
                     <CodeSampleButton onClick={() => codeEdit("isEnabled")} name='isEnabled' code={link.isEnabled}></CodeSampleButton>
                 </Panel>
+                <Panel header="Misc">
+                                    <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                                    {link.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={link.changeLocationInBg} onLocChange={onChangeLocationInBg} /> }
+                                </Panel>
                 <Panel header="Alternatives">
                     <div className='link-editor-section'>
-                        <Toggle checked={link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
+                        <Toggle checked={link.isAlternativeLink === undefined ? false : link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
                         {link.isAlternativeLink ? <CodeSampleButton onClick={() => codeEdit("alternative")} name='useAlternativeWhen' code={link.useAlternativeWhen}></CodeSampleButton> : null}
                         {link.isAlternativeLink ? linkEditorDirection(false, 0) : null}
                     </div>

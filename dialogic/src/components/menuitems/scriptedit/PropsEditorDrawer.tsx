@@ -3,15 +3,19 @@ import { AutoComplete, Button, Col, Drawer, Grid, Input, InputNumber, Row, Toggl
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import Prop from '../../../game/Prop';
+import './propeditor.css'
+import LocationPicker from '../../linkedit/LocationPicker';
 
 interface PropsEditorDrawerProps {
     value: Prop;
     open: boolean;
     onUpdateProp: (updates: Prop) => void;
     onClose: () => void;
+    onlyDefault?: boolean;
+    game: GameDescription
 }
 
-const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose }) => {
+const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose, onlyDefault, game }) => {
     const [prop, setProp] = useState<Prop>(value);
     const [listOfVariantsAsString, setListOfVariantsAsString] = useState<string>("")
     useEffect(() => {
@@ -31,7 +35,14 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
     const renderEditor = () => {
         if (prop.datatype === "string") {
             return <div>
+                <p>Default</p>
                 <Input placeholder='default value' value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}></Input>
+            </div>
+        }
+        if (prop.datatype === "location") {
+            return <div>
+                <p>Default</p>
+                <LocationPicker locs={game.locs}  value={prop.defaultValue} onLocChange={v => setProp({...prop, defaultValue: v})}></LocationPicker>
             </div>
         }
         if (prop.datatype === "number") {
@@ -43,11 +54,13 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                 }
             }
             return <div>
+                <p>Default</p>
                 <InputNumber placeholder='default value' value={prop.defaultValue} onChange={setNumber}></InputNumber>
             </div>
         }
         if (prop.datatype === "boolean") {
             return <div>
+                <p>Default value</p>
                 <Toggle size="lg" checkedChildren="true" unCheckedChildren="false" checked={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}/>
             </div>
         }
@@ -57,10 +70,12 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                 setProp({...prop, variants: decoded})
                 setListOfVariantsAsString(listAsCommaSepStr)
             }
-            return <div>
+            return <div className='prop-editor-long'>
+                <p>Default value</p>
                 <AutoComplete data={prop.variants}  value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}/>
-                <p>Variants:</p>
-                <Input placeholder='comma-separated list of values' value={listOfVariantsAsString} onChange={updateList}></Input>
+                <p>Variants</p>
+                <Input readOnly={onlyDefault} placeholder='comma-separated list of values' value={listOfVariantsAsString} onChange={updateList}></Input>
+                <p className='prop-editor-tip'>Comma-separated values. Example: <code>a,b,c</code></p>
             </div>
         }
     }
@@ -78,8 +93,10 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
                     </Button>
                 </Drawer.Actions>
             </Drawer.Header>
-            <Drawer.Body className="window-editor-drawer-body">
-                {renderEditor()}
+            <Drawer.Body>
+                <div className="prop-editor-drawer-content">
+                    {renderEditor()}
+                </div>
             </Drawer.Body>
         </Drawer>
     );

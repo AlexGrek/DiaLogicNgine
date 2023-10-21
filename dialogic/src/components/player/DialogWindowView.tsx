@@ -3,6 +3,9 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
 import Dialog, { DialogLink, DialogWindow } from '../../game/Dialog';
 import "./player.css"
+import InGameControlPad from './InGameControlPad';
+import { styleWithImage } from '../UiUtils';
+import { generateImageUrl } from '../../Utils';
 
 interface DialogWindowViewProps {
     game: GameExecManager;
@@ -38,6 +41,22 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
 
     const text = getActualWindowText(state, window)
 
+    const actor = game.getCurrentWindowActor(state, window)
+
+    const renderAvatar = () => {
+        if (actor === null) {
+            return <div></div>
+        } else {
+            var image = null;
+            if (actor.avatar) {
+                image = <img alt={actor.name} src={generateImageUrl(actor.avatar)}></img>
+            }
+            return <div className='dialog-actor-container'>
+                <p>{image}<span className='dialog-actor-name'>{actor.name}</span></p>
+            </div>
+        }
+    }
+
     const click = (link: DialogLink, textOfLink: string) => {
         setPrevText(text)
         const clickData = { actor: null, text: text, answer: textOfLink, step: state.stepCount } // TODO: add actor
@@ -45,10 +64,9 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
     }
 
     const dialogVariants = () => {
-
-        return window.links.map(link => {
+        return window.links.map((link, i) => {
             const textOfLink = getActualLinkText(state, link)
-            return (<div key={link.text}><button onClick={() => click(link, textOfLink)}>{textOfLink}</button></div>)
+            return (<div key={link.text + i} className="dialog-variant-button-container"><button onClick={() => click(link, textOfLink)}>{textOfLink}</button></div>)
         })
     }
 
@@ -64,31 +82,36 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
         return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1))
     }
 
-    const styleWithImage = (background?: string) => {
-        if (background) {
-            return { 
-                backgroundImage: `url("game_assets/${background}")`
-            }
-        }
-        else
-            return {}
+    const onFullScreen = () => {
+
     }
 
     return (
-        <div className="dialog-window-view" style={styleWithImage(state.background)}>
-            <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                {renderShortHistory()}
-            </div>
-            <div className="dialog-text">
-                <p className='dialog-prev-text' key={state.stepCount}>
-                    {prevText}
-                </p>
-                <p className='dialog-current-text' key={state.stepCount << 1}>
-                    {state.fatalError ? state.fatalError.message : text}
-                </p>
-            </div>
-            <div className="dialog-variants">
-                {state.fatalError ? [] : dialogVariants()}
+        <div className="dialog-window-view-old-bg">
+            <div className="dialog-window-view-top-bg" style={styleWithImage(state.background)}>
+                <div className="dialog-window-view">
+                    <div className="dialog-control-pad">
+                        <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
+                    </div>
+                    <div className="dialog-short-history" id="dialog-short-history-scrollable">
+                        {renderShortHistory()}
+                    </div>
+                    <div className='dialog-controls'>
+                        {renderAvatar()}
+                        <div className="dialog-text">
+                           
+                            <p className='dialog-prev-text' key={state.stepCount}>
+                                {prevText}
+                            </p>
+                            <p className='dialog-current-text' key={state.stepCount << 1}>
+                                {state.fatalError ? state.fatalError.message : text}
+                            </p>
+                        </div>
+                        <div className="dialog-variants">
+                            {state.fatalError ? [] : dialogVariants()}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

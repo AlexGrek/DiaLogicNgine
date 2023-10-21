@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
-import { Button } from 'rsuite';
 import StaticTabs from '../../common/StaticTabs';
-import Prop from '../../../game/Prop';
-import lodash from 'lodash';
 import CharMenu from './CharMenu';
+import RolesMenu from './RolesMenu';
 
 interface CharEditorTabsProps {
     game: GameDescription;
@@ -17,8 +15,8 @@ const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handle
     const createRolesEditorTab = () => {
         return {
             header: "Roles",
-            content: <div/>,
-            disabled: true
+            content: <RolesMenu game={game} onSetGame={onSetGame} handlers={handlers}/>,
+            disabled: false
         }
     }
 
@@ -38,7 +36,7 @@ const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handle
     }
 
     return (
-        <StaticTabs tabs={[createCharsEditorTab(), createRolesEditorTab(), createTraitsEditorTab()]}/>
+        <StaticTabs keepOpen={true} tabs={[createCharsEditorTab(), createRolesEditorTab(), createTraitsEditorTab()]}/>
     );
 };
 

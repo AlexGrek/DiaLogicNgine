@@ -2,65 +2,130 @@ import lodash, { isBoolean, isNumber, isString } from "lodash";
 import { State } from "./GameState";
 import { GameDescription } from "../game/GameDescription";
 import Prop from "../game/Prop";
+import { roleByUid } from "../game/Character";
 
-function addProp(object: any, prop: Prop) {
-    const getOrDefault = (object: any, name: string, def: any) => {
-        const state: State = object.state
-        if (state.props[name] !== undefined) {
-            return state.props[name]
+type StateProvider = () => State
+
+function addProp(stateProvider: StateProvider, object: any, prop: Prop, prefix: string) {
+    const getOrDefault = (stateProvider: StateProvider, object: any, name: string, prefix: string, def: any) => {
+        const state: State = stateProvider()
+        const fullname = `${prefix}${prop.name}`
+        if (state.props[fullname] !== undefined) {
+            return state.props[fullname]
         }
         return def
     }
 
-    const setToState = (object: any, prop: Prop, value: any) => {
-        const state: State = object.state
+    const setToState = (stateProvider: StateProvider, object: any, prop: Prop, prefix: string, value: any) => {
+        const state: State = stateProvider()
+        const fullname = `${prefix}${prop.name}`
         switch (prop.datatype) {
             case "string":
-                state.props[prop.name] = value != null ? value.toString() : "null"
+                state.props[fullname] = value != null ? value.toString() : "null"
                 break;
             case "boolean":
                 if (!isBoolean(value)) {
-                    console.error(`Trying to set ${prop.name} boolean, got: ${JSON.stringify(value)}`)
-                    state.props[prop.name] = prop.defaultValue
+                    console.error(`Trying to set ${fullname} boolean, got: ${JSON.stringify(value)}`)
+                    state.props[fullname] = prop.defaultValue
                 }
-                state.props[prop.name] = value
+                state.props[fullname] = value
                 break;
             case "number":
                 if (!isNumber(value)) {
-                    console.error(`Trying to set ${prop.name} number, got: ${JSON.stringify(value)}`)
-                    state.props[prop.name] = prop.defaultValue
+                    console.error(`Trying to set ${fullname} number, got: ${JSON.stringify(value)}`)
+                    state.props[fullname] = prop.defaultValue
                 }
-                state.props[prop.name] = value
+                state.props[fullname] = value
                 break;
             case "variant":
                 if (!isString(value) || prop.variants.indexOf(value) < 0) {
-                    console.error(`Trying to set ${prop.name} variant, got: ${JSON.stringify(value)}`)
-                    state.props[prop.name] = prop.defaultValue
+                    console.error(`Trying to set ${fullname} variant, got: ${JSON.stringify(value)}`)
+                    state.props[fullname] = prop.defaultValue
                 }
-                state.props[prop.name] = value
+                state.props[fullname] = value
                 break;
         }
     }
 
     Object.defineProperty(object, prop.name, {
-        get: function () { return getOrDefault(object, prop.name, prop.defaultValue) },
-        set: function (value: any) { setToState(object, prop, value) }
+        configurable: true,
+        enumerable: true,
+        get: function () { return getOrDefault(stateProvider, object, prop.name, prefix, prop.defaultValue) },
+        set: function (value: any) { setToState(stateProvider, object, prop, prefix, value) }
     });
 }
 
 function addProps(object: any, game: GameDescription) {
     game.props.forEach(prop => {
-        addProp(object, prop)
+        addProp(() => object.state, object, prop, "")
     })
     return object
+}
+
+function addChars(chars: any, game: GameDescription) {
+    game.chars.forEach(char => {
+        const prefix = `char:${char.uid}_`
+        const charObject = {}
+        char.props.forEach(prop => {
+            addProp(() => chars.state, charObject, prop, prefix)
+        })
+        char.roles.forEach(role => {
+            const roleDescr = roleByUid(role, game)
+            if (roleDescr !== undefined) {
+                roleDescr.props.forEach(prop => {
+                    addProp(() => chars.state, charObject, prop, prefix)
+                })
+            }
+        })
+        char.overrideProps.forEach(prop => {
+            addProp(() => chars.state, charObject, prop, prefix)
+        })
+        chars[char.uid] = charObject
+    })
+    return chars
+}
+
+class RuntimeFact {
+    stateProvider!: () => State;
+    uid!: string;
+
+    constructor(stateProvider: () => State, uid: string) {
+        this.uid = uid
+        this.stateProvider = stateProvider
+    }
+
+    public get known() {
+        const state = this.stateProvider()
+        return state.knownFacts.includes(this.uid)
+    }
+
+    public know() {
+        if (this.known) {
+            return
+        }
+        const state = this.stateProvider()
+        state.knownFacts.push(this.uid)
+    }
+}
+
+function addFacts(factsHost: any, game: GameDescription) {
+    game.facts.forEach(fact => {
+        const stateProvider = () => factsHost.state
+        const rtfact = new RuntimeFact(stateProvider, fact.uid)
+        factsHost[fact.uid] = rtfact
+    })
 }
 
 export class RuntimeRt {
     state?: State
     props: any
+    ch: any
+    facts: any
 
-    constructor(props: any, state?: State) {
+    constructor(props: any, chars: any, facts: any, state?: State) {
         this.props = props
+        this.ch = chars
+        this.facts = facts
         if (state)
             this.setState(state)
     }
@@ -69,13 +134,19 @@ export class RuntimeRt {
         this.state = s
         console.log("Setting state")
         this.props.state = this.state
+        this.ch.state = this.state
+        this.facts.state = this.state
     }
 }
 
-export function createRtObject(game: GameDescription, state: State) {
+export function createRtObject(game: GameDescription, state?: State) {
     const propsHost: any = {}
+    const charsHost: any = {}
+    const factsHost: any = {}
     addProps(propsHost, game)
-    var rt = new RuntimeRt(propsHost, state)
+    addChars(charsHost, game)
+    addFacts(factsHost, game)
+    var rt = new RuntimeRt(propsHost, charsHost, factsHost, state)
     return rt
 }
 
@@ -90,13 +161,17 @@ export function stateIsValid(stateCandidate: any) {
     return expectedProps.every((prp) => keys.includes(prp))
 }
 
+function makeFunctionBody(s: string) {
+    return `(function (rt, state, props, ch, facts) { ${s} })`
+}
+
 export function evaluateAsStateProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props) { ${s} })`
+    const body = makeFunctionBody(s)
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(newState))
             return newState as State
         else {
@@ -111,13 +186,13 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, prevS
 }
 
 export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props) { ${s} })`
+    const body = makeFunctionBody(s)
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
@@ -136,13 +211,13 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevSt
 }
 
 export function evaluateAsAnyProcessor(game: GameDescription, s: string, prevState: State) {
-    const body = `(function (rt, state, props) { ${s} })`
+    const body = makeFunctionBody(s)
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props);
+        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, Drawer, Input, Grid, Row, Col, Checkbox, Stack, PanelGroup, Panel } from 'rsuite';
 import { IUpds } from '../App';
-import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
+import Dialog, { Actor, DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
 import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
@@ -12,6 +12,8 @@ import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from './common/code_
 import CodeSampleButton from './common/CodeSampleButton';
 import { ImageList } from '../game/ImageList';
 import ImageListEditor from './common/text_list/ImageListEditor';
+import ActorEditor from './common/actor/ActorEditor';
+import LocationPicker from './linkedit/LocationPicker';
 
 const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -92,7 +94,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                 ui = CODE_EDITOR_UI_TEXTSELECTOR
                 break;
         }
-        return <PopupCodeEditor ui={ui} code={code || ""} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor ui={ui} code={code || ""} game={game} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
     }
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {
@@ -124,6 +126,20 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         })
     }
 
+    const onChangeLocationInBgCheck = (val: boolean) => {
+        const newValue = val ? "" : undefined
+        return modifyWindowBy(window => {
+            return { ...window, changeLocationInBg: newValue }
+        })
+    }
+
+    const onChangeLocationInBg = (val: string) => {
+        const newValue = val
+        return modifyWindowBy(window => {
+            return { ...window, changeLocationInBg: newValue }
+        })
+    }
+
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(false)}>
             <Drawer.Header>
@@ -141,9 +157,21 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             <div className='window-editor-grid-header'>
                                 Related
                             </div>
-                            <p>Display as JSON:</p>
+                            <PanelGroup accordion bordered>
+                                <Panel header="Actor" defaultExpanded>
+                                    <ActorEditor value={windowState.actor} game={game} onChange={(actor) => setWindow({...windowState, actor: actor})}/>
+                                </Panel>
+                                <Panel header="Misc">
+                                    <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                                    {windowState.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={windowState.changeLocationInBg} onLocChange={onChangeLocationInBg} /> }
+                                </Panel>
+                                <Panel header="Technical info">
+                                <p>Display as JSON:</p>
                             <Input as='textarea' rows={6} readOnly value={JSON.stringify(windowState)}></Input>
                             <Checkbox checked={changesMade}>changes</Checkbox>
+                                </Panel>
+                            </PanelGroup>
+                            
                         </Col>
                         <Col xs={12} className="window-editor-grid-content">
                             <div className='window-editor-grid-header'>
@@ -154,7 +182,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                                 <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
                                 </Panel>
                                 <Panel header="Background image">
-                                <ImageListEditor textList={windowState.backgrounds} onChange={onBackgroundChange}/>
+                                <ImageListEditor imageList={windowState.backgrounds} onChange={onBackgroundChange}/>
                                 </Panel>
                                 <Panel header="Scripting">
                                 <div className='window-editor-code-editors-stack'>

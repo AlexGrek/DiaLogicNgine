@@ -1,0 +1,10 @@
+.window-editor-tools {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.window-editor-tools > * {
+    margin-left: 12pt;
+    margin-top: 10pt;
+}

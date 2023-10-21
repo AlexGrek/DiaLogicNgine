@@ -37,9 +37,18 @@
   box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 }
 
+.window-editor-windows-container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-content: first baseline;
+}
+
 .window-widget-main {
+  flex: 0 0 auto;
+  height: fit-content;
   margin: 12px;
-  min-height: 18pt;
+  width: 23em;
   background-color: black;
   border-radius: 8pt;
   box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
@@ -61,6 +70,7 @@
   margin-top: 1pt;
   margin-bottom: 1pt;
   cursor: pointer;
+  min-height: 4em;
 }
 
 .window-widget-content-text {
@@ -71,6 +81,7 @@
   margin-top: 2pt;
   margin-left: 0;
   padding: 0;
+  min-height: 14pt;
   list-style-type: none;
 }
 
@@ -177,4 +188,9 @@
 .link-editor-toolbar {
   width: 100%;
   align-items: flex-end;
+}
+
+.window-tag-list {
+  width: 100%;
+  text-align: center;
 }

@@ -5,19 +5,20 @@ import HomeIcon from '@rsuite/icons/legacy/Home';
 import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
 import PublicFileUrl, { IMAGES } from '../PublicFileUrl';
+import { generateImageUrl } from '../../../Utils';
 
 interface ImageListEditorProps {
-    textList: ImageList;
+    imageList: ImageList;
     onChange: (t: ImageList) => void;
 }
 
-const ImageListEditor: React.FC<ImageListEditorProps> = ({ textList, onChange }) => {
+const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
 
     const CREATE_INDEX = -100500
 
     const onTextChange = (text: string | undefined) => {
-        const copy = lodash.cloneDeep(textList)
+        const copy = lodash.cloneDeep(imageList)
         if (editingIndex < 0) {
             copy.main = text
         }
@@ -28,7 +29,7 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ textList, onChange })
     }
 
     const onNameChange = (n: string) => {
-        const copy = lodash.cloneDeep(textList)
+        const copy = lodash.cloneDeep(imageList)
         if (editingIndex < 0) {
             console.warn("name changed while on unnamed tab")
         }
@@ -39,7 +40,7 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ textList, onChange })
     }
 
     const onRemoveTab = () => {
-        const copy = lodash.cloneDeep(textList)
+        const copy = lodash.cloneDeep(imageList)
         if (editingIndex < 0) {
             console.warn("remove while on unnamed tab")
         }
@@ -54,25 +55,25 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ textList, onChange })
         const selected_int = parseInt(selected)
         if (selected_int === CREATE_INDEX) {
             // create
-            const new_index = textList.list.length
-            const updatedList = [...textList.list, {uri: ""}]
+            const new_index = imageList.list.length
+            const updatedList = [...imageList.list, {uri: ""}]
             setEditingIndex(new_index)
-            onChange({...textList, list: updatedList})
+            onChange({...imageList, list: updatedList})
         }
         else {
             setEditingIndex(selected_int)
         }
     }
 
-    const navItems = textList.list.map((el, i) => {
+    const navItems = imageList.list.map((el, i) => {
         const key = `${i}`
         const name = el.name ? el.name : key
         return <Nav.Item eventKey={key}> {name}
         </Nav.Item>
     })
 
-    const editingText = editingIndex >= 0 && editingIndex < textList.list.length ? textList.list[editingIndex].uri : textList.main
-    const editingName = editingIndex >= 0 && editingIndex < textList.list.length ? textList.list[editingIndex].name : undefined
+    const editingText = editingIndex >= 0 && editingIndex < imageList.list.length ? imageList.list[editingIndex].uri : imageList.main
+    const editingName = editingIndex >= 0 && editingIndex < imageList.list.length ? imageList.list[editingIndex].name : undefined
 
     const nameEditingPanel = (name?: string) => {
         const viewName = name ? name : ""
@@ -91,7 +92,7 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ textList, onChange })
 
     const displayImage = (uri: string) => {
         return <div>
-            <img alt="background image preview" height="128" src={`game_assets/${uri}`}/>
+            <img alt="image preview" height="128" src={generateImageUrl(uri)}/>
         </div>
     }
 

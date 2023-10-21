@@ -8,9 +8,10 @@ import lodash from 'lodash';
 interface TextListEditorProps {
     textList: TextList;
     onChange: (t: TextList) => void;
+    singleLine?: boolean;
 }
 
-const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange }) => {
+const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, singleLine }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
 
     const CREATE_INDEX = -100500
@@ -66,7 +67,7 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange }) =
     const navItems = textList.list.map((el, i) => {
         const key = `${i}`
         const name = el.name ? el.name : key
-        return <Nav.Item eventKey={key}> {name}
+        return <Nav.Item eventKey={key} key={key}> {name}
         </Nav.Item>
     })
 
@@ -86,7 +87,7 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange }) =
     }
 
     const editor = 
-        <Input as="textarea" value={editingText} onChange={onTextChange} rows={5}></Input>
+        <Input as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5}></Input>
 
     return (
         <div>
