@@ -3,10 +3,11 @@ export interface Item {
     name: string
     description: string
     price?: number
-    unique: false
+    unique: boolean
     tags: string[]
     image?: string
-    thumbnail?: string
+    thumbnail?: string,
+    canGive: boolean
 }
 
 export function createEmptyItem(uid: string): Item {
@@ -20,6 +21,7 @@ export function createEmptyItem(uid: string): Item {
         description: "",
         price: 0,
         unique: false,
-        tags: []
+        tags: [],
+        canGive: true
     }
 }

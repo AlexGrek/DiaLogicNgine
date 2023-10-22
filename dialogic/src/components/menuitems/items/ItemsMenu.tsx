@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
-import { Button, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
+import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
 import { isValidJsIdentifier } from '../../../Utils';
 import { Item, createEmptyItem } from '../../../game/Items';
 import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
+import StringListEditor from '../../common/StringListEditor';
 
 interface ItemsMenuProps {
     game: GameDescription;
@@ -39,15 +40,32 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             return <div>Wrong item selected: {items.length}, {editingIndex}</div>
         }
         const it = items[editingIndex]
-        const updateFact = (prop: "name" | "description", value: string) => {
+        const updateItem = (prop: "name" | "description", value: string) => {
+            const upd = lodash.cloneDeep(items)
+            upd[editingIndex][prop] = value
+            onSetItems(upd)
+        }
+
+        const setTags = (value: string[]) => {
+            const upd = lodash.cloneDeep(items)
+            upd[editingIndex].tags = value
+            onSetItems(upd)
+        }
+
+        const setCheck= (prop: "canGive" | "unique", value: boolean) => {
             const upd = lodash.cloneDeep(items)
             upd[editingIndex][prop] = value
             onSetItems(upd)
         }
 
         return <div className='facts-drawer-contents'>
-            <Input value={it.name} onChange={(val) => updateFact("name", val)} placeholder='display item name'></Input>
-            <Input value={it.description} onChange={(val) => updateFact("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
+            <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display item name'></Input>
+            <Input value={it.description} onChange={(val) => updateItem("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
+            <Divider>Tags</Divider>
+            <StringListEditor canBeEmpty={true} value={it.tags} onChange={setTags}></StringListEditor>
+            <Divider>Properties</Divider>
+            <Checkbox checked={it.unique} onChange={(value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
+            <Checkbox checked={it.canGive} onChange={(value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
             <p className='item-edit-uid'>Item UID: <b>{it.uid}</b></p>
         </div>
     }

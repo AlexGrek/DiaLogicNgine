@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, IconButton, Input } from 'rsuite';
 import PlusIcon from '@rsuite/icons/Plus';
 import MinusIcon from '@rsuite/icons/Minus';
+import './StringListEditor.css'
 
 interface StringListEditorProps {
     onChange: (update: string[]) => void;
@@ -31,7 +32,7 @@ const StringListEditor: React.FC<StringListEditorProps> = ({onChange, value, can
     const renderValues = () => {
         return value.map((val, i) => {
             const remove = <Button onClick={() => removeAt(i)}><MinusIcon/></Button>
-            return <div>
+            return <div className="string-list-editor-row">
                 <Input key={i} value={val} onChange={(v) => editAt(i, v)}></Input>{i > 0 || canDeleteFirst ? remove : null}
             </div>
         })

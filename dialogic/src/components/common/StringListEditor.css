@@ -1,0 +1,9 @@
+.string-list-editor-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.string-list-editor-row > input {
+    width: 100%;
+}
