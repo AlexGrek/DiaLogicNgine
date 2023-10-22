@@ -25,6 +25,10 @@ export function roleByUid(uid: string, game: GameDescription) {
     return found
 }
 
+export interface Behavior {
+    speakingModel: SpeakingModel
+}
+
 export interface SpeakingModel {
     agree: string[]
     deny: string[]
@@ -59,7 +63,7 @@ export default interface Character {
     chooseAvatarScript?: string
     avatar: ImageList
     description: TextList
-    factReactionMap?: FactReactionMap
+    behavior?: Behavior
 }
 
 

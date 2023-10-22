@@ -35,7 +35,6 @@ const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers }) => {
         const facts = lodash.cloneDeep(game.facts)
         facts.splice(index, 1)
         onSetGame({...game, facts: facts})
-        
     }
 
     const renderFactsList = () => {

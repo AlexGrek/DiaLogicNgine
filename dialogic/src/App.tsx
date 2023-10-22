@@ -18,6 +18,8 @@ import Player from './components/player/Player';
 import Loc from './game/Loc';
 import Prop from './game/Prop';
 import FactsObjectivesTabs from './components/menuitems/factsobjectives/FactsObjectivesTabs';
+import ItemsMenu from './components/menuitems/items/ItemsMenu';
+import { Item } from './game/Items';
 
 export interface IAppProps {
 
@@ -165,6 +167,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       </div>
       <div style={this.displayStyle("facts")}>
         <FactsObjectivesTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+      </div>
+      <div style={this.displayStyle("items")}>
+        <ItemsMenu items={this.state.game.items} onSetItems={(items: Item[]) => this.setState({game: {...this.state.game, items: items}})} game={this.state.game}/>
       </div>
     </div>
   }

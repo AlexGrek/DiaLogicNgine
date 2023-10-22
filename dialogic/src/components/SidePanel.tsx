@@ -10,6 +10,7 @@ import AttachmentIcon from '@rsuite/icons/Attachment';
 import IdMappingIcon from '@rsuite/icons/IdMapping';
 import PlayOutlineIcon from '@rsuite/icons/PlayOutline';
 import FunnelTimeIcon from '@rsuite/icons/FunnelTime';
+import DeviceOtherIcon from '@rsuite/icons/DeviceOther';
 import ExploreIcon from '@rsuite/icons/Explore';
 import { IUpds } from '../App';
 
@@ -107,6 +108,9 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               </Nav.Item>
               <Nav.Item eventKey="facts" icon={<FunnelTimeIcon />} onClick={() => this.props.onMenuSwitch("facts")}>
                 Facts & Objectives
+              </Nav.Item>
+              <Nav.Item eventKey="items" icon={<DeviceOtherIcon />} onClick={() => this.props.onMenuSwitch("items")}>
+                Items
               </Nav.Item>
             </Nav>
           </Sidenav.Body>

@@ -3,6 +3,7 @@ import Character, { Role } from "./Character";
 import Dialog from "./Dialog";
 import Fact from "./Fact";
 import { emptyImageList } from "./ImageList";
+import { Item } from "./Items";
 import Loc from "./Loc";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
@@ -17,6 +18,7 @@ export interface GameDescription {
     roles: Role[]
     locs: Loc[]
     props: Prop[]
+    items: Item[]
     buildVersion: number
     startupDialog: DialogWindowId
     engineVersion: string
@@ -44,6 +46,7 @@ export function createDefaultGame(): GameDescription {
         facts: [],
         chars: [ narratorCharacter ],
         locs: [],
+        items: [],
         roles: [ agedRole ],
         props: [
             createNumberProp("testNumProp", 42),
