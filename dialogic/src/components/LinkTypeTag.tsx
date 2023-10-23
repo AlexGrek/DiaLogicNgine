@@ -14,7 +14,8 @@ const Colors = {
     [LinkType.NavigateToLocation]: asColor("cyan"),
     [LinkType.TalkToPerson]: asColor("green"),
     [LinkType.Jump]: asColor("red"),
-    [LinkType.ResetJump]: asColor("red")
+    [LinkType.ResetJump]: asColor("red"),
+    [LinkType.QuickReply]: asColor("yellow")
 }
 
 const Icons = {
@@ -24,7 +25,8 @@ const Icons = {
     [LinkType.NavigateToLocation]: "\ue01c",
     [LinkType.TalkToPerson]: "\ue066",
     [LinkType.Jump]: "5",
-    [LinkType.ResetJump]: "9"
+    [LinkType.ResetJump]: "9",
+    [LinkType.QuickReply]: "v"
 }
 
 const LinkTypeTag: React.FC<LinkTypeTagProps> = ({ value }) => {

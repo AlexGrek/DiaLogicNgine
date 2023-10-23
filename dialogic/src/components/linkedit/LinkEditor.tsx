@@ -1,23 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import 'animate.css';
-import { AutoComplete, Button, ButtonGroup, ButtonToolbar, Checkbox, Form, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Tag, Toggle, Tooltip, Whisper } from 'rsuite';
 import PagePreviousIcon from '@rsuite/icons/PagePrevious';
 import TrashIcon from '@rsuite/icons/Trash';
-import Dialog, { createDialog, createDialogLink, createWindow, DialogLink, DialogLinkDirection, DialogWindow, LinkType } from '../../game/Dialog';
-import { Divider } from 'rsuite';
-import ExitIcon from '@rsuite/icons/Exit';
-import ButtonPanelSelector from '../ButtonPanelSelector';
-import { KeyValuePair, stringEnumEntries } from '../../Utils';
-import LinkTypeTag from '../LinkTypeTag';
-import { GameDescription } from '../../game/GameDescription';
+import 'animate.css';
+import lodash from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, ButtonToolbar, Checkbox, Divider, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Toggle, Tooltip, Whisper } from 'rsuite';
 import { IUpds } from '../../App';
-import { DialogHandlers } from '../DialogEditor';
+import { stringEnumEntries } from '../../Utils';
 import { createDialogWindowId } from '../../exec/GameState';
+import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LinkType, createWindow } from '../../game/Dialog';
+import { GameDescription } from '../../game/GameDescription';
+import ButtonPanelSelector from '../ButtonPanelSelector';
+import { DialogHandlers } from '../DialogEditor';
+import LinkTypeTag from '../LinkTypeTag';
+import CodeSampleButton from '../common/CodeSampleButton';
 import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code_editor/PopupCodeEditor';
-import CodeSampleButton from '../common/CodeSampleButton';
-import Loc from '../../game/Loc';
-import lodash from 'lodash';
 import LocationPicker from './LocationPicker';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
@@ -85,7 +82,8 @@ const TooltipText: { [key: string]: string } = {
     [LinkType.NavigateToLocation]: "Move to location, clearing all the stack",
     [LinkType.TalkToPerson]: "Talk to person, push stack",
     [LinkType.Jump]: "Move to another dialog/window keeping the stack",
-    [LinkType.ResetJump]: "Move to another dialog/window clearing the stack"
+    [LinkType.ResetJump]: "Move to another dialog/window clearing the stack",
+    [LinkType.QuickReply]: "Reply without changing window"
 }
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
@@ -176,6 +174,19 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         onLinkChange(linkUpdate, index);
     }
 
+    const editReply = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, str: string) => {
+        const linkDirUpdate: DialogLinkDirection = { ...linkdir, replyText: str };
+
+        var linkUpdate = lodash.cloneDeep(link)
+        if (isMain) {
+            linkUpdate.mainDirection = linkDirUpdate
+        } else {
+            linkUpdate.alternativeDirections[aindex] = linkDirUpdate
+        }
+
+        onLinkChange(linkUpdate, index);
+    }
+
     const editPushDirection = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, d: string | null, w: string | null) => {
         if (d && w) {
             const id = createDialogWindowId(d, w);
@@ -255,10 +266,13 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             if (linkdir.qualifiedDirection === undefined) {
                 linkdir.qualifiedDirection = game.startupDialog
             }
-            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)}></DialogWindowPicker>
+            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)}/>
         }
         if (linkdir.type === LinkType.NavigateToLocation) {
             return <LocationPicker locs={game.locs} value={linkdir.direction || ''} onLocChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)} />
+        }
+        if (linkdir.type === LinkType.QuickReply) {
+            return <Input value={linkdir.replyText || ""} onChange={value => editReply(linkdir, isMainLink, aindex, value)} placeholder='reply text'/>
         }
         return <div></div>
     }

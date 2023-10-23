@@ -101,12 +101,13 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         setChanges(true);
         // console.log("window changed");
         const newWindow = modificator(windowState);
-        console.log(JSON.stringify(newWindow));
+        // console.log(JSON.stringify(newWindow));
         setWindow(newWindow); // update window changes
     }
 
     const onLinkChange = (links: DialogLink[]) => {
         const updater = (window: DialogWindow) => { return { ...window, links: links } };
+        // console.log(`onLinkChange: ${JSON.stringify(links)}`)
         modifyWindowBy(updater)
     }
 
@@ -173,7 +174,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             </PanelGroup>
                             
                         </Col>
-                        <Col xs={12} className="window-editor-grid-content">
+                        <Col xs={10} className="window-editor-grid-content">
                             <div className='window-editor-grid-header'>
                                 Content
                             </div>
@@ -197,7 +198,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             
                             
                         </Col>
-                        <Col xs={6}>
+                        <Col xs={8}>
                             <div className='window-editor-grid-header'>
                                 Links
                             </div>

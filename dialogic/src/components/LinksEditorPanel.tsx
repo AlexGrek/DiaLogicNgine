@@ -43,6 +43,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     const onLinkChange = (link: DialogLink, index: number) => {
         const newLinkList = links.slice();
         newLinkList[index] = link;
+        // console.log(`Links: ${JSON.stringify(newLinkList)}`)
         onChange(newLinkList);
     }
 
