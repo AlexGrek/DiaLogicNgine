@@ -47,3 +47,9 @@ export function generateImageUrl(uri: string) {
 export function mergeDicts<T>(dict1: T, dict2: T): T {
     return { ...dict1, ...dict2 };
 }
+
+export function isNumeric(str: string) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(parseInt(str)) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+  }

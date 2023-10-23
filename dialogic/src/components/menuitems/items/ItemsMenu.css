@@ -1,0 +1,42 @@
+.item-item {
+    width: 140pt;
+    height: 140pt;
+    cursor: pointer;
+    border-radius: 4pt;
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #1a1d24;
+    margin: 3pt;
+    overflow: hidden;
+}
+
+.item-item:hover {
+    border: 1px solid grey;
+}
+
+.item-header {
+    width: 100%;
+    text-align: center;
+}
+
+.item-name {
+    width: 100%;
+    min-height: 2em;
+    text-align: center;
+}
+
+.item-thumb {
+    max-width: 100%;
+    max-height: 130px;
+    display: block;
+    text-align: center;
+}
+
+.item-uid {
+    opacity: .4;
+    font-size: small;
+    font-family: monospace;
+    margin-top: 4pt;
+}

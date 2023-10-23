@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
-import { isValidJsIdentifier } from '../../../Utils';
+import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
 import { Item, createEmptyItem } from '../../../game/Items';
 import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
 import StringListEditor from '../../common/StringListEditor';
+import ImagePicker from '../../common/ImagePicker';
+import StringMapEditor from '../../common/StringMapEditor';
+import './ItemsMenu.css'
 
 interface ItemsMenuProps {
     game: GameDescription;
@@ -16,7 +19,20 @@ interface ItemsMenuProps {
 
 const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const [editingObject, setEditingObject] = useState<Item | null>(null);
     const [newUid, setNewUid] = React.useState<string>("")
+
+    const setEditing = (index: number, object?: Item) => {
+        setEditingIndex(index)
+        if (object !== undefined) {
+            setEditingObject(object)
+            return;
+        }
+        if (index >= items.length || index < 0) {
+            return;
+        }
+        setEditingObject(items[index])
+    }
 
     const createItem = () => {
         if (!isValidJsIdentifier(newUid)) {
@@ -24,59 +40,73 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
         }
         const item = createEmptyItem(newUid)
         setNewUid("")
-        setEditingIndex(items.length)
+        setEditing(items.length, item)
         onSetItems([...items, item])
     }
 
     const deleteItem = (index: number) => {
-        setEditingIndex(-1)
+        setEditing(-1)
         const itemsUpd = lodash.cloneDeep(items)
         itemsUpd.splice(index, 1)
         onSetItems(itemsUpd)
     }
 
     const renderDrawerContents = () => {
-        if (items.length < editingIndex) {
+        if (items.length < editingIndex || editingObject === null) {
             return <div>Wrong item selected: {items.length}, {editingIndex}</div>
         }
-        const it = items[editingIndex]
+        const it = editingObject
         const updateItem = (prop: "name" | "description", value: string) => {
-            const upd = lodash.cloneDeep(items)
-            upd[editingIndex][prop] = value
-            onSetItems(upd)
+            setEditingObject({...editingObject, [prop]: value})
         }
 
         const setTags = (value: string[]) => {
-            const upd = lodash.cloneDeep(items)
-            upd[editingIndex].tags = value
-            onSetItems(upd)
+            setEditingObject({...editingObject, tags: value})
         }
 
         const setCheck= (prop: "canGive" | "unique", value: boolean) => {
-            const upd = lodash.cloneDeep(items)
-            upd[editingIndex][prop] = value
-            onSetItems(upd)
+            setEditingObject({...editingObject, [prop]: value})
         }
 
-        return <div className='facts-drawer-contents'>
+        const setImage = (prop: "image" | "thumbnail", value: string | undefined) => {
+            setEditingObject({...editingObject, [prop]: value})
+        }
+
+        return <div className='items-drawer-contents'>
             <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display item name'></Input>
             <Input value={it.description} onChange={(val) => updateItem("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
-            <Divider>Tags</Divider>
-            <StringListEditor canBeEmpty={true} value={it.tags} onChange={setTags}></StringListEditor>
+            <Divider>Images</Divider>
+            <ImagePicker value={it.image} onChange={val => setImage("image", val)}>Image</ImagePicker>
+            <ImagePicker value={it.thumbnail} onChange={val => setImage("thumbnail", val)}>Thumbnail</ImagePicker>
             <Divider>Properties</Divider>
             <Checkbox checked={it.unique} onChange={(value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
             <Checkbox checked={it.canGive} onChange={(value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
+            <Divider>Stats</Divider>
+            <StringMapEditor value={it.stats} onChange={value => setEditingObject({...editingObject, stats: value})}></StringMapEditor>
+            <Divider>Tags</Divider>
+            <StringListEditor canBeEmpty={true} value={it.tags} onChange={setTags}></StringListEditor>
             <p className='item-edit-uid'>Item UID: <b>{it.uid}</b></p>
         </div>
     }
 
     const renderItems = () => {
-        return items.map((fact, i) => {
-            return <div className='item-item' key={i} onClick={() => setEditingIndex(i)}>
-                <div className='item-header'><p className='fact-uid'>{fact.uid}</p></div>
-                <p className='item-name'>{fact.name}</p>
+        return items.map((it, i) => {
+            const img = it.thumbnail? it.thumbnail : it.image
+            return <div className='item-item' key={i} onClick={() => setEditing(i)}>
+                <div className='item-header'><p className='item-uid'>{it.uid}</p></div>
+                {img ? <img className='item-thumb' src={generateImageUrl(img)}/> : null}
+                <p className='item-name'>{it.name}</p>
             </div>
         })
+    }
+
+    const saveEdited = () => {
+        // save updates into index
+        const copied = lodash.cloneDeep(items)
+        if (editingObject !== null)
+            copied[editingIndex] = editingObject
+        setEditing(-1)
+        onSetItems(copied)
     }
 
     return (
@@ -94,12 +124,12 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             <div className='facts-container'>
                 {renderItems()}
             </div>
-            <Drawer placement='right' open={editingIndex >= 0 && editingIndex < items.length} onClose={() => setEditingIndex(-1)}>
+            <Drawer placement='right' open={editingIndex >= 0 && editingIndex < items.length} onClose={() => saveEdited()}>
         <Drawer.Header>
           <Drawer.Title>Edit item</Drawer.Title>
           <Drawer.Actions>
           <ConfirmDeleteButton onConfirm={() => deleteItem(editingIndex)} objectDescr={`item`}></ConfirmDeleteButton>
-            <Button onClick={() => setEditingIndex(-1)} appearance="primary">
+            <Button onClick={() => saveEdited()} appearance="primary">
               Save
             </Button>
           </Drawer.Actions>

@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button, IconButton, Input } from 'rsuite';
-import PlusIcon from '@rsuite/icons/Plus';
 import MinusIcon from '@rsuite/icons/Minus';
-import './StringListEditor.css'
+import PlusIcon from '@rsuite/icons/Plus';
+import React from 'react';
+import { Button, Input } from 'rsuite';
+import './StringListEditor.css';
 
 interface StringListEditorProps {
     onChange: (update: string[]) => void;

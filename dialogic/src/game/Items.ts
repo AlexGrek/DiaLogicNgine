@@ -5,6 +5,7 @@ export interface Item {
     price?: number
     unique: boolean
     tags: string[]
+    stats: { [key: string]: number | string }
     image?: string
     thumbnail?: string,
     canGive: boolean
@@ -22,6 +23,7 @@ export function createEmptyItem(uid: string): Item {
         price: 0,
         unique: false,
         tags: [],
-        canGive: true
+        canGive: true,
+        stats: {}
     }
 }
