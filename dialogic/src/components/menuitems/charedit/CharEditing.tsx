@@ -10,7 +10,6 @@ import TextListEditor from '../../common/text_list/TextListEditor';
 import PropsEditMenu from '../scriptedit/PropsEditMenu';
 import CharRoleEditing from './CharRoleEditing';
 import './charediting.css';
-import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
 import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {

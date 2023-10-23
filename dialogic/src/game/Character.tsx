@@ -4,6 +4,7 @@ import Proxy from "./Proxy"
 import { ImageList, emptyImageList } from "./ImageList";
 import { GameDescription } from "./GameDescription";
 import { DialogWindowId } from "../exec/GameState";
+import { DialogLink } from "./Dialog";
 
 export interface Trait {
     name: string
@@ -50,20 +51,28 @@ export interface FactReactionMap {
 }
 
 
+export interface CharacterDialog {
+    behavior: Behavior
+    links: DialogLink[]
+    background: ImageList
+    text: TextList
+    chooseTextScript?: string
+    chooseBgScript?: string
+}
+
 export default interface Character {
     uid: string
     displayName: TextList
     traits: string[]
     props: Prop[]
     overrideProps: Prop[]
-    startDialog?: Proxy
     roles: string[],
     chooseNameScript?: string
     chooseDescriptionScript?: string
     chooseAvatarScript?: string
     avatar: ImageList
     description: TextList
-    behavior?: Behavior
+    dialog?: CharacterDialog
 }
 
 
