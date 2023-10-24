@@ -1,5 +1,5 @@
 import Prop from "./Prop";
-import { TextList } from "./TextList";
+import { TextList, emptyTextList } from "./TextList";
 import Proxy from "./Proxy"
 import { ImageList, emptyImageList } from "./ImageList";
 import { GameDescription } from "./GameDescription";
@@ -39,6 +39,17 @@ export interface SpeakingModel {
     dontKnowChar: string[]
 }
 
+const createSpeakingModel = (): SpeakingModel => {
+    return {
+        agree: ["ok"],
+        deny: ["no"],
+        bye: ["bye"],
+        hello: ["hello"],
+        dontKnowChar: ["who is it"],
+        dontKnowObject: ["what it it"]
+    }
+}
+
 export interface Reaction {
     simpleText: TextList
     chooseSimpleTextScript?: string
@@ -58,6 +69,17 @@ export interface CharacterDialog {
     text: TextList
     chooseTextScript?: string
     chooseBgScript?: string
+}
+
+export const createCharacterDialog = (): CharacterDialog => {
+    return {
+        behavior: {
+            speakingModel: createSpeakingModel()
+        },
+        links: [],
+        background: emptyImageList(),
+        text: emptyTextList()
+    }
 }
 
 export default interface Character {

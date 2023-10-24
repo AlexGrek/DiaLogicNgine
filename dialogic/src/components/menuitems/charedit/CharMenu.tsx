@@ -17,7 +17,7 @@ interface CharMenuProps {
     handlers: IUpds;
 }
 
-const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds }) => {
+const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingUID, setCreatingUID] = useState<string>("");
 
@@ -68,7 +68,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers: IUpds })
 
     const tab = (i: number) => {
         const char = game.chars[i]
-        return <CharEditing onDelete={deleteCharacter} key={char.uid} game={game} char={char} onCharacterChange={value => setCharacter(i, value)}></CharEditing>
+        return <CharEditing onDelete={deleteCharacter} key={char.uid} game={game} char={char} onCharacterChange={value => setCharacter(i, value)} handlers={handlers}></CharEditing>
     }
 
     return (

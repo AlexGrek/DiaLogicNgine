@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Panel, PanelGroup } from 'rsuite';
+import { Button, Panel, PanelGroup } from 'rsuite';
 import Character from '../../../game/Character';
 import { GameDescription } from '../../../game/GameDescription';
 import { ImageList } from '../../../game/ImageList';
@@ -11,6 +11,8 @@ import PropsEditMenu from '../scriptedit/PropsEditMenu';
 import CharRoleEditing from './CharRoleEditing';
 import './charediting.css';
 import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
+import CharDialogEditorDrawer from './CharDialogEditorDrawer';
+import { IUpds } from '../../../App';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -28,12 +30,14 @@ interface CharEditingProps {
     char: Character
     onCharacterChange: (char: Character) => void
     onDelete: (uid: string) => void
+    handlers: IUpds
 }
 
 type CodeEditMenu = "chooseAvatarScript" | "chooseNameScript" | "chooseDescriptionScript"
 
-const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange, onDelete }) => {
+const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange, onDelete, handlers }) => {
     const [ch, setCh] = useState<Character>(char);
+    const [dialogEditorOpen, setDialogEditorOpen] = useState<boolean>(false);
 
     // enable code editor props
     const [codeEditMenu, setCodeEditMenu] = useState<CodeEditMenu>("chooseNameScript");
@@ -85,7 +89,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     return (
         <div className='char-editing-main-container' onBlur={save}>
-            <p>{avatar(ch.avatar)}{ch.uid}{renderDeleteButton()}</p>
+            <p>{avatar(ch.avatar)}{ch.uid}{renderDeleteButton()}<Button onClick={() => setDialogEditorOpen(true)} appearance='link'>Dialog...</Button></p>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Display name" defaultExpanded>
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })}/>
@@ -109,6 +113,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                 </Panel>
             </PanelGroup>
             {renderCodeEditor(codeEditMenu)}
+            <CharDialogEditorDrawer value={ch} open={dialogEditorOpen} onUpdate={onCharacterChange} onClose={() => setDialogEditorOpen(false)} game={game} handlers={handlers}/>
             
             
         </div>
