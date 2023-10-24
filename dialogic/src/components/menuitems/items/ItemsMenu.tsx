@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { GameDescription } from '../../../game/GameDescription';
-import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
-import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
-import { Item, createEmptyItem } from '../../../game/Items';
 import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
+import React, { useState } from 'react';
+import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
+import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
+import { GameDescription } from '../../../game/GameDescription';
+import { Item, createEmptyItem } from '../../../game/Items';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
-import StringListEditor from '../../common/StringListEditor';
 import ImagePicker from '../../common/ImagePicker';
+import StringListEditor from '../../common/StringListEditor';
 import StringMapEditor from '../../common/StringMapEditor';
-import './ItemsMenu.css'
+import './ItemsMenu.css';
 
 interface ItemsMenuProps {
     game: GameDescription;
@@ -57,19 +57,19 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
         }
         const it = editingObject
         const updateItem = (prop: "name" | "description", value: string) => {
-            setEditingObject({...editingObject, [prop]: value})
+            setEditingObject({ ...editingObject, [prop]: value })
         }
 
         const setTags = (value: string[]) => {
-            setEditingObject({...editingObject, tags: value})
+            setEditingObject({ ...editingObject, tags: value })
         }
 
-        const setCheck= (prop: "canGive" | "unique", value: boolean) => {
-            setEditingObject({...editingObject, [prop]: value})
+        const setCheck = (prop: "canGive" | "unique", value: boolean) => {
+            setEditingObject({ ...editingObject, [prop]: value })
         }
 
         const setImage = (prop: "image" | "thumbnail", value: string | undefined) => {
-            setEditingObject({...editingObject, [prop]: value})
+            setEditingObject({ ...editingObject, [prop]: value })
         }
 
         return <div className='items-drawer-contents'>
@@ -82,7 +82,7 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             <Checkbox checked={it.unique} onChange={(value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
             <Checkbox checked={it.canGive} onChange={(value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
             <Divider>Stats</Divider>
-            <StringMapEditor value={it.stats} onChange={value => setEditingObject({...editingObject, stats: value})}></StringMapEditor>
+            <StringMapEditor value={it.stats} onChange={value => setEditingObject({ ...editingObject, stats: value })}></StringMapEditor>
             <Divider>Tags</Divider>
             <StringListEditor canBeEmpty={true} value={it.tags} onChange={setTags}></StringListEditor>
             <p className='item-edit-uid'>Item UID: <b>{it.uid}</b></p>
@@ -91,10 +91,10 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
 
     const renderItems = () => {
         return items.map((it, i) => {
-            const img = it.thumbnail? it.thumbnail : it.image
+            const img = it.thumbnail ? it.thumbnail : it.image
             return <div className='item-item' key={i} onClick={() => setEditing(i)}>
                 <div className='item-header'><p className='item-uid'>{it.uid}</p></div>
-                {img ? <img className='item-thumb' src={generateImageUrl(img)}/> : null}
+                {img ? <img className='item-thumb' src={generateImageUrl(img)} /> : null}
                 <p className='item-name'>{it.name}</p>
             </div>
         })
@@ -125,19 +125,19 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
                 {renderItems()}
             </div>
             <Drawer placement='right' open={editingIndex >= 0 && editingIndex < items.length} onClose={() => saveEdited()}>
-        <Drawer.Header>
-          <Drawer.Title>Edit item</Drawer.Title>
-          <Drawer.Actions>
-          <ConfirmDeleteButton onConfirm={() => deleteItem(editingIndex)} objectDescr={`item`}></ConfirmDeleteButton>
-            <Button onClick={() => saveEdited()} appearance="primary">
-              Save
-            </Button>
-          </Drawer.Actions>
-        </Drawer.Header>
-        <Drawer.Body>
-          {editingIndex >= 0 && editingIndex < items.length ? renderDrawerContents() : null}
-        </Drawer.Body>
-      </Drawer>
+                <Drawer.Header>
+                    <Drawer.Title>Edit item</Drawer.Title>
+                    <Drawer.Actions>
+                        <ConfirmDeleteButton onConfirm={() => deleteItem(editingIndex)} objectDescr={`item`}></ConfirmDeleteButton>
+                        <Button onClick={() => saveEdited()} appearance="primary">
+                            Save
+                        </Button>
+                    </Drawer.Actions>
+                </Drawer.Header>
+                <Drawer.Body>
+                    {editingIndex >= 0 && editingIndex < items.length ? renderDrawerContents() : null}
+                </Drawer.Body>
+            </Drawer>
         </div>
     );
 };

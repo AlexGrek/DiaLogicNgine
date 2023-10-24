@@ -1,7 +1,7 @@
+import ShieldIcon from '@rsuite/icons/Shield';
+import TrashIcon from '@rsuite/icons/Trash';
 import React from 'react';
 import { IconButton } from 'rsuite';
-import TrashIcon from '@rsuite/icons/Trash';
-import ShieldIcon from '@rsuite/icons/Shield';
 
 interface ConfirmDeleteButtonSmallProps {
     onConfirm: () => void
@@ -13,9 +13,9 @@ const ConfirmDeleteButtonSmall: React.FC<ConfirmDeleteButtonSmallProps> = ({ onC
 
     return (
         <span>
-        {!pressed ? 
-            <IconButton color="red" onClick={() => setPressed(true)} icon={<TrashIcon/>}>{customText || "Delete"}</IconButton> 
-            : <IconButton color="red" onClick={() => onConfirm()} icon={<ShieldIcon/>}>Confirm</IconButton>}
+            {!pressed ?
+                <IconButton color="red" onClick={() => setPressed(true)} icon={<TrashIcon />}>{customText || "Delete"}</IconButton>
+                : <IconButton color="red" onClick={() => onConfirm()} icon={<ShieldIcon />}>Confirm</IconButton>}
         </span>
     );
 };

@@ -6,11 +6,11 @@ import { DialogLink } from '../../../game/Dialog';
 import { GameDescription } from '../../../game/GameDescription';
 import { TextList } from '../../../game/TextList';
 import LinksEditorPanel from '../../LinksEditorPanel';
+import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 import { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import ImageListEditor from '../../common/text_list/ImageListEditor';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import './charmenu.css';
-import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -73,9 +73,9 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
 
     const mustBeDialog = char.dialog || createCharacterDialog()
 
-    const setDialog = (val?: CharacterDialog) => { 
+    const setDialog = (val?: CharacterDialog) => {
         console.log("Setting dialog: " + JSON.stringify(val))
-        setChar({ ...char, dialog: val }) 
+        setChar({ ...char, dialog: val })
     }
 
     const linksChange = (val: DialogLink[]) => setDialog({ ...mustBeDialog, links: val })
@@ -86,7 +86,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
             <Drawer.Header>
                 <Drawer.Title>Dialog options for {char.displayName.main}</Drawer.Title>
                 <Drawer.Actions>
-                {char.dialog === undefined ? null : <ConfirmDeleteButtonSmall customText='Disable dialog' onConfirm={() => setDialog(undefined)}/>}
+                    {char.dialog === undefined ? null : <ConfirmDeleteButtonSmall customText='Disable dialog' onConfirm={() => setDialog(undefined)} />}
                     <Button onClick={() => onCloseHandler(false)} appearance="ghost" color="blue">
                         Discard
                     </Button>
@@ -96,7 +96,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
                 </Drawer.Actions>
             </Drawer.Header>
             <Drawer.Body className="window-editor-drawer-body">
-            <Checkbox checked={char.dialog !== undefined} readOnly={char.dialog !== undefined} onChange={() => setDialog(mustBeDialog) }>Dialog enabled</Checkbox>
+                <Checkbox checked={char.dialog !== undefined} readOnly={char.dialog !== undefined} onChange={() => setDialog(mustBeDialog)}>Dialog enabled</Checkbox>
                 {char.dialog === undefined ? <p>Enable dialog option to edit character</p> :
                     <Grid className="window-editor-grid">
                         <Row className="show-grid">

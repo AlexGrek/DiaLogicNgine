@@ -23,7 +23,7 @@ const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
         "always first alternative": "return 1;"
     },
     "header": "alternative choose"
-  }
+}
 
 interface CharEditingProps {
     game: GameDescription;
@@ -62,7 +62,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     const editCode = (menu: CodeEditMenu, val: string) => {
         const upd = val.trim() === "" ? undefined : val;
-        setCh({...ch, [menu]: upd})
+        setCh({ ...ch, [menu]: upd })
         setCodeEditorOpen(false)
     }
 
@@ -72,7 +72,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
             setCodeEditMenu(menu)
             setCodeEditorOpen(true)
         }
-        return <CodeSampleButton onClick={() => codeEdit(prop)} name={displayName} code={ch[prop]}/>
+        return <CodeSampleButton onClick={() => codeEdit(prop)} name={displayName} code={ch[prop]} />
     }
 
     const avatar = (img: ImageList) => {
@@ -84,7 +84,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
     }
 
     const renderDeleteButton = () => {
-        return <ConfirmDeleteButtonSmall onConfirm={() => onDelete(char.uid)}/>
+        return <ConfirmDeleteButtonSmall onConfirm={() => onDelete(char.uid)} />
     }
 
     return (
@@ -92,13 +92,13 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
             <p>{avatar(ch.avatar)}{ch.uid}{renderDeleteButton()}<Button onClick={() => setDialogEditorOpen(true)} appearance='link'>Dialog...</Button></p>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Display name" defaultExpanded>
-                    <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })}/>
+                    <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })} />
                 </Panel>
                 <Panel header="Avatar Image">
-                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value})}/>
+                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value })} />
                 </Panel>
                 <Panel header="Roles">
-                <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />
+                    <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />
                 </Panel>
                 <Panel header="Personal props">
                     <PropsEditMenu game={game} props={ch.props} onSetProps={p => setCh({ ...ch, props: p })} />
@@ -109,13 +109,13 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                     {renderCodeEditButton("chooseDescriptionScript")}
                 </Panel>
                 <Panel header="Display description">
-                    <TextListEditor singleLine={false} textList={ch.description} onChange={p => setCh({ ...ch, description: p })}/>
+                    <TextListEditor singleLine={false} textList={ch.description} onChange={p => setCh({ ...ch, description: p })} />
                 </Panel>
             </PanelGroup>
             {renderCodeEditor(codeEditMenu)}
-            <CharDialogEditorDrawer value={ch} open={dialogEditorOpen} onUpdate={onCharacterChange} onClose={() => setDialogEditorOpen(false)} game={game} handlers={handlers}/>
-            
-            
+            <CharDialogEditorDrawer value={ch} open={dialogEditorOpen} onUpdate={onCharacterChange} onClose={() => setDialogEditorOpen(false)} game={game} handlers={handlers} />
+
+
         </div>
     );
 };

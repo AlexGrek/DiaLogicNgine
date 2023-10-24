@@ -31,7 +31,7 @@ function removeByIndex<T>(array: T[], index: Number) {
     return array.filter((_, i) => i !== index);
 }
 
-export { allEnumValuesOf, asColor, removeByIndex }
+export { allEnumValuesOf, asColor, removeByIndex };
 
 export function isValidJsIdentifier(id?: string) {
     if (!id) {
