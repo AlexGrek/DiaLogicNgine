@@ -5,7 +5,7 @@ import lodash from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, ButtonToolbar, Checkbox, Divider, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Toggle, Tooltip, Whisper } from 'rsuite';
 import { IUpds } from '../../App';
-import { stringEnumEntries } from '../../Utils';
+import { genRandomAlphanumericString, prependToCode, stringEnumEntries } from '../../Utils';
 import { createDialogWindowId } from '../../exec/GameState';
 import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LinkType, createWindow } from '../../game/Dialog';
 import { GameDescription } from '../../game/GameDescription';
@@ -16,6 +16,8 @@ import CodeSampleButton from '../common/CodeSampleButton';
 import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code_editor/PopupCodeEditor';
 import LocationPicker from './LocationPicker';
+import Magic, { MagicOperation } from '../common/magic/Magic';
+import { createBoolProp } from '../../game/Prop';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -214,7 +216,6 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         }
         // we are not in dialog, local and pop links are not available
         return !(linkType == LinkType.Local || linkType == LinkType.Pop)
-
     }
 
     const linkTypes = stringEnumEntries(LinkType).filter((el) => isAllowedLinkType(el.value))
@@ -266,16 +267,38 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             if (linkdir.qualifiedDirection === undefined) {
                 linkdir.qualifiedDirection = game.startupDialog
             }
-            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)}/>
+            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)} />
         }
         if (linkdir.type === LinkType.NavigateToLocation) {
             return <LocationPicker locs={game.locs} value={linkdir.direction || ''} onLocChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)} />
         }
         if (linkdir.type === LinkType.QuickReply) {
-            return <Input value={linkdir.replyText || ""} onChange={value => editReply(linkdir, isMainLink, aindex, value)} placeholder='reply text'/>
+            return <Input value={linkdir.replyText || ""} onChange={value => editReply(linkdir, isMainLink, aindex, value)} placeholder='reply text' />
         }
         return <div></div>
     }
+
+    const magicOperationMakeVisibleOnce: MagicOperation = {
+        name: 'Usable once',
+        parameters: {
+            "property_uid": `_visited_${genRandomAlphanumericString(6)}`
+        },
+        descr: 'Link will be invisible after user clicks it once, creates prop and script',
+        onApply: function (op: MagicOperation): string | null {
+            const prop = op.parameters["property_uid"]
+            handlers.createProp(createBoolProp(prop, false))
+            const isVisible = `return !props.${prop};`
+            const action = `props.${prop} = true;`
+            const linkUpdate = {
+                ...link,
+                isVisible: prependToCode(isVisible, link.isVisible),
+                actionCode: prependToCode(action, link.actionCode)
+            };
+            onLinkChange(linkUpdate, index)
+            return null
+        }
+    }
+    const magic = <Magic game={game} operations={[magicOperationMakeVisibleOnce]} />
 
     const tooltips = lodash.cloneDeep(TooltipText)
     const filteredTooltips = Object.fromEntries(Object.entries(tooltips));
@@ -322,11 +345,11 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
 
     const onChangeLocationInBgCheck = (value: boolean) => {
         const newValue = value ? "" : undefined
-        onLinkChange({...link, changeLocationInBg: newValue}, index)
+        onLinkChange({ ...link, changeLocationInBg: newValue }, index)
     }
 
     const onChangeLocationInBg = (value: string) => {
-        onLinkChange({...link, changeLocationInBg: value}, index)
+        onLinkChange({ ...link, changeLocationInBg: value }, index)
     }
 
 
@@ -336,6 +359,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                 <IconButton icon={<PagePreviousIcon />} placement="left" onClick={() => editingDone()}>
                     Done
                 </IconButton>
+                {magic}
                 <IconButton icon={<TrashIcon />} appearance='subtle' placement="left" onClick={() => linkRemoved()}>
                 </IconButton>
             </Stack>
@@ -352,9 +376,9 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                     <CodeSampleButton onClick={() => codeEdit("isEnabled")} name='isEnabled' code={link.isEnabled}></CodeSampleButton>
                 </Panel>
                 <Panel header="Misc">
-                                    <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
-                                    {link.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={link.changeLocationInBg} onLocChange={onChangeLocationInBg} /> }
-                                </Panel>
+                    <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                    {link.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={link.changeLocationInBg} onLocChange={onChangeLocationInBg} />}
+                </Panel>
                 <Panel header="Alternatives">
                     <div className='link-editor-section'>
                         <Toggle checked={link.isAlternativeLink === undefined ? false : link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction

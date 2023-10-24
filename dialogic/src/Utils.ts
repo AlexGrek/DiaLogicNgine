@@ -14,10 +14,10 @@ export interface KeyValuePair<K, V> {
 export function stringEnumEntries<T extends Object>(type: T) {
     const arr = Object.keys(type).map((name) => {
         return {
-          name,
-          value: type[name as keyof typeof type],
+            name,
+            value: type[name as keyof typeof type],
         };
-      });
+    });
     return arr
 }
 
@@ -51,5 +51,25 @@ export function mergeDicts<T>(dict1: T, dict2: T): T {
 export function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(parseInt(str)) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-  }
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+export function genRandomAlphanumericString(length: number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
+
+export function prependToCode(prependValue: string, oldCode?: string | null) {
+    if (oldCode === undefined || oldCode === null || oldCode === '') {
+        return prependValue
+    } else {
+        return `// generated\n${prependValue}\n\n// restored\n${oldCode}`
+    }
+}
