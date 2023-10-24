@@ -1,12 +1,11 @@
+import ArrowDownIcon from '@rsuite/icons/ArrowDown';
+import ArrowRightIcon from '@rsuite/icons/ArrowRight';
+import CreativeIcon from '@rsuite/icons/Creative';
+import lodash from 'lodash';
 import React, { ReactNode, useState } from 'react';
 import { Button, Divider, Dropdown, Input, InputNumber, Modal } from 'rsuite';
-import ShieldIcon from '@rsuite/icons/Shield';
-import ArrowRightIcon from '@rsuite/icons/ArrowRight';
-import ArrowDownIcon from '@rsuite/icons/ArrowDown';
-import CreativeIcon from '@rsuite/icons/Creative';
-import lodash, { isString } from 'lodash';
-import { GameDescription } from '../../../game/GameDescription';
 import { isValidJsIdentifier } from '../../../Utils';
+import { GameDescription } from '../../../game/GameDescription';
 
 
 export interface MagicOperation {

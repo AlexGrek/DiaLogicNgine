@@ -9,15 +9,15 @@ import { genRandomAlphanumericString, prependToCode, stringEnumEntries } from '.
 import { createDialogWindowId } from '../../exec/GameState';
 import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LinkType, createWindow } from '../../game/Dialog';
 import { GameDescription } from '../../game/GameDescription';
+import { createBoolProp } from '../../game/Prop';
 import ButtonPanelSelector from '../ButtonPanelSelector';
 import { DialogHandlers } from '../DialogEditor';
 import LinkTypeTag from '../LinkTypeTag';
 import CodeSampleButton from '../common/CodeSampleButton';
 import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code_editor/PopupCodeEditor';
-import LocationPicker from './LocationPicker';
 import Magic, { MagicOperation } from '../common/magic/Magic';
-import { createBoolProp } from '../../game/Prop';
+import LocationPicker from './LocationPicker';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
