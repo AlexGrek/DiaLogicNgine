@@ -8,9 +8,10 @@ interface LinkShortViewProps {
     index: number;
     link: DialogLink;
     onLinkClick: (i: number) => void;
+    noninteractive?: boolean
 }
 
-const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick }) => {
+const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick, noninteractive }) => {
     const clickHandler = (e: React.MouseEvent) => {
         e.stopPropagation();
         onLinkClick(index);
@@ -39,10 +40,12 @@ const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick 
             tags.push(tag)
         }
         return tags
-    } 
+    }
+
+    const classes = "link-short-view" + (noninteractive ? "" : " animate__animated animate__fadeInLeft animate__faster")
 
     return (
-        <div className='link-short-view animate__animated animate__fadeInLeft animate__faster' onClick={clickHandler}>
+        <div className={classes} onClick={noninteractive ? undefined : clickHandler}>
             <p className='link-short-view-text'>{link.text}<span className='link-tags'>     {linkTags()}</span></p>
             <p className='link-short-view-target'><LinkTypeTag value={link.mainDirection.type}/>{link.mainDirection.direction}</p>
         </div>

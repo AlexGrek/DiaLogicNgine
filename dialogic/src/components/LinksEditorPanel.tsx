@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'rsuite';
+import { ButtonGroup, IconButton } from 'rsuite';
 import { IUpds } from '../App';
 import Dialog, { createDialogLink, DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
@@ -8,6 +8,10 @@ import { DialogHandlers } from './DialogEditor';
 import LinkEditor from './linkedit/LinkEditor';
 import LinkShortView from './linkedit/LinkShortView';
 import PasteButton from './common/copypaste/PasteButton';
+import PlusRoundIcon from '@rsuite/icons/PlusRound';
+import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
+import { Draggable } from "react-drag-reorder";
+import lodash from 'lodash';
 
 interface LinksEditorPanelProps {
     links: DialogLink[];
@@ -20,11 +24,14 @@ interface LinksEditorPanelProps {
     window_uid: string;
 }
 
-const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, dialog, game, onChange, 
+const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, dialog, game, onChange,
     window, handlers, dialogHandlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const [reorderMenu, setReorderMenu] = useState<boolean>(false);
+
     useEffect(() => {
         setEditingIndex(-1);
+        setReorderMenu(false);
     }, [window_uid]);
 
     const onLinkClick = (index: number) => {
@@ -32,7 +39,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     }
 
     const onCreateNew = () => {
-        const newLinks = [...links, createDialogLink() ]
+        const newLinks = [...links, createDialogLink()]
         onChange(newLinks);
         setEditingIndex(links.length);
     }
@@ -42,7 +49,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
             console.error(`Pasted not link, but ${typename}`)
             return
         }
-        const newLinks = [...links, link as DialogLink ]
+        const newLinks = [...links, link as DialogLink]
         onChange(newLinks);
         setEditingIndex(links.length);
     }
@@ -67,7 +74,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     if (editingIndex >= 0) {
         // editing mode
         linksEditorContent = <div>
-            <LinkEditor dialogHandlers={dialogHandlers} game={game} dialog={dialog} window={window} onLinkRemove={onLinkRemove} link={links[editingIndex]} index={editingIndex} onLinkChange={onLinkChange} onEditingDone={onEditingDone} handlers={handlers}/>
+            <LinkEditor dialogHandlers={dialogHandlers} game={game} dialog={dialog} window={window} onLinkRemove={onLinkRemove} link={links[editingIndex]} index={editingIndex} onLinkChange={onLinkChange} onEditingDone={onEditingDone} handlers={handlers} />
         </div>
     } else {
         // view mode
@@ -77,13 +84,42 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
         })
         linksEditorContent = <div>
             {linksList}
-            <Button onClick={() => onCreateNew()}>ADD</Button>
-            <PasteButton handlers={handlers} typenames={['link']} onPasteClick={onPaste}/>
+            <div className='links-editor-instrument-keys'>
+            <ButtonGroup>
+                <IconButton icon={<PlusRoundIcon />} onClick={() => onCreateNew()}>Create link</IconButton>
+                <IconButton icon={<VerifyRoundIcon />} onClick={() => setReorderMenu(true)}>Reorder</IconButton>
+                <PasteButton handlers={handlers} typenames={['link']} onPasteClick={onPaste} />
+            </ButtonGroup>
+            </div>
         </div>
     }
 
+    const getChangedPos = (currentPos: number, newPos: number) => {
+        console.log(currentPos, newPos);
+        const copy = [...links]
+        const [dragged] = copy.splice(currentPos, 1)
+        copy.splice(newPos, 0, dragged)
+        onChange(copy)
+      };
+
+    const renderLinksReorder = () => {
+        return <Draggable onPosChange={getChangedPos}>
+            {links.map((link, idx) => {
+              return (
+                <div key={idx} className="flex-item">
+                  <LinkShortView index={idx} key={idx} link={link} onLinkClick={onLinkClick} noninteractive/>
+                </div>
+              );
+            })}
+          </Draggable>
+    }
+
     return (
-        <div className='links-editor-panel'>{linksEditorContent}</div>
+        reorderMenu ? <div className='links-editor-reorder'>
+            {renderLinksReorder()}
+            <IconButton icon={<VerifyRoundIcon />} onClick={() => setReorderMenu(false)}>Reorder done</IconButton>
+            <p>Drag and drop links to reorder</p>
+        </div> : <div className='links-editor-panel'>{linksEditorContent}</div>
     );
 };
 
