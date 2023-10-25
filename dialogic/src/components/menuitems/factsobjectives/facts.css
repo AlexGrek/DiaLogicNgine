@@ -25,6 +25,7 @@
     min-height: 6em;
     background-color: #1a1d24;
     cursor: pointer;
+    transition: background .3s;
 }
 
 .fact-uid {

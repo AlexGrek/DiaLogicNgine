@@ -1,7 +1,7 @@
 import MinusIcon from '@rsuite/icons/Minus';
 import PlusIcon from '@rsuite/icons/Plus';
 import React, { useEffect, useState } from 'react';
-import { Button, Input } from 'rsuite';
+import { Button, Input, InputGroup } from 'rsuite';
 import './StringListEditor.css';
 import lodash from 'lodash';
 import { isNumeric } from '../../Utils';
@@ -27,7 +27,7 @@ const StringMapEditor: React.FC<StringMapEditorProps> = ({ onChange, value, canB
         for (let key in value) {
             if (value.hasOwnProperty(key)) {
                 let item = value[key];
-                items.push({key: key, value: item.toString()})
+                items.push({ key: key, value: item.toString() })
             }
         }
         setState(items);
@@ -51,17 +51,18 @@ const StringMapEditor: React.FC<StringMapEditorProps> = ({ onChange, value, canB
 
     const editAt = (i: number, v: string) => {
         const clone = [...state]
-        clone[i] = { ...clone[i], value: v}
+        clone[i] = { ...clone[i], value: v }
         setState(clone)
     }
 
     const renderValues = () => {
         return state.map((pair, i) => {
-            const {key, value} = pair
-            const remove = <Button onClick={() => removeAt(key)}><MinusIcon/></Button>
-                const renderItem = <div className="string-map-editor-row" key={i}>
-                    <div className="string-map-editor-key">{key} = </div><Input value={value} onChange={(v) => editAt(i, v)}></Input>{i > 0 || canDeleteFirst ? remove : null}
-                </div>
+            const { key, value } = pair
+            const remove = <InputGroup.Button onClick={() => removeAt(key)}><MinusIcon /></InputGroup.Button>
+            const renderItem = <div className="string-map-editor-row" key={i}>
+                <div className="string-map-editor-key">{key} = </div>
+                <InputGroup><Input value={value} onChange={(v) => editAt(i, v)}></Input>{i > 0 || canDeleteFirst ? remove : null}</InputGroup>
+            </div>
             return renderItem
         })
     }
@@ -78,7 +79,12 @@ const StringMapEditor: React.FC<StringMapEditorProps> = ({ onChange, value, canB
     return (
         <div onBlur={() => updateValue()}>
             {renderValues()}
-            <div className="string-map-editor-row"><Input value={newKey} onPressEnter={() => add()} onChange={setNewKey} placeholder='stat'/><Button onClick={add}><PlusIcon /></Button></div>
+            <div className="string-map-editor-row">
+                <InputGroup>
+                    <Input value={newKey} onPressEnter={() => add()} onChange={setNewKey} placeholder='stat' />
+                    <InputGroup.Button onClick={add}><PlusIcon /></InputGroup.Button>
+                </InputGroup>
+            </div>
         </div>
     );
 };

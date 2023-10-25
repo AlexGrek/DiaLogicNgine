@@ -1,3 +1,5 @@
+import { DialogWindowId } from "../exec/GameState"
+
 export default interface GameEvent {
     name: string
     highPriority: boolean
@@ -5,14 +7,16 @@ export default interface GameEvent {
     onEventActionScript?: string
     canHappenScript?: string
     targets: string[]
+    link: DialogWindowId | null
 }
 
 export function createEvent(name?: string): GameEvent {
     return {
         name: name || "",
         highPriority: false,
-        probability: 0.2,
-        targets: []
+        probability: 20,
+        targets: [],
+        link: null
     }
 }
 
