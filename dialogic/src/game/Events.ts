@@ -16,9 +16,7 @@ export function createEvent(name?: string): GameEvent {
     }
 }
 
-export interface EventHost {
-    uid: string
-}
+export type EventHost = string
 
 export function createEventHost(uid: string) {
     return {uid: uid}

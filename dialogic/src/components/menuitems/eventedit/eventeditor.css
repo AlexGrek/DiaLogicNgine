@@ -1,0 +1,21 @@
+.events-widget {
+    background-color: rgba(200, 200, 200, .07);
+    border-radius: 6pt;
+    padding: 8pt;
+    margin-top: 2pt;
+}
+
+.events-widget input {
+    font-family: monospace;
+}
+
+.events-widget-header {
+    font-size: large;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 4pt;
+}
+
+.events-predefined-eventhost {
+    font-family: monospace;
+}

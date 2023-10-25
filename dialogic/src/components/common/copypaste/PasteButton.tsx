@@ -1,4 +1,4 @@
-import FileDownloadIcon from '@rsuite/icons/FileDownload';
+import AttachmentIcon from '@rsuite/icons/Attachment';
 import React, { useState } from 'react';
 import { Dropdown, IconButton, Input, InputGroup } from 'rsuite';
 import { IUpds } from '../../../App';
@@ -47,7 +47,7 @@ const PasteButton: React.FC<PasteButtonProps> = ({ handlers, customText, onPaste
     }
 
     return requireNewUid ?
-        (<Dropdown title="Paste" icon={<FileDownloadIcon />}>
+        (<Dropdown title="Paste" icon={<AttachmentIcon />}>
             <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                 <InputGroup>
                     <InputGroup.Addon>Copy UID:</InputGroup.Addon><Input onPressEnter={() => press()} value={creatingUID} onChange={setCreatingUID}></Input>
@@ -56,7 +56,7 @@ const PasteButton: React.FC<PasteButtonProps> = ({ handlers, customText, onPaste
             </Dropdown.Item>
         </Dropdown>) :
         (
-            <IconButton style={{ minWidth: "7em" }} disabled={pressed} color="red" onClick={() => press()} icon={<FileDownloadIcon />}>{customText || "Paste"}</IconButton>
+            <IconButton style={{ minWidth: "7em" }} disabled={pressed} color="red" onClick={() => press()} icon={<AttachmentIcon />}>{customText || "Paste"}</IconButton>
         );
 };
 

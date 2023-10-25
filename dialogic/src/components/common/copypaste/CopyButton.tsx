@@ -1,4 +1,4 @@
-import FileUploadIcon from '@rsuite/icons/FileUpload';
+import CopyIcon from '@rsuite/icons/Copy';
 import React, { ReactNode } from 'react';
 import { Button, ButtonProps, IconButton } from 'rsuite';
 import { IUpds } from '../../../App';
@@ -27,7 +27,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ handlers, customText, obj, type
 
     const genSpecificButton = (style: CopyButtonStyle) => {
         if (style === "onlyIcon") {
-            return <Button disabled={pressed} onClick={() => press()}><FileUploadIcon />{customText || ""}</Button>
+            return <Button disabled={pressed} onClick={() => press()}><CopyIcon />{customText || ""}</Button>
         }
         if (style === "link") {
             return <Button disabled={pressed} appearance='link' onClick={() => press()}>{customText || "copy"}</Button>
@@ -37,7 +37,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ handlers, customText, obj, type
 
     return (
         buttonStyle === undefined ?
-            <IconButton style={{minWidth: "7em"}} disabled={pressed} onClick={() => press()} icon={<FileUploadIcon />}>{customText || "Copy"}</IconButton>
+            <IconButton style={{minWidth: "7em"}} disabled={pressed} onClick={() => press()} icon={<CopyIcon />}>{customText || "Copy"}</IconButton>
             : genSpecificButton(buttonStyle)
     );
 };

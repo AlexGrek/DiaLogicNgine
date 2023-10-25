@@ -69,7 +69,7 @@ export interface CharacterDialog {
     text: TextList
     chooseTextScript?: string
     chooseBgScript?: string
-    eventHosts: string[]
+    eventHosts?: string[]
 }
 
 export const createCharacterDialog = (): CharacterDialog => {
@@ -123,4 +123,23 @@ export function createEmptyRole(uid: string): Role {
         name: uid,
         props: []
     }
+}
+
+export function getChar(game: GameDescription, uid: string) {
+    return game.chars.find(ch =>  ch.uid === uid)
+}
+
+export function getCharEventHostName(ch: Character | undefined) {
+    if (ch && ch.dialog) {
+        return ch.dialog.eventHosts === undefined ? null : `char:${ch.uid}`
+    }
+    return null
+}
+
+export function getLocEventHosts(ch: Character | undefined) {
+    if (ch && ch.dialog && ch.dialog.eventHosts !== undefined) {
+        const personal = getCharEventHostName(ch)
+        return [...ch.dialog.eventHosts, personal]
+    }
+    return []
 }

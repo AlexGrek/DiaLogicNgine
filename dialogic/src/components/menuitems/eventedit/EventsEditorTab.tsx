@@ -11,6 +11,8 @@ import StringListEditor from '../../common/StringListEditor';
 import StringMapEditor from '../../common/StringMapEditor';
 import './eventeditor.css';
 import { IUpds } from '../../../App';
+import { getLocEventHostName } from '../../../game/Loc';
+import { getCharEventHostName } from '../../../game/Character';
 
 interface EventsEditorTabProps {
     game: GameDescription;
@@ -23,12 +25,32 @@ const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, hand
     const [editingObject, setEditingObject] = useState<Item | null>(null);
     const [newUid, setNewUid] = React.useState<string>("")
 
+    const predefinedHosts = [
+        ...game.locs.map(loc => getLocEventHostName(loc)).filter(el => el !== null),
+        ...game.chars.map(c => getCharEventHostName(c)).filter(el => el !== null)
+    ]
+
+    const allEventHosts = [...game.eventHosts, ...predefinedHosts]
+
     const renderEvents = () => {
         return <div/>
     }
 
-    const renderEventHosts = () => {
-        return <div/>
+    const renderCustomEventHosts = () => {
+        return <div className='events-widget'>
+            <p className='events-widget-header'>Custom event hosts</p>
+            <StringListEditor canBeEmpty onChange={(value) => onSetGame({...game, eventHosts: value})} value={game.eventHosts}/>
+        </div>
+    }
+
+    const renderPredefinedEventHosts = () => {
+        const predefinedRender = predefinedHosts.map((text, i) => {
+            return <p className='events-predefined-eventhost' key={i}>{text}</p>
+        })
+        return <div className='events-widget'>
+            <p className='events-widget-header'>Predefined event hosts</p>
+            {predefinedRender}
+        </div>
     }
 
     return (<Grid className="events-editor-grid">
@@ -43,7 +65,8 @@ const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, hand
                 <div className='events-grid-header'>
                     Event hosts
                 </div>
-                {renderEventHosts()}
+                {renderCustomEventHosts()}
+                {renderPredefinedEventHosts()}
             </Col>
         </Row>
     </Grid>
