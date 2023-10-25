@@ -9,13 +9,13 @@ import { DialogWindowId } from '../../../exec/GameState';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
-    "functionName": "chooseAltText",
+    "functionName": "onEventActionScript",
     "functionTemplates": {
         "no action": "",
-        "always main": "return 0;",
-        "always first alternative": "return 1;"
+        "always": "return true;",
+        "never": "return false;"
     },
-    "header": "alternative choose"
+    "header": "Code editor"
 }
 
 interface EventEditorDrawerProps {
@@ -74,14 +74,14 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, onClose, o
 
     const onSetDialogWindow = (d: string | null, w: string | null) => {
         if (d === null || w === null) {
-            setEv({...ev, link: null})
+            setEv({ ...ev, link: null })
         } else {
             const id: DialogWindowId = {
                 kind: "window",
                 dialog: d,
                 window: w
             }
-            setEv({...ev, link: id})
+            setEv({ ...ev, link: id })
         }
     }
 
@@ -117,17 +117,17 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, onClose, o
                             <div className='location-params'>
                                 <PanelGroup accordion bordered>
                                     <Panel header="Probalility" defaultExpanded>
-                                    <Checkbox checked={ev.highPriority} onChange={(value, checked) => setEv({...ev, highPriority: checked})}>High priority</Checkbox>
-                                    <p>
-                                        <span>{ev.probability}%</span>
-                                        <Slider
-      progress
-      value={ev.probability}
-      onChange={value => {
-        setEv({...ev, probability: value})
-      }}
-    />
-                                    </p>
+                                        <Checkbox checked={ev.highPriority} onChange={(value, checked) => setEv({ ...ev, highPriority: checked })}>High priority</Checkbox>
+                                        <p>
+                                            <span>{ev.probability}%</span>
+                                            <Slider
+                                                progress
+                                                value={ev.probability}
+                                                onChange={value => {
+                                                    setEv({ ...ev, probability: value })
+                                                }}
+                                            />
+                                        </p>
                                     </Panel>
                                     <Panel defaultExpanded header="Scripting">
                                         {renderCodeEditButton("onEventActionScript")}
@@ -139,8 +139,8 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, onClose, o
                         </Col>
                         <Col xs={6}>
                             <p>Destination</p>
-                            <Checkbox checked={ev.link !== null} onChange={(value, checked) => checked ? onSetDialogWindow(game.startupDialog.dialog, game.startupDialog.window) : setEv({...ev, link: null})}>Push to another window</Checkbox>
-                            {ev.link && <DialogWindowPicker dialogs={game.dialogs} chosen={[ev.link.dialog, ev.link.window]} onValueChange={onSetDialogWindow}/>}
+                            <Checkbox checked={ev.link !== null} onChange={(value, checked) => checked ? onSetDialogWindow(game.startupDialog.dialog, game.startupDialog.window) : setEv({ ...ev, link: null })}>Push to another window</Checkbox>
+                            {ev.link && <DialogWindowPicker dialogs={game.dialogs} chosen={[ev.link.dialog, ev.link.window]} onValueChange={onSetDialogWindow} />}
                         </Col>
                     </Row>
                 </Grid>

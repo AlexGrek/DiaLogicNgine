@@ -156,6 +156,14 @@
   padding: 2pt 4pt;
 }
 
+.links-editor-instrument-keys {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  margin-top: 4pt;
+}
+
 .link-short-view-text {
   font-size: 14pt;
 }
