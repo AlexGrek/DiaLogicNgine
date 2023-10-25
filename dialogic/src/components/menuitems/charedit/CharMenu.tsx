@@ -74,7 +74,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     const setCharacter = (i: number, value: Character) => {
         const copy = lodash.cloneDeep(game.chars)
         const difference = diff(copy[i], value)
-        console.log(`upd char from ${JSON.stringify(copy[i])} to ${JSON.stringify(value)}, diff: ${JSON.stringify(difference)}`)
+        // console.log(`upd char from ${JSON.stringify(copy[i])} to ${JSON.stringify(value)}, diff: ${JSON.stringify(difference)}`)
         copy[i] = value
         updateCharacterList(copy)
     }

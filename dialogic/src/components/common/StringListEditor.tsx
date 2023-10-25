@@ -32,8 +32,8 @@ const StringListEditor: React.FC<StringListEditorProps> = ({onChange, value, can
     const renderValues = () => {
         return value.map((val, i) => {
             const remove = <Button onClick={() => removeAt(i)}><MinusIcon/></Button>
-            return <div className="string-list-editor-row">
-                <Input key={i} value={val} onChange={(v) => editAt(i, v)}></Input>{i > 0 || canDeleteFirst ? remove : null}
+            return <div key={i} className="string-list-editor-row">
+                <Input value={val} onChange={(v) => editAt(i, v)}></Input>{i > 0 || canDeleteFirst ? remove : null}
             </div>
         })
     }

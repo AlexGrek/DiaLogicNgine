@@ -188,12 +188,12 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                     <Table.Cell dataKey="name" />
                 </Table.Column>
                 <Table.Column width={150}>
-                    <Table.HeaderCell>Default</Table.HeaderCell>
-                    <Table.Cell dataKey="value" />
-                </Table.Column>
-                <Table.Column width={150}>
                     <Table.HeaderCell>Data type</Table.HeaderCell>
                     <Table.Cell dataKey="type" />
+                </Table.Column>
+                <Table.Column width={150}>
+                    <Table.HeaderCell>Default</Table.HeaderCell>
+                    <Table.Cell dataKey="value" />
                 </Table.Column>
                 <Table.Column width={150}>
                     <Table.HeaderCell>Actions</Table.HeaderCell>

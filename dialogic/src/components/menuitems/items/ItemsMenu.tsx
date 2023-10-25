@@ -2,7 +2,7 @@ import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
 import React, { useState } from 'react';
 import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
-import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
+import { generateImageUrl, isValidJsIdentifier, mergeDicts } from '../../../Utils';
 import { GameDescription } from '../../../game/GameDescription';
 import { Item, createEmptyItem } from '../../../game/Items';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
@@ -10,6 +10,7 @@ import ImagePicker from '../../common/ImagePicker';
 import StringListEditor from '../../common/StringListEditor';
 import StringMapEditor from '../../common/StringMapEditor';
 import './ItemsMenu.css';
+import ItemsPicker from './ItemsPicker';
 
 interface ItemsMenuProps {
     game: GameDescription;
@@ -72,6 +73,22 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             setEditingObject({ ...editingObject, [prop]: value })
         }
 
+        const copyStats = (item: Item | null) => {
+            if (!item) {
+                return
+            }
+            const stats = item.stats
+            setEditingObject({ ...it, stats: mergeDicts(it.stats, stats) })
+        }
+
+        const copyTags = (item: Item | null) => {
+            if (!item) {
+                return
+            }
+            const tags = item.tags
+            setEditingObject({ ...it, tags: [...it.tags, ...tags] })
+        }
+
         return <div className='items-drawer-contents'>
             <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display item name'></Input>
             <Input value={it.description} onChange={(val) => updateItem("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
@@ -82,8 +99,10 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             <Checkbox checked={it.unique} onChange={(value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
             <Checkbox checked={it.canGive} onChange={(value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
             <Divider>Stats</Divider>
+            <p><ItemsPicker placeholder='Copy stats from...' game={game} onPickItem={copyStats} excludeUids={[it.uid]}/></p>
             <StringMapEditor value={it.stats} onChange={value => setEditingObject({ ...editingObject, stats: value })}></StringMapEditor>
             <Divider>Tags</Divider>
+            <p><ItemsPicker placeholder='Copy tags from...' game={game} onPickItem={copyTags} excludeUids={[it.uid]}/></p>
             <StringListEditor canBeEmpty={true} value={it.tags} onChange={setTags}></StringListEditor>
             <p className='item-edit-uid'>Item UID: <b>{it.uid}</b></p>
         </div>
