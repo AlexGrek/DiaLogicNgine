@@ -19,6 +19,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ handlers, customText, obj, type
     const press = () => {
         handlers.copy(obj, typename)
         setPressed(true)
+        handlers.notify("info", `Copied ${typename}`)
         setTimeout(() => {
             setPressed(false)
         }, 1000)

@@ -29,12 +29,22 @@
   color: #61dafb;
 }
 
-.app-header-text {
-  font-family: 'HeaderFont';
-  font-size: 14pt;
-  text-align: center;
+.app-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
   background-color: #282c34;
   box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+  height: 22pt;
+  overflow-y: hidden;
+}
+
+.app-header-text {
+  margin-left: 6pt;
+  font-family: 'HeaderFont';
+  font-size: 14pt;
+  text-align: left;
 }
 
 .window-editor-windows-container {

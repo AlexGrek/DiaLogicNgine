@@ -21,6 +21,7 @@ import FactsObjectivesTabs from './components/menuitems/factsobjectives/FactsObj
 import ItemsMenu from './components/menuitems/items/ItemsMenu';
 import { Item } from './game/Items';
 import lodash from 'lodash';
+import NotificationBar from './components/notification/NotificationBar';
 
 export interface IAppProps {
 
@@ -214,8 +215,11 @@ export default class App extends React.Component<IAppProps, IAppState> {
     return (
       <CustomProvider theme="dark">
         <Container>
-          <Header className='app-header-text'>🇺🇦 DiaLogic Ngine</Header>
-          <NotificationViewPanel notifications={this.state.notifications}></NotificationViewPanel>
+          <Header className='app-header-container'>
+            <p className='app-header-text'>🇺🇦 DiaLogic Ngine</p>
+            <NotificationBar notification={this.state.notifications[this.state.notifications.length - 1]}></NotificationBar>
+            </Header>
+          {/* <NotificationViewPanel notifications={this.state.notifications}></NotificationViewPanel> */}
           <Container>
             <Sidebar>
               <SidePanel game={this.state.game}
