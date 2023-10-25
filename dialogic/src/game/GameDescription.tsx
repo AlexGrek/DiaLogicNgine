@@ -1,6 +1,7 @@
 import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
 import Character, { Role } from "./Character";
 import Dialog from "./Dialog";
+import GameEvent, { EventHost } from "./Events";
 import Fact from "./Fact";
 import { emptyImageList } from "./ImageList";
 import { Item } from "./Items";
@@ -19,6 +20,8 @@ export interface GameDescription {
     locs: Loc[]
     props: Prop[]
     items: Item[]
+    eventHosts: EventHost[],
+    events: GameEvent[],
     buildVersion: number
     startupDialog: DialogWindowId
     engineVersion: string
@@ -47,6 +50,8 @@ export function createDefaultGame(): GameDescription {
         chars: [ narratorCharacter ],
         locs: [],
         items: [],
+        events: [],
+        eventHosts: [],
         roles: [ agedRole ],
         props: [
             createNumberProp("testNumProp", 42),

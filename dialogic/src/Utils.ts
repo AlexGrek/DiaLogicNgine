@@ -1,3 +1,5 @@
+import lodash from "lodash";
+
 const isValidIdentifier = require('is-valid-identifier')
 
 function allEnumValuesOf(type: any) {
@@ -73,3 +75,34 @@ export function prependToCode(prependValue: string, oldCode?: string | null) {
         return `// generated\n${prependValue}\n\n// restored\n${oldCode}`
     }
 }
+
+export function createTypeAssertionFunction<T>(properties: (keyof T)[]): (obj: any) => obj is T {
+    return function (obj: any): obj is T {
+        return properties.every(prop => prop in obj);
+    };
+}
+
+// type TypeAssertion<T> = {
+//     [K in keyof T]: (value: any) => value is T[K];
+// };
+
+// export function createSampleTypeAssertionFunction<T extends object>(sample: T): (obj: any) => obj is T {
+//     const assertions: TypeAssertion<T> = {} as TypeAssertion<T>;
+
+//     for (const key in sample) {
+//         if (sample.hasOwnProperty(key)) {
+//             assertions[key] = (value): value is T[typeof key] => typeof value === typeof sample[key];
+//         }
+//     }
+
+//     return function (obj: any): obj is T {
+//         if (lodash.isObject(obj)) {
+//             return Object.keys(assertions).every((key) => {
+//                 const ass = assertions[key]
+//                 return ass(obj[key])
+//             })
+//         } else {
+//             return false
+//         }
+//     };
+// }

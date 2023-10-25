@@ -19,4 +19,7 @@ export default interface Loc {
     chooseTextScript?: string
     choosebackgroundScript?: string
     onEntryScript?: string
+
+    // events
+    eventHosts: string[]
 }

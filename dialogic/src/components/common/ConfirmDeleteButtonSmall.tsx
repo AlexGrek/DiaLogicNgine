@@ -12,11 +12,7 @@ const ConfirmDeleteButtonSmall: React.FC<ConfirmDeleteButtonSmallProps> = ({ onC
     const [pressed, setPressed] = React.useState<boolean>(false)
 
     return (
-        <span>
-            {!pressed ?
-                <IconButton color="red" onClick={() => setPressed(true)} icon={<TrashIcon />}>{customText || "Delete"}</IconButton>
-                : <IconButton color="red" onClick={() => onConfirm()} icon={<ShieldIcon />}>Confirm</IconButton>}
-        </span>
+            !pressed ? (<IconButton color="red" onClick={() => setPressed(true)} icon={<TrashIcon />}>{customText || "Delete"}</IconButton>) : <IconButton color="red" onClick={() => onConfirm()} icon={<ShieldIcon />}>Confirm</IconButton>
     );
 };
 

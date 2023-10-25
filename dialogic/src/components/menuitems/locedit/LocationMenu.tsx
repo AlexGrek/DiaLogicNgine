@@ -37,7 +37,8 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }
                 list: []
             },
             routes: [],
-            backgrounds: emptyImageList()
+            backgrounds: emptyImageList(),
+            eventHosts: []
         }
         setCreatingNew(true)
         setEditingIndex(game.locs.length)

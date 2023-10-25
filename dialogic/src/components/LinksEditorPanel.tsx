@@ -7,6 +7,7 @@ import { removeByIndex } from '../Utils';
 import { DialogHandlers } from './DialogEditor';
 import LinkEditor from './linkedit/LinkEditor';
 import LinkShortView from './linkedit/LinkShortView';
+import PasteButton from './common/copypaste/PasteButton';
 
 interface LinksEditorPanelProps {
     links: DialogLink[];
@@ -32,6 +33,16 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
 
     const onCreateNew = () => {
         const newLinks = [...links, createDialogLink() ]
+        onChange(newLinks);
+        setEditingIndex(links.length);
+    }
+
+    const onPaste = (link: any, typename: string) => {
+        if (typename !== 'link') {
+            console.error(`Pasted not link, but ${typename}`)
+            return
+        }
+        const newLinks = [...links, link as DialogLink ]
         onChange(newLinks);
         setEditingIndex(links.length);
     }
@@ -67,6 +78,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
         linksEditorContent = <div>
             {linksList}
             <Button onClick={() => onCreateNew()}>ADD</Button>
+            <PasteButton handlers={handlers} typenames={['link']} onPasteClick={onPaste}/>
         </div>
     }
 

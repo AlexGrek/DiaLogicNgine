@@ -18,6 +18,7 @@ import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code_editor/PopupCodeEditor';
 import Magic, { MagicOperation } from '../common/magic/Magic';
 import LocationPicker from './LocationPicker';
+import CopyButton from '../common/copypaste/CopyButton';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -299,6 +300,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         }
     }
     const magic = <Magic game={game} operations={[magicOperationMakeVisibleOnce]} />
+    const copyButton = <CopyButton handlers={handlers} typename="link" obj={link}/>
 
     const tooltips = lodash.cloneDeep(TooltipText)
     const filteredTooltips = Object.fromEntries(Object.entries(tooltips));
@@ -360,6 +362,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
                     Done
                 </IconButton>
                 {magic}
+                {copyButton}
                 <IconButton icon={<TrashIcon />} appearance='subtle' placement="left" onClick={() => linkRemoved()}>
                 </IconButton>
             </Stack>

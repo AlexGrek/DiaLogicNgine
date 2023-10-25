@@ -10,6 +10,7 @@ import Character, { createEmptyCharacter } from '../../../game/Character';
 import { isValidJsIdentifier } from '../../../Utils';
 import CharEditing from './CharEditing';
 import './charmenu.css'
+import PasteButton from '../../common/copypaste/PasteButton';
 
 interface CharMenuProps {
     game: GameDescription;
@@ -40,6 +41,18 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
         setCreatingUID("")
         const copy = lodash.cloneDeep(game.chars)
         copy.push(createEmptyCharacter(name))
+        updateCharacterList(copy)
+    }
+
+    const charPasted = (obj: any, typename: string, newUid?: string) => {
+        if (newUid === undefined || typename !== 'char') {
+            return
+        }
+        const name = newUid
+        const character = obj as Character
+        const copy = lodash.cloneDeep(game.chars)
+        console.log(`Pasted character: ${JSON.stringify(character)}`)
+        copy.push({...character, uid: name})
         updateCharacterList(copy)
     }
 
@@ -74,9 +87,6 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     return (
         <div>
             <div className='char-menu-top-panel'>
-                <Notification closable style={{ height: 70 }}>
-                    Create non-payable characters with roles and traits assigned, that can use proxy to trigger any dialog
-                </Notification>
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>
@@ -88,6 +98,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
                             </InputGroup>
                         </Dropdown.Item>
                     </Dropdown>
+                    <PasteButton requireNewUid handlers={handlers} typenames={['char']} onPasteClick={charPasted}/>
                     <Nav vertical appearance="tabs" activeKey={editingIndex.toString()} onSelect={onSelectTab}>
                         {navItems()}
                     </Nav>

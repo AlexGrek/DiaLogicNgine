@@ -6,6 +6,7 @@ import StaticTabs from '../../common/StaticTabs';
 import PropsEditMenu from './PropsEditMenu';
 import Prop from '../../../game/Prop';
 import lodash from 'lodash';
+import EventsEditorTab from '../eventedit/EventsEditorTab';
 
 interface ScriptEditMenuProps {
     game: GameDescription;
@@ -39,8 +40,15 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
         }
     }
 
+    const createEventEditorTab = () => {
+        return {
+            header: "Events",
+            content: <EventsEditorTab game={game} handlers={handlers} onSetGame={onSetGame}/>
+        }
+    }
+
     return (
-        <StaticTabs tabs={[createPropsEditorTab(), createScriptsEditorTab()]}></StaticTabs>
+        <StaticTabs tabs={[createPropsEditorTab(), createScriptsEditorTab(), createEventEditorTab()]}></StaticTabs>
     );
 };
 

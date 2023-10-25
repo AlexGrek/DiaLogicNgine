@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ButtonGroup, Input, InputGroup, RadioTile, RadioTileGroup } from 'rsuite';
+import { ButtonGroup, IconButton, Input, InputGroup, RadioTile, RadioTileGroup } from 'rsuite';
 import { IUpds } from '../../../App';
 import { Button, Stack, Table } from 'rsuite';
 import ListIcon from '@rsuite/icons/List';
@@ -16,6 +16,8 @@ import { isValidJsIdentifier } from '../../../Utils';
 import lodash from 'lodash';
 import PropsEditorDrawer from './PropsEditorDrawer';
 import { GameDescription } from '../../../game/GameDescription';
+import CopyButton from '../../common/copypaste/CopyButton';
+import PasteButton from '../../common/copypaste/PasteButton';
 
 interface PropsEditMenuProps {
     props: Prop[];
@@ -30,6 +32,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
     const [createTypeChange, setCreateTypeChange] = useState<string>("none");
+    const [createMenuOpen, setCreateMenuOpen] = useState<boolean>(false);
     useEffect(() => {
         setEditingIndex(editingIndex);
     }, [props]);
@@ -81,6 +84,19 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
         }
     }
 
+    const onPaste = (obj: any, typename: string, newUid?: string) => {
+        const p = obj as Prop
+        if (typename !== 'prop') {
+            return
+        }
+        if (newUid === undefined) {
+            return
+        }
+        const copy = lodash.cloneDeep(props)
+        copy.push({...p, name: newUid})
+        onSetProps(copy)
+    }
+
 
     const convertTableRow = (p: Prop, i: number) => {
         const name = p.name
@@ -89,7 +105,8 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
             "index": i,
             "name": name,
             "value": `${value}`,
-            "type": p.datatype
+            "type": p.datatype,
+            "item": p
         }
     }
 
@@ -146,9 +163,20 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
         </div>
     }
 
+    const createOrPasteMenu = () => {
+        const buttons = <Stack>
+            <IconButton icon={<PlusIcon/>} onClick={() => setCreateMenuOpen(!createMenuOpen)}>Create</IconButton>
+            {handlers && <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['prop']}/>}
+        </Stack>
+        return <div className="props-menu-buttons">
+            {buttons}
+            {createMenuOpen ? createMenu() : null}
+        </div>
+    }
+
     return (
         <div>
-            {canCreate ? createMenu() : null}
+            {canCreate ? createOrPasteMenu() : null}
             <Table
                 data={createTableData()}>
                 <Table.Column width={35}>
@@ -178,6 +206,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                                 <Button onClick={() => deleteProp(rowData.index)}>
                                     <TrashIcon />
                                 </Button>
+                                {handlers ? <CopyButton handlers={handlers} typename={'prop'} obj={rowData.item} buttonStyle='onlyIcon'/> : null}
                             </ButtonGroup>
                         )}
                     </Table.Cell>

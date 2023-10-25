@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Panel, PanelGroup } from 'rsuite';
+import { Button, ButtonGroup, Panel, PanelGroup } from 'rsuite';
 import Character from '../../../game/Character';
 import { GameDescription } from '../../../game/GameDescription';
 import { ImageList } from '../../../game/ImageList';
@@ -13,6 +13,7 @@ import './charediting.css';
 import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 import CharDialogEditorDrawer from './CharDialogEditorDrawer';
 import { IUpds } from '../../../App';
+import CopyButton from '../../common/copypaste/CopyButton';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -89,7 +90,14 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     return (
         <div className='char-editing-main-container' onBlur={save}>
-            <p>{avatar(ch.avatar)}{ch.uid}{renderDeleteButton()}<Button onClick={() => setDialogEditorOpen(true)} appearance='link'>Dialog...</Button></p>
+            <p>{avatar(ch.avatar)}{ch.uid}<br/>
+            <ButtonGroup>
+                {renderDeleteButton()}
+                <CopyButton handlers={handlers} typename={'char'} obj={ch}/>
+                <Button onClick={() => setDialogEditorOpen(true)} appearance='primary' color='green'>Dialog...</Button>
+                
+                </ButtonGroup>
+            </p>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Display name" defaultExpanded>
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })} />

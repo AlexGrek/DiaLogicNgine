@@ -20,9 +20,15 @@ import Prop from './game/Prop';
 import FactsObjectivesTabs from './components/menuitems/factsobjectives/FactsObjectivesTabs';
 import ItemsMenu from './components/menuitems/items/ItemsMenu';
 import { Item } from './game/Items';
+import lodash from 'lodash';
 
 export interface IAppProps {
 
+}
+
+export interface CopiedObject {
+  value: any
+  typename: string
 }
 
 export interface IAppState {
@@ -30,6 +36,7 @@ export interface IAppState {
   menu: string
   game: GameDescription
   notifications: Notification[]
+  copied?: CopiedObject
 }
 
 export interface IUpds {
@@ -41,6 +48,8 @@ export interface IUpds {
   handlePropChange: (props: Prop[]) => void;
   createProp: (prop: Prop) => void;
   notify: NotifyCallback
+  copy: (obj: any, typename: string) => void
+  paste: () => CopiedObject | undefined
 }
 
 export interface DialogWindowListUpdater {
@@ -70,6 +79,19 @@ export default class App extends React.Component<IAppProps, IAppState> {
 
   private handleMenuSwitch(newMenu: string) {
     this.setState({ menu: newMenu })
+  }
+
+  private handlePaste() {
+    return this.state.copied
+  }
+
+  private handleCopy(copied: any, copiedType: string) {
+    const copy = lodash.cloneDeep(copied)
+    this.setState({
+      ...this.state, copied: {
+        value: copy, typename: copiedType
+      }
+    })
   }
 
   private handleDialogEdit(dialog: Dialog) {
@@ -136,7 +158,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
     }
   }
 
-  private handleNotify(type: NotificationType, text: string, header: string | null) {
+  private handleNotify(type: NotificationType, text: string, header?: string | null) {
     const notif = new Notification(type, text, header);
     const notifications = [...this.state.notifications, notif]
     this.setState({ notifications: notifications })
@@ -154,28 +176,28 @@ export default class App extends React.Component<IAppProps, IAppState> {
         <SaveLoadMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} currentGame={this.state.game}></SaveLoadMenu>
       </div>
       <div style={this.displayStyle("config")}>
-        <ConfigurationMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game}/>
+        <ConfigurationMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} />
       </div>
       <div style={this.displayStyle("locs")}>
-        <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+        <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("chars")}>
-        <CharEditorTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+        <CharEditorTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("scripts")}>
-        <ScriptEditMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+        <ScriptEditMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("facts")}>
-        <FactsObjectivesTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates}/>
+        <FactsObjectivesTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("items")}>
-        <ItemsMenu items={this.state.game.items} onSetItems={(items: Item[]) => this.setState({game: {...this.state.game, items: items}})} game={this.state.game}/>
+        <ItemsMenu items={this.state.game.items} onSetItems={(items: Item[]) => this.setState({ game: { ...this.state.game, items: items } })} game={this.state.game} />
       </div>
     </div>
   }
 
   public render() {
-    let updates = {
+    let updates: IUpds = {
       handleDialogEdit: this.handleDialogEdit.bind(this),
       handleDialogCreate: this.handleDialogCreate.bind(this),
       handleDialogApplyChange: this.handleDialogApplyChange.bind(this),
@@ -183,7 +205,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       handleLocChange: this.handleLocChange.bind(this),
       handlePropChange: this.handlePropChange.bind(this),
       createProp: this.createProp.bind(this),
-      notify: this.handleNotify.bind(this)
+      notify: this.handleNotify.bind(this),
+      copy: this.handleCopy.bind(this),
+      paste: this.handlePaste.bind(this)
     }
 
     let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);

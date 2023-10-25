@@ -12,4 +12,4 @@ export class Notification {
     }
 }
 
-export type NotifyCallback = (type: NotificationType, text: string, header: string | null) => void
+export type NotifyCallback = (type: NotificationType, text: string, header?: string | null) => void

@@ -69,6 +69,7 @@ export interface CharacterDialog {
     text: TextList
     chooseTextScript?: string
     chooseBgScript?: string
+    eventHosts: string[]
 }
 
 export const createCharacterDialog = (): CharacterDialog => {
@@ -78,7 +79,8 @@ export const createCharacterDialog = (): CharacterDialog => {
         },
         links: [],
         background: emptyImageList(),
-        text: emptyTextList()
+        text: emptyTextList(),
+        eventHosts: []
     }
 }
 
