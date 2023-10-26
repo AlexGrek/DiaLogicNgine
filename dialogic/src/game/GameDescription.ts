@@ -12,6 +12,20 @@ export interface StartMenuConfiguration {
     menuBackground?: string
 }
 
+export interface GeneralGameInfo {
+    name: string
+    version: string
+    authors: string[]
+    extras: { [key: string]: string | number}
+    description: string
+}
+
+export function createGeneralGameInfo(): GeneralGameInfo {
+    return {
+        name: '', version: '', authors: ['alexgrek'], extras: {}, description: ''
+    }
+}
+
 export interface GameDescription {
     dialogs: Dialog[]
     facts: Fact[]
@@ -26,33 +40,38 @@ export interface GameDescription {
     startupDialog: DialogWindowId
     engineVersion: string
     startMenu: StartMenuConfiguration
+    general: GeneralGameInfo
 }
 
 export function createDefaultGame(): GameDescription {
-    let d1 = { name: "dialog1", windows: [
-        { "uid": "welcome", "text": {"main": "Welcome to the game!", "list": []},
-        "backgrounds": {"list": []}, "links": [ ], tags: [] },
-    ] };
-    const agedRole: Role = { name: "aged", props: [ { name: "age", datatype: "number", defaultValue: 30 } ] }
-    const narratorCharacter: Character =  {
+    let d1 = {
+        name: "dialog1", windows: [
+            {
+                "uid": "welcome", "text": { "main": "Welcome to the game!", "list": [] },
+                "backgrounds": { "list": [] }, "links": [], tags: []
+            },
+        ]
+    };
+    const agedRole: Role = { name: "aged", props: [{ name: "age", datatype: "number", defaultValue: 30 }] }
+    const narratorCharacter: Character = {
         uid: "narrator",
         displayName: { "main": "Narrator", "list": [] },
         traits: [],
-        props: [ { "datatype": "variant", "name": "mood", "variants": [ "bored", "happy" ], "defaultValue": "bored" } ],
-        overrideProps: [ { "name": "age", "datatype": "number", "defaultValue": 27 } ],
-        roles: [ "aged" ],
+        props: [{ "datatype": "variant", "name": "mood", "variants": ["bored", "happy"], "defaultValue": "bored" }],
+        overrideProps: [{ "name": "age", "datatype": "number", "defaultValue": 27 }],
+        roles: ["aged"],
         avatar: emptyImageList(),
-        description: { main: "", list: []}
-      }
-    let game: GameDescription = { 
+        description: { main: "", list: [] }
+    }
+    let game: GameDescription = {
         dialogs: [d1],
         facts: [],
-        chars: [ narratorCharacter ],
+        chars: [narratorCharacter],
         locs: [],
         items: [],
         events: [],
         eventHosts: [],
-        roles: [ agedRole ],
+        roles: [agedRole],
         props: [
             createNumberProp("testNumProp", 42),
             createVariantProp("testVariantProp", ["a", "b", "c"], "b")
@@ -60,7 +79,8 @@ export function createDefaultGame(): GameDescription {
         buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
         engineVersion: "0.4",
-        startMenu: {}
+        startMenu: {},
+        general: createGeneralGameInfo()
     };
 
     return game
