@@ -2,13 +2,13 @@ import React from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { Actor, createActor } from '../../../game/Dialog';
 import './actor.css'
-import { Checkbox, SelectPicker } from 'rsuite';
+import { Checkbox, SelectPicker, Toggle } from 'rsuite';
 import lodash from 'lodash';
 import { generateImageUrl } from '../../../Utils';
 
 interface ActorEditorProps {
     game: GameDescription;
-    value: Actor | undefined
+    value: Actor | null
     onChange: (update: Actor | undefined) => void
 }
 
@@ -24,7 +24,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
             onChange(undefined);
             return;
         }
-        if (value === undefined) {
+        if (value === null) {
             update = createActor()
         } else {
             update = lodash.cloneDeep(value)
@@ -36,7 +36,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
 
     const changeAvatar = (val: string | number | null | undefined) => {
         var update;
-        if (value === undefined) {
+        if (value === null) {
             update = createActor()
         } else {
             update = lodash.cloneDeep(value)
@@ -67,7 +67,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
     }
 
     const renderEditors = () => {
-        if (value === undefined) {
+        if (value === null) {
             return <p></p>
         }
         return <div>
@@ -128,10 +128,25 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
         return {backgroundImage: `url("${generateImageUrl(imageUri)}")`}
     }
 
+    const setCurrentChar = (val: boolean) => {
+        if (val) {
+            const was = value ? value : createActor()
+            onChange({...was, currentCharacter: true})
+        } else {
+            // false is the new value
+            onChange(undefined)
+        }
+    }
+
+    const isCurrentChar = value && value.currentCharacter
+
     return (
         <div className='actor-editor-main' style={generateStyle(value?.avatar)}>
-            Actor: <SelectPicker placeholder="no actor" data={data} value={value ? value.character : null} onChange={(val) => changeChar(val)}/>
-            {value ? renderEditors() : null}
+            Actor:
+            <Toggle checkedChildren="Current dialog character" unCheckedChildren="Current dialog character" checked={!!isCurrentChar} onChange={(val) => setCurrentChar(val)}/>
+            <br></br>
+            {!isCurrentChar && <SelectPicker placeholder="no actor" data={data} value={value ? value.character : null} onChange={(val) => changeChar(val)}/>}
+            {value && !isCurrentChar ? renderEditors() : null}
         </div>
     );
 };

@@ -91,7 +91,7 @@ export interface CharacterDialog {
     chooseTextScript?: string
     chooseBgScript?: string
     canHostEventsScript?: string
-    eventHosts?: string[]
+    eventHosts: string[] | null
 }
 
 export const createCharacterDialog = (): CharacterDialog => {
@@ -154,13 +154,13 @@ export function getChar(game: GameDescription, uid: string) {
 
 export function getCharEventHostName(ch: Character | undefined) {
     if (ch && ch.dialog) {
-        return ch.dialog.eventHosts === undefined ? null : `char:${ch.uid}`
+        return ch.dialog.eventHosts === null ? null : `char:${ch.uid}`
     }
     return null
 }
 
 export function getLocEventHosts(ch: Character | undefined) {
-    if (ch && ch.dialog && ch.dialog.eventHosts !== undefined) {
+    if (ch && ch.dialog && ch.dialog.eventHosts !== null) {
         const personal = getCharEventHostName(ch)
         return [...ch.dialog.eventHosts, personal]
     }

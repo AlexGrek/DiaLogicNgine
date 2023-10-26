@@ -160,7 +160,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             </div>
                             <PanelGroup accordion bordered>
                                 <Panel header="Actor" defaultExpanded>
-                                    <ActorEditor value={windowState.actor} game={game} onChange={(actor) => setWindow({...windowState, actor: actor})}/>
+                                    <ActorEditor value={windowState.actor? windowState.actor : null} game={game} onChange={(actor) => setWindow({...windowState, actor: actor})}/>
                                 </Panel>
                                 <Panel header="Misc">
                                     <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>

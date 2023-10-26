@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Loc from '../../../game/Loc';
-import { Button, CheckPicker, Col, Divider, Drawer, Grid, IconButton, Input, Panel, PanelGroup, Row } from 'rsuite';
+import Loc, { getLocEventHostName } from '../../../game/Loc';
+import { Button, CheckPicker, Checkbox, Col, Divider, Drawer, Grid, IconButton, Input, Panel, PanelGroup, Row } from 'rsuite';
 import PublicFileUrl, { IMAGES } from '../../common/PublicFileUrl';
 import LinksEditorPanel from '../../LinksEditorPanel';
 import { DialogLink, DialogWindow } from '../../../game/Dialog';
@@ -15,6 +15,7 @@ import lodash from 'lodash';
 import ImageListEditor from '../../common/text_list/ImageListEditor';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../../common/CodeSampleButton';
+import EventHostsEditor from '../../common/EventHostsEditor';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -36,7 +37,7 @@ interface LocEditorProps {
     handlers: IUpds;
 }
 
-type CodeEditMenu = "isAccessibleScript" | "isVisibleScript" | "chooseTextScript" | "choosebackgroundScript" | "onEntryScript"
+type CodeEditMenu = "isAccessibleScript" | "isVisibleScript" | "chooseTextScript" | "choosebackgroundScript" | "onEntryScript" | "canHostEventsScript"
 
 const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, open, handlers, game }) => {
     const [location, setlocation] = useState<Loc>(loc);
@@ -186,6 +187,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                 <p>Thumbnail image</p>
                                 <img className='location-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
                                 <PublicFileUrl extensions={IMAGES} value={location.thumbnail} onChange={thumbChange}></PublicFileUrl>
+                                
                                 <Divider>Routes</Divider>
                                 <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>
                                 <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1 || loc.uid === ""}>Make routes</Button>
@@ -210,6 +212,17 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                         {renderCodeEditButton("chooseTextScript")}
                                         {renderCodeEditButton("choosebackgroundScript")}
                                         {renderCodeEditButton("onEntryScript")}
+                                    </Panel>
+                                    <Panel header="Events">
+                                    <Checkbox checked={location.eventHosts !== null} onChange={(v, checked) =>{
+                                        if (!checked) {
+                                            setlocation({...location, eventHosts: null})
+                                        } else {
+                                            setlocation({...location, eventHosts: []})
+                                        }
+                                    } }>Can host events</Checkbox>
+                                    {location.eventHosts && <EventHostsEditor eventHosts={game.eventHosts} value={location.eventHosts} onValueChange={(val) => setlocation({...location, eventHosts: val})} personalEventHostName={getLocEventHostName(location) || ''}/>}
+                                    {location.eventHosts && renderCodeEditButton("canHostEventsScript")}
                                     </Panel>
                                 </PanelGroup>
                                 {renderCodeEditor(codeEditMenu)}

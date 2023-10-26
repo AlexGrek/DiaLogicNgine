@@ -115,7 +115,7 @@ const ChainEditor: React.FC<ChainEditorProps> = ({ visible, onSetVisible, onAppl
                 <div>
                     <Input value={uid} placeholder='Dialog window UID' onChange={setUid} />
                     <Divider>Actor</Divider>
-                        <ActorEditor value={act} game={game} onChange={(actor) => setAct(actor)}/>
+                        <ActorEditor value={act? act : null} game={game} onChange={(actor) => setAct(actor)}/>
                     <Divider>Windows</Divider>
                     <div className="chain-container">
                         {renderStubs()}

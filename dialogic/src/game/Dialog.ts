@@ -48,13 +48,15 @@ export function createDialogLink(): DialogLink {
 
 export interface Actor {
     character: string
+    currentCharacter: boolean,
     avatar: string | number | undefined
 }
 
 export const createActor = (): Actor => {
     return {
         character: "",
-        avatar: undefined
+        avatar: undefined,
+        currentCharacter: false
     }
 }
 

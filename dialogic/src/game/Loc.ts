@@ -22,7 +22,8 @@ export default interface Loc {
     onEntryScript?: string
 
     // events
-    eventHosts?: string[]
+    eventHosts: string[] | null
+    canHostEventsScript?: string
 }
 
 export function getLoc(game: GameDescription, uid: string) {
@@ -31,13 +32,13 @@ export function getLoc(game: GameDescription, uid: string) {
 
 export function getLocEventHostName(loc: Loc | undefined) {
     if (loc) {
-        return loc.eventHosts === undefined ? null : `loc:${loc.uid}`
+        return loc.eventHosts === null ? null : `loc:${loc.uid}`
     }
     return null
 }
 
 export function getLocEventHosts(loc: Loc | undefined) {
-    if (loc && loc.eventHosts !== undefined) {
+    if (loc && loc.eventHosts !== null) {
         const personal = getLocEventHostName(loc)
         return [...loc.eventHosts, personal]
     }
