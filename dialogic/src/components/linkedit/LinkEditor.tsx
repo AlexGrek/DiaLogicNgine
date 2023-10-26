@@ -16,9 +16,9 @@ import LinkTypeTag from '../LinkTypeTag';
 import CodeSampleButton from '../common/CodeSampleButton';
 import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code_editor/PopupCodeEditor';
+import CopyButton from '../common/copypaste/CopyButton';
 import Magic, { MagicOperation } from '../common/magic/Magic';
 import LocationPicker from './LocationPicker';
-import CopyButton from '../common/copypaste/CopyButton';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,

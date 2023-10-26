@@ -3,6 +3,7 @@ export interface Item {
     name: string
     description: string
     price?: number
+    discussable: boolean
     unique: boolean
     tags: string[]
     stats: { [key: string]: number | string }
@@ -24,6 +25,7 @@ export function createEmptyItem(uid: string): Item {
         unique: false,
         tags: [],
         canGive: true,
-        stats: {}
+        stats: {},
+        discussable: true
     }
 }

@@ -28,6 +28,7 @@ export function roleByUid(uid: string, game: GameDescription) {
 
 export interface Behavior {
     speakingModel: SpeakingModel
+    reactions: Reaction[]
 }
 
 export interface SpeakingModel {
@@ -46,21 +47,41 @@ const createSpeakingModel = (): SpeakingModel => {
         bye: ["bye"],
         hello: ["hello"],
         dontKnowChar: ["who is it"],
-        dontKnowObject: ["what it it"]
+        dontKnowObject: ["what is it"]
     }
 }
 
+export interface ReactionTrigger {
+    facts: string[],
+    chars: string[],
+    items: string[],
+    places: string[]
+}
+
 export interface Reaction {
-    simpleText: TextList
-    chooseSimpleTextScript?: string
+    trigger: ReactionTrigger
+    reply: string
+    actionScript?: string
+    isEnabled?: string
     dialogWindow?: DialogWindowId
 }
 
-export interface FactReactionMap {
-    reactionType: string | null // use null for default reaction type
-    customReactions: {[factid: string]: Reaction}
+export function createTrigger() {
+    return {
+        facts: [],
+        chars: [],
+        items: [],
+        places: []
+    }
 }
 
+export function createReaction(): Reaction {
+    return {
+        trigger: createTrigger(),
+        reply: "",
+    }
+
+}
 
 export interface CharacterDialog {
     behavior: Behavior
@@ -69,13 +90,15 @@ export interface CharacterDialog {
     text: TextList
     chooseTextScript?: string
     chooseBgScript?: string
+    canHostEventsScript?: string
     eventHosts?: string[]
 }
 
 export const createCharacterDialog = (): CharacterDialog => {
     return {
         behavior: {
-            speakingModel: createSpeakingModel()
+            speakingModel: createSpeakingModel(),
+            reactions: []
         },
         links: [],
         background: emptyImageList(),
