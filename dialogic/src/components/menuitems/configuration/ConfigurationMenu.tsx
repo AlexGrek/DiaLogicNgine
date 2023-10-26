@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { createDialogWindowId } from '../../../exec/GameState';
-import { GameDescription } from '../../../game/GameDescription';
+import { GameDescription, GeneralGameInfo } from '../../../game/GameDescription';
 import { NotifyCallback } from '../../../UiNotifications';
 import DialogWindowPicker from '../../common/DialogWindowPicker';
-import { Panel, PanelGroup } from 'rsuite';
+import { Button, ButtonGroup, Panel, PanelGroup, Stack } from 'rsuite';
 import ImageListEditor from '../../common/text_list/ImageListEditor';
 import PublicFileUrl, { IMAGES } from '../../common/PublicFileUrl';
 import { generateImageUrl } from '../../../Utils';
 import lodash from 'lodash';
 import './configuration.css'
+import GeneralEditor from './GeneralEditor';
 
 interface ConfigurationMenuProps {
     game: GameDescription;
@@ -18,6 +19,7 @@ interface ConfigurationMenuProps {
 
 const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, onNotify }) => {
     const [currentGame, setCurrentGame] = useState<GameDescription>(game);
+    const [generalEditorOpen, setGeneralEditorOpen] = useState<boolean>(false);
     useEffect(() => {
         setCurrentGame(game);
     }, [game]);
@@ -37,10 +39,35 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
 
     const publicImageSrc = game.startMenu.menuBackground ? generateImageUrl(game.startMenu.menuBackground) : null;
 
+    const renderGeneralProp = (name: keyof GeneralGameInfo) => {
+        const prop = game.general[name]
+        return <p>
+            <b>{name}: </b>{prop.toString()}
+        </p>
+    }
+
     return (
         <div>
-            <h2>Game configuration menu</h2>
-            <PanelGroup accordion bordered>
+            <h3>Game configuration menu</h3>
+            <Stack wrap={true} alignItems='stretch'>
+            <Panel style={{minWidth: '30em', maxWidth: '40em'}}
+    bordered
+    header={
+      <Stack justifyContent="space-between">
+        <span>About game</span>
+        <ButtonGroup>
+          <Button active onClick={() => setGeneralEditorOpen(true)}>Edit</Button>
+        </ButtonGroup>
+      </Stack>
+    }
+  >
+    {renderGeneralProp("name")}
+    {renderGeneralProp("version")}
+    {renderGeneralProp("description")}
+    {renderGeneralProp("authors")}
+    <GeneralEditor value={game.general} open={generalEditorOpen} onChange={val => onSetGame({...currentGame, general: val})} onClose={() => setGeneralEditorOpen(false)}/>
+  </Panel>
+            <PanelGroup accordion bordered style={{minWidth: '40em'}}>
                 <Panel header="Basic">
                 <p>Startup dialog</p>
                 <DialogWindowPicker dialogs={currentGame.dialogs} chosen={[currentGame.startupDialog.dialog, currentGame.startupDialog.window]} onValueChange={onCurrentDialogChange}></DialogWindowPicker>
@@ -50,6 +77,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                                 <PublicFileUrl extensions={IMAGES} value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val)}></PublicFileUrl>
                 </Panel>
             </PanelGroup>
+            </Stack>
         </div>
     );
 };

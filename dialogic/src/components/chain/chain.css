@@ -1,6 +1,5 @@
 .chain-container {
-    max-height: 100%;
-    overflow: scroll;
+    overflow: auto;
 }
 
 .chain-toolbox-bottom {
