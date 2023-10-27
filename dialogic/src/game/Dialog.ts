@@ -19,7 +19,7 @@ export enum LinkType {
     Local = "local", Push = "push", Pop = "pop",
     Jump = "jump", ResetJump = "resetjump",
     NavigateToLocation = "tolocation", TalkToPerson = "toperson",
-    QuickReply = "reply"
+    QuickReply = "reply", Return = "return"
 }
 
 export interface DialogLinkDirection {

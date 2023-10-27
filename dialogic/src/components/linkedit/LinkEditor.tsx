@@ -79,14 +79,15 @@ interface LinkEditorProps {
 type CodeEditMenu = "actionCode" | "isVisible" | "isEnabled" | "alternative"
 
 const TooltipText: { [key: string]: string } = {
-    [LinkType.Local]: "Move to another window in same dialogm keeping the stack",
-    [LinkType.Pop]: "Move to previous level (one level back), pop stack",
-    [LinkType.Push]: "Move to next level, possible to another dialog (one level down), push stack",
-    [LinkType.NavigateToLocation]: "Move to location, clearing all the stack",
-    [LinkType.TalkToPerson]: "Talk to person, push stack",
-    [LinkType.Jump]: "Move to another dialog/window keeping the stack",
-    [LinkType.ResetJump]: "Move to another dialog/window clearing the stack",
-    [LinkType.QuickReply]: "Reply without changing window"
+    [LinkType.Local]: "Local: move to another window in same dialogm keeping the stack",
+    [LinkType.Pop]: "Pop: move to previous level (one level back) or to location, pop stack",
+    [LinkType.Push]: "Push: move to next level, possible to another dialog (one level down), push stack",
+    [LinkType.NavigateToLocation]: "Loc: move to location, clearing all the stack",
+    [LinkType.TalkToPerson]: "Talk: start dialog with NPC, push stack",
+    [LinkType.Jump]: "Jump: move to another dialog/window keeping the stack",
+    [LinkType.ResetJump]: "ResetJump: move to another dialog/window clearing the stack",
+    [LinkType.QuickReply]: "Reply: quick text without changing window",
+    [LinkType.Return]: "Return: return to location or NPC (if in dialog)"
 }
 
 const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
