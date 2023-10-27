@@ -21,6 +21,7 @@ export interface IDialogEditorProps {
   dialog?: Dialog;
   handlers: IUpds;
   game: GameDescription;
+  visible: boolean
 }
 
 export interface IDialogEditorState {
@@ -106,12 +107,12 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
 
     return (
       <div ref={this.itemReference}>
-        <div className='window-editor-tools'>
+        {this.props.visible &&<div className='window-editor-tools'>
           <CreateWindowButton createHandler={this.createDialogWindowHandler.bind(this)}></CreateWindowButton>
           <IconButton icon={<PushMessageIcon />} placement="left" onClick={() => this.setState({ chainOpen: true })}>
             Chain
           </IconButton>
-        </div>
+        </div>}
         <div className='window-editor-windows-container'>
           {
             this.props.dialog ?

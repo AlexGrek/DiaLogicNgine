@@ -9,9 +9,15 @@ interface CharEditorTabsProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
+    visible: boolean
 }
 
-const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handlers }) => {
+const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handlers, visible }) => {
+    if (!visible) {
+        // TODO: change this hardcore optimization to something lighter
+        return <div></div>
+    }
+
     const createRolesEditorTab = () => {
         return {
             header: "Roles",

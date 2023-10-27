@@ -12,14 +12,19 @@ interface LocationMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
+    visible: boolean
 }
 
-const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers }) => {
+const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers, visible }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     useEffect(() => {
         setEditingIndex(editingIndex);
     }, [game]);
+
+    if (!visible) {
+        return <div/>
+    }
 
     const edit = (i: number) => {
         setEditingIndex(i)

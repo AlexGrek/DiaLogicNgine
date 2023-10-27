@@ -58,8 +58,8 @@ const ChainEditor: React.FC<ChainEditorProps> = ({ visible, onSetVisible, onAppl
             return <Panel bordered key={i}>
                 <div className='chain-item-toolbar'><p className='chain-item-uid'>{possibleUid}</p><Button appearance="link" color="red" onClick={() => del(i)}>Delete</Button></div>
                 <Input value={stub.text} placeholder='Text' as="textarea" rows={3} onChange={(val) => editStub(i, { ...stub, text: val })} />
-                { i < stubs.length-1 ?
-                <Input value={stub.nextButton} placeholder='Next button text' onChange={(val) => editStub(i, { ...stub, nextButton: val })} /> : null }
+                {i < stubs.length - 1 ?
+                    <Input value={stub.nextButton} placeholder='Next button text' onChange={(val) => editStub(i, { ...stub, nextButton: val })} /> : null}
             </Panel>
         })
     }
@@ -112,19 +112,19 @@ const ChainEditor: React.FC<ChainEditorProps> = ({ visible, onSetVisible, onAppl
                 </Drawer.Actions>
             </Drawer.Header>
             <Drawer.Body>
-                <div>
-                    <Input value={uid} placeholder='Dialog window UID' onChange={setUid} />
-                    <Divider>Actor</Divider>
-                        <ActorEditor value={act? act : null} game={game} onChange={(actor) => setAct(actor)}/>
-                    <Divider>Windows</Divider>
-                    <div className="chain-container">
-                        {renderStubs()}
-                    </div>
-                    <div className='chain-toolbox-bottom'>
-                        <IconButton icon={<PlusIcon />} onClick={() => add()}>Add</IconButton>
-                    </div>
-
-                </div>
+                {visible &&
+                    <div>
+                        <Input value={uid} placeholder='Dialog window UID' onChange={setUid} />
+                        <Divider>Actor</Divider>
+                        <ActorEditor value={act ? act : null} game={game} onChange={(actor) => setAct(actor)} />
+                        <Divider>Windows</Divider>
+                        <div className="chain-container">
+                            {renderStubs()}
+                        </div>
+                        <div className='chain-toolbox-bottom'>
+                            <IconButton icon={<PlusIcon />} onClick={() => add()}>Add</IconButton>
+                        </div>
+                    </div>}
             </Drawer.Body>
         </Drawer>
 

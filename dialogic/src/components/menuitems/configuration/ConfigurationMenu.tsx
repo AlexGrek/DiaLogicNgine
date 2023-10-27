@@ -16,14 +16,19 @@ interface ConfigurationMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds
+    visible: boolean
 }
 
-const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, handlers }) => {
+const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, handlers, visible }) => {
     const [currentGame, setCurrentGame] = useState<GameDescription>(game);
     const [generalEditorOpen, setGeneralEditorOpen] = useState<boolean>(false);
     useEffect(() => {
         setCurrentGame(game);
     }, [game]);
+
+    if (!visible) {
+        return <div/>
+    }
 
     const onCurrentDialogChange = (d: string | null, w: string | null) => {
         if (d && w) {

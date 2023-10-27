@@ -8,13 +8,14 @@ interface CharEditorTabsProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
+    visible: boolean
 }
 
-const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handlers }) => {
+const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handlers, visible }) => {
     const createFactsTab = () => {
         return {
             header: "Facts",
-            content: <FactsMenu game={game} onSetGame={onSetGame} handlers={handlers}/>,
+            content: <FactsMenu visible={visible} game={game} onSetGame={onSetGame} handlers={handlers}/>,
             disabled: false
         }
     }

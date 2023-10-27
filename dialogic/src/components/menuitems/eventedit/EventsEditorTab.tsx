@@ -22,12 +22,17 @@ interface EventsEditorTabProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void
     handlers: IUpds
+    visible: boolean
 }
 
-const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, handlers }) => {
+const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, handlers, visible }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<GameEvent | null>(null)
     const [filterByTargets, setFilterByTargets] = useState<string[]>([])
+
+    if (!visible) {
+        return <div/>
+    }
 
     const predefinedHosts = [
         ...game.locs.map(loc => getLocEventHostName(loc)).filter(el => el !== null),

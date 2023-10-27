@@ -14,11 +14,16 @@ interface FactsMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
+    visible: boolean
 }
 
-const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers }) => {
+const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visible }) => {
     const [newuid, setNewuid] = React.useState<string>("")
     const [editFact, setEditFact] = React.useState<number>(-1)
+
+    if (!visible) {
+        return <div/>
+    }
 
     const createFact = () => {
         if (!isValidJsIdentifier(newuid)) {

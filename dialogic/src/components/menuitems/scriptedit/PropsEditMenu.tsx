@@ -25,9 +25,10 @@ interface PropsEditMenuProps {
     onSetProps: (props: Prop[]) => void;
     handlers?: IUpds;
     creatable?: boolean
+    visible?: boolean
 }
 
-const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers, creatable }) => {
+const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers, creatable, visible }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
@@ -36,6 +37,10 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
     useEffect(() => {
         setEditingIndex(editingIndex);
     }, [props]);
+
+    if (visible !== undefined && visible === false) {
+        return <div/>
+    }
 
     const canCreate = creatable !== undefined ? creatable : true;
 

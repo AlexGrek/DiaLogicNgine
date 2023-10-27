@@ -6,11 +6,13 @@ import { NotifyCallback } from '../../UiNotifications';
 import { ENGINE_VERSION, GameDescription } from '../../game/GameDescription';
 import { loadJsonStringAndPatch } from '../../game/Patches';
 import SaveLoadJsonDrawer from './SaveLoadJsonDrawer';
+import { trace } from '../../Trace';
 
 interface SaveLoadMenuProps {
     currentGame: GameDescription;
     onSetGame: (game: GameDescription) => void;
     onNotify: NotifyCallback;
+    visible: boolean
 }
 
 const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onNotify }) => {
@@ -27,6 +29,7 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
     const updateSaves = () => {
         const man = new SaveLoadManager()
         setList(man.listGameNames())
+        trace("Update saves")
     }
 
     useEffect(() => {

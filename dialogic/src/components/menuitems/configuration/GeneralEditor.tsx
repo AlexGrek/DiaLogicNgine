@@ -20,7 +20,7 @@ const GeneralEditor: React.FC<GeneralEditorProps> = ({ value, onClose, onChange,
     }, [general]);
 
     const setStrProp = (prop: keyof GeneralGameInfo) => (value: string) => {
-        setGeneral({...general, [prop]: value})
+        setGeneral({ ...general, [prop]: value })
     }
 
     const onDone = () => {
@@ -31,30 +31,32 @@ const GeneralEditor: React.FC<GeneralEditorProps> = ({ value, onClose, onChange,
     const renderStrPropEditor = (prop: keyof GeneralGameInfo) => {
         var input;
         if (TEXTAREA_FOR.includes(prop)) {
-            input = <Input as="textarea" rows={3} value={general[prop].toString()} onChange={setStrProp(prop)}/>
+            input = <Input as="textarea" rows={3} value={general[prop].toString()} onChange={setStrProp(prop)} />
         } else {
-            input = <Input value={general[prop].toString()} onChange={setStrProp(prop)}/>
+            input = <Input value={general[prop].toString()} onChange={setStrProp(prop)} />
         }
         return <p>
             <b>{prop}</b>
-            <br/>
+            <br />
             {input}
         </p>
     }
 
     return (
         <Drawer open={open} onClose={() => onDone()}>
-        <Drawer.Body>
-            {renderStrPropEditor("name")}<br/>
-            {renderStrPropEditor("description")}<br/>
-            {renderStrPropEditor("version")}<br/>
-            <b>Authors</b>
-            <StringListEditor value={general.authors} onChange={val => setGeneral({...general, authors: val})}/>
-            <br/>
-            <b>Additional info</b>
-            <StringMapEditor value={general.extras} onChange={val => setGeneral({...general, extras: val})}/>
-        </Drawer.Body>
-      </Drawer>
+            <Drawer.Body>
+                {open && <div>
+                    {renderStrPropEditor("name")}<br />
+                    {renderStrPropEditor("description")}<br />
+                    {renderStrPropEditor("version")}<br />
+                    <b>Authors</b>
+                    <StringListEditor value={general.authors} onChange={val => setGeneral({ ...general, authors: val })} />
+                    <br />
+                    <b>Additional info</b>
+                    <StringMapEditor value={general.extras} onChange={val => setGeneral({ ...general, extras: val })} />
+                </div>}
+            </Drawer.Body>
+        </Drawer>
     );
 };
 

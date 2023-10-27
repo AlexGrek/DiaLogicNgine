@@ -168,6 +168,10 @@ export default class App extends React.Component<IAppProps, IAppState> {
     }
   }
 
+  private isVisible(name: string) {
+    return this.state.menu === name
+  }
+
   private handleNotify(type: NotificationType, text: string, header?: string | null) {
     const notif = new Notification(type, text, header);
     const notifications = [...this.state.notifications, notif]
@@ -177,31 +181,31 @@ export default class App extends React.Component<IAppProps, IAppState> {
   private renderContent(updates: IUpds, chosenDialog: Dialog | undefined) {
     return <div>
       <div style={this.displayStyle("dialog")}>
-        <DialogEditor game={this.state.game} handlers={updates} dialog={chosenDialog} />
+        <DialogEditor visible={this.isVisible("dialog")} game={this.state.game} handlers={updates} dialog={chosenDialog} />
       </div>
       <div style={this.displayStyle("player")}>
-        <Player game={this.state.game} handlers={updates} visible={this.state.menu === "player"} />
+        <Player visible={this.isVisible("player")} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("saveload")}>
-        <SaveLoadMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} currentGame={this.state.game}></SaveLoadMenu>
+        <SaveLoadMenu visible={this.isVisible("saveload")} onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} currentGame={this.state.game}></SaveLoadMenu>
       </div>
       <div style={this.displayStyle("config")}>
-        <ConfigurationMenu handlers={updates} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} />
+        <ConfigurationMenu visible={this.isVisible("config")} handlers={updates} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} />
       </div>
       <div style={this.displayStyle("locs")}>
-        <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
+        <LocationMenu visible={this.isVisible("locs")} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("chars")}>
-        <CharEditorTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
+        <CharEditorTabs visible={this.isVisible("chars")} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("scripts")}>
-        <ScriptEditMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
+        <ScriptEditMenu visible={this.isVisible("scripts")} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("facts")}>
-        <FactsObjectivesTabs onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
+        <FactsObjectivesTabs visible={this.isVisible("facts")} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />
       </div>
       <div style={this.displayStyle("items")}>
-        <ItemsMenu items={this.state.game.items} onSetItems={(items: Item[]) => this.setState({ game: { ...this.state.game, items: items } })} game={this.state.game} />
+        <ItemsMenu visible={this.isVisible("items")} items={this.state.game.items} onSetItems={(items: Item[]) => this.setState({ game: { ...this.state.game, items: items } })} game={this.state.game} />
       </div>
     </div>
   }
