@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Drawer, Input, Radio, RadioGroup } from 'rsuite';
+import React, { useEffect, useState } from 'react';
+import { Button, Input, Radio, RadioGroup } from 'rsuite';
 import { ValueType } from 'rsuite/esm/Radio';
-import { getNameOfJSDocTypedef } from 'typescript';
-import { GameDescription } from '../../game/GameDescription';
 import { SaveLoadManager } from '../../SaveLoadManager';
 import { NotifyCallback } from '../../UiNotifications';
+import { ENGINE_VERSION, GameDescription } from '../../game/GameDescription';
+import { loadJsonStringAndPatch } from '../../game/Patches';
 import SaveLoadJsonDrawer from './SaveLoadJsonDrawer';
 
 interface SaveLoadMenuProps {
@@ -66,7 +66,7 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
                 "facts" in game
         }
         try {
-            const parsed: GameDescription = JSON.parse(text)
+            const parsed: GameDescription = loadJsonStringAndPatch(text, ENGINE_VERSION)
             if (!isGameType(parsed)) {
                 onNotify("error", "Failed to parse JSON", null)
                 return;

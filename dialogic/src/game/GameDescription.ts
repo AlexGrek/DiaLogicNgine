@@ -8,6 +8,8 @@ import { Item } from "./Items";
 import Loc from "./Loc";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
+export const ENGINE_VERSION="0.4"
+
 export interface StartMenuConfiguration {
     menuBackground?: string
 }
@@ -78,7 +80,7 @@ export function createDefaultGame(): GameDescription {
         ],
         buildVersion: 1,
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
-        engineVersion: "0.4",
+        engineVersion: ENGINE_VERSION,
         startMenu: {},
         general: createGeneralGameInfo()
     };
