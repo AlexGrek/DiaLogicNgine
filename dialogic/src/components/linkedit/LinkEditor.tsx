@@ -269,7 +269,8 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             if (linkdir.qualifiedDirection === undefined) {
                 linkdir.qualifiedDirection = game.startupDialog
             }
-            return <DialogWindowPicker dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)} />
+            return <DialogWindowPicker handlers={handlers} dialogs={game.dialogs} chosen={[linkdir.qualifiedDirection.dialog, linkdir.qualifiedDirection.window]} onValueChange={(d, w) => editPushDirection(linkdir, isMainLink, aindex, d, w)} />
+            
         }
         if (linkdir.type === LinkType.NavigateToLocation) {
             return <LocationPicker locs={game.locs} value={linkdir.direction || ''} onLocChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)} />

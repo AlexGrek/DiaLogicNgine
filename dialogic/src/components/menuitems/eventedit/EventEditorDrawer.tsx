@@ -6,6 +6,7 @@ import CodeSampleButton from '../../common/CodeSampleButton';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import DialogWindowPicker from '../../common/DialogWindowPicker';
 import { DialogWindowId } from '../../../exec/GameState';
+import { IUpds } from '../../../App';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -25,11 +26,12 @@ interface EventEditorDrawerProps {
     onDelete: () => void
     hosts: (string | null)[]
     game: GameDescription
+    handlers: IUpds
 }
 
 type CodeEditMenu = "onEventActionScript" | "canHappenScript"
 
-const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, onClose, onEventChange, onDelete, hosts, game }) => {
+const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, handlers, onClose, onEventChange, onDelete, hosts, game }) => {
     const [ev, setEv] = useState<GameEvent>(event || createEvent());
     // enable code editor props
     const [codeEditMenu, setCodeEditMenu] = useState<CodeEditMenu>("canHappenScript");
@@ -103,7 +105,7 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, onClose, o
             </Drawer.Header>
             <Drawer.Body className="window-editor-drawer-body">
 
-                <Grid className="window-editor-grid">
+                {event !== null && <Grid className="window-editor-grid">
                     <Row className="show-grid">
                         <Col xs={6}>
                             <div className='location-params'>
@@ -140,11 +142,11 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, onClose, o
                         <Col xs={6}>
                             <p>Destination</p>
                             <Checkbox checked={ev.link !== null} onChange={(value, checked) => checked ? onSetDialogWindow(game.startupDialog.dialog, game.startupDialog.window) : setEv({ ...ev, link: null })}>Push to another window</Checkbox>
-                            {ev.link && <DialogWindowPicker dialogs={game.dialogs} chosen={[ev.link.dialog, ev.link.window]} onValueChange={onSetDialogWindow} />}
+                            {ev.link && <DialogWindowPicker handlers={handlers} dialogs={game.dialogs} chosen={[ev.link.dialog, ev.link.window]} onValueChange={onSetDialogWindow} />}
                         </Col>
                     </Row>
                 </Grid>
-
+                }
 
 
             </Drawer.Body>

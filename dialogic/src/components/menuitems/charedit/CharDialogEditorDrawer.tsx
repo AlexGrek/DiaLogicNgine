@@ -110,7 +110,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
             </Drawer.Header>
             <Drawer.Body className="window-editor-drawer-body">
                 <Checkbox checked={char.dialog !== undefined} readOnly={char.dialog !== undefined} onChange={() => setDialog(mustBeDialog)}>Dialog enabled</Checkbox>
-                {char.dialog === undefined ? <p>Enable dialog option to edit character</p> :
+                {open && char.dialog === undefined ? <p>Enable dialog option to edit character</p> :
                     <Grid className="window-editor-grid">
                         <Row className="show-grid">
                             <Col xs={6}>

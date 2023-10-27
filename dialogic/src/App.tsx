@@ -13,7 +13,7 @@ import CharEditorTabs from './components/menuitems/charedit/CharEditorTabs';
 import ConfigurationMenu from './components/menuitems/configuration/ConfigurationMenu';
 import LocationMenu from './components/menuitems/locedit/LocationMenu';
 import ScriptEditMenu from './components/menuitems/scriptedit/ScriptEditMenu';
-import NotificationViewPanel from './components/notification/NotificationViewPanel';
+// import NotificationViewPanel from './components/notification/NotificationViewPanel';
 import Player from './components/player/Player';
 import Loc from './game/Loc';
 import Prop from './game/Prop';
@@ -44,7 +44,7 @@ export interface IUpds {
   handleDialogEdit: (dialog: Dialog) => void;
   handleDialogCreate: (dialog: Dialog) => void;
   handleDialogApplyChange: (func: DialogWindowListUpdater, dialog_uid: string | null) => void;
-  handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null) => void;
+  handleDialogWindowChange: (window: DialogWindow, dialog_uid: string | null, create?: boolean) => void;
   handleLocChange: (locs: Loc[]) => void;
   handlePropChange: (props: Prop[]) => void;
   createProp: (prop: Prop) => void;
@@ -114,18 +114,23 @@ export default class App extends React.Component<IAppProps, IAppState> {
       if (d.name === dialog_uid) {
         const dialogWindows = func(d.windows);
         const newDialog = { ...d, windows: dialogWindows }
-        console.log(`Dialog ${d.name} updated.`);
+        // console.log(`Dialog ${d.name} updated.`);
         return newDialog;
       }
       return d;
     })
+    console.warn(`new dialogs: ${JSON.stringify(newDialogs)}`)
     this.setState({ game: { ...this.state.game, dialogs: newDialogs } });
   }
 
-  private handleDialogWindowChange(window: DialogWindow, dialog_uid: string | null) {
+  private handleDialogWindowChange(window: DialogWindow, dialog_uid: string | null, create?: boolean) {
     const uid = window.uid;
     console.warn("Handling dialog window change: " + JSON.stringify(window))
     const dialogWindowListChanger = (lst: DialogWindow[]) => {
+      if (create) {
+        console.log(`Creating, so now we have: ${lst}`)
+        return [...lst, window]
+      }
       return lst.map((element) => {
         if (element.uid === uid) {
           return window;
@@ -177,7 +182,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
         <SaveLoadMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} currentGame={this.state.game}></SaveLoadMenu>
       </div>
       <div style={this.displayStyle("config")}>
-        <ConfigurationMenu onNotify={this.handleNotify.bind(this)} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} />
+        <ConfigurationMenu handlers={updates} onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} />
       </div>
       <div style={this.displayStyle("locs")}>
         <LocationMenu onSetGame={(game: GameDescription) => this.setState({ game: game })} game={this.state.game} handlers={updates} />

@@ -45,7 +45,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }, [code, ui]);
 
     const rt = () => game ? createRtDoc(game) : null
-    
+
     const getArguments = () => {
         let args = ui.arguments
         if (game && game.facts.length > 0) {
@@ -69,12 +69,12 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
 
     const renderEditor = () => {
         return <CodeEditor value={codeVal} language="js" placeholder="Please enter JS code or leave blank for no action." data-color-mode="dark" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
-        padding={10}
-        style={{
-            fontSize: 14,
-            backgroundColor: "#050505",
-            fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-        }} />
+            padding={10}
+            style={{
+                fontSize: 14,
+                backgroundColor: "#050505",
+                fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+            }} />
     }
 
     const renderDoc = () => {
@@ -85,7 +85,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
             </p>
         } else {
             return <p>
-                <mark>{docOpenFor}</mark><br/>
+                <mark>{docOpenFor}</mark><br />
                 <span>{docOpenFor in args ? args[docOpenFor] : "missing documentation"}</span>
             </p>
         }
@@ -110,7 +110,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
         })
     }
 
-    const argumentsCommaSeparated = (argsObj: {[key: string]: string}) => {
+    const argumentsCommaSeparated = (argsObj: { [key: string]: string }) => {
         const keys = Object.keys(argsObj)
         const keysRootOnly = keys.filter(val => val.indexOf(".") < 0)
         return keysRootOnly.join(', ')
@@ -122,11 +122,11 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                 <Modal.Title>{ui.header}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className="editor-content-code">
+                {open && <div className="editor-content-code">
                     <div className='side-panel-code'>
                         <div className='object-navi-code'>
                             <h3 className='micro-header-code'>Available objects</h3>
-                            <AccessibleObjects objectDescrMap={getArguments()} onObjectClick={accessibleObjectClick} onAddClick={accessibleObjectAddClick}/>
+                            <AccessibleObjects objectDescrMap={getArguments()} onObjectClick={accessibleObjectClick} onAddClick={accessibleObjectAddClick} />
                         </div>
                         <div className='object-docs-code'>
                             {renderDoc()}
@@ -136,11 +136,11 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                         function {ui.functionName}({argumentsCommaSeparated(getArguments())}) {"{"}
                         {renderEditor()}
                         {"}"}
-                        <br/>
-                        <br/>
+                        <br />
+                        <br />
                         <span className="load-examples-code">{"// Load examples: "}{renderExamples()}</span>
                     </div>
-                </div>
+                </div>}
 
 
             </Modal.Body>

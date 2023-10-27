@@ -102,7 +102,7 @@ const BehaviorEditor: React.FC<BehaviorEditorProps> = ({ game, value, onSetBehav
                 <Button appearance='link' onClick={() => setTriggerEditorOpen(true)}>Edit triggers</Button>
             </div>
             {!r.dialogWindow && <Input name="reply" placeholder='Reply text' value={r.reply} onChange={(value) => editReaction({...r, reply: value})}/>}
-            <DialogWindowPicker dialogs={game.dialogs} chosen={r.dialogWindow === undefined ? null : [r.dialogWindow.dialog, r.dialogWindow.window]} onValueChange={editDialog}/>
+            <DialogWindowPicker handlers={handlers} dialogs={game.dialogs} chosen={r.dialogWindow === undefined ? null : [r.dialogWindow.dialog, r.dialogWindow.window]} onValueChange={editDialog}/>
             {r.dialogWindow && <Button onClick={() => editDialog(null, null)}>Just reply</Button>}
         </div>
     }

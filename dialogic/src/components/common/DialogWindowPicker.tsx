@@ -1,6 +1,8 @@
 import React from 'react';
 import { Cascader } from 'rsuite';
 import Dialog from '../../game/Dialog';
+import { IUpds } from '../../App';
+import QuickWindowCreator from './QuickWindowCreator';
 
 const SEPARATOR = "#~@~#"
 
@@ -12,9 +14,10 @@ interface DialogWindowPickerProps {
     dialogs: Dialog[]
     chosen: [string, string] | null
     onValueChange: (d: string | null, w: string | null) => void
+    handlers: IUpds
 }
 
-const DialogWindowPicker: React.FC<DialogWindowPickerProps> = ({ dialogs, onValueChange, chosen }) => {
+const DialogWindowPicker: React.FC<DialogWindowPickerProps> = ({ dialogs, onValueChange, chosen, handlers }) => {
     var uid = null
     if (chosen) {
         const dialogName = chosen[0]
@@ -43,8 +46,15 @@ const DialogWindowPicker: React.FC<DialogWindowPickerProps> = ({ dialogs, onValu
         }
     }
 
+    const handleNewDialogWindow = (d: string, w: string) => {
+        onValueChange(d, w)
+    }
+
     return (
-        <Cascader style={{'minWidth': '15em'}} data={data} value={uid} onChange={(val, _) => onChange(val)} placement='autoVerticalStart' placeholder='Pick dialog window' />
+        <span>
+            <Cascader style={{'minWidth': '15em'}} data={data} value={uid} onChange={(val, _) => onChange(val)} placement='autoVerticalStart' placeholder='Pick dialog window' />
+            <QuickWindowCreator handlers={handlers} dialogs={dialogs} onCreated={handleNewDialogWindow}/>
+        </span>
     );
 };
 

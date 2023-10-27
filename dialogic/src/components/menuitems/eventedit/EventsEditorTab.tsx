@@ -109,7 +109,7 @@ const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, hand
         onSetGame({...game, events: eventsCopy})
     }
 
-    const eventsEditor = <EventEditorDrawer event={editingObject} onEventChange={editEvent} onClose={closeEventsEditor} onDelete={() => deleteEvent(editingIndex)} hosts={allEventHosts} game={game}/>
+    const eventsEditor = <EventEditorDrawer handlers={handlers} event={editingObject} onEventChange={editEvent} onClose={closeEventsEditor} onDelete={() => deleteEvent(editingIndex)} hosts={allEventHosts} game={game}/>
 
     return (<Grid className="events-editor-grid">
         <Row className="event-show-grid">

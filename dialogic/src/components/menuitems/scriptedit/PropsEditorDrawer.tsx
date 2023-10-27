@@ -95,7 +95,7 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
             </Drawer.Header>
             <Drawer.Body>
                 <div className="prop-editor-drawer-content">
-                    {renderEditor()}
+                    {open && renderEditor()}
                 </div>
             </Drawer.Body>
         </Drawer>

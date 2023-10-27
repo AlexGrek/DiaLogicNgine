@@ -10,14 +10,15 @@ import { generateImageUrl } from '../../../Utils';
 import lodash from 'lodash';
 import './configuration.css'
 import GeneralEditor from './GeneralEditor';
+import { IUpds } from '../../../App';
 
 interface ConfigurationMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
-    onNotify: NotifyCallback;
+    handlers: IUpds
 }
 
-const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, onNotify }) => {
+const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, handlers }) => {
     const [currentGame, setCurrentGame] = useState<GameDescription>(game);
     const [generalEditorOpen, setGeneralEditorOpen] = useState<boolean>(false);
     useEffect(() => {
@@ -70,7 +71,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
             <PanelGroup accordion bordered style={{minWidth: '40em'}}>
                 <Panel header="Basic">
                 <p>Startup dialog</p>
-                <DialogWindowPicker dialogs={currentGame.dialogs} chosen={[currentGame.startupDialog.dialog, currentGame.startupDialog.window]} onValueChange={onCurrentDialogChange}></DialogWindowPicker>
+                <DialogWindowPicker handlers={handlers} dialogs={currentGame.dialogs} chosen={[currentGame.startupDialog.dialog, currentGame.startupDialog.window]} onValueChange={onCurrentDialogChange}></DialogWindowPicker>
                 </Panel>
                 <Panel header="Menu background">
                 <img className='menu-config-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>

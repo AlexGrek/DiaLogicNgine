@@ -122,7 +122,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
             if (!loc) {
                 console.warn(`Location ${route} was not found, but has a route from ${location.uid}`)
                 deleteRoute(route)
-                return <Divider key={i}/>
+                return <Divider key={i} />
             }
             return <div className='loc-route' key={i}>
                 <p>{loc.displayName}</p>
@@ -177,67 +177,67 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                 </Drawer.Actions>
             </Drawer.Header>
             <Drawer.Body className="window-editor-drawer-body">
+                {open &&
+                    <Grid className="window-editor-grid">
+                        <Row className="show-grid">
+                            <Col xs={6}>
+                                <div className='location-params'>
+                                    <p>UID (has to be unique)</p>
+                                    <Input value={location.uid} readOnly={loc.uid !== ""} onChange={uidNameChange}></Input>
+                                    <p>Thumbnail image</p>
+                                    <img className='location-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
+                                    <PublicFileUrl extensions={IMAGES} value={location.thumbnail} onChange={thumbChange}></PublicFileUrl>
 
-                <Grid className="window-editor-grid">
-                    <Row className="show-grid">
-                        <Col xs={6}>
-                            <div className='location-params'>
-                                <p>UID (has to be unique)</p>
-                                <Input value={location.uid} readOnly={loc.uid !== ""} onChange={uidNameChange}></Input>
-                                <p>Thumbnail image</p>
-                                <img className='location-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
-                                <PublicFileUrl extensions={IMAGES} value={location.thumbnail} onChange={thumbChange}></PublicFileUrl>
-                                
-                                <Divider>Routes</Divider>
-                                <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>
-                                <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1 || loc.uid === ""}>Make routes</Button>
-                                {renderRoutes()}
-                            </div>
-                        </Col>
-                        <Col xs={12}>
-                            <div className='location-params'>
-                                <p>Display name</p>
-                                <Input value={location.displayName} onChange={displayNameChange}></Input>
-                                <PanelGroup accordion bordered>
-                                    <Panel header="Display text" defaultExpanded>
-                                        <TextListEditor textList={location.text} onChange={textChange}></TextListEditor>
-                                    </Panel>
+                                    <Divider>Routes</Divider>
+                                    <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>
+                                    <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1 || loc.uid === ""}>Make routes</Button>
+                                    {renderRoutes()}
+                                </div>
+                            </Col>
+                            <Col xs={12}>
+                                <div className='location-params'>
+                                    <p>Display name</p>
+                                    <Input value={location.displayName} onChange={displayNameChange}></Input>
+                                    <PanelGroup accordion bordered>
+                                        <Panel header="Display text" defaultExpanded>
+                                            <TextListEditor textList={location.text} onChange={textChange}></TextListEditor>
+                                        </Panel>
 
-                                    <Panel header="Background">
-                                        <ImageListEditor imageList={location.backgrounds} onChange={(val) => setlocation({ ...location, backgrounds: val })} />
-                                    </Panel>
-                                    <Panel header="Scripting">
-                                        {renderCodeEditButton("isAccessibleScript")}
-                                        {renderCodeEditButton("isVisibleScript")}
-                                        {renderCodeEditButton("chooseTextScript")}
-                                        {renderCodeEditButton("choosebackgroundScript")}
-                                        {renderCodeEditButton("onEntryScript")}
-                                    </Panel>
-                                    <Panel header="Events">
-                                    <Checkbox checked={location.eventHosts !== null} onChange={(v, checked) =>{
-                                        if (!checked) {
-                                            setlocation({...location, eventHosts: null})
-                                        } else {
-                                            setlocation({...location, eventHosts: []})
-                                        }
-                                    } }>Can host events</Checkbox>
-                                    {location.eventHosts && <EventHostsEditor eventHosts={game.eventHosts} value={location.eventHosts} onValueChange={(val) => setlocation({...location, eventHosts: val})} personalEventHostName={getLocEventHostName(location) || ''}/>}
-                                    {location.eventHosts && renderCodeEditButton("canHostEventsScript")}
-                                    </Panel>
-                                </PanelGroup>
-                                {renderCodeEditor(codeEditMenu)}
-                            </div>
-                        </Col>
-                        <Col xs={6}>
-                            <div className='link-editor'>
-                                <p>Links</p>
-                                <LinksEditorPanel links={location.links} dialog={null} handlers={handlers} game={game} onChange={linksChange} window={null} window_uid={loc.uid}></LinksEditorPanel>
-                            </div>
-                        </Col>
-                    </Row>
-                </Grid>
+                                        <Panel header="Background">
+                                            <ImageListEditor imageList={location.backgrounds} onChange={(val) => setlocation({ ...location, backgrounds: val })} />
+                                        </Panel>
+                                        <Panel header="Scripting">
+                                            {renderCodeEditButton("isAccessibleScript")}
+                                            {renderCodeEditButton("isVisibleScript")}
+                                            {renderCodeEditButton("chooseTextScript")}
+                                            {renderCodeEditButton("choosebackgroundScript")}
+                                            {renderCodeEditButton("onEntryScript")}
+                                        </Panel>
+                                        <Panel header="Events">
+                                            <Checkbox checked={location.eventHosts !== null} onChange={(v, checked) => {
+                                                if (!checked) {
+                                                    setlocation({ ...location, eventHosts: null })
+                                                } else {
+                                                    setlocation({ ...location, eventHosts: [] })
+                                                }
+                                            }}>Can host events</Checkbox>
+                                            {location.eventHosts && <EventHostsEditor eventHosts={game.eventHosts} value={location.eventHosts} onValueChange={(val) => setlocation({ ...location, eventHosts: val })} personalEventHostName={getLocEventHostName(location) || ''} />}
+                                            {location.eventHosts && renderCodeEditButton("canHostEventsScript")}
+                                        </Panel>
+                                    </PanelGroup>
+                                    {renderCodeEditor(codeEditMenu)}
+                                </div>
+                            </Col>
+                            <Col xs={6}>
+                                <div className='link-editor'>
+                                    <p>Links</p>
+                                    <LinksEditorPanel links={location.links} dialog={null} handlers={handlers} game={game} onChange={linksChange} window={null} window_uid={loc.uid}></LinksEditorPanel>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Grid>
 
-
+                }
 
             </Drawer.Body>
         </Drawer>
