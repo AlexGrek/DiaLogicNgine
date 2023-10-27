@@ -22,6 +22,7 @@ import ItemsMenu from './components/menuitems/items/ItemsMenu';
 import { Item } from './game/Items';
 import lodash from 'lodash';
 import NotificationBar from './components/notification/NotificationBar';
+import logYaml from './Trace';
 
 export interface IAppProps {
 
@@ -119,8 +120,11 @@ export default class App extends React.Component<IAppProps, IAppState> {
       }
       return d;
     })
-    console.warn(`new dialogs: ${JSON.stringify(newDialogs)}`)
-    this.setState({ game: { ...this.state.game, dialogs: newDialogs } });
+    // logYaml(newDialogs, 'new dialogs')
+    const newState = { game: { ...this.state.game, dialogs: newDialogs } }
+    // logYaml(newState, 'new state')
+    // console.warn(`new dialogs: ${JSON.stringify(newDialogs)}`)
+    this.setState(newState);
   }
 
   private handleDialogWindowChange(window: DialogWindow, dialog_uid: string | null, create?: boolean) {
