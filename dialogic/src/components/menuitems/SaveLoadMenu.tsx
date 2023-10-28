@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Radio, RadioGroup } from 'rsuite';
+import { Button, Input, Panel, Radio, RadioGroup, Stack } from 'rsuite';
 import { ValueType } from 'rsuite/esm/Radio';
 import { SaveLoadManager } from '../../SaveLoadManager';
 import { NotifyCallback } from '../../UiNotifications';
@@ -7,6 +7,9 @@ import { ENGINE_VERSION, GameDescription } from '../../game/GameDescription';
 import { loadJsonStringAndPatch } from '../../game/Patches';
 import SaveLoadJsonDrawer from './SaveLoadJsonDrawer';
 import { trace } from '../../Trace';
+import PublicFileUrl from '../common/PublicFileUrl';
+import DownloadAsJson from './saveload/DownloadAsJson';
+import UploadJson from './saveload/UploadJson';
 
 interface SaveLoadMenuProps {
     currentGame: GameDescription;
@@ -15,12 +18,13 @@ interface SaveLoadMenuProps {
     visible: boolean
 }
 
-const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onNotify }) => {
+const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onNotify, visible }) => {
     const [game, setGame] = useState<GameDescription>(currentGame);
     const [name, setName] = useState<string>("");
     const [jsonMode, setJsonMode] = useState<boolean>(false);
     const [nameText, setNameText] = useState<string>("");
     const [list, setList] = useState<string[]>([])
+    const [serverFile, setServerFile] = useState<string | undefined>(undefined)
 
     useEffect(() => {
         setGame(currentGame);
@@ -76,6 +80,9 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
             }
             setJsonMode(false)
             onSetGame(parsed)
+            if (nameText === '') {
+                setNameText(parsed.general.name)
+            }
         } catch (e) {
             onNotify("error", `${e}`, "JSON parsing error")
             return;
@@ -88,6 +95,32 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
         return <SaveLoadJsonDrawer gameInput={game} visible={jsonMode} onClose={close} onJsonLoad={loadJson}></SaveLoadJsonDrawer>
     }
 
+    const loadServerFile = (s: string | undefined) => {
+        if (s === undefined) {
+            return
+        }
+        const nameWithoutExt = s.replaceAll('.json', '')
+        setName(nameWithoutExt)
+        setNameText(nameWithoutExt)
+        const url = 'games/' + s
+        console.log('Loading server file ' + url)
+        fetch(url).then(
+            res => res.json()
+        ).then(
+            json => {
+                console.log("Game json file downloaded")
+                loadJson(JSON.stringify(json))
+            }
+        )
+    }
+
+    const handleJsonUpload = (data: string) => {
+        loadJson(data)
+    }
+
+    if (!visible)
+        return <div/>
+
     return (
         <div>
             <h1>Save/Load menu</h1>
@@ -96,12 +129,25 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
             <Button disabled={nameText.length < 1} onClick={() => onLoad()}>Load</Button>
             <Button color="cyan" appearance="ghost" onClick={() => setJsonMode(true)}>JSON mode</Button>
             <p>endgame.</p>
-            <div>
-                <p>Saved:</p>
+            <Stack wrap justifyContent='space-between'>
+            <Panel>
+                <p>Saved in local storage:</p>
                 <RadioGroup value={name} onChange={(value, _) => onChooseToLoad(value)}>
                     {renderSavedGames(list).reverse()}
                 </RadioGroup>
-            </div>
+            </Panel>
+            <Panel id='server-file-loader' bordered>
+                <p>Load server file:</p>
+                <PublicFileUrl extensions={['json']} onChange={setServerFile} requestUrl="games/list.json"/>
+                <Button id='load-server-file' disabled={serverFile === undefined} onClick={() => loadServerFile(serverFile)}>Load file</Button>
+            </Panel>
+            <Panel bordered>
+                <p>Download game as JSON file</p>
+                <DownloadAsJson data={game} filename={nameText}></DownloadAsJson>
+                <p>Load JSON file</p>
+                <UploadJson onUpload={handleJsonUpload}></UploadJson>
+            </Panel>
+            </Stack>
             {jsonModeLoader()}
         </div>
     );

@@ -1,27 +1,32 @@
 
 const path = require('path');
 const fs = require('fs');
-const directoryPath = path.join(__dirname, '../public/game_assets');
+const assets = path.join(__dirname, '../public/game_assets');
+const games = path.join(__dirname, '../public/games');
 
 LIST = "list.json"
 
 // Recursive function to get files
-function getFiles(dir, files = []) {
+function getFiles(root, dir, files = []) {
     const fileList = fs.readdirSync(dir);
     for (const file of fileList) {
         const name = `${dir}/${file}`;
         if (fs.statSync(name).isDirectory()) {
-            getFiles(name, files);
+            getFiles(root, name, files);
         } else {
             if (!file.endsWith(LIST))
-                files.push(path.relative(directoryPath, name).replace(/\\/g, '/'));
+                files.push(path.relative(root, name).replace(/\\/g, '/'));
         }
     }
     return files;
 }
 
-files = getFiles(directoryPath)
-console.log(files)
+function dumpFileList(root, destination, filename) {
+    let files = getFiles(root, root)
+    let data = JSON.stringify(files)
+    fs.writeFileSync(path.join(destination, filename), data)
+}
 
-let data = JSON.stringify(files);
-fs.writeFileSync(path.join(directoryPath, 'list.json'), data);
+
+dumpFileList(assets, assets, 'list.json')
+dumpFileList(games, games, 'list.json')

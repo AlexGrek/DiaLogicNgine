@@ -5,17 +5,18 @@ interface PublicFileUrlProps {
     extensions: string[];
     value?: string;
     onChange: (val?: string) => void;
+    requestUrl?: string
 }
 
 export const IMAGES = ["jpeg", "jpg", "png", "bmp", "webp", "gif", "svg", "tiff"]
 
-const PublicFileUrl: React.FC<PublicFileUrlProps> = ({ extensions, value, onChange }) => {
+const PublicFileUrl: React.FC<PublicFileUrlProps> = ({ extensions, value, onChange, requestUrl }) => {
     const [ext, setExt] = useState<string[]>(extensions);
     const [data, setData] = useState<string[]>([]);
     useEffect(() => {
         setExt(extensions);
         // uncomment to use http requests instead of static file
-        fetch("game_assets/list.json").then(
+        fetch(requestUrl || "game_assets/list.json").then(
             res => res.json()
         ).then(
             json => {

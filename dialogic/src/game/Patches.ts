@@ -1,5 +1,5 @@
 import lodash from "lodash";
-import { GameDescription } from "./GameDescription";
+import { GameDescription, createDefaultConfig } from "./GameDescription";
 
 export default interface Patch {
     from(): string;
@@ -16,7 +16,8 @@ export class PatchFrom04To05 implements Patch {
     }
     apply(obj: any): GameDescription {
         // do the patch work
-        console.log("Patching hard")
+        console.log("Patching 0.4 to 0.5")
+        obj["config"] = createDefaultConfig()
         return obj as GameDescription
     }
 }
