@@ -23,7 +23,7 @@
     "react-accessible-treeview": "^2.4.0",
     "react-dom": "^18.2.0",
     "react-drag-reorder": "^1.2.0",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "rsuite": "^5.40.0",
     "screenfull": "^6.0.2",
     "storage-manager-js": "^4.0.7",
@@ -59,6 +59,7 @@
     ]
   },
   "devDependencies": {
-    "@types/deep-diff": "^1.0.3"
+    "@types/deep-diff": "^1.0.3",
+    "cypress": "^13.3.3"
   }
 }
