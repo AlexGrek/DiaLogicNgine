@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, ButtonGroup } from 'rsuite';
 import { IUpds } from '../../App';
-import { GameExecManager } from '../../exec/GameExecutor';
-import { createInitialState, State } from '../../exec/GameState';
-import { GameDescription } from '../../game/GameDescription';
-import GameUiWidgetDisplay from './GameUiWidgetDisplay';
-import "./player.css"
-import StateDsiplayDrawer from './StateDisplayDrawer';
-import StateDisplayDrawer from './StateDisplayDrawer';
 import { trace } from '../../Trace';
+import { GameExecManager } from '../../exec/GameExecutor';
+import { State, createInitialState } from '../../exec/GameState';
+import { GameDescription } from '../../game/GameDescription';
 import PlayerCore from './PlayerCore';
+import StateDisplayDrawer from './StateDisplayDrawer';
+import "./player.css";
 
 interface PlayerProps {
     game: GameDescription;
@@ -25,9 +23,9 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
 
     useEffect(() => {
         setGame(game);
-            trace("GameExecutor updated")
-            setGameExecutor(new GameExecManager(game));
-            trace(`game updated: ${game.general.description}`)
+        trace("GameExecutor updated")
+        setGameExecutor(new GameExecManager(game));
+        trace(`game updated: ${game.general.description}`)
     }, [game]);
 
     const handleStateChange = (s: State) => {
@@ -46,7 +44,7 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
             <div className="player-main">
                 <PlayerCore game={gameExecutor} state={gameState} onStateUpd={handleStateChange}></PlayerCore>
             </div>
-            <StateDisplayDrawer state={gameState} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen}/>
+            <StateDisplayDrawer state={gameState} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen} />
         </div>
     );
 };
