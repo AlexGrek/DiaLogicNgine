@@ -11,13 +11,14 @@ interface GameUiWidgetDisplayProps {
     state: State;
     onStateUpd: (newState: State) => void
     view: RenderView
+    transitionOut: boolean
 }
 
-const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view }) => {
+const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view, transitionOut }) => {
 
     if (view.uiWidgetView.widget === 'dialog') {
         return (
-            <DialogWindowView view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd}/>
+            <DialogWindowView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd}/>
         )
     }
 

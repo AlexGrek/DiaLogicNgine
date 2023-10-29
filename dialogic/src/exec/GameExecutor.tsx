@@ -384,7 +384,8 @@ export class GameExecManager {
         return {
             uiWidgetView: this.renderUiWidget(state),
             backgroundChange: bgChange,
-            notifications: [] //TODO: add notification support
+            notifications: [], //TODO: add notification support
+            step: state.stepCount
         }
     }
 }

@@ -16,17 +16,27 @@ interface PlayerCoreProps {
 }
 
 const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
+    const [prevView, setPrevView] = React.useState<RenderView | null>(null)
     const [currentView, setCurrentView] = React.useState<RenderView | null>(null)
     const [background, setBackground] = React.useState<string | null>(null)
     const [prevbackground, setPrevbackground] = React.useState<string | null>(null)
+    const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
 
     useEffect(() => {
         const view = game.render(state, background)
+        setPrevView(currentView)
         setCurrentView(view)
+
+        // calculate background change
         if (view.backgroundChange) {
             setPrevbackground(background)
             setBackground(view.backgroundChange.nextbg)
         }
+
+        // start transition animation
+        setInTransitionState(true)
+        // transition away should be completed
+        setTimeout(() => setInTransitionState(false), 200)
     }, [state])
 
     const onFullScreen = () => {}
@@ -38,7 +48,21 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         return `player-bg-host bg-host-${host}${animationClass}`
     }
 
+    const handleStateUpd = (newState: State) => {
+        if (inTransitionState) {
+            // do nothing if user is trying to change state while transition is happening
+            return;
+        }
+        else {
+            onStateUpd(newState)
+        }
+        
+    }
+
     if (currentView) {
+
+        const viewToRenderNow = (inTransitionState && prevView) ? prevView : currentView
+
         return (
             <div className='player-core-container' id='player-core'>
                 <div key={prevbackground} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
@@ -47,7 +71,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                 <div className="dialog-control-pad">
                     <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
                 </div>
-                    <GameUiWidgetDisplay view={currentView} game={game} state={state} onStateUpd={onStateUpd}/>
+                    <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd}/>
                 </div>
                 
             </div>

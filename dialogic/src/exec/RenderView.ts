@@ -68,4 +68,5 @@ export interface RenderView {
     uiWidgetView: RenderWidget
     backgroundChange: BgChange
     notifications: PlayerNotification[]
+    step: number
 }

@@ -12,11 +12,14 @@ interface DialogWindowViewProps {
     game: GameExecManager;
     state: State;
     view: DialogRenderView
+    step: number
     onStateUpd: (newState: State) => void
+    transitionOut: boolean
 }
 
-const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view }) => {
+const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
     const [prevText, setPrevText] = useState<string>("")
+    const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
         if (state.shortHistory.length > 0) {
@@ -29,7 +32,10 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
 
             }
         }
-    }, [state])
+
+        setInTransitionIn(true)
+        setTimeout(() => setInTransitionIn(false), 250)
+    }, [view])
 
     const text = view.text
 
@@ -49,16 +55,46 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         }
     }
 
+    const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
+        if (transitionOut) {
+            return transitionOutClass(base, index, maxindex)
+        }
+        if (!inTransitionIn)
+            return base
+
+        // we are in transition in, so...
+        let indexString = ''
+        if (index !== undefined && maxindex) {
+            const inumber = index > maxindex ? maxindex : index
+            indexString = ` transition-in-${inumber}`
+        }
+        return `${base} transition-in${indexString}`
+    }
+
+    const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
+        if (!transitionOut) {
+            return base
+        }
+        let indexString = ''
+        if (index !== undefined && maxindex) {
+            const inumber = index > maxindex ? maxindex : index
+            indexString = ` transition-out-${inumber}`
+        }
+        return `${base} transition-out${indexString}`
+    }
+
     const click = (link: DialogLink, textOfLink: string) => {
         setPrevText(text)
-        const clickData = { actor: null, text: text, answer: textOfLink, step: state.stepCount } // TODO: add actor
+        const clickData = { actor: null, text: text, answer: textOfLink, step: step } // TODO: add actor
         onStateUpd(game.dialogVariantApply(state, link, clickData))
     }
 
     const dialogVariants = () => {
         return view.links.map((link, i) => {
             const textOfLink = link.text
-            return (<div key={link.text + i} className="dialog-variant-button-container"><button disabled={link.disabled} onClick={() => click(link.link, textOfLink)}>{textOfLink}</button></div>)
+            return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
+                <button disabled={link.disabled} onClick={() => click(link.link, textOfLink)}>{textOfLink}</button>
+            </div>)
         })
     }
 
@@ -79,25 +115,25 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
     }
 
     return (
-            <div className="dialog-window-view">
-                <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                    {renderShortHistory()}
-                </div>
-                <div className='dialog-controls'>
-                    {renderAvatar()}
-                    <div className="dialog-text">
-                        <p className='dialog-prev-text' key={state.stepCount}>
+        <div className={transitionOutClass("dialog-window-view")}>
+            <div className="dialog-short-history" id="dialog-short-history-scrollable">
+                {renderShortHistory()}
+            </div>
+            <div className='dialog-controls'>
+                {renderAvatar()}
+                <div key={step << 1} className={transitionOutClass("dialog-text")}>
+                    {/* <p className='dialog-prev-text' key={state.stepCount}>
                             {prevText}
-                        </p>
-                        <p className='dialog-current-text' key={state.stepCount << 1}>
-                            {state.fatalError ? state.fatalError.message : text}
-                        </p>
-                    </div>
-                    <div className="dialog-variants">
-                        {state.fatalError ? [] : dialogVariants()}
-                    </div>
+                        </p> */}
+                    <p className='dialog-current-text' key={step << 1}>
+                        {state.fatalError ? state.fatalError.message : text}
+                    </p>
+                </div>
+                <div className="dialog-variants">
+                    {state.fatalError ? [] : dialogVariants()}
                 </div>
             </div>
+        </div>
     );
 };
 

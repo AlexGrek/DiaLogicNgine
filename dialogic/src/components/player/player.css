@@ -106,6 +106,8 @@
 }
 
 .dialog-control-pad {
+    position: absolute;
+    z-index: 10;
     grid-column: 1;
     grid-row: 1;
     place-self: start start;
@@ -116,20 +118,38 @@
     text-align: right;
 }
 
+.dialog-text.transition-out {
+    animation: shrink .15s ease-out forwards;
+}
+
+@keyframes shrink {
+    0% {
+        transform:scaleY(100%);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scaleY(60%);
+        opacity: 0;
+    }
+}
+
+
 .dialog-text {
     font-size: 22px;
     margin-right: 12pt;
-    background-image: radial-gradient(at right center, #22222244 0%, #04040400 100%);
+    background-color:  #04040422;
     padding: 10pt;
     overflow: hidden;
     position: relative;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     /* font-family: 'M PLUS 1p', sans-serif; */
 }
 
 .dialog-current-text {
     width: 100%;
     animation-name: nexttext;
-    animation-duration: .5s;
+    animation-duration: .15s;
     /* or: Xms */
     animation-iteration-count: 1;
     animation-direction: normal;
@@ -186,7 +206,6 @@
 }
 
 .dialog-variants {
-
     font-size: 20px;
     max-width: 100%;
     text-align: right;
@@ -204,10 +223,34 @@
     padding: 4pt 4pt;
     margin: 0 1em 3pt 0;
     background-color: rgba(20, 20, 20, 0.3);
-    transition-property: background-color transform;
-    transition-duration: .3s;
+    transition-property: background-color opacity transform;
+    transition-duration: .2s;
     transform-style: preserve-3d;
     transform-origin: top center;
+}
+
+@keyframes dialog-variants-appear {
+    0% {
+        transform: rotateX(90deg) translateY(10%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: rotateX(0) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes dialog-variants-dissappear {
+    0% {
+        transform: rotateX(0) translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: rotateX(90deg) translateY(10%);
+        opacity: 0;
+    }
 }
 
 .dialog-variant-button-container {
@@ -219,6 +262,14 @@
     background-color: rgba(40, 40, 40, 0.8);
     transition-duration: .1s;
     transform: rotateX(28deg) translateY(6%);
+}
+
+.dialog-variant-button-container.transition-out button {
+    animation: dialog-variants-dissappear .2s ease-in forwards;
+}
+
+.dialog-variant-button-container.transition-in button {
+    animation: dialog-variants-appear .2s ease-out forwards;
 }
 
 
