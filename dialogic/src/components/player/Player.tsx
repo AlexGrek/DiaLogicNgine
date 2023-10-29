@@ -9,6 +9,7 @@ import "./player.css"
 import StateDsiplayDrawer from './StateDisplayDrawer';
 import StateDisplayDrawer from './StateDisplayDrawer';
 import { trace } from '../../Trace';
+import PlayerCore from './PlayerCore';
 
 interface PlayerProps {
     game: GameDescription;
@@ -29,7 +30,6 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
             trace("GameExecutor updated")
             setGameExecutor(new GameExecManager(game));
         }
-        
     }, [game, visible]);
 
     const handleStateChange = (s: State) => {
@@ -46,7 +46,7 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
                 </ButtonGroup>
             </div>
             <div className="player-main">
-                <GameUiWidgetDisplay game={gameExecutor} state={gameState} onStateUpd={handleStateChange}></GameUiWidgetDisplay>
+                <PlayerCore game={gameExecutor} state={gameState} onStateUpd={handleStateChange}></PlayerCore>
             </div>
             <StateDisplayDrawer state={gameState} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen}/>
         </div>

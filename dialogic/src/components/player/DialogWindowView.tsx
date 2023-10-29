@@ -6,16 +6,16 @@ import "./player.css"
 import InGameControlPad from './InGameControlPad';
 import { styleWithImage } from '../UiUtils';
 import { generateImageUrl } from '../../Utils';
+import { DialogRenderView } from '../../exec/RenderView';
 
 interface DialogWindowViewProps {
     game: GameExecManager;
     state: State;
-    dialog: Dialog;
-    window: DialogWindow;
+    view: DialogRenderView
     onStateUpd: (newState: State) => void
 }
 
-const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog, window, onStateUpd }) => {
+const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view }) => {
     const [prevText, setPrevText] = useState<string>("")
 
     useEffect(() => {
@@ -31,17 +31,9 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
         }
     }, [state])
 
-    const getActualLinkText = (state: State, link: DialogLink) => {
-        return link.text  // TODO: add processing logic
-    }
+    const text = view.text
 
-    const getActualWindowText = (state: State, window: DialogWindow) => {
-        return game.getCurrentWindowText(state, window)
-    }
-
-    const text = getActualWindowText(state, window)
-
-    const actor = game.getCurrentWindowActor(state, window)
+    const actor = view.actor
 
     const renderAvatar = () => {
         if (actor === null) {
@@ -64,9 +56,9 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
     }
 
     const dialogVariants = () => {
-        return window.links.map((link, i) => {
-            const textOfLink = getActualLinkText(state, link)
-            return (<div key={link.text + i} className="dialog-variant-button-container"><button onClick={() => click(link, textOfLink)}>{textOfLink}</button></div>)
+        return view.links.map((link, i) => {
+            const textOfLink = link.text
+            return (<div key={link.text + i} className="dialog-variant-button-container"><button disabled={link.disabled} onClick={() => click(link.link, textOfLink)}>{textOfLink}</button></div>)
         })
     }
 
@@ -87,33 +79,25 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
     }
 
     return (
-        <div className="dialog-window-view-old-bg">
-            <div className="dialog-window-view-top-bg" style={styleWithImage(state.background)}>
-                <div className="dialog-window-view">
-                    <div className="dialog-control-pad">
-                        <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
+            <div className="dialog-window-view">
+                <div className="dialog-short-history" id="dialog-short-history-scrollable">
+                    {renderShortHistory()}
+                </div>
+                <div className='dialog-controls'>
+                    {renderAvatar()}
+                    <div className="dialog-text">
+                        <p className='dialog-prev-text' key={state.stepCount}>
+                            {prevText}
+                        </p>
+                        <p className='dialog-current-text' key={state.stepCount << 1}>
+                            {state.fatalError ? state.fatalError.message : text}
+                        </p>
                     </div>
-                    <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                        {renderShortHistory()}
-                    </div>
-                    <div className='dialog-controls'>
-                        {renderAvatar()}
-                        <div className="dialog-text">
-                           
-                            <p className='dialog-prev-text' key={state.stepCount}>
-                                {prevText}
-                            </p>
-                            <p className='dialog-current-text' key={state.stepCount << 1}>
-                                {state.fatalError ? state.fatalError.message : text}
-                            </p>
-                        </div>
-                        <div className="dialog-variants">
-                            {state.fatalError ? [] : dialogVariants()}
-                        </div>
+                    <div className="dialog-variants">
+                        {state.fatalError ? [] : dialogVariants()}
                     </div>
                 </div>
             </div>
-        </div>
     );
 };
 

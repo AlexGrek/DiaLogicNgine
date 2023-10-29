@@ -4,20 +4,20 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import DialogWindowView from './DialogWindowView';
 import LocationView from './LocationView';
+import { RenderView } from '../../exec/RenderView';
 
 interface GameUiWidgetDisplayProps {
     game: GameExecManager;
     state: State;
     onStateUpd: (newState: State) => void
+    view: RenderView
 }
 
-const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd }) => {
+const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view }) => {
 
-    const dw = game.getCurrentDialogWindow(state)
-    if (dw != null) {
-        const [dialog, window] = dw
+    if (view.uiWidgetView.widget === 'dialog') {
         return (
-            <DialogWindowView game={game} state={state} onStateUpd={onStateUpd} dialog={dialog} window={window}/>
+            <DialogWindowView view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd}/>
         )
     }
 

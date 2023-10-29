@@ -4,7 +4,7 @@ import { GameDescription } from "../game/GameDescription"
 import { generateImageUrl } from "../Utils"
 
 
-export const styleWithImage = (background?: string) => {
+export const styleWithImage = (background?: string | null) => {
     if (background) {
         return {
             backgroundImage: `url("game_assets/${background}")`
