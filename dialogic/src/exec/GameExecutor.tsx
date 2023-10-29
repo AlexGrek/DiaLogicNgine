@@ -55,7 +55,7 @@ export class GameExecManager {
             return [false, ''];
         }
         const { state, decision } = evaluateAsBoolProcessor(this.game, link.isEnabled, instate)
-        return [decision, 'link disabled reason is not implemented']
+        return [!decision, 'link disabled reason is not implemented']
     }
 
     getCurrentText(tlist: TextList, inState: State, script?: string) {

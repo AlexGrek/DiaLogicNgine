@@ -81,11 +81,23 @@ Cypress.Commands.add('openMenu', (menu: string) => {
   cy.get(`[data-event-key="${menu}"]`).click()
 })
 
+Cypress.Commands.add('clickDialog', (buttonText: string) => {
+  cy.wait(200)
+  cy.get('button.dialog-button').contains(buttonText).click()
+})
+
+Cypress.Commands.add('checkDialog', (text: string) => {
+  cy.wait(200)
+  cy.get('.dialog-current-text').should('contain.text', text)
+})
+
 declare global {
   namespace Cypress {
     interface Chainable {
       useTestGame(): Chainable<void>
       openMenu(menu: string): Chainable<void>
+      clickDialog(buttonText: string): Chainable<void>
+      checkDialog(buttonText: string): Chainable<void>
       // drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
       // dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
       // visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>

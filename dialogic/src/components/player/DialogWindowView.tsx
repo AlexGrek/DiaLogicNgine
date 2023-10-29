@@ -93,7 +93,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         return view.links.map((link, i) => {
             const textOfLink = link.text
             return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled} onClick={() => click(link.link, textOfLink)}>{textOfLink}</button>
+                <button disabled={link.disabled} className='dialog-button' onClick={() => click(link.link, textOfLink)}>{textOfLink}</button>
             </div>)
         })
     }
