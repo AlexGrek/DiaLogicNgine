@@ -135,17 +135,17 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
 
     return (
         <div>
-            <div className='facts-create-panel'>
-                <Dropdown title="Create">
+            <div className='items-create-panel'>
+                <Dropdown title="Create" className='items-create-dropdown'>
                     <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                         <InputGroup>
-                            <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createItem()} value={newUid} onChange={setNewUid}></Input>
+                            <InputGroup.Addon>UID:</InputGroup.Addon><Input className='items-create-uid-input' onPressEnter={() => createItem()} value={newUid} onChange={setNewUid}></Input>
                             <InputGroup.Button onClick={() => createItem()} disabled={!isValidJsIdentifier(newUid)}><PlusIcon /></InputGroup.Button>
                         </InputGroup>
                     </Dropdown.Item>
                 </Dropdown>
             </div>
-            <div className='facts-container'>
+            <div className='items-container'>
                 {renderItems()}
             </div>
             <Drawer placement='right' open={editingIndex >= 0 && editingIndex < items.length} onClose={() => saveEdited()}>

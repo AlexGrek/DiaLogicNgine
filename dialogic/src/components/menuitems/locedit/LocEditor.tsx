@@ -168,7 +168,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                     <Button onClick={() => onDelete()} appearance="ghost" color='red'>
                         Delete
                     </Button>
-                    <Button onClick={() => onCloseHandler(false)} appearance="ghost" color="blue">
+                    <Button disabled={location.uid === "" || !isValidJsIdentifier(location.uid)} onClick={() => onCloseHandler(false)} appearance="ghost" color="blue">
                         Discard
                     </Button>
                     <Button disabled={location.uid === "" || !isValidJsIdentifier(location.uid)} onClick={() => onCloseHandler(true)} appearance="primary">

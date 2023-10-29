@@ -38,7 +38,7 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs, keepOpen }) => {
             return <div><p><mark>ERROR: cannot open tab {openTabIndex.toString()}</mark></p></div>
         }
         if (tabs[openTabIndex].content) {
-            return <div>{tabs[openTabIndex].content}</div>
+            return <div className='static-tabs-tab' data-tab-index={openTabIndex}>{tabs[openTabIndex].content}</div>
         } else {
             return <div></div>
         }
@@ -62,11 +62,12 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs, keepOpen }) => {
     }
 
     return (
-        <div>
+        <div className='static-tabs'>
             <Nav appearance='subtle' activeKey={openTabIndex.toString()} onSelect={changeTab}>
                 {prepareTabs(tabs)}
             </Nav>
-            {keepOpen ? renderContentAllTabs() : renderContentSingleTab()}
+            <div className='static-tabs-tab-container'>{keepOpen ? renderContentSingleTab() : renderContentSingleTab()}
+            </div>
         </div>
     );
 };

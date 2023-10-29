@@ -47,7 +47,7 @@ const PasteButton: React.FC<PasteButtonProps> = ({ handlers, customText, onPaste
     }
 
     return requireNewUid ?
-        (<Dropdown title="Paste" icon={<AttachmentIcon />}>
+        (<Dropdown id='pastebutton' name='paste' title="Paste" icon={<AttachmentIcon />}>
             <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                 <InputGroup>
                     <InputGroup.Addon>Copy UID:</InputGroup.Addon><Input onPressEnter={() => press()} value={creatingUID} onChange={setCreatingUID}></Input>
@@ -56,7 +56,7 @@ const PasteButton: React.FC<PasteButtonProps> = ({ handlers, customText, onPaste
             </Dropdown.Item>
         </Dropdown>) :
         (
-            <IconButton style={{ minWidth: "7em" }} disabled={pressed} color="red" onClick={() => press()} icon={<AttachmentIcon />}>{customText || "Paste"}</IconButton>
+            <IconButton id='pastebutton' name='paste' style={{ minWidth: "7em" }} disabled={pressed} color="red" onClick={() => press()} icon={<AttachmentIcon />}>{customText || "Paste"}</IconButton>
         );
 };
 

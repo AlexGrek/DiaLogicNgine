@@ -44,7 +44,7 @@ const PublicFileUrl: React.FC<PublicFileUrlProps> = ({ extensions, value, onChan
     }
 
     return (
-        <InputPicker creatable data={convertListToView(data)} onChange={onChange} value={value}>
+        <InputPicker className='public-file-url' creatable data={convertListToView(data)} onChange={onChange} value={value}>
         </InputPicker>
     );
 };

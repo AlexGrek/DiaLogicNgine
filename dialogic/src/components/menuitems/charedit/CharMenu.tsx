@@ -24,7 +24,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
 
     const navItems = () => {
         return game.chars.map((item, i) => {
-            return <Nav.Item key={i} eventKey={i.toString()} icon={<UserBadgeIcon />}>{item.displayName.main || item.uid}</Nav.Item>
+            return <Nav.Item data-char={item.uid} key={i} eventKey={i.toString()} icon={<UserBadgeIcon />}>{item.displayName.main || item.uid}</Nav.Item>
         })
     }
 
@@ -85,12 +85,12 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     }
 
     return (
-        <div>
+        <div id='charmenu'>
             <div className='char-menu-top-panel'>
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>
-                    <Dropdown title="Create">
+                    <Dropdown id='createchar' title="Create">
                         <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
                             <InputGroup>
                                 <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createCharacter()} value={creatingUID} onChange={setCreatingUID}></Input>
@@ -99,7 +99,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
                         </Dropdown.Item>
                     </Dropdown>
                     <PasteButton requireNewUid handlers={handlers} typenames={['char']} onPasteClick={charPasted}/>
-                    <Nav vertical appearance="tabs" activeKey={editingIndex.toString()} onSelect={onSelectTab}>
+                    <Nav id='chars' vertical appearance="tabs" activeKey={editingIndex.toString()} onSelect={onSelectTab}>
                         {navItems()}
                     </Nav>
                 </div>

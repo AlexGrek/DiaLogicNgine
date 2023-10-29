@@ -24,7 +24,7 @@ const DownloadAsJson: React.FC<DownloadAsJsonProps> = ({ data, filename }) => {
   };
 
   return (
-    <IconButton icon={<FileDownloadIcon/>} onClick={handleDownload}>
+    <IconButton icon={<FileDownloadIcon />} onClick={handleDownload}>
       Download JSON
     </IconButton>
   );

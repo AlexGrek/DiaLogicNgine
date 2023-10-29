@@ -47,7 +47,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
 
     const renderGeneralProp = (name: keyof GeneralGameInfo) => {
         const prop = game.general[name]
-        return <p>
+        return <p id={`general-prop-${name}`}>
             <b>{name}: </b>{prop.toString()}
         </p>
     }
