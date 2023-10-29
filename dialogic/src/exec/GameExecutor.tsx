@@ -1,18 +1,16 @@
 import lodash from "lodash";
 import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
-import { DialogWindowId, HistoryRecord, LocationID, State } from "./GameState";
-import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime"
+import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
 import { TextList, chooseText } from "../game/TextList";
+import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
-import { ImageList, chooseImage } from "../game/ImageList";
 import { ActorView, BgChange, DialogRenderView, LocRouteRenderView, LocationRenderView, RenderLink, RenderView, RenderWidget } from "./RenderView";
-import LocationPreview from "../components/menuitems/locedit/LocationPreview";
+import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
-
     game: GameDescription
 
     constructor(game: GameDescription) {
@@ -184,6 +182,21 @@ export class GameExecManager {
         return newState;
     }
 
+    locRouteApply(state: State, view: LocRouteRenderView): State {
+        const afterLink = this.withChangedLocation(state, view.destination)
+        var followed = this.withClearedHistory(afterLink)
+        const afterWindowUpd = this.modifyStateScript(followed, view.destination.onEntryScript)
+        return afterWindowUpd
+    }
+
+    private withChangedLocation(state: State, destination: Loc) {
+        const followed = this.goToLocation(state, destination.uid)
+        if (destination.onEntryScript) {
+            return evaluateAsStateProcessor(this.game, destination.onEntryScript, followed)
+        }
+        return followed;
+    }
+
     private followLink(prevState: State, link: DialogLink): State {
         var newState = prevState
         var directionFromLink = link.mainDirection
@@ -236,7 +249,15 @@ export class GameExecManager {
         return s
     }
 
-    executeWindowOnEntry(state: State): State {
+    withClearedHistory(state: State): State {
+        // also changes step value
+        var s = lodash.cloneDeep(state)
+        s.stepCount = s.stepCount + 1
+        s.shortHistory = []
+        return s
+    }
+
+    private executeOnEntry(state: State): State {
         const dw = this.getCurrentDialogWindow(state)
         if (dw != null) {
             const [_, window] = dw
@@ -246,6 +267,13 @@ export class GameExecManager {
             }
         }
         return state
+    }
+
+    private modifyStateScript(instate: State, script?: string): State {
+        if (script) {
+            return evaluateAsStateProcessor(this.game, script, instate)
+        }
+        return instate
     }
 
     getCurrentbackground(instate: State, backgrounds: ImageList, chooseBackgroundScript: string | undefined): string | undefined {
@@ -267,7 +295,7 @@ export class GameExecManager {
 
     dialogVariantApply(state: State, link: DialogLink, clickData: HistoryRecord): State {
         const afterLink = this.applyLink(state, link, clickData)
-        const afterWindowUpd = this.executeWindowOnEntry(afterLink)
+        const afterWindowUpd = this.executeOnEntry(afterLink)
         return afterWindowUpd
     }
 

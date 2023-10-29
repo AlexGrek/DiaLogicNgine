@@ -83,7 +83,6 @@
     border-radius: 6px;
     margin: auto;
     position: relative;
-    outline: 2px solid yellow;
 }
 
 .dialog-window-view {
@@ -91,7 +90,6 @@
     height: 100%;
     padding-top: 5px;
     display: grid;
-    outline: 1px solid red;
 
     grid-template-columns: 5fr 4fr;
     grid-template-rows: 4fr 3fr;
@@ -289,6 +287,20 @@
     /* outline: 2px solid yellowgreen; */
 }
 
+.dialog-widget-special-links {
+    grid-column: 1;
+    grid-row: 2;
+    place-self: end start;
+    max-width: 70%;
+    min-height: 300pt;
+    margin-bottom: 30pt;
+    perspective: 800px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
 .dialog-history-record {
     margin-left: auto;
     margin-right: 0;
@@ -332,4 +344,54 @@
 
 .dialog-actor-name {
     color: lightblue;
+}
+
+.route-button {
+    width: 130pt;
+    height: 100pt;
+    border: none;
+    padding: 0;
+    background-size: cover;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    color: white;
+    margin: 6px;
+    transform-style: preserve-3d;
+    transition-property: transform;
+    transform-origin: top center;
+    transition-duration: .2s;
+}
+
+.route-button:hover {
+    transform: rotateX(8deg) translateY(6%);
+}
+
+.route-button-inside {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    height: 100%;
+    width: 100%;
+    transition-property: background-color;
+    transition-duration: .3s;
+}
+
+.route-button-inside:hover {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.route-button-inside p {
+    padding: 1pt;
+    border-radius: 2pt;
+    background-color: rgba(0, 0, 0, 0.2);
+    transition-property: font-size;
+    transition-duration: .2s;
+}
+
+.route-button-inside:hover p {
+    font-size: large;
 }

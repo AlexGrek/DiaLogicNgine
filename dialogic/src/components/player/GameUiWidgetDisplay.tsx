@@ -5,6 +5,7 @@ import { State } from '../../exec/GameState';
 import DialogWindowView from './DialogWindowView';
 import LocationView from './LocationView';
 import { RenderView } from '../../exec/RenderView';
+import LocView from './LocView';
 
 interface GameUiWidgetDisplayProps {
     game: GameExecManager;
@@ -22,9 +23,8 @@ const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, 
         )
     }
 
-    const loc = game.getCurrentLocation(state)
-    if (loc != null) {
-        return <LocationView game={game} state={state} onStateUpd={onStateUpd} location={loc}></LocationView>
+    if (view.uiWidgetView.widget === 'location') {
+        return <LocView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd}/>
     }
 
     return (

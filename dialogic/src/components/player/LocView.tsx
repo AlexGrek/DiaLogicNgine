@@ -2,21 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { generateImageUrl } from '../../Utils';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
-import { DialogRenderView } from '../../exec/RenderView';
+import { DialogRenderView, LocRouteRenderView, LocationRenderView } from '../../exec/RenderView';
 import { DialogLink } from '../../game/Dialog';
 import DialogVariants from './DialogVariants';
 import "./player.css";
+import LocButton from './LocButton';
 
-interface DialogWindowViewProps {
+interface LocViewProps {
     game: GameExecManager;
     state: State;
-    view: DialogRenderView
+    view: LocationRenderView
     step: number
     onStateUpd: (newState: State) => void
     transitionOut: boolean
 }
 
-const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
+const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
@@ -27,7 +28,6 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
                     latest.scrollTop = latest.scrollHeight;
                     console.log("Scroll to bottom applied")
                 }, 100)
-
             }
         }
 
@@ -36,22 +36,6 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
     }, [view])
 
     const text = view.text
-
-    const actor = view.actor
-
-    const renderAvatar = () => {
-        if (actor === null) {
-            return <div></div>
-        } else {
-            var image = null;
-            if (actor.avatar) {
-                image = <img alt={actor.name} src={generateImageUrl(actor.avatar)}></img>
-            }
-            return <div className='dialog-actor-container'>
-                <p>{image}<span className='dialog-actor-name'>{actor.name}</span></p>
-            </div>
-        }
-    }
 
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
         if (transitionOut) {
@@ -86,6 +70,10 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         onStateUpd(game.dialogVariantApply(state, link, clickData))
     }
 
+    const clickRoute = (view: LocRouteRenderView) => {
+        onStateUpd(game.locRouteApply(state, view))
+    }
+
     const dialogVariants = () => {
         return view.links.map((link, i) => {
             const textOfLink = link.text
@@ -95,25 +83,18 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         })
     }
 
-    const renderShortHistoryItem = (item: HistoryRecord, latest: boolean, index: number) => {
-        // TODO: add actor rendering
-        return <div key={index} id={latest ? "history-record-latest" : `history-record-${item.step}`} className='dialog-history-record'>
-            <p className='dialog-history-record-text'>{item.text}</p>
-            <p className='dialog-history-record-ans'>{item.answer}</p>
-        </div>
-    }
-
-    const renderShortHistory = () => {
-        return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1, index))
+    const locButtons = () => {
+        return view.routes.map((view) => {
+            return <LocButton route={view} onClick={clickRoute}/>
+        })
     }
 
     return (
         <div className={transitionOutClass("dialog-window-view")}>
-            <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                {renderShortHistory()}
+            <div className='dialog-widget-special-links'>
+                {locButtons()}
             </div>
             <div className='dialog-controls'>
-                {renderAvatar()}
                 <div key={step << 1} className={transitionOutClass("dialog-text")}>
                     {/* <p className='dialog-prev-text' key={state.stepCount}>
                             {prevText}
@@ -128,4 +109,4 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
     );
 };
 
-export default DialogWindowView
+export default LocView
