@@ -39,21 +39,26 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
 
   private renderTags() {
     const tags = []
+    let key = 0
     if (this.props.window.entryScript) {
-      const tag = <Tag color="green">code</Tag>
+      const tag = <Tag key={key} color="green">code</Tag>
       tags.push(tag)
+      key++
     }
     if (this.props.window.actor) {
-      const tag = <Tag color="blue">actor</Tag>
+      const tag = <Tag key={key} color="blue">actor</Tag>
       tags.push(tag)
+      key++
     }
     if (this.props.window.backgrounds.main) {
-      const tag = <Tag color="orange">bg</Tag>
+      const tag = <Tag key={key} color="orange">bg</Tag>
       tags.push(tag)
+      key++
     }
     if (this.props.window.changeLocationInBg) {
-      const tag = <Tag color="cyan">loc</Tag>
+      const tag = <Tag key={key} color="cyan">loc</Tag>
       tags.push(tag)
+      key++
     }
     return tags
   }

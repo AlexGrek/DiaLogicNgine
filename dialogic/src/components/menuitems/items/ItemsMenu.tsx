@@ -1,7 +1,7 @@
 import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
 import React, { useState } from 'react';
-import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup } from 'rsuite';
+import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup, Stack } from 'rsuite';
 import { generateImageUrl, isValidJsIdentifier, mergeDicts } from '../../../Utils';
 import { GameDescription } from '../../../game/GameDescription';
 import { Item, createEmptyItem } from '../../../game/Items';
@@ -145,9 +145,9 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
                     </Dropdown.Item>
                 </Dropdown>
             </div>
-            <div className='items-container'>
+            <Stack wrap className='items-container'>
                 {renderItems()}
-            </div>
+            </Stack>
             <Drawer placement='right' open={editingIndex >= 0 && editingIndex < items.length} onClose={() => saveEdited()}>
                 <Drawer.Header>
                     <Drawer.Title>Edit item</Drawer.Title>

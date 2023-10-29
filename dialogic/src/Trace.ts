@@ -8,6 +8,11 @@ export default function logYaml(obj: any, name?: string) {
     console.log(yamltext)
 }
 
+export function toYaml(obj: any) {
+    const yamltext = yaml.dump(obj)
+    return yamltext
+}
+
 export function trace(obj: any) {
     if (TRACE) {
         console.log(obj)

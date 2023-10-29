@@ -68,7 +68,7 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange }
     const navItems = imageList.list.map((el, i) => {
         const key = `${i}`
         const name = el.name ? el.name : key
-        return <Nav.Item eventKey={key}> {name}
+        return <Nav.Item key={i} eventKey={key}> {name}
         </Nav.Item>
     })
 

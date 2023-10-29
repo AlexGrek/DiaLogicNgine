@@ -70,16 +70,16 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, dialog
         })
     }
 
-    const renderShortHistoryItem = (item: HistoryRecord, latest: boolean) => {
+    const renderShortHistoryItem = (item: HistoryRecord, latest: boolean, index: number) => {
         // TODO: add actor rendering
-        return <div id={latest ? "history-record-latest" : `history-record-${item.step}`} className='dialog-history-record' key={item.step}>
+        return <div key={index} id={latest ? "history-record-latest" : `history-record-${item.step}`} className='dialog-history-record'>
             <p className='dialog-history-record-text'>{item.text}</p>
             <p className='dialog-history-record-ans'>{item.answer}</p>
         </div>
     }
 
     const renderShortHistory = () => {
-        return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1))
+        return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1, index))
     }
 
     const onFullScreen = () => {
