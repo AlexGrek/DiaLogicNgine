@@ -91,7 +91,7 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
 
     return (
         <div className={transitionOutClass("dialog-window-view")}>
-            <div className='dialog-widget-special-links'>
+            <div className={transitionInOutClass('dialog-widget-special-links')}>
                 {locButtons()}
             </div>
             <div className='dialog-controls'>

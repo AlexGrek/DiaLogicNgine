@@ -301,6 +301,14 @@
     align-items: end;
 }
 
+.dialog-widget-special-links.transition-out {
+    animation: disappear .2s ease-in forwards;
+}
+
+.dialog-widget-special-links.transition-in {
+    animation: appear .2s ease-in forwards;
+}
+
 .dialog-history-record {
     margin-left: auto;
     margin-right: 0;
