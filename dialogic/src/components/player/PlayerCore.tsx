@@ -65,8 +65,8 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
 
         return (
             <div className='player-core-container' id='player-core'>
-                <div key={prevbackground} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
-                <div key={background} id='player-current-background-host' className={backgroundContainerStyle('new', animation)} style={styleWithImage(background)}></div>
+                <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
+                <div key={background || 'bg'} id='player-current-background-host' className={backgroundContainerStyle('new', animation)} style={styleWithImage(background)}></div>
                 <div className='player-core-widget-container' id='player-current-widget-host'>
                 <div className="dialog-control-pad">
                     <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>

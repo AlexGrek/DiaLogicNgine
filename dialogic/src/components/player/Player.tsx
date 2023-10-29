@@ -25,12 +25,10 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
 
     useEffect(() => {
         setGame(game);
-        if (visible) {
-            // do not do this when the tab is not visible for optimization
             trace("GameExecutor updated")
             setGameExecutor(new GameExecManager(game));
-        }
-    }, [game, visible]);
+            trace(`game updated: ${game.general.description}`)
+    }, [game]);
 
     const handleStateChange = (s: State) => {
         setGameState(s)
