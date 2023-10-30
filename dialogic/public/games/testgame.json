@@ -1,456 +1,475 @@
 {
-    "dialogs": [
-      {
-        "name": "dialog1",
-        "windows": [
-          {
-            "uid": "welcome",
-            "text": { "main": "Welcome to the game!", "list": [] },
-            "backgrounds": { "list": [] },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "success" }, "text": "Basic forward link", "alternativeDirections": [] },
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundMain", "window": "main" } },
-                "text": "To test playground (push)",
-                "alternativeDirections": []
-              },
-              {
-                "mainDirection": { "type": "jump", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundMain", "window": "main" } },
-                "text": "To test playground (jump)",
-                "alternativeDirections": []
-              },
-              {
-                "mainDirection": { "type": "resetjump", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundMain", "window": "main" } },
-                "text": "To test playground (resetjump)",
-                "alternativeDirections": []
-              },
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "pushToMe" } },
-                "text": "Test push",
-                "alternativeDirections": []
-              }
-            ],
-            "tags": []
-          },
-          {
-            "uid": "success",
-            "text": { "main": "Success", "list": [] },
-            "links": [ { "mainDirection": { "type": "local", "direction": "welcome" }, "text": "Home", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "success2",
-            "text": { "main": "Alternative success", "list": [] },
-            "links": [ { "mainDirection": { "type": "local", "direction": "welcome" }, "text": "Home", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "pushToMe",
-            "text": { "main": "Pushed here, now use pop", "list": [] },
-            "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "pop", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          }
-        ]
-      },
-      {
-        "name": "testPlaygroundMain",
-        "windows": [
-          {
-            "uid": "main",
-            "text": { "main": "This is home page of the test playground", "list": [] },
-            "links": [
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundScripts", "window": "main" } },
-                "text": "Scripts playground",
-                "alternativeDirections": []
-              },
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundChars", "window": "main" } },
-                "text": "Chars playground",
-                "alternativeDirections": []
-              },
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundLocs", "window": "main" } },
-                "text": "Locs playground",
-                "alternativeDirections": []
-              },
-              {
-                "mainDirection": { "type": "resetjump", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
-                "text": "Open main page (reset)",
-                "alternativeDirections": []
-              },
-              { "mainDirection": { "type": "local", "direction": "room01" }, "text": "TestRoom01", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "bg01" }, "text": "Test backgrounds", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "room01",
-            "text": { "main": "Room 01. Contains invisible and disabled link. Disabled should be, you know, disabled. Unclickable. Invisible should not be there on the screen.", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Invisible link", "alternativeDirections": [], "isVisible": "return false;" },
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Disabled link", "alternativeDirections": [], "isEnabled": "return false;" },
-              { "mainDirection": { "type": "local", "direction": "room02" }, "text": "Room 02", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "room02",
-            "text": { "main": "Room 02. This text should be replaced with 'hello' when link is clicked.", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] },
-              {
-                "mainDirection": { "type": "reply", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" }, "replyText": "hello" },
-                "text": "Quick reply link says \"hello\"",
-                "alternativeDirections": []
-              },
-              { "mainDirection": { "type": "local", "direction": "room03bigtext" }, "text": "Room 03: big text", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "room03bigtext",
-            "text": {
-              "main": "Developing a captivating visual novel requires a delicate balance of narrative finesse and interactive design. To create a memorable experience, start with a well-crafted and engaging storyline that seamlessly integrates with the visual elements. Pay meticulous attention to character design, ensuring that each visual component reflects the personality and emotions of the characters. Incorporate choices that genuinely impact the narrative, fostering a sense of agency for the players. Strive for a visually cohesive art style that complements the story's tone and themes. Implement user-friendly interfaces that enhance immersion without sacrificing functionality.",
-              "list": []
+  "dialogs": [
+    {
+      "name": "dialog1",
+      "windows": [
+        {
+          "uid": "welcome",
+          "text": { "main": "Welcome to the game!", "list": [] },
+          "backgrounds": { "list": [] },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "success" }, "text": "Basic forward link", "alternativeDirections": [] },
+            {
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundMain", "window": "main" } },
+              "text": "To test playground (push)",
+              "alternativeDirections": []
             },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "room04" }, "text": "Room 04", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "room04",
-            "text": {
-              "main": "You should not see this text, you should see alternative one",
-              "list": [ { "text": "You should see this text, success" }, { "text": "You should not see this either" }, { "text": "Definitely not this one" } ]
+            {
+              "mainDirection": { "type": "jump", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundMain", "window": "main" } },
+              "text": "To test playground (jump)",
+              "alternativeDirections": []
             },
-            "links": [ { "mainDirection": { "type": "local", "direction": "room05alt" }, "text": "Room 05", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": [],
-            "chooseTextScript": "return 0;"
-          },
-          {
-            "uid": "room05alt",
-            "text": { "main": "You should not see this text", "list": [ { "text": "You should see this text, success", "name": "alternative" }, { "text": "not this" } ] },
-            "links": [ { "mainDirection": { "type": "local", "direction": "room06alt" }, "text": "Room 06: second alt text", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": [],
-            "chooseTextScript": "return \"alternative\";"
-          },
-          {
-            "uid": "room06alt",
-            "text": {
-              "main": "You should not see this text",
-              "list": [ { "text": "not this" }, { "text": "You see correct text again, success", "name": "thistext" }, { "text": "nah" }, { "text": "no", "name": "not this" } ]
+            {
+              "mainDirection": { "type": "resetjump", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundMain", "window": "main" } },
+              "text": "To test playground (resetjump)",
+              "alternativeDirections": []
             },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "room07" }, "text": "Room 07", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "room05alt" }, "text": "Back to Room 05", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": [],
-            "chooseTextScript": "return \"thistext\";"
-          },
-          {
-            "uid": "room07",
-            "text": {
-              "main": "This text is an error, you cannot see it",
-              "list": [
-                { "text": "you cannot see me" },
-                { "text": "no" },
-                { "text": "error" },
-                { "text": "This text is success! So we finally completed all the tests for text, now let's go to background tests." }
-              ]
+            {
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "pushToMe" } },
+              "text": "Test push",
+              "alternativeDirections": []
+            }
+          ],
+          "tags": []
+        },
+        {
+          "uid": "success",
+          "text": { "main": "Success", "list": [] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "welcome" }, "text": "Home", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "success2",
+          "text": { "main": "Alternative success", "list": [] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "welcome" }, "text": "Home", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "pushToMe",
+          "text": { "main": "Pushed here, now use pop", "list": [] },
+          "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "pop", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        }
+      ]
+    },
+    {
+      "name": "testPlaygroundMain",
+      "windows": [
+        {
+          "uid": "main",
+          "text": { "main": "This is home page of the test playground", "list": [] },
+          "links": [
+            {
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundScripts", "window": "main" } },
+              "text": "Scripts playground",
+              "alternativeDirections": []
             },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "bg01" }, "text": "Bg rooms", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": [],
-            "chooseTextScript": "return 3;"
-          },
-          {
-            "uid": "bg01",
-            "text": { "main": "You should see beautiful seashore now, with some stuctures", "list": [] },
-            "links": [ { "mainDirection": { "type": "local", "direction": "bg02" }, "text": "Go somewhere", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [], "main": "backgrounds/random/seashore.jpg" },
-            "tags": []
-          },
-          {
-            "uid": "bg02",
-            "text": {
-              "main": "You should still see the seashore, but this window does not affect background. Try \"push\" to see how it can affect background. It should not. Then return back there.",
-              "list": []
+            {
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundChars", "window": "main" } },
+              "text": "Chars playground",
+              "alternativeDirections": []
             },
-            "links": [
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "pushToMe" } },
-                "text": "Push!",
-                "alternativeDirections": []
-              },
-              { "mainDirection": { "type": "local", "direction": "bg03" }, "text": "Done pushing, let's go to 3rd screen", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          },
-          {
-            "uid": "bg03",
-            "text": { "main": "This screen changed background again. Like it? It should look like some desert under the starry sky, but with sunset. Impossible beauty.", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "bg04" }, "text": "Next screen, please", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Nah, I want home", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [], "main": "backgrounds/space/2023-10-07-00-36-47-08-k_dpmpp_2_a-Dreamshaper_3-0000.jpg" },
-            "tags": []
-          },
-          {
-            "uid": "bg04",
-            "text": { "main": "This image should not be red. It should be white, like on the moon. If you see the red picture - it's an ERROR! Red moon is bad, white moon is good.", "list": [] },
-            "links": [ { "mainDirection": { "type": "local", "direction": "bg05" }, "text": "To next room", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [ { "uri": "backgrounds/space/2023-10-07-01-29-59-07-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg" } ], "main": "backgrounds/space/2023-10-07-00-26-41-07-k_euler_a-Dreamshaper_3-0000.jpg" },
-            "tags": [],
-            "chooseBackgroundScript": "return 0;"
-          },
-          {
-            "uid": "bg05",
-            "text": { "main": "Now you should see the Seashore again. If you see some moon - we have a problem. Check your eyes, and if this does not help - check your code!", "list": [] },
-            "links": [ { "mainDirection": { "type": "local", "direction": "bg06" }, "text": "Next bg test", "alternativeDirections": [] } ],
-            "backgrounds": {
-              "list": [
-                { "uri": "backgrounds/space/2023-10-07-00-26-41-07-k_euler_a-Dreamshaper_3-0000.jpg", "name": "moon" },
-                { "uri": "backgrounds/random/seashore.jpg", "name": "seashore" },
-                { "uri": "backgrounds/space/00048.jpg", "name": "whatever" }
-              ],
-              "main": "backgrounds/space/2023-10-07-01-27-18-01-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg"
+            {
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "testPlaygroundLocs", "window": "main" } },
+              "text": "Locs playground",
+              "alternativeDirections": []
             },
-            "tags": [],
-            "chooseBackgroundScript": "return \"seashore\";"
+            {
+              "mainDirection": { "type": "resetjump", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
+              "text": "Open main page (reset)",
+              "alternativeDirections": []
+            },
+            { "mainDirection": { "type": "local", "direction": "room01" }, "text": "TestRoom01", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "bg01" }, "text": "Test backgrounds", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "room01",
+          "text": { "main": "Room 01. Contains invisible and disabled link. Disabled should be, you know, disabled. Unclickable. Invisible should not be there on the screen.", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Invisible link", "alternativeDirections": [], "isVisible": "return false;" },
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Disabled link", "alternativeDirections": [], "isEnabled": "return false;" },
+            { "mainDirection": { "type": "local", "direction": "room02" }, "text": "Room 02", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "room02",
+          "text": { "main": "Room 02. This text should be replaced with 'hello' when link is clicked.", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] },
+            {
+              "mainDirection": { "type": "reply", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" }, "replyText": "hello" },
+              "text": "Quick reply link says \"hello\"",
+              "alternativeDirections": []
+            },
+            { "mainDirection": { "type": "local", "direction": "room03bigtext" }, "text": "Room 03: big text", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "room03bigtext",
+          "text": {
+            "main": "Developing a captivating visual novel requires a delicate balance of narrative finesse and interactive design. To create a memorable experience, start with a well-crafted and engaging storyline that seamlessly integrates with the visual elements. Pay meticulous attention to character design, ensuring that each visual component reflects the personality and emotions of the characters. Incorporate choices that genuinely impact the narrative, fostering a sense of agency for the players. Strive for a visually cohesive art style that complements the story's tone and themes. Implement user-friendly interfaces that enhance immersion without sacrificing functionality.",
+            "list": []
           },
-          {
-            "uid": "bg06",
-            "text": { "main": "Actually, still seashore. You should see the seashore. We don't have more tests for backgrounds now. Go pick other test suites.", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] },
-              {
-                "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
-                "text": "Start the game over",
-                "alternativeDirections": []
-              }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          }
-        ]
-      },
-      {
-        "name": "testPlaygroundLocs",
-        "windows": [
-          {
-            "uid": "main",
-            "text": { "main": "This is location playground. You have to enter a location and do whatever you want.", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "tolocation", "direction": "test_lab" }, "text": "Go to Laboratory", "alternativeDirections": [] },
-              { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "main" }, "text": "Log current location to console", "alternativeDirections": [], "actionCode": "console.log(state.location);" }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          }
-        ]
-      },
-      {
-        "name": "testPlaygroundChars",
-        "windows": [
-          {
-            "uid": "main",
-            "text": { "main": "", "list": [] },
-            "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          }
-        ]
-      },
-      {
-        "name": "testPlaygroundScripts",
-        "windows": [
-          {
-            "uid": "main",
-            "text": { "main": "", "list": [] },
-            "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          }
-        ]
-      },
-      {
-        "name": "eventUtils",
-        "windows": [
-          {
-            "uid": "event_on_room2",
-            "text": { "main": "Strange event, super strange event just happened. Go back, nothing to do here.", "list": [] },
-            "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "go back", "alternativeDirections": [] } ],
-            "backgrounds": { "list": [] },
-            "tags": []
-          }
-        ]
-      },
-      {
-        "name": "nurse_dialogs",
-        "windows": [
-          {
-            "uid": "test_subject",
-            "text": { "main": "Yes, you are a test subject, stupid", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "pop", "direction": "" }, "text": "Okay", "alternativeDirections": [] },
-              { "mainDirection": { "type": "local", "direction": "nope" }, "text": "No, actually I am testing everything here!", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": [],
-            "actor": { "character": "", "currentCharacter": true },
-            "entryScript": "facts.you_are_test_subject.know()"
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "room04" }, "text": "Room 04", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "room04",
+          "text": {
+            "main": "You should not see this text, you should see alternative one",
+            "list": [ { "text": "You should see this text, success" }, { "text": "You should not see this either" }, { "text": "Definitely not this one" } ]
           },
-          {
-            "uid": "nope",
-            "text": { "main": "No.", "list": [] },
-            "links": [
-              { "mainDirection": { "type": "local", "direction": "nope" }, "text": "Just... no? Can you explain?", "alternativeDirections": [] },
-              { "mainDirection": { "type": "pop", "direction": "test_subject" }, "text": "Okay", "alternativeDirections": [] }
-            ],
-            "backgrounds": { "list": [] },
-            "tags": [],
-            "actor": { "character": "", "currentCharacter": true }
-          }
-        ]
-      }
-    ],
-    "facts": [ { "uid": "you_are_test_subject", "short": "You are a test subject", "full": "You are the only one to conduct experiments on. Oh god, what a shame." } ],
-    "chars": [
-      {
-        "uid": "narrator",
-        "displayName": { "main": "Narrator", "list": [] },
-        "traits": [],
-        "props": [ { "datatype": "variant", "name": "mood", "variants": [ "bored", "happy" ], "defaultValue": "bored" } ],
-        "overrideProps": [ { "name": "age", "datatype": "number", "defaultValue": 27 } ],
-        "roles": [ "aged" ],
-        "avatar": { "list": [] },
-        "description": { "main": "", "list": [] }
-      },
-      {
-        "uid": "nurse",
-        "displayName": { "main": "Nurse", "list": [] },
-        "traits": [],
-        "props": [],
-        "overrideProps": [],
-        "roles": [],
-        "avatar": { "list": [], "main": "females/blondie_on_blue.jpg" },
-        "description": { "main": "", "list": [] },
-        "dialog": {
-          "behavior": {
-            "speakingModel": { "agree": [ "ok" ], "deny": [ "no" ], "bye": [ "bye" ], "hello": [ "hello" ], "dontKnowChar": [ "who is it" ], "dontKnowObject": [ "what is it" ] },
-            "reactions": [ { "trigger": { "facts": [ "you_are_test_subject" ], "chars": [], "items": [], "places": [] }, "reply": "Yes you are, so what?" } ]
+          "links": [ { "mainDirection": { "type": "local", "direction": "room05alt" }, "text": "Room 05", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "chooseTextScript": "return 0;"
+        },
+        {
+          "uid": "room05alt",
+          "text": { "main": "You should not see this text", "list": [ { "text": "You should see this text, success", "name": "alternative" }, { "text": "not this" } ] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "room06alt" }, "text": "Room 06: second alt text", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "chooseTextScript": "return \"alternative\";"
+        },
+        {
+          "uid": "room06alt",
+          "text": {
+            "main": "You should not see this text",
+            "list": [ { "text": "not this" }, { "text": "You see correct text again, success", "name": "thistext" }, { "text": "nah" }, { "text": "no", "name": "not this" } ]
+          },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "room07" }, "text": "Room 07", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "room05alt" }, "text": "Back to Room 05", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "chooseTextScript": "return \"thistext\";"
+        },
+        {
+          "uid": "room07",
+          "text": {
+            "main": "This text is an error, you cannot see it",
+            "list": [
+              { "text": "you cannot see me" },
+              { "text": "no" },
+              { "text": "error" },
+              { "text": "This text is success! So we finally completed all the tests for text, now let's go to background tests." }
+            ]
+          },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "bg01" }, "text": "Bg rooms", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "chooseTextScript": "return 3;"
+        },
+        {
+          "uid": "bg01",
+          "text": { "main": "You should see beautiful seashore now, with some stuctures", "list": [] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "bg02" }, "text": "Go somewhere", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [], "main": "backgrounds/random/seashore.jpg" },
+          "tags": []
+        },
+        {
+          "uid": "bg02",
+          "text": {
+            "main": "You should still see the seashore, but this window does not affect background. Try \"push\" to see how it can affect background. It should not. Then return back there.",
+            "list": []
           },
           "links": [
             {
-              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
-              "text": "Wait, how do you call me?",
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "pushToMe" } },
+              "text": "Push!",
               "alternativeDirections": []
             },
-            { "mainDirection": { "type": "return", "direction": "" }, "text": "Bye", "alternativeDirections": [] }
+            { "mainDirection": { "type": "local", "direction": "bg03" }, "text": "Done pushing, let's go to 3rd screen", "alternativeDirections": [] }
           ],
-          "background": { "list": [] },
-          "text": { "main": "Hi, test subject", "list": [] },
-          "eventHosts": null
+          "backgrounds": { "list": [] },
+          "tags": []
+        },
+        {
+          "uid": "bg03",
+          "text": { "main": "This screen changed background again. Like it? It should look like some desert under the starry sky, but with sunset. Impossible beauty.", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "bg04" }, "text": "Next screen, please", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Nah, I want home", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [], "main": "backgrounds/space/2023-10-07-00-36-47-08-k_dpmpp_2_a-Dreamshaper_3-0000.jpg" },
+          "tags": []
+        },
+        {
+          "uid": "bg04",
+          "text": { "main": "This image should not be red. It should be white, like on the moon. If you see the red picture - it's an ERROR! Red moon is bad, white moon is good.", "list": [] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "bg05" }, "text": "To next room", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [ { "uri": "backgrounds/space/2023-10-07-01-29-59-07-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg" } ], "main": "backgrounds/space/2023-10-07-00-26-41-07-k_euler_a-Dreamshaper_3-0000.jpg" },
+          "tags": [],
+          "chooseBackgroundScript": "return 0;"
+        },
+        {
+          "uid": "bg05",
+          "text": { "main": "Now you should see the Seashore again. If you see some moon - we have a problem. Check your eyes, and if this does not help - check your code!", "list": [] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "bg06" }, "text": "Next bg test", "alternativeDirections": [] } ],
+          "backgrounds": {
+            "list": [
+              { "uri": "backgrounds/space/2023-10-07-00-26-41-07-k_euler_a-Dreamshaper_3-0000.jpg", "name": "moon" },
+              { "uri": "backgrounds/random/seashore.jpg", "name": "seashore" },
+              { "uri": "backgrounds/space/00048.jpg", "name": "whatever" }
+            ],
+            "main": "backgrounds/space/2023-10-07-01-27-18-01-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg"
+          },
+          "tags": [],
+          "chooseBackgroundScript": "return \"seashore\";"
+        },
+        {
+          "uid": "bg06",
+          "text": { "main": "Actually, still seashore. You should see the seashore. We don't have more tests for backgrounds now. Go pick other test suites.", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Home", "alternativeDirections": [] },
+            {
+              "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
+              "text": "Start the game over",
+              "alternativeDirections": []
+            }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": []
         }
-      }
-    ],
-    "locs": [
-      {
-        "displayName": "Laboratory",
-        "uid": "test_lab",
-        "goto": [],
+      ]
+    },
+    {
+      "name": "testPlaygroundLocs",
+      "windows": [
+        {
+          "uid": "main",
+          "text": { "main": "This is location playground. You have to enter a location and do whatever you want.", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "tolocation", "direction": "test_lab" }, "text": "Go to Laboratory", "alternativeDirections": [] },
+            { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "main" }, "text": "Log current location to console", "alternativeDirections": [], "actionCode": "console.log(state.location);" }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        }
+      ]
+    },
+    {
+      "name": "testPlaygroundChars",
+      "windows": [
+        {
+          "uid": "main",
+          "text": { "main": "", "list": [] },
+          "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        }
+      ]
+    },
+    {
+      "name": "testPlaygroundScripts",
+      "windows": [
+        {
+          "uid": "main",
+          "text": { "main": "", "list": [] },
+          "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        }
+      ]
+    },
+    {
+      "name": "eventUtils",
+      "windows": [
+        {
+          "uid": "event_on_room2",
+          "text": { "main": "Strange event, super strange event just happened. Go back, nothing to do here.", "list": [] },
+          "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "go back", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": []
+        }
+      ]
+    },
+    {
+      "name": "nurse_dialogs",
+      "windows": [
+        {
+          "uid": "test_subject",
+          "text": { "main": "Yes, you are a test subject, stupid", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "pop", "direction": "" }, "text": "Okay", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "nope" }, "text": "No, actually I am testing everything here!", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "actor": { "character": "", "currentCharacter": true },
+          "entryScript": "facts.you_are_test_subject.know()"
+        },
+        {
+          "uid": "nope",
+          "text": { "main": "No.", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "local", "direction": "nope" }, "text": "Just... no? Can you explain?", "alternativeDirections": [] },
+            { "mainDirection": { "type": "pop", "direction": "test_subject" }, "text": "Okay", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "actor": { "character": "", "currentCharacter": true }
+        }
+      ]
+    }
+  ],
+  "facts": [ { "uid": "you_are_test_subject", "short": "You are a test subject", "full": "You are the only one to conduct experiments on. Oh god, what a shame." } ],
+  "chars": [
+    {
+      "uid": "narrator",
+      "displayName": { "main": "Narrator", "list": [] },
+      "traits": [],
+      "props": [ { "datatype": "variant", "name": "mood", "variants": [ "bored", "happy" ], "defaultValue": "bored" } ],
+      "overrideProps": [ { "name": "age", "datatype": "number", "defaultValue": 27 } ],
+      "roles": [ "aged" ],
+      "avatar": { "list": [] },
+      "description": { "main": "", "list": [] }
+    },
+    {
+      "uid": "nurse",
+      "displayName": { "main": "Nurse", "list": [] },
+      "traits": [],
+      "props": [],
+      "overrideProps": [],
+      "roles": [],
+      "avatar": { "list": [], "main": "females/blondie_on_blue.jpg" },
+      "description": { "main": "", "list": [] },
+      "dialog": {
+        "behavior": {
+          "speakingModel": { "agree": [ "ok" ], "deny": [ "no" ], "bye": [ "bye" ], "hello": [ "hello" ], "dontKnowChar": [ "who is it" ], "dontKnowObject": [ "what is it" ] },
+          "reactions": [ { "trigger": { "facts": [ "you_are_test_subject" ], "chars": [], "items": [], "places": [] }, "reply": "Yes you are, so what?" } ]
+        },
         "links": [
           {
             "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
-            "text": "Go to the start of the game",
+            "text": "Wait, how do you call me?",
             "alternativeDirections": []
-          }
+          },
+          { "mainDirection": { "type": "return", "direction": "" }, "text": "Bye", "alternativeDirections": [] }
         ],
-        "text": {
-          "main": "This is test laboratory. But where are all the test subjects? Maybe you are the one?",
-          "list": [ { "text": "This is test laboratory. But where are all the test subjects? Oh, now you know. You are.", "name": "know" } ]
-        },
-        "routes": [ "room01", "room02", "directors_office" ],
-        "backgrounds": { "list": [], "main": "backgrounds/space/00048.jpg" },
-        "eventHosts": [],
-        "thumbnail": "backgrounds/space/00048.jpg"
-      },
-      {
-        "displayName": "Room 01",
-        "uid": "room01",
-        "goto": [],
-        "links": [],
-        "text": { "main": "A room with name \"Room 01\". Fascinating. It cannot even host events.", "list": [] },
-        "routes": [ "test_lab" ],
-        "backgrounds": { "list": [], "main": "backgrounds/space/2023-10-07-00-34-12-02-k_dpmpp_2_a-Dreamshaper_3-0000.jpg" },
-        "eventHosts": null,
-        "thumbnail": "backgrounds/space/2023-10-07-01-29-59-07-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg"
-      },
-      {
-        "displayName": "Room 02",
-        "uid": "room02",
-        "goto": [],
-        "links": [],
-        "text": { "main": "This is a second room. What can we find there? At least, an event host. A custom one! named \"demoEventHost\". So crude.", "list": [] },
-        "routes": [ "test_lab" ],
-        "backgrounds": { "list": [], "main": "backgrounds/space/2023-10-07-01-29-59-07-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg" },
-        "eventHosts": [ "demoEventHost" ],
-        "thumbnail": "backgrounds/space/2023-10-07-01-34-36-04-k_dpmpp_2_a-sd-v1-5-fp16-0000.jpg"
-      },
-      {
-        "displayName": "Director's office",
-        "uid": "directors_office",
-        "goto": [],
-        "links": [],
-        "text": { "main": "Office of lab director. He's also a CEO probably.", "list": [] },
-        "routes": [ "test_lab" ],
-        "backgrounds": { "list": [], "main": "backgrounds/space/00048.jpg" },
-        "eventHosts": [],
-        "thumbnail": "backgrounds/space/00048.jpg"
+        "background": { "list": [] },
+        "text": { "main": "Hi, test subject", "list": [] },
+        "eventHosts": null
       }
-    ],
-    "items": [],
-    "events": [
-      {
-        "name": "Strange thing on room02 or anywhere",
-        "highPriority": false,
-        "probability": 20,
-        "targets": [ "demoEventHost" ],
-        "link": { "kind": "window", "dialog": "eventUtils", "window": "event_on_room2" }
-      }
-    ],
-    "eventHosts": [ "demoEventHost" ],
-    "roles": [ { "name": "aged", "props": [ { "name": "age", "datatype": "number", "defaultValue": 30 } ] } ],
-    "props": [ { "name": "testNumProp", "datatype": "number", "defaultValue": 42 }, { "datatype": "variant", "name": "testVariantProp", "variants": [ "a", "b", "c" ], "defaultValue": "b" } ],
-    "buildVersion": 1,
-    "startupDialog": { "kind": "window", "dialog": "dialog1", "window": "welcome" },
-    "engineVersion": "0.4",
-    "startMenu": {},
-    "general": {
-      "name": "Test game",
-      "version": "0.0.1",
-      "authors": [ "alexgrek", "alexgrek's insomnia" ],
-      "extras": { "build_status": "pass" },
-      "description": "This is a test game. It's purpose is to test all the features of the game engine, and be used as a test and demo project."
+    },
+    {
+      "uid": "ceo",
+      "displayName": { "main": "CEO", "list": [] },
+      "traits": [],
+      "props": [ { "datatype": "boolean", "name": "isInOffice", "defaultValue": true } ],
+      "overrideProps": [],
+      "roles": [],
+      "avatar": { "list": [] },
+      "description": { "main": "", "list": [] }
     }
-  }
-  
+  ],
+  "locs": [
+    {
+      "displayName": "Laboratory",
+      "uid": "test_lab",
+      "goto": [],
+      "links": [
+        {
+          "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
+          "text": "Go to the start of the game",
+          "alternativeDirections": []
+        }
+      ],
+      "text": {
+        "main": "This is test laboratory. But where are all the test subjects? Maybe you are the one?",
+        "list": [ { "text": "This is test laboratory. But where are all the test subjects? Oh, now you know. You are.", "name": "know" } ]
+      },
+      "routes": [ "room01", "room02", "directors_office" ],
+      "backgrounds": { "list": [], "main": "testgame/loc_bg/lab.jpg" },
+      "eventHosts": [],
+      "thumbnail": "testgame/loc_bg/lab.jpg"
+    },
+    {
+      "displayName": "Room 01",
+      "uid": "room01",
+      "goto": [],
+      "links": [],
+      "text": { "main": "A room with name \"Room 01\". Fascinating. It cannot even host events.", "list": [] },
+      "routes": [ "test_lab" ],
+      "backgrounds": { "list": [], "main": "testgame/loc_bg/room01.jpg" },
+      "eventHosts": null,
+      "thumbnail": "testgame/loc_bg/room01.jpg"
+    },
+    {
+      "displayName": "Room 02",
+      "uid": "room02",
+      "goto": [],
+      "links": [],
+      "text": { "main": "This is a second room. What can we find there? At least, an event host. A custom one! named \"demoEventHost\". So crude.", "list": [] },
+      "routes": [ "test_lab" ],
+      "backgrounds": { "list": [], "main": "testgame/loc_bg/room02.jpg" },
+      "eventHosts": [ "demoEventHost" ],
+      "thumbnail": "testgame/loc_bg/room02.jpg"
+    },
+    {
+      "displayName": "Director's office",
+      "uid": "directors_office",
+      "goto": [],
+      "links": [
+        {
+          "mainDirection": { "type": "local", "direction": "" },
+          "text": "Tell CEO that there is a fire",
+          "alternativeDirections": [],
+          "actionCode": "ch.ceo.isInOffice = false",
+          "isVisible": "return ch.ceo.isInOffice"
+        }
+      ],
+      "text": { "main": "Office of lab director. He's also a CEO probably.", "list": [] },
+      "routes": [ "test_lab" ],
+      "backgrounds": { "list": [ { "uri": "testgame/people/office_with_ceo.jpg", "name": "ceo" } ], "main": "testgame/loc_bg/office_empty.jpg" },
+      "eventHosts": [],
+      "thumbnail": "testgame/loc_bg/office_empty.jpg",
+      "choosebackgroundScript": "return ch.ceo.isInOffice ? \"ceo\" : null;"
+    }
+  ],
+  "items": [],
+  "events": [
+    {
+      "name": "Strange thing on room02 or anywhere",
+      "highPriority": false,
+      "probability": 20,
+      "targets": [ "demoEventHost" ],
+      "link": { "kind": "window", "dialog": "eventUtils", "window": "event_on_room2" }
+    }
+  ],
+  "eventHosts": [ "demoEventHost" ],
+  "roles": [ { "name": "aged", "props": [ { "name": "age", "datatype": "number", "defaultValue": 30 } ] } ],
+  "props": [ { "name": "testNumProp", "datatype": "number", "defaultValue": 42 }, { "datatype": "variant", "name": "testVariantProp", "variants": [ "a", "b", "c" ], "defaultValue": "b" } ],
+  "buildVersion": 1,
+  "startupDialog": { "kind": "window", "dialog": "dialog1", "window": "welcome" },
+  "engineVersion": "0.5",
+  "startMenu": {},
+  "general": {
+    "name": "Test game",
+    "version": "0.0.1",
+    "authors": [ "alexgrek", "alexgrek's insomnia" ],
+    "extras": { "build_status": "pass" },
+    "description": "This is a test game. It's purpose is to test all the features of the game engine, and be used as a test and demo project."
+  },
+  "config": { "assetsPath": "" }
+}
