@@ -19,6 +19,7 @@ import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code
 import CopyButton from '../common/copypaste/CopyButton';
 import Magic, { MagicOperation } from '../common/magic/Magic';
 import LocationPicker from './LocationPicker';
+import CharPicker from './CharPicker';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -273,7 +274,10 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             
         }
         if (linkdir.type === LinkType.NavigateToLocation) {
-            return <LocationPicker locs={game.locs} value={linkdir.direction || ''} onLocChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)} />
+            return <LocationPicker locs={game.locs} value={linkdir.direction || ''} onLocChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value? value : '')} />
+        }
+        if (linkdir.type === LinkType.TalkToPerson) {
+            return <CharPicker chars={game.chars} value={linkdir.direction || ''} onChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value? value : '')} dialogOnly={true} />
         }
         if (linkdir.type === LinkType.QuickReply) {
             return <Input value={linkdir.replyText || ""} onChange={value => editReply(linkdir, isMainLink, aindex, value)} placeholder='reply text' />
@@ -352,8 +356,8 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         onLinkChange({ ...link, changeLocationInBg: newValue }, index)
     }
 
-    const onChangeLocationInBg = (value: string) => {
-        onLinkChange({ ...link, changeLocationInBg: value }, index)
+    const onChangeLocationInBg = (value: string | null) => {
+        onLinkChange({ ...link, changeLocationInBg: value || undefined}, index)
     }
 
 

@@ -134,10 +134,10 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         })
     }
 
-    const onChangeLocationInBg = (val: string) => {
+    const onChangeLocationInBg = (val: string | null) => {
         const newValue = val
         return modifyWindowBy(window => {
-            return { ...window, changeLocationInBg: newValue }
+            return { ...window, changeLocationInBg: newValue || undefined }
         })
     }
 

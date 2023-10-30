@@ -42,7 +42,7 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
         if (prop.datatype === "location") {
             return <div>
                 <p>Default</p>
-                <LocationPicker locs={game.locs}  value={prop.defaultValue} onLocChange={v => setProp({...prop, defaultValue: v})}></LocationPicker>
+                <LocationPicker locs={game.locs}  value={prop.defaultValue} onLocChange={v => setProp({...prop, defaultValue: v || ''})}></LocationPicker>
             </div>
         }
         if (prop.datatype === "number") {
