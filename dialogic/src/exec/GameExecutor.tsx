@@ -265,6 +265,7 @@ export class GameExecManager {
 
     withUpdatedBackground(state: State, backgroundList: ImageList, script?: string) {
             const newbackground = this.getCurrentbackground(state, backgroundList, script)
+            // console.log("New background: " + newbackground)
             state.background = newbackground
             return state
     }
