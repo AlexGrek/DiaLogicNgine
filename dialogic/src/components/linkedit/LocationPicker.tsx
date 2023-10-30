@@ -14,7 +14,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ locs, value, onLocChang
     }
 
     return (
-        <SelectPicker style={{minWidth: '16em'}} data={makeLocationsPickerData(locs)} value={value} onChange={onLocChange}/>
+        <SelectPicker name='location-picker' style={{minWidth: '16em'}} data={makeLocationsPickerData(locs)} value={value} onChange={onLocChange}/>
     );
 };
 

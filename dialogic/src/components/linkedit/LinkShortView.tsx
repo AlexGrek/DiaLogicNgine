@@ -46,12 +46,15 @@ const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick,
     }
 
     const classes = "link-short-view" + (noninteractive ? "" : " animate__animated animate__fadeInLeft animate__faster")
-    const linkDirection = LOCAL_LINK_TYPES.includes(link.mainDirection.type) ? link.mainDirection.direction :
+    let linkDirection = LOCAL_LINK_TYPES.includes(link.mainDirection.type) ? link.mainDirection.direction :
         `${link.mainDirection.qualifiedDirection?.dialog}.${link.mainDirection.qualifiedDirection?.window}`
+    if (link.mainDirection.type == LinkType.QuickReply) {
+        linkDirection = `"${link.mainDirection.replyText}"`
+    }
     return (
         <div className={classes} onClick={noninteractive ? undefined : clickHandler}>
             <p className='link-short-view-text'>{link.text}<span className='link-tags'>     {linkTags()}</span></p>
-            <p className='link-short-view-target'><LinkTypeTag value={link.mainDirection.type} />{!RETURN_LINK_TYPES.includes(link.mainDirection.type) && linkDirection}</p>
+            <p className='link-short-view-target'><LinkTypeTag value={link.mainDirection.type} />{(!RETURN_LINK_TYPES.includes(link.mainDirection.type) || link.mainDirection.type == LinkType.QuickReply) && linkDirection}</p>
         </div>
 
 

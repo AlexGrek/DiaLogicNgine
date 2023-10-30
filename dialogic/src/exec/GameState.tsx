@@ -42,11 +42,13 @@ export interface State {
     gameVersion: string
     background?: string
     knownFacts: string[]
+    quickReplyText: string | null
 }
 
 export function createInitialState(game: GameDescription): State {
     return {
         position: game.startupDialog,
+        quickReplyText: null,
         positionStack: [],
         location: null,
         props: {},

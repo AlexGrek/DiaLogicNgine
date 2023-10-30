@@ -363,7 +363,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
 
     return (
         <div className="link-editor-body animate__animated animate__fadeInRight animate__faster">
-            <Stack alignItems="center" justifyContent='space-between' className="link-editor-toolbar">
+            <Stack wrap alignItems="center" justifyContent='space-between' className="link-editor-toolbar">
                 <IconButton icon={<PagePreviousIcon />} placement="left" onClick={() => editingDone()}>
                     Done
                 </IconButton>
@@ -376,21 +376,21 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
             <p>Text:</p>
             <Input onChange={editText} ref={txtInput} placeholder="Answer text" value={link.text}></Input>
             <PanelGroup accordion>
-                <Panel header="Direction" defaultExpanded>
+                <Panel className='direction-editor-panel' header="Direction" defaultExpanded>
                     {linkEditorDirection(true, 0)}
                 </Panel>
-                <Panel header="Scripting">
+                <Panel className='scripting-panel' header="Scripting">
                     <CodeSampleButton onClick={() => codeEdit("actionCode")} name='action' code={link.actionCode}></CodeSampleButton>
                     <CodeSampleButton onClick={() => codeEdit("isVisible")} name='isVisible' code={link.isVisible}></CodeSampleButton>
                     <CodeSampleButton onClick={() => codeEdit("isEnabled")} name='isEnabled' code={link.isEnabled}></CodeSampleButton>
                 </Panel>
-                <Panel header="Misc">
+                <Panel className='misc-panel' header="Misc">
                     <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
                     {link.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={link.changeLocationInBg} onLocChange={onChangeLocationInBg} />}
                 </Panel>
-                <Panel header="Alternatives">
+                <Panel className='alternatives-panel' header="Alternatives">
                     <div className='link-editor-section'>
-                        <Toggle checked={link.isAlternativeLink === undefined ? false : link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
+                        <Toggle id='alternatives-toggle' checked={link.isAlternativeLink === undefined ? false : link.isAlternativeLink} onChange={value => swithAlternativeLink(value)}></Toggle> Alternative direction
                         {link.isAlternativeLink ? <CodeSampleButton onClick={() => codeEdit("alternative")} name='useAlternativeWhen' code={link.useAlternativeWhen}></CodeSampleButton> : null}
                         {link.isAlternativeLink ? linkEditorDirection(false, 0) : null}
                     </div>

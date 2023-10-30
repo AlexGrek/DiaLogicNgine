@@ -17,7 +17,7 @@ const CharPicker: React.FC<CharPickerProps> = ({ chars, value, onChange, dialogO
     }
 
     return (
-        <SelectPicker style={{minWidth: '16em'}} data={makeLocationsPickerData(chars)} value={value} onChange={onChange}/>
+        <SelectPicker name='char-picker' style={{minWidth: '16em'}} data={makeLocationsPickerData(chars)} value={value} onChange={onChange}/>
     );
 };
 

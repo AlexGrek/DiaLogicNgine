@@ -77,9 +77,9 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
     const nameEditingPanel = (name?: string) => {
         const viewName = name ? name : ""
         return (
-            <InputGroup>
+            <InputGroup className='text-list-tab-controls'>
             <InputGroup.Addon>Name</InputGroup.Addon>
-            <Input value={viewName} onChange={onNameChange} size="sm" style={{width: "42em"}}></Input>
+            <Input className='text-list-tab-name' value={viewName} onChange={onNameChange} size="sm" style={{width: "42em"}}></Input>
             <InputGroup.Button onClick={onRemoveTab}>
             <TrashIcon/>
             </InputGroup.Button>
@@ -87,16 +87,16 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
     }
 
     const editor = 
-        <Input as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5}></Input>
+        <Input className='text-list-text-editor' as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5}></Input>
 
     return (
         <div>
-        <Nav activeKey={editingIndex.toString()} onSelect={onSelect} appearance="subtle" reversed style={{ marginBottom: 2 }}>
-            <Nav.Item eventKey={"-1"} icon={<HomeIcon />}>
+        <Nav className='text-list-tabs' activeKey={editingIndex.toString()} onSelect={onSelect} appearance="subtle" reversed style={{ marginBottom: 2 }}>
+            <Nav.Item className='text-list-tab-main' eventKey={"-1"} icon={<HomeIcon />}>
                 main
             </Nav.Item>
             {navItems}
-            <Nav.Item eventKey={CREATE_INDEX.toString()}>+</Nav.Item>
+            <Nav.Item className='text-list-tab-plus' eventKey={CREATE_INDEX.toString()}>+</Nav.Item>
         </Nav>
         <div>
             {editingIndex < 0 ? null : nameEditingPanel(editingName) }

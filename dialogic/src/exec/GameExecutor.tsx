@@ -22,6 +22,9 @@ export class GameExecManager {
     }
 
     getCurrentWindowText(instate: State, window: DialogWindow) {
+        if (instate.quickReplyText) {
+            return instate.quickReplyText
+        }
         return this.getCurrentText(window.text, instate, window.chooseTextScript)
     }
 
@@ -239,6 +242,12 @@ export class GameExecManager {
                     return newState
             case (LinkType.Pop):
                 return this.popLink(newState)
+            case (LinkType.QuickReply):
+                if (directionFromLink.replyText !== undefined) {
+                    return this.quickReply(newState, directionFromLink.replyText)
+                }
+                else
+                    return newState
             case (LinkType.NavigateToLocation):
                 return this.goToLocation(newState, directionFromLink.direction)
             default:
@@ -246,7 +255,11 @@ export class GameExecManager {
         }
     }
 
-    withUpdatedHistory(state: State, clickData: HistoryRecord): State {
+    private quickReply(prevState: State, replyText: string): State {
+        return {...prevState, quickReplyText: replyText }
+    }
+
+    private withUpdatedHistory(state: State, clickData: HistoryRecord): State {
         // also changes step value
         var s = lodash.cloneDeep(state)
         if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
@@ -257,9 +270,10 @@ export class GameExecManager {
     }
 
     private withUpdatedStep(state: State): State {
-        // also changes step value
+        // also clears quickReply as it was for the previous step
         var s = lodash.cloneDeep(state)
         s.stepCount = s.stepCount + 1
+        s.quickReplyText = null
         return s
     }
 
@@ -299,11 +313,13 @@ export class GameExecManager {
     }
 
     applyLink(state: State, link: DialogLink, clickData: HistoryRecord): State {
-        var followed = this.withUpdatedHistory(this.followLink(state, link), clickData)
+        // execute code if needed BEFORE link is followed
+        let modifiedState = state
         if (link.actionCode) {
-            return evaluateAsStateProcessor(this.game, link.actionCode, followed)
+            modifiedState = evaluateAsStateProcessor(this.game, link.actionCode, modifiedState)
         }
-        return followed;
+        modifiedState = this.withUpdatedHistory(this.followLink(modifiedState, link), clickData)
+        return modifiedState;
     }
 
     dialogVariantApply(state: State, link: DialogLink, clickData: HistoryRecord): State {

@@ -39,6 +39,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
 
   public dialogs(dialogs: Dialog[]) {
     let items = dialogs.map((d) => <Nav.Item
+    className='side-panel-dialog'
       eventKey={d.name}
       title={d.name}
       key={d.name}
@@ -87,9 +88,9 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
                 Play
               </Nav.Item>
               <Nav.Menu eventKey="4" title="Dialogs" icon={<MagicIcon />}>
-                <Nav.Item>
+                <Nav.Item className='side-panel-dialog-create'>
                   <InputGroup>
-                    <Input placeholder="Add dialog" value={this.state.newDialogname} onChange={this.addDialogInputHandler.bind(this)} />
+                    <Input name='add-dialog' placeholder="Add dialog" value={this.state.newDialogname} onPressEnter={this.handleCreateDialog.bind(this)} onChange={this.addDialogInputHandler.bind(this)} />
                     <InputGroup.Button disabled={this.state.newDialogname.length === 0} onClick={this.handleCreateDialog.bind(this)}>
                       <PlusRound />
                     </InputGroup.Button>

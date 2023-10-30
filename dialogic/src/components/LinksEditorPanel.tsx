@@ -82,7 +82,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
             console.log(`Link: ${el}`)
             return <LinkShortView index={index} key={index} link={el} onLinkClick={onLinkClick}></LinkShortView>
         })
-        linksEditorContent = <div>
+        linksEditorContent = <div className='links-list'>
             {linksList}
             <div className='links-editor-instrument-keys'>
             <ButtonGroup>
