@@ -164,41 +164,49 @@ export class GameExecManager {
         }
     }
 
-    private goToLocation(prevState: State, direction?: string) {
+    private goToLocation(prevState: State, direction?: string | Loc) {
         // remove all the stack
         var newState = lodash.cloneDeep(prevState)
         if (!direction) {
             console.error("Direction is not defined for a location")
             return prevState
         }
+
+        const directionUid = lodash.isString(direction) ? direction : direction.uid
+        const directionObject = lodash.isString(direction) ? getLoc(this.game, direction) : direction
+
+        if (!directionObject) {
+            console.error("DirectionObject is not defined for a location")
+            return prevState
+        }
+
         newState.positionStack = []
         // remove all the short history
         newState.shortHistory = []
         newState.position = {
-            location: direction,
+            location: directionUid,
             kind: "location"
         }
-        newState.location = direction
+        newState.location = directionUid
+
+        newState = this.modifyStateScript(newState, directionObject.onEntryScript)
+        newState = this.withUpdatedBackground(newState, directionObject.backgrounds, directionObject.choosebackgroundScript)
+
         return newState;
     }
 
     locRouteApply(state: State, view: LocRouteRenderView): State {
-        const afterLink = this.withChangedLocation(state, view.destination)
-        var followed = this.withClearedHistory(afterLink)
-        const afterWindowUpd = this.modifyStateScript(followed, view.destination.onEntryScript)
-        return afterWindowUpd
+        const afterLink = this.withChangedLocation(this.withUpdatedStep(state), view.destination)
+        return afterLink
     }
 
     private withChangedLocation(state: State, destination: Loc) {
         const followed = this.goToLocation(state, destination.uid)
-        if (destination.onEntryScript) {
-            return evaluateAsStateProcessor(this.game, destination.onEntryScript, followed)
-        }
         return followed;
     }
 
     private followLink(prevState: State, link: DialogLink): State {
-        var newState = prevState
+        var newState = this.withUpdatedStep(prevState)
         var directionFromLink = link.mainDirection
         if (link.isAlternativeLink && link.alternativeDirections.length > 0 && link.useAlternativeWhen) {
             const { state, decision } = evaluateAsBoolProcessor(this.game, link.useAlternativeWhen, newState)
@@ -241,7 +249,6 @@ export class GameExecManager {
     withUpdatedHistory(state: State, clickData: HistoryRecord): State {
         // also changes step value
         var s = lodash.cloneDeep(state)
-        s.stepCount = s.stepCount + 1
         if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
             s.shortHistory.shift() // remove latest entry
         }
@@ -249,12 +256,17 @@ export class GameExecManager {
         return s
     }
 
-    withClearedHistory(state: State): State {
+    private withUpdatedStep(state: State): State {
         // also changes step value
         var s = lodash.cloneDeep(state)
         s.stepCount = s.stepCount + 1
-        s.shortHistory = []
         return s
+    }
+
+    withUpdatedBackground(state: State, backgroundList: ImageList, script?: string) {
+            const newbackground = this.getCurrentbackground(state, backgroundList, script)
+            state.background = newbackground
+            return state
     }
 
     private executeOnEntry(state: State): State {
