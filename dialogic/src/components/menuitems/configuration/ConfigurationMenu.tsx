@@ -80,7 +80,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                 </Panel>
                 <Panel header="Menu background">
                 <img className='menu-config-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
-                                <PublicFileUrl extensions={IMAGES} value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val)}></PublicFileUrl>
+                                <PublicFileUrl extensions={IMAGES} value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)}></PublicFileUrl>
                 </Panel>
             </PanelGroup>
             </Stack>

@@ -11,6 +11,7 @@ import { isValidJsIdentifier } from '../../../Utils';
 import CharEditing from './CharEditing';
 import './charmenu.css'
 import PasteButton from '../../common/copypaste/PasteButton';
+import Note from '../../userguide/Note';
 
 interface CharMenuProps {
     game: GameDescription;
@@ -87,6 +88,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     return (
         <div id='charmenu'>
             <div className='char-menu-top-panel'>
+                <Note text='Create **characters** (NPCs) and customize their behavior and properties'/>
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>

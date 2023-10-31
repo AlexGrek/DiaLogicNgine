@@ -17,13 +17,13 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange }
 
     const CREATE_INDEX = -100500
 
-    const onTextChange = (text: string | undefined) => {
+    const onTextChange = (text: string | null) => {
         const copy = lodash.cloneDeep(imageList)
         if (editingIndex < 0) {
-            copy.main = text
+            copy.main = text || undefined
         }
         else {
-            copy.list[editingIndex].uri = text
+            copy.list[editingIndex].uri = text || undefined
         }
         onChange(copy)
     }

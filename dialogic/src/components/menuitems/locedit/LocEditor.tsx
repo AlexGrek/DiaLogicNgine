@@ -154,7 +154,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
 
     const displayNameChange = (val: string) => setlocation({ ...location, displayName: val })
     const uidNameChange = (val: string) => setlocation({ ...location, uid: val })
-    const thumbChange = (val?: string) => setlocation({ ...location, thumbnail: val })
+    const thumbChange = (val: string | null) => setlocation({ ...location, thumbnail: val || undefined })
     const linksChange = (val: DialogLink[]) => setlocation({ ...location, links: val })
     const textChange = (val: TextList) => setlocation({ ...location, text: val })
 

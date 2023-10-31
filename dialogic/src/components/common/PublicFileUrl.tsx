@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { InputPicker } from 'rsuite';
+import { InputPicker, SelectPicker } from 'rsuite';
 
 interface PublicFileUrlProps {
     extensions: string[];
     value?: string;
-    onChange: (val?: string) => void;
+    onChange: (val: string | null) => void;
     requestUrl?: string
 }
 
@@ -44,8 +44,8 @@ const PublicFileUrl: React.FC<PublicFileUrlProps> = ({ extensions, value, onChan
     }
 
     return (
-        <InputPicker className='public-file-url' creatable data={convertListToView(data)} onChange={onChange} value={value}>
-        </InputPicker>
+        <SelectPicker className='public-file-url' data={convertListToView(data)} onChange={onChange} value={value}>
+        </SelectPicker>
     );
 };
 

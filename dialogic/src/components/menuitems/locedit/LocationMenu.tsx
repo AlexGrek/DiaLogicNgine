@@ -7,6 +7,7 @@ import { Button, Notification } from 'rsuite';
 import './loc.css'
 import LocEditor from './LocEditor';
 import { emptyImageList } from '../../../game/ImageList';
+import Note from '../../userguide/Note';
 
 interface LocationMenuProps {
     game: GameDescription;
@@ -74,9 +75,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers, 
 
     return (
         <div>
-          <Notification closable style={{ height: 70 }}>
-                    Create locations that can contain paths to other locations and NPCs
-            </Notification>
+            <Note text='Create locations that can contain paths to other locations and NPCs' />
           {editingIndex >= 0 ? editor(editingIndex) : null}
           <div className="locItems">
             {locItems(game.locs)}

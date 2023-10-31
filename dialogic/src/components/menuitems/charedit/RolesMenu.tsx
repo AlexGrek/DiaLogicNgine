@@ -9,6 +9,7 @@ import { Role, createEmptyRole } from '../../../game/Character';
 import { GameDescription } from '../../../game/GameDescription';
 import RoleEditing from './RoleEditing';
 import './charmenu.css';
+import Note from '../../userguide/Note';
 
 interface RolesMenuProps {
     game: GameDescription;
@@ -71,9 +72,7 @@ const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds 
     return (
         <div>
             <div className='char-menu-top-panel'>
-                <Notification closable style={{ height: 70 }}>
-                    Create a role for NPCs that contain properties and functions, that can be used by NPCs, and can be overriden by NPCs
-                </Notification>
+                <Note text='Create a role for NPCs that contain properties and functions, that can be used by NPCs, and can be overriden by NPCs' />
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>

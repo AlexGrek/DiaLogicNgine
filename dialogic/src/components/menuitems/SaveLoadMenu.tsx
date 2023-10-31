@@ -26,6 +26,10 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
     const [list, setList] = useState<string[]>([])
     const [serverFile, setServerFile] = useState<string | undefined>(undefined)
 
+    const handleSetServerFile = (value: string | null) => {
+        setServerFile(value || undefined)
+    }
+
     useEffect(() => {
         setGame(currentGame);
     }, [currentGame]);
@@ -138,7 +142,7 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
             </Panel>
             <Panel id='server-file-loader' bordered>
                 <p>Load server file:</p>
-                <PublicFileUrl extensions={['json']} onChange={setServerFile} requestUrl="games/list.json"/>
+                <PublicFileUrl extensions={['json']} onChange={handleSetServerFile} requestUrl="games/list.json"/>
                 <Button id='load-server-file' disabled={serverFile === undefined} onClick={() => loadServerFile(serverFile)}>Load file</Button>
             </Panel>
             <Panel bordered>

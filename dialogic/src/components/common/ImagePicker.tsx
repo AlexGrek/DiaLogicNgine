@@ -6,7 +6,7 @@ import './ImagePicker.css'
 interface ImagePickerProps {
     extensions?: string[];
     value?: string;
-    onChange: (val?: string) => void;
+    onChange: (val: string | null) => void;
     children?: ReactNode;
 }
 
