@@ -6,9 +6,10 @@ import Fact from "./Fact";
 import { emptyImageList } from "./ImageList";
 import { Item } from "./Items";
 import Loc from "./Loc";
+import QuestLine from "./Objectives";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION="0.5"
+export const ENGINE_VERSION="0.6"
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -55,6 +56,7 @@ export interface GameDescription {
     startMenu: StartMenuConfiguration
     general: GeneralGameInfo
     config: Config
+    objectives: QuestLine[]
 }
 
 export function createDefaultGame(): GameDescription {
@@ -95,7 +97,8 @@ export function createDefaultGame(): GameDescription {
         engineVersion: ENGINE_VERSION,
         startMenu: {},
         general: createGeneralGameInfo(),
-        config: createDefaultConfig()
+        config: createDefaultConfig(),
+        objectives: []
     };
 
     return game

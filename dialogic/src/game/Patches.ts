@@ -22,8 +22,24 @@ export class PatchFrom04To05 implements Patch {
     }
 }
 
+export class PatchFrom05To06 implements Patch {
+    from(): string {
+        return "0.5"
+    }
+    to(): string {
+        return "0.6"
+    }
+    apply(obj: any): GameDescription {
+        // do the patch work
+        console.log("Patching 0.5 to 0.6")
+        obj["objectives"] = []
+        return obj as GameDescription
+    }
+}
+
 const PATCHES = [
-    new PatchFrom04To05()
+    new PatchFrom04To05(),
+    new PatchFrom05To06()
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {

@@ -1,4 +1,5 @@
 import { GameDescription } from "../game/GameDescription"
+import { GameProgress, createInitialGameProgress } from "./GameProgress"
 
 export interface DialogWindowId {
     kind: "window"
@@ -47,7 +48,9 @@ export interface State {
     gameVersion: string
     background?: string
     knownFacts: string[]
+    progress: GameProgress
     quickReplyText: string | null
+    engineVersion: string
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -60,7 +63,9 @@ export function createInitialState(game: GameDescription): State {
         stepCount: 0,
         fatalError: null,
         shortHistory: [],
-        gameVersion: "0.0.1",
-        knownFacts: []
+        gameVersion: game.general.version,
+        knownFacts: [],
+        engineVersion: game.engineVersion,
+        progress: createInitialGameProgress()
     }
 }
