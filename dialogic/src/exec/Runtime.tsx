@@ -3,6 +3,7 @@ import { State } from "./GameState";
 import { GameDescription } from "../game/GameDescription";
 import Prop from "../game/Prop";
 import { roleByUid } from "../game/Character";
+import QuestLine, { Quest, Task } from "../game/Objectives";
 
 type StateProvider = () => State
 
@@ -105,6 +106,61 @@ class RuntimeFact {
         }
         const state = this.stateProvider()
         state.knownFacts.push(this.uid)
+    }
+}
+
+class RuntimeObjectiveQuestLine {
+    stateProvider!: () => State;
+    questline: QuestLine
+
+    constructor(stateProvider: () => State, questline: QuestLine) {
+        this.questline = questline
+        this.stateProvider = stateProvider
+    }
+}
+
+class RuntimeObjectiveQuest {
+    stateProvider!: () => State;
+    quest: Quest
+
+    constructor(stateProvider: () => State, quest: Quest, parent: QuestLine) {
+        this.quest = quest
+        this.stateProvider = stateProvider
+    }
+
+    public fail() {
+        const state = this.stateProvider()
+        state.progress.failedQuests.push(this.quest.uid)
+    }
+}
+
+class RuntimeObjectiveTask {
+    stateProvider!: () => State;
+    task: Task
+    parent: RuntimeObjectiveQuest
+
+    constructor(stateProvider: () => State, task: Task, parent: RuntimeObjectiveQuest) {
+        this.task = task
+        this.stateProvider = stateProvider
+        this.parent = parent
+    }
+
+    public get isCompleted() {
+        const state = this.stateProvider()
+        return state.progress.completedTasks.includes(this.task.uid)
+    }
+
+    public get isFailed() {
+        const state = this.stateProvider()
+        return state.progress.failedTasks.includes(this.task.uid)
+    }
+
+    public fail() {
+        const state = this.stateProvider()
+        state.progress.failedTasks.push(this.task.uid)
+        if (this.task.critical) {
+            this.parent.fail()
+        }
     }
 }
 

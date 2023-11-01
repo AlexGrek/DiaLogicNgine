@@ -1,6 +1,7 @@
 export interface Task {
     uid: string
     text: string
+    critical: boolean // if failed - all quest will be failed
 }
 
 export interface Quest {
@@ -9,6 +10,8 @@ export interface Quest {
     name: string
     tags: string[]
     autoComplete: boolean
+    onComplete?: string
+    onFail?: string
 }
 
 export default interface QuestLine {
@@ -21,7 +24,8 @@ export default interface QuestLine {
 export function createTask(questuid: string, index: number): Task {
     return {
         uid: `${questuid}Task${index+1}`,
-        text: ''
+        text: '',
+        critical: true
     }
 }
 
