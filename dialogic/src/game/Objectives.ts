@@ -9,7 +9,7 @@ export interface Quest {
     tasks: Task[]
     name: string
     tags: string[]
-    autoComplete: boolean
+    ordered: true
     onComplete?: string
     onFail?: string
 }
@@ -34,7 +34,7 @@ export function createQuest(questuid: string): Quest {
         uid: questuid,
         tasks: [],
         tags: [],
-        autoComplete: true,
+        ordered: true,
         name: ''
     }
 }

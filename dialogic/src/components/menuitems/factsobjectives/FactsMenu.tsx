@@ -22,7 +22,7 @@ const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visibl
     const [editFact, setEditFact] = React.useState<number>(-1)
 
     if (!visible) {
-        return <div/>
+        return <div />
     }
 
     const createFact = () => {
@@ -32,20 +32,20 @@ const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visibl
         const fact = createEmptyFact(newuid)
         setNewuid("")
         setEditFact(game.facts.length)
-        onSetGame({...game, facts: [...game.facts, fact]})
+        onSetGame({ ...game, facts: [...game.facts, fact] })
     }
 
     const deleteFact = (index: number) => {
         setEditFact(-1)
         const facts = lodash.cloneDeep(game.facts)
         facts.splice(index, 1)
-        onSetGame({...game, facts: facts})
+        onSetGame({ ...game, facts: facts })
     }
 
     const renderFactsList = () => {
         return game.facts.map((fact, i) => {
             return <div className='fact-item' key={i} onClick={() => setEditFact(i)}>
-                <div className='fact-header'><PinIcon/><p className='fact-uid'>{fact.uid}</p></div>
+                <div className='fact-header'><PinIcon /><p className='fact-uid'>{fact.uid}</p></div>
                 <p className='fact-short'>{fact.short}</p>
             </div>
         })
@@ -56,7 +56,7 @@ const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visibl
         const updateFact = (prop: "short" | "full", value: string) => {
             const updatedFacts = lodash.cloneDeep(game.facts)
             updatedFacts[editFact][prop] = value
-            onSetGame({...game, facts: updatedFacts})
+            onSetGame({ ...game, facts: updatedFacts })
         }
 
         return <div className='facts-drawer-contents'>
@@ -82,19 +82,19 @@ const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visibl
                 {renderFactsList()}
             </div>
             <Drawer placement='right' open={editFact >= 0 && editFact < game.facts.length} onClose={() => setEditFact(-1)}>
-        <Drawer.Header>
-          <Drawer.Title>Edit fact</Drawer.Title>
-          <Drawer.Actions>
-          <ConfirmDeleteButton onConfirm={() => deleteFact(editFact)} objectDescr="fact"></ConfirmDeleteButton>
-            <Button onClick={() => setEditFact(-1)} appearance="primary">
-              Save
-            </Button>
-          </Drawer.Actions>
-        </Drawer.Header>
-        <Drawer.Body>
-          {editFact >= 0 && editFact < game.facts.length ? renderDrawerContents() : null}
-        </Drawer.Body>
-      </Drawer>
+                <Drawer.Header>
+                    <Drawer.Title>Edit fact</Drawer.Title>
+                    <Drawer.Actions>
+                        <ConfirmDeleteButton onConfirm={() => deleteFact(editFact)} objectDescr="fact"></ConfirmDeleteButton>
+                        <Button onClick={() => setEditFact(-1)} appearance="primary">
+                            Save
+                        </Button>
+                    </Drawer.Actions>
+                </Drawer.Header>
+                <Drawer.Body>
+                    {editFact >= 0 && editFact < game.facts.length ? renderDrawerContents() : null}
+                </Drawer.Body>
+            </Drawer>
         </div>
     );
 };

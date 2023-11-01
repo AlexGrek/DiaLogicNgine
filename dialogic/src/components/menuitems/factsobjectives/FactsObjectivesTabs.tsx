@@ -3,6 +3,8 @@ import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import StaticTabs from '../../common/StaticTabs';
 import FactsMenu from './FactsMenu';
+import QuestLineMenu from '../objectives/QuestLinesMenu';
+import './facts.css'
 
 interface CharEditorTabsProps {
     game: GameDescription;
@@ -15,7 +17,7 @@ const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handle
     const createFactsTab = () => {
         return {
             header: "Facts",
-            content: <FactsMenu visible={visible} game={game} onSetGame={onSetGame} handlers={handlers}/>,
+            content: <FactsMenu visible={visible} game={game} onSetGame={onSetGame} handlers={handlers} />,
             disabled: false
         }
     }
@@ -23,21 +25,21 @@ const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handle
     const createObjectivesTab = () => {
         return {
             header: "Objectives",
-            content: <div/>,
-            disabled: true
+            content: <QuestLineMenu game={game} onSetGame={onSetGame} handlers={handlers} />,
+            disabled: false
         }
     }
 
     const createLoreTab = () => {
         return {
             header: "Lore",
-            content: <div/>,
+            content: <div />,
             disabled: true
         }
     }
 
     return (
-        <StaticTabs keepOpen={true} tabs={[createFactsTab(), createObjectivesTab(), createLoreTab()]}/>
+        <StaticTabs keepOpen={true} tabs={[createFactsTab(), createObjectivesTab(), createLoreTab()]} />
     );
 };
 
