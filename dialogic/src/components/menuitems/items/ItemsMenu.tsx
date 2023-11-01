@@ -11,6 +11,7 @@ import StringListEditor from '../../common/StringListEditor';
 import StringMapEditor from '../../common/StringMapEditor';
 import './ItemsMenu.css';
 import ItemsPicker from './ItemsPicker';
+import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 
 interface ItemsMenuProps {
     game: GameDescription;
@@ -22,7 +23,6 @@ interface ItemsMenuProps {
 const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<Item | null>(null);
-    const [newUid, setNewUid] = React.useState<string>("")
 
     if (!visible) {
         return <div/>
@@ -40,12 +40,9 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
         setEditingObject(items[index])
     }
 
-    const createItem = () => {
-        if (!isValidJsIdentifier(newUid)) {
-            return
-        }
-        const item = createEmptyItem(newUid)
-        setNewUid("")
+    const createItem = (data: CreationData) => {
+        const item = createEmptyItem(data.uid)
+        item.name = data.name
         setEditing(items.length, item)
         onSetItems([...items, item])
     }
@@ -136,14 +133,7 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
     return (
         <div>
             <div className='items-create-panel'>
-                <Dropdown title="Create" className='items-create-dropdown'>
-                    <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
-                        <InputGroup>
-                            <InputGroup.Addon>UID:</InputGroup.Addon><Input className='items-create-uid-input' onPressEnter={() => createItem()} value={newUid} onChange={setNewUid}></Input>
-                            <InputGroup.Button onClick={() => createItem()} disabled={!isValidJsIdentifier(newUid)}><PlusIcon /></InputGroup.Button>
-                        </InputGroup>
-                    </Dropdown.Item>
-                </Dropdown>
+                <CreateWithUid objectName={'item'} onCreate={createItem}/>
             </div>
             <Stack wrap className='items-container'>
                 {renderItems()}

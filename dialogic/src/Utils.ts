@@ -1,4 +1,4 @@
-import lodash from "lodash";
+import lodash, { lowerFirst, upperFirst } from "lodash";
 
 const isValidIdentifier = require('is-valid-identifier')
 
@@ -106,3 +106,9 @@ export function createTypeAssertionFunction<T>(properties: (keyof T)[]): (obj: a
 //         }
 //     };
 // }
+
+export function generateUidFromName(name: string) {
+    const words = name.split(' ').map(word => upperFirst(word))
+    const gluedWords = words.join('')
+    return lowerFirst(gluedWords)
+}

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import diff from 'deep-diff'
-import { GameDescription } from '../../../game/GameDescription';
-import { IUpds } from '../../../App';
 import UserBadgeIcon from '@rsuite/icons/UserBadge';
-import PlusIcon from '@rsuite/icons/Plus';
-import { Button, Col, Dropdown, Input, InputGroup, Nav, Notification } from 'rsuite';
+import diff from 'deep-diff';
 import lodash from 'lodash';
+import React, { useState } from 'react';
+import { Nav } from 'rsuite';
+import { IUpds } from '../../../App';
 import Character, { createEmptyCharacter } from '../../../game/Character';
-import { isValidJsIdentifier } from '../../../Utils';
-import CharEditing from './CharEditing';
-import './charmenu.css'
+import { GameDescription } from '../../../game/GameDescription';
+import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 import PasteButton from '../../common/copypaste/PasteButton';
 import Note from '../../userguide/Note';
+import CharEditing from './CharEditing';
+import './charmenu.css';
 
 interface CharMenuProps {
     game: GameDescription;
@@ -21,7 +20,6 @@ interface CharMenuProps {
 
 const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
-    const [creatingUID, setCreatingUID] = useState<string>("");
 
     const navItems = () => {
         return game.chars.map((item, i) => {
@@ -34,14 +32,11 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
         onSetGame(newGame)
     }
 
-    const createCharacter = () => {
-        if (!isValidJsIdentifier(creatingUID)) {
-            return
-        }
-        const name = creatingUID
-        setCreatingUID("")
+    const createCharacter = (data: CreationData) => {
+        const char = createEmptyCharacter(data.uid)
+        char.displayName.main = data.name
         const copy = lodash.cloneDeep(game.chars)
-        copy.push(createEmptyCharacter(name))
+        copy.push(char)
         updateCharacterList(copy)
     }
 
@@ -53,7 +48,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
         const character = obj as Character
         const copy = lodash.cloneDeep(game.chars)
         console.log(`Pasted character: ${JSON.stringify(character)}`)
-        copy.push({...character, uid: name})
+        copy.push({ ...character, uid: name })
         updateCharacterList(copy)
     }
 
@@ -61,7 +56,6 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
         const chars = game.chars
         const updatedCharList = chars.filter((ch) => ch.uid !== uid)
         updateCharacterList(updatedCharList)
-        setCreatingUID("")
         setEditingIndex(0)
     }
 
@@ -88,19 +82,12 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
     return (
         <div id='charmenu'>
             <div className='char-menu-top-panel'>
-                <Note text='Create **characters** (NPCs) and customize their behavior and properties'/>
+                <Note text='Create **characters** (NPCs) and customize their behavior and properties' />
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>
-                    <Dropdown id='createchar' title="Create">
-                        <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
-                            <InputGroup>
-                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createCharacter()} value={creatingUID} onChange={setCreatingUID}></Input>
-                                <InputGroup.Button onClick={() => createCharacter()} disabled={!isValidJsIdentifier(creatingUID)}><PlusIcon /></InputGroup.Button>
-                            </InputGroup>
-                        </Dropdown.Item>
-                    </Dropdown>
-                    <PasteButton requireNewUid handlers={handlers} typenames={['char']} onPasteClick={charPasted}/>
+                    <CreateWithUid objectName={'character'} onCreate={createCharacter} />
+                    <PasteButton requireNewUid handlers={handlers} typenames={['char']} onPasteClick={charPasted} />
                     <Nav id='chars' vertical appearance="tabs" activeKey={editingIndex.toString()} onSelect={onSelectTab}>
                         {navItems()}
                     </Nav>

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { GameDescription } from '../../../game/GameDescription';
-import { IUpds } from '../../../App';
-import { Button, Drawer, Dropdown, Input, InputGroup, Panel } from 'rsuite';
-import { createEmptyFact } from '../../../game/Fact';
-import { isValidJsIdentifier } from '../../../Utils';
 import PinIcon from '@rsuite/icons/Pin';
-import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
-import './facts.css'
+import React from 'react';
+import { Button, Drawer, Input } from 'rsuite';
+import { IUpds } from '../../../App';
+import { isValidJsIdentifier } from '../../../Utils';
+import { createEmptyFact } from '../../../game/Fact';
+import { GameDescription } from '../../../game/GameDescription';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
+import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
+import './facts.css';
 
 interface FactsMenuProps {
     game: GameDescription;
@@ -18,19 +18,18 @@ interface FactsMenuProps {
 }
 
 const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visible }) => {
-    const [newuid, setNewuid] = React.useState<string>("")
     const [editFact, setEditFact] = React.useState<number>(-1)
 
     if (!visible) {
         return <div />
     }
 
-    const createFact = () => {
-        if (!isValidJsIdentifier(newuid)) {
+    const createFact = (data: CreationData) => {
+        if (!isValidJsIdentifier(data.uid)) {
             return
         }
-        const fact = createEmptyFact(newuid)
-        setNewuid("")
+        const fact = createEmptyFact(data.uid)
+        fact.short = data.name
         setEditFact(game.facts.length)
         onSetGame({ ...game, facts: [...game.facts, fact] })
     }
@@ -69,14 +68,7 @@ const FactsMenu: React.FC<FactsMenuProps> = ({ game, onSetGame, handlers, visibl
     return (
         <div>
             <div className='facts-create-panel'>
-                <Dropdown title="Create">
-                    <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
-                        <InputGroup>
-                            <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => createFact()} value={newuid} onChange={setNewuid}></Input>
-                            <InputGroup.Button onClick={() => createFact()} disabled={!isValidJsIdentifier(newuid)}><PlusIcon /></InputGroup.Button>
-                        </InputGroup>
-                    </Dropdown.Item>
-                </Dropdown>
+                <CreateWithUid objectName='fact' onCreate={createFact} />
             </div>
             <div className='facts-container'>
                 {renderFactsList()}

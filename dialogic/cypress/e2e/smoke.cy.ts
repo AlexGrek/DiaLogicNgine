@@ -1,5 +1,5 @@
 describe('smoke test', () => {
-  it('passes', () => {
+  it.only('passes', () => {
     cy.visit('http://localhost:3000/')
     cy.get('[data-event-key="saveload"]').click()
     cy.get('h1').contains("Save/Load menu")
@@ -32,7 +32,7 @@ describe('smoke test', () => {
 
     cy.get('[data-event-key="items"]').click()
     cy.contains('Create').click()
-    cy.get('.items-create-uid-input').type('testitem{enter}')
+    cy.get('.create-uid-name').type('Testitem{enter}')
     cy.get('.rs-btn-primary').contains('Save').click()
     cy.get('.items-container > :nth-child(1)').should('contain.text', "Testitem")
   }),

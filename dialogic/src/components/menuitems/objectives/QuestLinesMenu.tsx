@@ -1,5 +1,5 @@
 import PeoplesMapIcon from '@rsuite/icons/PeoplesMap';
-import PlusIcon from '@rsuite/icons/Plus';
+
 import lodash from 'lodash';
 import React, { useState } from 'react';
 import { Dropdown, Input, InputGroup, Nav } from 'rsuite';
@@ -10,6 +10,7 @@ import QuestLine, { createQuestLine } from '../../../game/Objectives';
 import Note from '../../userguide/Note';
 import QuestLineEditor from './QuestLineEditor';
 import TaskIcon from '@rsuite/icons/Task';
+import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 
 interface QuestLineMenuProps {
     game: GameDescription;
@@ -19,7 +20,6 @@ interface QuestLineMenuProps {
 
 const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers: IUpds }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
-    const [creatingUID, setCreatingUID] = useState<string>("");
 
     const questlines = game.objectives
 
@@ -38,19 +38,7 @@ const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers
     const deleteRole = (uid: string) => {
         const upd = game.objectives.filter((ch) => ch.uid !== uid)
         updateQuestLines(upd)
-        setCreatingUID("")
         setEditingIndex(0)
-    }
-
-    const addQuestLine = () => {
-        if (!isValidJsIdentifier(creatingUID) || existingUids().includes(creatingUID)) {
-            return
-        }
-        const name = creatingUID
-        setCreatingUID("")
-        const copy = lodash.cloneDeep(questlines)
-        copy.push(createQuestLine(name))
-        updateQuestLines(copy)
     }
 
     const onSelectTab = (selected: string) => {
@@ -71,21 +59,26 @@ const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers
         return <QuestLineEditor game={game} questline={q} onSetQuestLine={value => setQuestLine(i, value)} />
     }
 
+    const handleCreate = (data: CreationData) => {
+        if (!isValidJsIdentifier(data.uid) || existingUids().includes(data.uid)) {
+            return
+        }
+        const name = data.uid
+        const copy = lodash.cloneDeep(questlines)
+        const line = createQuestLine(name)
+        line.name = data.name
+        copy.push(line)
+        updateQuestLines(copy)
+    }
+
     return (
         <div>
             <div className='char-menu-top-panel'>
-                <Note text='Create a role for NPCs that contain properties and functions, that can be used by NPCs, and can be overriden by NPCs' />
+                <Note text='**Quest Lines** contain **Quests**, and **Quests** contain **Tasks** that can be completed or failed' />
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>
-                    <Dropdown title="Create">
-                        <Dropdown.Item panel style={{ padding: 10, width: 280 }}>
-                            <InputGroup>
-                                <InputGroup.Addon>UID:</InputGroup.Addon><Input onPressEnter={() => addQuestLine()} value={creatingUID} onChange={setCreatingUID}></Input>
-                                <InputGroup.Button onClick={() => addQuestLine()} disabled={!isValidJsIdentifier(creatingUID)}><PlusIcon /></InputGroup.Button>
-                            </InputGroup>
-                        </Dropdown.Item>
-                    </Dropdown>
+                    <CreateWithUid objectName='QuestLine' onCreate={handleCreate}/>
                     <Nav vertical appearance="tabs" activeKey={editingIndex.toString()} onSelect={onSelectTab}>
                         {navItems()}
                     </Nav>
