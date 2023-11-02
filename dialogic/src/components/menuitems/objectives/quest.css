@@ -8,3 +8,36 @@
     align-items: center;
     padding: 8pt;
 }
+
+.quest-gen-window-controls {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 15pt;
+}
+
+.quest-gen-editor-window {
+    min-height: 16em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.quest-gen-editor-window {
+    max-height: 25em;
+    overflow-y: auto;
+    padding: 4pt;
+}
+
+.yaml-textarea {
+    font-family: monospace;
+    font-size: small;
+    min-height: 18em;
+}
+
+.quest-gen-editor-window > p {
+    margin: 4pt;
+    font-size: larger;
+    width: 96%;
+    text-align: center;
+}

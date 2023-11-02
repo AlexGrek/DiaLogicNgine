@@ -1,16 +1,15 @@
-import PeoplesMapIcon from '@rsuite/icons/PeoplesMap';
 
+import TaskIcon from '@rsuite/icons/Task';
 import lodash from 'lodash';
 import React, { useState } from 'react';
-import { Dropdown, Input, InputGroup, Nav } from 'rsuite';
+import { Nav } from 'rsuite';
 import { IUpds } from '../../../App';
 import { isValidJsIdentifier } from '../../../Utils';
 import { GameDescription } from '../../../game/GameDescription';
 import QuestLine, { createQuestLine } from '../../../game/Objectives';
+import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 import Note from '../../userguide/Note';
 import QuestLineEditor from './QuestLineEditor';
-import TaskIcon from '@rsuite/icons/Task';
-import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 
 interface QuestLineMenuProps {
     game: GameDescription;
@@ -73,12 +72,12 @@ const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers
 
     return (
         <div>
-            <div className='char-menu-top-panel'>
+            <div className='quest-menu-top-panel'>
                 <Note text='**Quest Lines** contain **Quests**, and **Quests** contain **Tasks** that can be completed or failed' />
             </div>
             <div className='char-menu-tab-host'>
                 <div className='char-menu-tab-navi'>
-                    <CreateWithUid objectName='QuestLine' onCreate={handleCreate}/>
+                    <CreateWithUid objectName='QuestLine' onCreate={handleCreate} />
                     <Nav vertical appearance="tabs" activeKey={editingIndex.toString()} onSelect={onSelectTab}>
                         {navItems()}
                     </Nav>

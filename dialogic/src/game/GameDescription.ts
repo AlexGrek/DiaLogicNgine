@@ -98,7 +98,12 @@ export function createDefaultGame(): GameDescription {
         startMenu: {},
         general: createGeneralGameInfo(),
         config: createDefaultConfig(),
-        objectives: []
+        objectives: [{
+            uid: 'misc',
+            name: "Miscellanous",
+            tags: ['main', 'misc'],
+            quests: []
+        }]
     };
 
     return game

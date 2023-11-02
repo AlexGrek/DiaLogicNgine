@@ -29,6 +29,14 @@ export function createTask(questuid: string, index: number): Task {
     }
 }
 
+export function createTaskByUid(taskuid: string, index: number): Task {
+    return {
+        uid: taskuid,
+        text: '',
+        critical: true
+    }
+}
+
 export function createQuest(questuid: string): Quest {
     return {
         uid: questuid,

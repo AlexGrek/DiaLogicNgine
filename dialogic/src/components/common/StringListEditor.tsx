@@ -8,9 +8,10 @@ interface StringListEditorProps {
     onChange: (update: string[]) => void;
     value: string[]
     canBeEmpty?: boolean
+    editTextOnly?: boolean
 }
 
-const StringListEditor: React.FC<StringListEditorProps> = ({onChange, value, canBeEmpty }) => {
+const StringListEditor: React.FC<StringListEditorProps> = ({onChange, value, canBeEmpty, editTextOnly }) => {
     const canDeleteFirst = canBeEmpty === true
     const [list, setList] = React.useState<string[]>(value)
 
@@ -36,7 +37,7 @@ const StringListEditor: React.FC<StringListEditorProps> = ({onChange, value, can
 
     const renderValues = () => {
         return list.map((val, i) => {
-            const remove = <InputGroup.Button onClick={() => removeAt(i)}><CloseIcon/></InputGroup.Button>
+            const remove = editTextOnly ? null : <InputGroup.Button onClick={() => removeAt(i)}><CloseIcon/></InputGroup.Button>
             return <div key={i} className="string-list-editor-row">
                 <InputGroup>
                 <Input value={val} onChange={(v) => editAt(i, v)}></Input>{i > 0 || canDeleteFirst ? remove : null}
@@ -48,7 +49,7 @@ const StringListEditor: React.FC<StringListEditorProps> = ({onChange, value, can
     return (
         <div onBlur={() => onChange(list)}>
             {renderValues()}
-            <Button onClick={add}><PlusIcon/></Button>
+            {!editTextOnly && <Button onClick={add}><PlusIcon/></Button>}
         </div>
     );
 };
