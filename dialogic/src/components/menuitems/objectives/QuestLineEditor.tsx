@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import QuestLine, { Quest } from '../../../game/Objectives';
 import { GameDescription } from '../../../game/GameDescription';
-import { Divider, Input, Panel } from 'rsuite';
+import { Divider, Input, InputPicker, Panel } from 'rsuite';
 import './quest.css'
 import QuestGenerator from './QuestGenerator';
+import lodash from 'lodash';
 
 interface QuestLineEditorProps {
     questline: QuestLine;
@@ -13,12 +14,32 @@ interface QuestLineEditorProps {
 
 const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSetQuestLine }) => {
     const [qline, setQline] = useState<QuestLine>(questline);
+    const [editingItem, setEditingItem] = useState<number>(-1)
+
     useEffect(() => {
         setQline(questline);
+        setEditingItem(-1);
     }, [questline]);
 
     const handleOnCreateQuest = (quest: Quest) => {
         onSetQuestLine({...qline, quests: [...qline.quests, quest]})
+    }
+
+    const pickerData = questline.quests.map((quest, number) => {
+        return { label: quest.name, value: number }
+    })
+
+    const handleChangeQuest = (q: Quest, i: number) => {
+        const questsCopy = lodash.cloneDeep(qline.quests)
+        questsCopy[i] = q
+        return setQline({...qline, quests: questsCopy})
+    }
+
+    const renderItem = (q: Quest) => {
+        return <div className='objectives-render-item'>
+            {q.uid}
+            <Input value={q.name} onChange={(value) => handleChangeQuest({...q, name: value}, editingItem)} />
+        </div>
     }
 
     return (
@@ -30,6 +51,10 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
             <Panel bordered style={{minWidth: "30em"}} collapsible header='Quest generator'>
                 <QuestGenerator game={game} questline={questline} onCreateQuest={handleOnCreateQuest}/>
             </Panel>
+            <InputPicker data={pickerData} block value={editingItem} onChange={setEditingItem} />
+            {editingItem >= 0 && editingItem <  questline.quests.length && <Panel>
+                {renderItem(questline.quests[editingItem])}
+            </Panel>}
         </div>
     );
 };
