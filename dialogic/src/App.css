@@ -1,3 +1,36 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+#root {
+  height: 100%;
+  outline: 1px solid green;
+}
+
+.root-container {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.root-section {
+  height: 100%;
+}
+
+.main-sidebar, .app-main-sidebar {
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.content-container {
+  height: 100%;
+  overflow-y: auto;
+}
+
 .App {
   text-align: center;
   height: 100%;

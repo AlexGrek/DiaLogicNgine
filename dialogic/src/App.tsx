@@ -227,14 +227,14 @@ export default class App extends React.Component<IAppProps, IAppState> {
     let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);
     return (
       <CustomProvider theme="dark">
-        <Container>
+        <Container className='root-container'>
           <Header className='app-header-container'>
             <p className='app-header-text'>🇺🇦 DiaLogic Ngine</p>
             <NotificationBar notification={this.state.notifications[this.state.notifications.length - 1]}></NotificationBar>
             </Header>
           {/* <NotificationViewPanel notifications={this.state.notifications}></NotificationViewPanel> */}
-          <Container>
-            <Sidebar>
+          <Container className='root-section'>
+            <Sidebar className='app-main-sidebar'>
               <SidePanel game={this.state.game}
                 activeMenu={this.state.menu}
                 activeDialog={this.state.activeDialog}
@@ -242,7 +242,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
                 onMenuSwitch={this.handleMenuSwitch.bind(this)}
                 handlers={updates}></SidePanel>
             </Sidebar>
-            <Content>
+            <Content className='content-container'>
               {this.renderContent(updates, chosenDialog)}
             </Content>
           </Container>

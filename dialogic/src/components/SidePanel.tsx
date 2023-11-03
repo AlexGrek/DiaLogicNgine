@@ -74,7 +74,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
     }
 
     return (
-      <div style={{ width: 240 }}>
+      <div className='main-sidebar' style={{ width: 240 }}>
         <Sidenav defaultOpenKeys={['3', '4']}>
           <Sidenav.Body>
             <Nav activeKey={activeKey}>

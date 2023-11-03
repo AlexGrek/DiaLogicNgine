@@ -1,5 +1,5 @@
 describe('smoke test', () => {
-  it.only('passes', () => {
+  it('passes', () => {
     cy.visit('http://localhost:3000/')
     cy.get('[data-event-key="saveload"]').click()
     cy.get('h1').contains("Save/Load menu")

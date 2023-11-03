@@ -5,64 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body, html {
-            height: 100%;
             margin: 0;
-        }
-
-        #outer-container {
-            width: 1920px; /* You can adjust the width as needed */
-            margin: auto;
-            position: relative;
-            height: 1080px; /* You can adjust the height as needed */
-            aspect-ratio: 16 / 9;
-        }
-
-        .fullscreen-div {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            padding: 0;
             height: 100%;
+        }
+
+        .container {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            height: 100%;
         }
 
-        #div1 {
-            background-color: rgba(255, 0, 0, 0.5); /* Red with 50% opacity */
-            opacity: .1;
+        header, footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
         }
 
-        #div2 {
-            background-image: url('public/game_assets/backgrounds/random/seashore.jpg');
-            opacity: .8;
-            background-size: cover;
-            /* background-color: rgba(0, 255, 0, 0.5); */
-            z-index: 1;
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden; /* Hide the overflow to prevent double scrollbar */
         }
 
-        #div3 {
-            /* background-color: rgba(0, 0, 255, 0.5); */
-            z-index: 2;
-            opacity: .1;
+        .side-panel {
+            width: 20%;
+            background-color: #f4f4f4;
+            padding: 20px;
+            overflow-y: auto; /* Allow the side panel to scroll */
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto; /* Allow the main content to scroll */
         }
     </style>
+    <title>Scrollable Panels</title>
 </head>
 <body>
-    <p>Lorem ipsum</p>
-    <div id="outer-container">
-        <div class="fullscreen-div" id="div1">
-            <h1>Div 1</h1>
+    <div class="container">
+        <header>
+            <h1>Header</h1>
+        </header>
+        
+        <div class="main">
+            <div class="side-panel">
+                <h2>Side Panel</h2>
+                <!-- Add your side panel content here -->
+                <p>Side panel content goes here...</p>
+            </div>
+            
+            <div class="content">
+                <h2>Main Content</h2>
+                <p>Certainly! If you want the left panel and content to scroll separately, you can add the overflow-y: auto; property to the respective containers. Here's an updated version of the code:
+
+                    This template uses flexbox to create a simple layout with a header, side panel, main content area, and footer. The height: 100%; in the body and html ensures that the page takes up at least 100% of the viewport height. Feel free to modify and expand upon it as needed!
+                </p>
+                <p>Main content goes here...</p>
+                <!-- You can add more content as needed -->
+            </div>
         </div>
 
-        <div class="fullscreen-div" id="div2">
-            <h1>Div 2</h1>
-        </div>
-
-        <div class="fullscreen-div" id="div3">
-            <h1>Div 3</h1>
-        </div>
+        <footer>
+            <p>Footer</p>
+        </footer>
     </div>
-    <p>Footer</p>
 </body>
 </html>
