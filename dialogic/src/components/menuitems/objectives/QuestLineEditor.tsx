@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import QuestLine, { Quest } from '../../../game/Objectives';
 import { GameDescription } from '../../../game/GameDescription';
-import { Divider, Input, InputPicker, Panel } from 'rsuite';
+import { Divider, Input, InputPicker, Panel, Stack } from 'rsuite';
 import './quest.css'
 import QuestGenerator from './QuestGenerator';
 import lodash from 'lodash';
+import QuestEditor from './QuestEditor';
 
 interface QuestLineEditorProps {
     questline: QuestLine;
@@ -18,11 +19,11 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
 
     useEffect(() => {
         setQline(questline);
-        setEditingItem(-1);
+        // setEditingItem(-1);
     }, [questline]);
 
     const handleOnCreateQuest = (quest: Quest) => {
-        onSetQuestLine({...qline, quests: [...qline.quests, quest]})
+        onSetQuestLine({ ...qline, quests: [...qline.quests, quest] })
     }
 
     const pickerData = questline.quests.map((quest, number) => {
@@ -32,14 +33,11 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
     const handleChangeQuest = (q: Quest, i: number) => {
         const questsCopy = lodash.cloneDeep(qline.quests)
         questsCopy[i] = q
-        return setQline({...qline, quests: questsCopy})
+        return setQline({ ...qline, quests: questsCopy })
     }
 
     const renderItem = (q: Quest) => {
-        return <div className='objectives-render-item'>
-            {q.uid}
-            <Input value={q.name} onChange={(value) => handleChangeQuest({...q, name: value}, editingItem)} />
-        </div>
+        return <QuestEditor quest={q} onSetQuest={value => handleChangeQuest(value, editingItem)} game={game} />
     }
 
     return (
@@ -47,14 +45,18 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
             <p>Quest line <b>{qline.name}</b></p>
             <Divider></Divider>
             <p>UID: <code>{qline.uid}</code></p>
-            <Input placeholder='Quest line name' value={qline.name} onChange={value => setQline({...qline, name: value})}/>
-            <Panel bordered style={{minWidth: "30em"}} collapsible header='Quest generator'>
-                <QuestGenerator game={game} questline={questline} onCreateQuest={handleOnCreateQuest}/>
-            </Panel>
-            <InputPicker data={pickerData} block value={editingItem} onChange={setEditingItem} />
-            {editingItem >= 0 && editingItem <  questline.quests.length && <Panel>
-                {renderItem(questline.quests[editingItem])}
-            </Panel>}
+            <Input placeholder='Quest line name' value={qline.name} onChange={value => setQline({ ...qline, name: value })} />
+            <Stack direction='row-reverse' alignItems='flex-start' wrap>
+                <Panel bordered collapsible header='Quest generator' style={{ height: '100%', overflowY: 'auto', minWidth: "36em" }}>
+                    <QuestGenerator game={game} questline={questline} onCreateQuest={handleOnCreateQuest} />
+                </Panel>
+                <Panel bordered collapsible header='Quest editor' defaultExpanded style={{ height: '100%', overflowY: 'auto', minWidth: "30em" }}>
+                    <InputPicker data={pickerData} block value={editingItem} onChange={setEditingItem} />
+                    {editingItem >= 0 && editingItem < questline.quests.length && <Panel>
+                        {renderItem(questline.quests[editingItem])}
+                    </Panel>}
+                </Panel>
+            </Stack>
         </div>
     );
 };

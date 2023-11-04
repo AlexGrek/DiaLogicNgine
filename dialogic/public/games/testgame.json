@@ -462,7 +462,7 @@
   "props": [ { "name": "testNumProp", "datatype": "number", "defaultValue": 42 }, { "datatype": "variant", "name": "testVariantProp", "variants": [ "a", "b", "c" ], "defaultValue": "b" } ],
   "buildVersion": 1,
   "startupDialog": { "kind": "window", "dialog": "dialog1", "window": "welcome" },
-  "engineVersion": "0.5",
+  "engineVersion": "0.6",
   "startMenu": {},
   "general": {
     "name": "Test game",
@@ -471,5 +471,6 @@
     "extras": { "build_status": "pass" },
     "description": "This is a test game. It's purpose is to test all the features of the game engine, and be used as a test and demo project."
   },
-  "config": { "assetsPath": "" }
+  "config": { "assetsPath": "" },
+  "objectives": [ { "uid": "main", "tags": [], "quests": [ { "uid": "testObjective", "tasks": [], "tags": [], "ordered": true, "name": "Test objective" } ], "name": "main" } ]
 }

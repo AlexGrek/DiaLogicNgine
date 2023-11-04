@@ -6,7 +6,7 @@ import PlusIcon from '@rsuite/icons/Plus';
 import './quest.css'
 import { generateUidFromName, isValidJsIdentifier } from '../../../Utils';
 import StringListEditor from '../../common/StringListEditor';
-import { toYaml } from '../../../Trace';
+import { objectFromYaml, toYaml } from '../../../Trace';
 
 interface QuestGeneratorProps {
     questline: QuestLine;
@@ -24,6 +24,7 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
     const [questTaskIds, setQuestTaskIds] = useState<string[]>([])
 
     const [yamlText, setYamlText] = useState<string>('')
+    const [errorText, setErrorText] = useState<string>('')
 
     useEffect(() => {
 
@@ -59,11 +60,19 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
     }
 
     const handleOnCreateQuest = () => {
-        if (!isValidJsIdentifier(questId)) {
+        if (!isValidJsIdentifier(questId) && yamlText !== '') {
             return
         }
-        const quest = createQuest(questId)
-        quest.name = questName
+
+        let quest: Quest | null = null
+
+        try {
+            const object = objectFromYaml(yamlText, ['tasks', 'name', 'uid', 'tags'])
+            quest = object as Quest
+        } catch (e) {
+            setErrorText(`${e}`)
+            return
+        }
 
         // cleanup
         setQuestId('')
@@ -74,8 +83,9 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
         setQuestTaskIds([])
         setQuestTaskNames([])
         setYamlText('')
+        setErrorText('')
 
-        onCreateQuest(quest)
+        quest && onCreateQuest(quest)
     }
 
     const handleNameChange = (value: string) => {
@@ -135,7 +145,8 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
     const renderStepFinal = () => {
         return <div className='quest-gen-editor-window'>
             <p>Verify quest to be created</p>
-            <Input as='textarea' value={yamlText} rows={3} onChange={setYamlText} className='yaml-textarea'/>
+            <Input as='textarea' value={yamlText} rows={3} onChange={setYamlText} className='yaml-textarea' />
+            <p>{errorText}</p>
             <div className='quest-gen-window-controls'>
                 <ButtonGroup>
                     <Button className='quest-gen-back' onClick={() => setGenStep(1)}>Back</Button>
