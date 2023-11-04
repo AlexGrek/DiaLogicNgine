@@ -246,3 +246,62 @@ body, html {
   width: 100%;
   text-align: center;
 }
+
+/* common */
+
+.editor-label {
+  opacity: .8;
+  font-size: smaller;
+  margin-bottom: 0;
+  margin-top: 6pt;
+}
+
+
+div.text-field-editor {
+  width: 100%;
+}
+
+.objectives-editing-task-controls button {
+  size: small;
+  padding: 2pt 4pt;
+}
+
+@keyframes moveDownTask {
+  0% {
+    transform: translateY(100%) rotateX(0);
+  }
+  50% {
+    transform: translateY(50%) translateZ(-10px) rotateX(-20deg);
+  }
+  100% {
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+@keyframes moveUpTask {
+  0% {
+    transform: translateY(-100%) translateZ(0) rotateX(0);
+  }
+  50% {
+    transform: translateY(-50%) translateZ(30px) rotateX(30deg);
+  }
+  100% {
+    transform: translateY(0) translateZ(0) rotateX(0);
+  }
+}
+
+.objectives-moving-down {
+  transform: translateY(100%) rotateX(0);
+  animation: moveDownTask .3s ease-out forwards;
+  transform-origin: center bottom;
+}
+
+.objectives-moving-up {
+  transform: translateY(-100%) translateZ(0) rotateX(0);
+  animation: moveUpTask .3s ease-out forwards;
+  transform-origin: center bottom;
+}
+
+.objectives-editing-tasks {
+  perspective: 600px;
+}

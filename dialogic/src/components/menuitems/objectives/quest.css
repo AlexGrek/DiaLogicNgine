@@ -41,3 +41,30 @@
     width: 96%;
     text-align: center;
 }
+
+.objectives-render-item {
+    width: 100%;
+}
+
+.objectives-editing-task {
+    width: 100%;
+    text-align: left;
+    background-color: #0f131a;
+    border-radius: 4pt;
+    margin: 2pt 0;
+    padding-left: 4pt;
+    padding: 2pt;
+}
+
+.objectives-editing-task:nth-child(2n) {
+    background-color: #0f131aaa;
+}
+
+.objectives-editing-task code {
+    opacity: .5;
+}
+
+.objectives-editing-edit-task-link {
+    color: white;
+    padding: 1pt;
+}

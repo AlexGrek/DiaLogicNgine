@@ -1,7 +1,6 @@
 .note-outer {
     background-color: #1e2d48;
     box-shadow: 3px 3px 2px -1px rgba(0,0,0,0.55);
-    border-left: 3px solid black;
     margin: 6pt;
     opacity: .9;
     display: flex;
@@ -12,6 +11,7 @@
 .note-container {
     padding: 8pt 12pt;
     color: rgba(255, 255, 255, 0.879);
+    overflow: hidden;
 }
 
 .note-pin {
@@ -25,4 +25,5 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
+    overflow: hidden;
 }

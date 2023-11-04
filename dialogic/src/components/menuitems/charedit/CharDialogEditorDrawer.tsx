@@ -20,8 +20,8 @@ const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     "functionName": "chooseAltText",
     "functionTemplates": {
         "no action": "",
-        "always main": "return 0;",
-        "always first alternative": "return 1;"
+        "always main": "return null;",
+        "always first alternative": "return 0;"
     },
     "header": "alternative choose"
 }

@@ -33,7 +33,7 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
     const handleChangeQuest = (q: Quest, i: number) => {
         const questsCopy = lodash.cloneDeep(qline.quests)
         questsCopy[i] = q
-        return setQline({ ...qline, quests: questsCopy })
+        return onSetQuestLine({ ...qline, quests: questsCopy })
     }
 
     const renderItem = (q: Quest) => {
@@ -47,14 +47,13 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
             <p>UID: <code>{qline.uid}</code></p>
             <Input placeholder='Quest line name' value={qline.name} onChange={value => setQline({ ...qline, name: value })} />
             <Stack direction='row-reverse' alignItems='flex-start' wrap>
-                <Panel bordered collapsible header='Quest generator' style={{ height: '100%', overflowY: 'auto', minWidth: "36em" }}>
-                    <QuestGenerator game={game} questline={questline} onCreateQuest={handleOnCreateQuest} />
+                <Panel bordered collapsible header='Quest generator' style={{ height: '100%', overflowY: 'auto', minWidth: "30em" }}>
+                    <QuestGenerator game={game} questline={qline} onCreateQuest={handleOnCreateQuest} />
                 </Panel>
-                <Panel bordered collapsible header='Quest editor' defaultExpanded style={{ height: '100%', overflowY: 'auto', minWidth: "30em" }}>
+                <Panel bordered collapsible header='Quest editor' defaultExpanded style={{ height: '100%', overflowY: 'auto', minWidth: "46em" }}>
                     <InputPicker data={pickerData} block value={editingItem} onChange={setEditingItem} />
-                    {editingItem >= 0 && editingItem < questline.quests.length && <Panel>
-                        {renderItem(questline.quests[editingItem])}
-                    </Panel>}
+                    {editingItem >= 0 && editingItem < qline.quests.length &&
+                        renderItem(qline.quests[editingItem])}
                 </Panel>
             </Stack>
         </div>

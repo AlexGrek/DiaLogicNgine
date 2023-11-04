@@ -2,6 +2,11 @@ export interface Task {
     uid: string
     text: string
     critical: boolean // if failed - all quest will be failed
+
+    // code
+    onComplete?: string
+    onFail?: string
+    autoCheckScript?: string // call this always if the task is open
 }
 
 export interface Quest {

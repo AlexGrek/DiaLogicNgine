@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TextList } from '../../../game/TextList';
 import { Button, Input, InputGroup, Nav, Stack } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
@@ -9,10 +9,20 @@ interface TextListEditorProps {
     textList: TextList;
     onChange: (t: TextList) => void;
     singleLine?: boolean;
+    focus?: boolean
 }
 
-const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, singleLine }) => {
+const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, singleLine, focus }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const textFieldRef = useRef<HTMLTextAreaElement>(null)
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (textFieldRef.current) {
+                textFieldRef.current.focus()
+            }
+        }, 100)
+    }, [])
 
     const CREATE_INDEX = -100500
 
@@ -87,7 +97,7 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
     }
 
     const editor = 
-        <Input className='text-list-text-editor' as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5}></Input>
+        <Input className='text-list-text-editor' as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5} ref={textFieldRef}></Input>
 
     return (
         <div>

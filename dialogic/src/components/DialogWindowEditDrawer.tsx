@@ -180,7 +180,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             </div>
                             <PanelGroup accordion bordered>
                                 <Panel header="Text" defaultExpanded>
-                                <TextListEditor textList={windowState.text} onChange={onTextChange}></TextListEditor>
+                                <TextListEditor focus textList={windowState.text} onChange={onTextChange}></TextListEditor>
                                 </Panel>
                                 <Panel header="Background image">
                                 <ImageListEditor imageList={windowState.backgrounds} onChange={onBackgroundChange}/>

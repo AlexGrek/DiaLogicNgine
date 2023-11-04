@@ -104,7 +104,6 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
 
     const renderStep1 = () => {
         return <form>
-            <div></div>
             <InputGroup>
                 <InputGroup.Addon>Name</InputGroup.Addon><Input name='name' className='quest-create-uid-name' placeholder={`New quest name`} onPressEnter={handleOnCreateQuest} value={questName} onChange={handleNameChange} />
             </InputGroup>
@@ -130,13 +129,14 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
     }
 
     const renderStep3 = () => {
+        const allowedNext = questTaskIds.every((item) => isValidJsIdentifier(item))
         return <div className='quest-gen-editor-window'>
             <p>Verify quest task IDs</p>
             <StringListEditor editTextOnly value={questTaskIds} onChange={setQuestTaskIds} />
             <div className='quest-gen-window-controls'>
                 <ButtonGroup>
                     <Button className='quest-gen-back' onClick={() => setGenStep(1)}>Back</Button>
-                    <Button className='quest-gen-forward' onClick={toStepFinal}>Finish</Button>
+                    <Button className='quest-gen-forward' disabled={!allowedNext} onClick={toStepFinal}>Finish</Button>
                 </ButtonGroup>
             </div>
         </div>
