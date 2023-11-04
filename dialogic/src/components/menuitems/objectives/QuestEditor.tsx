@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import QuestLine, { Quest, Task, createQuest, createTask } from '../../../game/Objectives';
-import { GameDescription } from '../../../game/GameDescription';
-import { Button, ButtonGroup, Divider, Drawer, IconButton, Input, InputPicker, Panel, Stack } from 'rsuite';
-import './quest.css'
-import QuestGenerator from './QuestGenerator';
-import lodash from 'lodash';
-import PlusRoundIcon from '@rsuite/icons/PlusRound';
-import TrashIcon from '@rsuite/icons/Trash';
 import ArrowDownLineIcon from '@rsuite/icons/ArrowDownLine';
 import ArrowUpLineIcon from '@rsuite/icons/ArrowUpLine';
-import OthersIcon from '@rsuite/icons/Others';
 import MoreIcon from '@rsuite/icons/More';
+import PlusRoundIcon from '@rsuite/icons/PlusRound';
+import TrashIcon from '@rsuite/icons/Trash';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, ButtonGroup, IconButton, Input, Stack } from 'rsuite';
+import { GameDescription } from '../../../game/GameDescription';
+import { Quest, Task, createQuest, createTask } from '../../../game/Objectives';
 import TaskEditor from './TaskEditor';
-import { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
+import './quest.css';
 
 interface QuestEditorProps {
     quest: Quest
@@ -89,7 +85,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ quest, game, onSetQuest }) =>
     }
 
     const getItemClass = (i: number) => {
-        let className='objectives-editing-task'
+        let className = 'objectives-editing-task'
         if (i === itemMovingDownIndex) {
             return "objectives-moving-down " + className
         }

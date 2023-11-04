@@ -4,10 +4,10 @@ import { IUpds } from '../../../App';
 import { generateUidFromName } from '../../../Utils';
 import { GameDescription } from '../../../game/GameDescription';
 import { Quest, Task, createTaskByUid } from '../../../game/Objectives';
-import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
-import './quest.css';
 import CodeSampleButton from '../../common/CodeSampleButton';
+import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import Note from '../../userguide/Note';
+import './quest.css';
 
 const CODE_EDITOR_UI_ON: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -51,7 +51,6 @@ const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }
 
     useEffect(() => {
         setTask(value || createTaskByUid("_", 0))
-        
         setTimeout(() => {
             console.log("Try to focus")
             if (textFieldRef.current && value) {

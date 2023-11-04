@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import QuestLine, { Quest, createQuest, createTask, createTaskByUid } from '../../../game/Objectives';
-import { GameDescription } from '../../../game/GameDescription';
-import { Button, ButtonGroup, Divider, IconButton, Input, InputGroup, Panel, Steps } from 'rsuite';
 import PlusIcon from '@rsuite/icons/Plus';
-import './quest.css'
-import { generateUidFromName, isValidJsIdentifier } from '../../../Utils';
-import StringListEditor from '../../common/StringListEditor';
+import React, { useEffect, useState } from 'react';
+import { Button, ButtonGroup, IconButton, Input, InputGroup, Steps } from 'rsuite';
 import { objectFromYaml, toYaml } from '../../../Trace';
+import { generateUidFromName, isValidJsIdentifier } from '../../../Utils';
+import { GameDescription } from '../../../game/GameDescription';
+import QuestLine, { Quest, createQuest, createTaskByUid } from '../../../game/Objectives';
+import StringListEditor from '../../common/StringListEditor';
+import './quest.css';
 
 interface QuestGeneratorProps {
     questline: QuestLine;

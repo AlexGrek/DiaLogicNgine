@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import QuestLine, { Quest } from '../../../game/Objectives';
-import { GameDescription } from '../../../game/GameDescription';
-import { Divider, Input, InputPicker, Panel, Stack } from 'rsuite';
-import './quest.css'
-import QuestGenerator from './QuestGenerator';
 import lodash from 'lodash';
-import QuestEditor from './QuestEditor';
+import React, { useEffect, useState } from 'react';
+import { Input, InputPicker, Panel, Stack } from 'rsuite';
+import { GameDescription } from '../../../game/GameDescription';
+import QuestLine, { Quest } from '../../../game/Objectives';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
+import QuestEditor from './QuestEditor';
+import QuestGenerator from './QuestGenerator';
+import './quest.css';
 
 interface QuestLineEditorProps {
     questline: QuestLine;

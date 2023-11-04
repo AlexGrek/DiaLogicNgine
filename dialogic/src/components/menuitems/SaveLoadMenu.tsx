@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Button, Input, Panel, Radio, RadioGroup, Stack } from 'rsuite';
 import { ValueType } from 'rsuite/esm/Radio';
 import { SaveLoadManager } from '../../SaveLoadManager';
+import { trace } from '../../Trace';
 import { NotifyCallback } from '../../UiNotifications';
 import { ENGINE_VERSION, GameDescription } from '../../game/GameDescription';
 import { loadJsonStringAndPatch } from '../../game/Patches';
-import SaveLoadJsonDrawer from './SaveLoadJsonDrawer';
-import { trace } from '../../Trace';
 import PublicFileUrl from '../common/PublicFileUrl';
+import Note from '../userguide/Note';
+import SaveLoadJsonDrawer from './SaveLoadJsonDrawer';
 import DownloadAsJson from './saveload/DownloadAsJson';
 import UploadJson from './saveload/UploadJson';
 
@@ -123,34 +124,35 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
     }
 
     if (!visible)
-        return <div/>
+        return <div />
 
     return (
         <div>
-            <h1>Save/Load menu</h1>
+            <h2 className='center-header'>Save/Load menu</h2>
+            <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"} />
             <p>Name: <Input value={nameText} onChange={setNameText}></Input></p>
             <Button disabled={nameText.length < 1} onClick={() => onSave()}>Save</Button>
             <Button disabled={nameText.length < 1} onClick={() => onLoad()}>Load</Button>
             <Button color="cyan" appearance="ghost" onClick={() => setJsonMode(true)}>JSON mode</Button>
             <p>endgame.</p>
             <Stack wrap justifyContent='space-between'>
-            <Panel>
-                <p>Saved in local storage:</p>
-                <RadioGroup value={name} onChange={(value, _) => onChooseToLoad(value)}>
-                    {renderSavedGames(list).reverse()}
-                </RadioGroup>
-            </Panel>
-            <Panel id='server-file-loader' bordered>
-                <p>Load server file:</p>
-                <PublicFileUrl extensions={['json']} onChange={handleSetServerFile} requestUrl="games/list.json"/>
-                <Button id='load-server-file' disabled={serverFile === undefined} onClick={() => loadServerFile(serverFile)}>Load file</Button>
-            </Panel>
-            <Panel bordered>
-                <p>Download game as JSON file</p>
-                <DownloadAsJson data={game} filename={nameText}></DownloadAsJson>
-                <p>Load JSON file</p>
-                <UploadJson onUpload={handleJsonUpload}></UploadJson>
-            </Panel>
+                <Panel>
+                    <p>Saved in local storage:</p>
+                    <RadioGroup value={name} onChange={(value, _) => onChooseToLoad(value)}>
+                        {renderSavedGames(list).reverse()}
+                    </RadioGroup>
+                </Panel>
+                <Panel id='server-file-loader' bordered>
+                    <p>Load server file:</p>
+                    <PublicFileUrl extensions={['json']} onChange={handleSetServerFile} requestUrl="games/list.json" />
+                    <Button id='load-server-file' disabled={serverFile === undefined} onClick={() => loadServerFile(serverFile)}>Load file</Button>
+                </Panel>
+                <Panel bordered>
+                    <p>Download game as JSON file</p>
+                    <DownloadAsJson data={game} filename={nameText}></DownloadAsJson>
+                    <p>Load JSON file</p>
+                    <UploadJson onUpload={handleJsonUpload}></UploadJson>
+                </Panel>
             </Stack>
             {jsonModeLoader()}
         </div>

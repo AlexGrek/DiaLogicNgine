@@ -14,6 +14,7 @@ import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 import CharDialogEditorDrawer from './CharDialogEditorDrawer';
 import { IUpds } from '../../../App';
 import CopyButton from '../../common/copypaste/CopyButton';
+import Note from '../../userguide/Note';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -90,6 +91,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     return (
         <div className='char-editing-main-container' onBlur={save}>
+            <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"}/>
             <p>{avatar(ch.avatar)}{ch.uid}<br/>
             <ButtonGroup>
                 {renderDeleteButton()}
