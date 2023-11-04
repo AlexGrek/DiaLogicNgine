@@ -8,7 +8,7 @@ import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import { TextList } from '../../../game/TextList';
-import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
+import { generateImageUrl, generateUidFromName, isValidJsIdentifier } from '../../../Utils';
 import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
 import './loc.css'
 import lodash from 'lodash';
@@ -158,6 +158,13 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
     const linksChange = (val: DialogLink[]) => setlocation({ ...location, links: val })
     const textChange = (val: TextList) => setlocation({ ...location, text: val })
 
+    const handleUidFromName = () => {
+        if (location.uid === '') {
+            const id = generateUidFromName(location.displayName)
+            uidNameChange(id)
+        }
+    }
+
     const publicImageSrc = location.thumbnail ? generateImageUrl(location.thumbnail) : null;
 
     return (
@@ -197,7 +204,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                             <Col xs={12}>
                                 <div className='location-params'>
                                     <p>Display name</p>
-                                    <Input value={location.displayName} onChange={displayNameChange}></Input>
+                                    <Input value={location.displayName} onBlur={handleUidFromName} onChange={displayNameChange}></Input>
                                     <PanelGroup accordion bordered>
                                         <Panel header="Display text" defaultExpanded>
                                             <TextListEditor textList={location.text} onChange={textChange}></TextListEditor>

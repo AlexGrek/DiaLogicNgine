@@ -6,14 +6,16 @@ import './quest.css'
 import QuestGenerator from './QuestGenerator';
 import lodash from 'lodash';
 import QuestEditor from './QuestEditor';
+import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
 
 interface QuestLineEditorProps {
     questline: QuestLine;
     game: GameDescription;
     onSetQuestLine: (line: QuestLine) => void
+    onDeleteQuestLine: (line: QuestLine) => void
 }
 
-const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSetQuestLine }) => {
+const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onDeleteQuestLine, onSetQuestLine }) => {
     const [qline, setQline] = useState<QuestLine>(questline);
     const [editingItem, setEditingItem] = useState<number>(-1)
 
@@ -23,6 +25,7 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
     }, [questline]);
 
     const handleOnCreateQuest = (quest: Quest) => {
+        setEditingItem(qline.quests.length)
         onSetQuestLine({ ...qline, quests: [...qline.quests, quest] })
     }
 
@@ -41,10 +44,18 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
     }
 
     return (
-        <div onBlur={() => onSetQuestLine(qline)} className='objectives-editing-main-container'>
-            <p>Quest line <b>{qline.name}</b></p>
-            <Divider></Divider>
-            <p>UID: <code>{qline.uid}</code></p>
+        <div className='objectives-editing-main-container'>
+            <Stack style={{ width: '90%' }} className='objectives-editing-main-top-panel' justifyContent='space-between' wrap>
+                <div>
+                    <p><small>UID: <code>{qline.uid}</code></small></p>
+                </div>
+                <h2 className='center-header'>Quest line <b>{qline.name}</b></h2>
+                <div>
+                    <ConfirmDeleteButton objectDescr="quest line" onConfirm={() => onDeleteQuestLine(questline)} />
+                </div>
+            </Stack>
+            <div onBlur={() => onSetQuestLine(qline)}>
+            <p style={{ width: '100%' }} className='editor-label'>Name</p>
             <Input placeholder='Quest line name' value={qline.name} onChange={value => setQline({ ...qline, name: value })} />
             <Stack direction='row-reverse' alignItems='flex-start' wrap>
                 <Panel bordered collapsible header='Quest generator' style={{ height: '100%', overflowY: 'auto', minWidth: "30em" }}>
@@ -56,6 +67,7 @@ const QuestLineEditor: React.FC<QuestLineEditorProps> = ({ questline, game, onSe
                         renderItem(qline.quests[editingItem])}
                 </Panel>
             </Stack>
+            </div>
         </div>
     );
 };

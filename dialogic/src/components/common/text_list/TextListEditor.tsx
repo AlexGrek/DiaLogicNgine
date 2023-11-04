@@ -17,11 +17,13 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
     const textFieldRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
-        setTimeout(() => {
-            if (textFieldRef.current) {
-                textFieldRef.current.focus()
-            }
-        }, 100)
+        if (focus) {
+            setTimeout(() => {
+                if (textFieldRef.current) {
+                    textFieldRef.current.focus()
+                }
+            }, 100)
+        }
     }, [])
 
     const CREATE_INDEX = -100500
@@ -43,7 +45,7 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
             console.warn("name changed while on unnamed tab")
         }
         else {
-            copy.list[editingIndex].name = n == "" ? undefined : n 
+            copy.list[editingIndex].name = n == "" ? undefined : n
         }
         onChange(copy)
     }
@@ -65,9 +67,9 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
         if (selected_int === CREATE_INDEX) {
             // create
             const new_index = textList.list.length
-            const updatedList = [...textList.list, {text: ""}]
+            const updatedList = [...textList.list, { text: "" }]
             setEditingIndex(new_index)
-            onChange({...textList, list: updatedList})
+            onChange({ ...textList, list: updatedList })
         }
         else {
             setEditingIndex(selected_int)
@@ -88,30 +90,30 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
         const viewName = name ? name : ""
         return (
             <InputGroup className='text-list-tab-controls'>
-            <InputGroup.Addon>Name</InputGroup.Addon>
-            <Input className='text-list-tab-name' value={viewName} onChange={onNameChange} size="sm" style={{width: "42em"}}></Input>
-            <InputGroup.Button onClick={onRemoveTab}>
-            <TrashIcon/>
-            </InputGroup.Button>
+                <InputGroup.Addon>Name</InputGroup.Addon>
+                <Input className='text-list-tab-name' value={viewName} onChange={onNameChange} size="sm" style={{ width: "42em" }}></Input>
+                <InputGroup.Button onClick={onRemoveTab}>
+                    <TrashIcon />
+                </InputGroup.Button>
             </InputGroup>)
     }
 
-    const editor = 
+    const editor =
         <Input className='text-list-text-editor' as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5} ref={textFieldRef}></Input>
 
     return (
         <div>
-        <Nav className='text-list-tabs' activeKey={editingIndex.toString()} onSelect={onSelect} appearance="subtle" reversed style={{ marginBottom: 2 }}>
-            <Nav.Item className='text-list-tab-main' eventKey={"-1"} icon={<HomeIcon />}>
-                main
-            </Nav.Item>
-            {navItems}
-            <Nav.Item className='text-list-tab-plus' eventKey={CREATE_INDEX.toString()}>+</Nav.Item>
-        </Nav>
-        <div>
-            {editingIndex < 0 ? null : nameEditingPanel(editingName) }
-            {editor}
-        </div>
+            <Nav className='text-list-tabs' activeKey={editingIndex.toString()} onSelect={onSelect} appearance="subtle" reversed style={{ marginBottom: 2 }}>
+                <Nav.Item className='text-list-tab-main' eventKey={"-1"} icon={<HomeIcon />}>
+                    main
+                </Nav.Item>
+                {navItems}
+                <Nav.Item className='text-list-tab-plus' eventKey={CREATE_INDEX.toString()}>+</Nav.Item>
+            </Nav>
+            <div>
+                {editingIndex < 0 ? null : nameEditingPanel(editingName)}
+                {editor}
+            </div>
         </div>
     );
 };

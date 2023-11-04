@@ -34,8 +34,10 @@ const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers
         onSetGame({ ...game, objectives: value })
     }
 
-    const deleteRole = (uid: string) => {
-        const upd = game.objectives.filter((ch) => ch.uid !== uid)
+    const deleteQuestLine = (q: QuestLine) => {
+        const upd = questlines.filter((ch) => ch.uid !== q.uid)
+        console.log("Deleting quest line " + q.uid)
+        console.log(`Was: ${questlines.length}, is: ${upd.length}`)
         updateQuestLines(upd)
         setEditingIndex(0)
     }
@@ -55,7 +57,7 @@ const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers
 
     const tab = (i: number) => {
         const q = questlines[i]
-        return <QuestLineEditor game={game} questline={q} onSetQuestLine={value => setQuestLine(i, value)} />
+        return <QuestLineEditor onDeleteQuestLine={deleteQuestLine} game={game} questline={q} onSetQuestLine={value => setQuestLine(i, value)} />
     }
 
     const handleCreate = (data: CreationData) => {
