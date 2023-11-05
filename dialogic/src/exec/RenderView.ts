@@ -1,4 +1,4 @@
-import Character from "../game/Character"
+import Character, { CharacterDialog } from "../game/Character"
 import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
 import Loc from "../game/Loc"
 import { State } from "./GameState"
@@ -44,6 +44,24 @@ export interface LocationRenderView {
     canHostEvents: boolean
 }
 
+export interface CharDialogOptions {
+    canDiscussChars: boolean
+    canDiscussItems: boolean
+    canDiscussFacts: boolean
+    canDiscussLocations: boolean
+    canGiveItemsTo: boolean
+}
+
+export interface CharDialogRenderView {
+    widget: "char"
+    links: RenderLink[]
+    char: Character
+    dialog: CharacterDialog
+    text: string
+    dialogOptions: CharDialogOptions
+    canHostEvents: boolean
+}
+
 export interface ErrorView {
     widget: "error"
     errorText: string
@@ -56,7 +74,7 @@ export interface BgRenderChange {
     effect: BgChangeEffect | null
 }
 
-export type RenderWidget = DialogRenderView | LocationRenderView | ErrorView
+export type RenderWidget = DialogRenderView | LocationRenderView | CharDialogRenderView | ErrorView
 
 export type BgChange = BgRenderChange | null
 

@@ -1,3 +1,4 @@
+import Character, { getChar } from "../game/Character"
 import Dialog, { DialogWindow } from "../game/Dialog"
 import { GameDescription } from "../game/GameDescription"
 import Loc from "../game/Loc"
@@ -30,4 +31,17 @@ export function tryGetLocationById(game: GameDescription, uid: UiObjectId): Read
         return found
     }
     return null;
+}
+
+export function tryGetCharById(game: GameDescription, uid: UiObjectId): Character | null {
+    if (uid.kind === "chardialog") {
+        const charUid = uid.char
+        const found = getChar(game, charUid)
+        if (!found) {
+            console.error(`Character ${charUid} was not found in ${JSON.stringify(game.locs)}`)
+            return null
+        }
+        return found || null
+    }
+    return null
 }

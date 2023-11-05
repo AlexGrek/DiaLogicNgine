@@ -20,6 +20,7 @@ import CopyButton from '../common/copypaste/CopyButton';
 import Magic, { MagicOperation } from '../common/magic/Magic';
 import LocationPicker from './LocationPicker';
 import CharPicker from './CharPicker';
+import Character from '../../game/Character';
 
 const CODE_EDITOR_UI_ACTION: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -75,6 +76,7 @@ interface LinkEditorProps {
     game: GameDescription;
     handlers: IUpds;
     dialogHandlers?: DialogHandlers;
+    char?: Character
 }
 
 type CodeEditMenu = "actionCode" | "isVisible" | "isEnabled" | "alternative"
@@ -91,7 +93,7 @@ const TooltipText: { [key: string]: string } = {
     [LinkType.Return]: "Return: return to location or NPC (if in dialog)"
 }
 
-const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChange, game, handlers, window,
+const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLinkChange, game, handlers, window,
     onEditingDone, onLinkRemove, dialogHandlers }) => {
 
     const txtInput = useRef<any>(null);
@@ -217,8 +219,11 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ link, index, dialog, onLinkChan
         if (dialog != null) {
             return true;
         }
+        if (char) {
+            return !(linkType === LinkType.Local)
+        }
         // we are not in dialog, local and pop links are not available
-        return !(linkType == LinkType.Local || linkType == LinkType.Pop)
+        return !(linkType === LinkType.Local || linkType === LinkType.Pop)
     }
 
     const linkTypes = stringEnumEntries(LinkType).filter((el) => isAllowedLinkType(el.value))

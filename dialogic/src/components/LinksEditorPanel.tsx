@@ -12,6 +12,7 @@ import PlusRoundIcon from '@rsuite/icons/PlusRound';
 import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
 import { Draggable } from "react-drag-reorder";
 import lodash from 'lodash';
+import Character from '../game/Character';
 
 interface LinksEditorPanelProps {
     links: DialogLink[];
@@ -22,9 +23,10 @@ interface LinksEditorPanelProps {
     window: DialogWindow | null;
     dialogHandlers?: DialogHandlers;
     window_uid: string;
+    char?: Character
 }
 
-const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, dialog, game, onChange,
+const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ char, window_uid, links, dialog, game, onChange,
     window, handlers, dialogHandlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [reorderMenu, setReorderMenu] = useState<boolean>(false);
@@ -74,7 +76,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ window_uid, links, 
     if (editingIndex >= 0) {
         // editing mode
         linksEditorContent = <div>
-            <LinkEditor dialogHandlers={dialogHandlers} game={game} dialog={dialog} window={window} onLinkRemove={onLinkRemove} link={links[editingIndex]} index={editingIndex} onLinkChange={onLinkChange} onEditingDone={onEditingDone} handlers={handlers} />
+            <LinkEditor char={char} dialogHandlers={dialogHandlers} game={game} dialog={dialog} window={window} onLinkRemove={onLinkRemove} link={links[editingIndex]} index={editingIndex} onLinkChange={onLinkChange} onEditingDone={onEditingDone} handlers={handlers} />
         </div>
     } else {
         // view mode

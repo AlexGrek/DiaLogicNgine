@@ -273,10 +273,22 @@
       "windows": [
         {
           "uid": "main",
-          "text": { "main": "", "list": [] },
-          "links": [ { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] } ],
-          "backgrounds": { "list": [] },
+          "text": { "main": "Talk to someone from here, why not?", "list": [] },
+          "links": [
+            { "mainDirection": { "type": "pop", "direction": "" }, "text": "back", "alternativeDirections": [] },
+            { "mainDirection": { "type": "toperson", "direction": "nurse" }, "text": "Talk to Nurse", "alternativeDirections": [] },
+            { "mainDirection": { "type": "local", "direction": "actorWindow" }, "text": "Actor window", "alternativeDirections": [] }
+          ],
+          "backgrounds": { "list": [], "main": "backgrounds/space/2023-10-07-00-44-20-12-k_dpmpp_2_a-Dreamshaper_3-0000.jpg" },
           "tags": []
+        },
+        {
+          "uid": "actorWindow",
+          "text": { "main": "Hello, I am Nurse!", "list": [] },
+          "links": [ { "mainDirection": { "type": "local", "direction": "main" }, "text": "back", "alternativeDirections": [] } ],
+          "backgrounds": { "list": [] },
+          "tags": [],
+          "actor": { "character": "nurse", "currentCharacter": false }
         }
       ]
     },
@@ -361,11 +373,12 @@
         },
         "links": [
           {
-            "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "dialog1", "window": "welcome" } },
+            "mainDirection": { "type": "push", "direction": "", "qualifiedDirection": { "kind": "window", "dialog": "nurse_dialogs", "window": "test_subject" } },
             "text": "Wait, how do you call me?",
             "alternativeDirections": []
           },
-          { "mainDirection": { "type": "return", "direction": "" }, "text": "Bye", "alternativeDirections": [] }
+          { "mainDirection": { "type": "pop", "direction": "" }, "text": "Bye", "alternativeDirections": [] },
+          { "mainDirection": { "type": "return", "direction": "" }, "text": "Return to location", "alternativeDirections": [] }
         ],
         "background": { "list": [] },
         "text": { "main": "Hi, test subject", "list": [] },
@@ -472,5 +485,12 @@
     "description": "This is a test game. It's purpose is to test all the features of the game engine, and be used as a test and demo project."
   },
   "config": { "assetsPath": "" },
-  "objectives": [ { "uid": "main", "tags": [], "quests": [ { "uid": "testObjective", "tasks": [], "tags": [], "ordered": true, "name": "Test objective" } ], "name": "main" } ]
+  "objectives": [
+    {
+      "uid": "main",
+      "tags": [],
+      "quests": [ { "uid": "testObjective", "tasks": [ { "uid": "theTaskText", "text": "The task text", "critical": true } ], "tags": [], "ordered": true, "name": "Test objective" } ],
+      "name": "main"
+    }
+  ]
 }

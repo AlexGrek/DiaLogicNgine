@@ -151,7 +151,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
                             <Col xs={6}>
                                 <div className='link-editor'>
                                     <p>Links</p>
-                                    <LinksEditorPanel links={mustBeDialog.links} dialog={null} handlers={handlers} game={game} onChange={linksChange} window={null} window_uid={char.uid}></LinksEditorPanel>
+                                    <LinksEditorPanel char={char} links={mustBeDialog.links} dialog={null} handlers={handlers} game={game} onChange={linksChange} window={null} window_uid={char.uid}></LinksEditorPanel>
                                 </div>
                             </Col>
                         </Row>
