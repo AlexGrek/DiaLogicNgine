@@ -5,6 +5,7 @@ import Fact, { createEmptyFact, getFact } from '../../game/Fact';
 import { GameDescription } from '../../game/GameDescription';
 import LeftTabUiMenuWidget from './LeftTabUiMenuWidget';
 import './gamemenupanel.css';
+import TabsUiMenuWidget from './TabsUiMenuWidget';
 
 
 interface GameMenuPanelProps {
@@ -66,6 +67,13 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
         }]
     }
 
+    const factTabs = () => {
+        return [{
+            name: "Facts",
+            contentRenderer: () => <LeftTabUiMenuWidget data={getFactsView()} detailsRenderer={renderFactDetails}/>
+        }]
+    }
+
     const renderWidgetButton = (name: string) => {
         const classBaseName = 'game-menu-sub-button'
         const className = selectedWidget === name ? `${classBaseName} open` : classBaseName
@@ -77,7 +85,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
             <div className='game-menu-top'>
                 <div className={getClass('game-menu-widget-container')}>
                     {('Facts' === selectedWidget || 'Facts' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Facts')}>
-                        <LeftTabUiMenuWidget data={getFactsView()} detailsRenderer={renderFactDetails} />
+                        <TabsUiMenuWidget data={factTabs()} />
                     </div>}
                 </div>
             </div>

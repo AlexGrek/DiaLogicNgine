@@ -18,12 +18,12 @@ const TabsUiMenuWidget: React.FC<TabsUiMenuWidgetProps<any>> = ({ data }) => {
         setChosenItemIndex(0)
     }, [data])
 
-    const  handleItemSelect = (idx: number) => {
+    const handleItemSelect = (idx: number) => {
         setChosenItemIndex(idx)
     }
 
     const renderGroupItems = (items: TabData[]) => {
-        
+
         return items.map((item, idx) => {
             const add = idx === chosenItemIndex ? ' chosen' : ''
             const className = `tab-ui-menu-item${add}`
@@ -40,7 +40,7 @@ const TabsUiMenuWidget: React.FC<TabsUiMenuWidgetProps<any>> = ({ data }) => {
                 {data.length > 0 && renderGroupItems(data)}
             </div>
             <div className='tab-ui-menu-content'>
-                {(data.length > 0 && chosenItemIndex < data.length) && data[chosenItemIndex].contentRenderer() }
+                {(data.length > 0 && chosenItemIndex < data.length) && data[chosenItemIndex].contentRenderer()}
             </div>
         </div>
     );
