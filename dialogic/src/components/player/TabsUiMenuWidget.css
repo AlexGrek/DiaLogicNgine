@@ -1,0 +1,14 @@
+.tab-ui-menu-top {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    background-color: rgba(13, 13, 13, .8);
+}
+
+.tab-ui-menu-main-container {
+    display: grid;
+    grid-template-rows: 3em 1fr;
+    height: 100%;
+    width: 100%;
+    outline: 1px solid yellow;
+}

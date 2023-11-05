@@ -40,7 +40,7 @@ export class GameExecManager {
         return this.getCurrentText(window.text, instate, window.chooseTextScript)
     }
 
-    getCurrentWindowLinks(instate: State, window: {links: DialogLink[]}) {
+    getCurrentWindowLinks(instate: State, window: { links: DialogLink[] }) {
         const visibleLinks = window.links.filter((link => this.isLinkVisible(link, instate)))
         const renderLinks: RenderLink[] = visibleLinks.map((link, index) => {
             const [disabled, reason] = this.isLinkDisabled(link, instate)
@@ -87,9 +87,15 @@ export class GameExecManager {
             return null
         }
 
-        const character = this.game.chars.find(item => item.uid === actor.character)
+        let charToSeacrh = actor.character
+
+        if (actor.currentCharacter) {
+            charToSeacrh = instate.charDialog || ''
+        }
+
+        const character = this.game.chars.find(item => item.uid === charToSeacrh)
         if (character === undefined) {
-            console.error("Cannot find character " + actor.character)
+            console.error("Cannot find character " + charToSeacrh)
             return null
         }
 
@@ -154,7 +160,7 @@ export class GameExecManager {
 
     getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined) {
         if (script !== undefined && script !== '') {
-            const {state, decision} = evaluateAsBoolProcessor(this.game, script, instate)
+            const { state, decision } = evaluateAsBoolProcessor(this.game, script, instate)
             return decision
         }
         else {
@@ -195,7 +201,7 @@ export class GameExecManager {
                 // go to some previous dialog, we found one
                 return stateWithFoundDialog
             }
-            
+
             if (prevState.location) {
                 newState.position = {
                     location: prevState.location,
@@ -312,14 +318,15 @@ export class GameExecManager {
         const dw = this.getCurrentDialogWindow(state)
         if (dw != null) {
             const [_, window] = dw
+            let newState = state
             if (window.backgrounds.main) {
-                let newState = this.withUpdatedBackground(state, window.backgrounds, window.chooseBackgroundScript)
-                newState = this.modifyStateScript(newState, window.entryScript)
-                if (window.changeLocationInBg) {
-                    newState.location = window.changeLocationInBg
-                }
-                return newState
+                newState = this.withUpdatedBackground(state, window.backgrounds, window.chooseBackgroundScript)
             }
+            newState = this.modifyStateScript(newState, window.entryScript)
+            if (window.changeLocationInBg) {
+                newState.location = window.changeLocationInBg
+            }
+            return newState
         }
 
         return state
@@ -370,7 +377,7 @@ export class GameExecManager {
             case (LinkType.NavigateToLocation):
                 return this.goToLocation(newState, directionFromLink.direction)
             case (LinkType.TalkToPerson):
-                    return this.goToCharDialog(newState, directionFromLink.direction)
+                return this.goToCharDialog(newState, directionFromLink.direction)
             default:
                 return newState
         }
@@ -414,7 +421,7 @@ export class GameExecManager {
     }
 
     private quickReply(prevState: State, replyText: string): State {
-        return {...prevState, quickReplyText: replyText }
+        return { ...prevState, quickReplyText: replyText }
     }
 
     private withUpdatedHistory(state: State, clickData: HistoryRecord): State {
@@ -436,10 +443,10 @@ export class GameExecManager {
     }
 
     withUpdatedBackground(state: State, backgroundList: ImageList, script?: string) {
-            const newbackground = this.getCurrentbackground(state, backgroundList, script)
-            // console.log("New background: " + newbackground)
-            state.background = newbackground
-            return state
+        const newbackground = this.getCurrentbackground(state, backgroundList, script)
+        // console.log("New background: " + newbackground)
+        state.background = newbackground
+        return state
     }
 
     private modifyStateScript(instate: State, script?: string): State {
@@ -452,7 +459,7 @@ export class GameExecManager {
     getCurrentbackground(instate: State, backgrounds: ImageList, chooseBackgroundScript: string | undefined): string | undefined {
         const main = backgrounds.main
         if (chooseBackgroundScript) {
-            const {state, decision} = evaluateAsAnyProcessor(this.game, chooseBackgroundScript, instate)
+            const { state, decision } = evaluateAsAnyProcessor(this.game, chooseBackgroundScript, instate)
             return chooseImage(backgrounds, decision)
         }
         return main
@@ -482,7 +489,7 @@ export class GameExecManager {
             throw `Window ${JSON.stringify(state.position)} was not found`
         }
         const [dialog, window] = dw
-        
+
         // rendering window
         return {
             widget: "dialog",
@@ -499,7 +506,7 @@ export class GameExecManager {
             throw Error(`Window ${JSON.stringify(state.position)} was not found`)
         }
         const [char, charDialog] = c
-        
+
         // rendering window
         return {
             widget: "char",
@@ -524,7 +531,7 @@ export class GameExecManager {
         if (loc == null) {
             throw `Location ${JSON.stringify(state.position)} was not found`
         }
-        
+
         return {
             widget: "location",
             links: this.getCurrentWindowLinks(state, loc),
@@ -552,7 +559,7 @@ export class GameExecManager {
         })
         const visibleRoutes = routeLocs.filter(route => {
             if (route.isVisibleScript) {
-                const {state, decision} = evaluateAsBoolProcessor(this.game, route.isVisibleScript, instate)
+                const { state, decision } = evaluateAsBoolProcessor(this.game, route.isVisibleScript, instate)
                 return decision
             }
             return true
@@ -560,7 +567,7 @@ export class GameExecManager {
         return visibleRoutes.map((route, i) => {
             let disabled = false
             if (route.isAccessibleScript) {
-                const {state, decision} = evaluateAsBoolProcessor(this.game, route.isAccessibleScript, instate)
+                const { state, decision } = evaluateAsBoolProcessor(this.game, route.isAccessibleScript, instate)
                 disabled = !decision
             }
 

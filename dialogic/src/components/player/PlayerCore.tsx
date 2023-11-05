@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react';
-import { Input } from 'rsuite';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
-import DialogWindowView from './DialogWindowView';
-import LocationView from './LocationView';
 import { RenderView } from '../../exec/RenderView';
-import GameUiWidgetDisplay from './GameUiWidgetDisplay';
 import { styleWithImage } from '../UiUtils';
-import InGameControlPad from './InGameControlPad';
 import GameMenuPanel from './GameMenuPanel';
+import GameUiWidgetDisplay from './GameUiWidgetDisplay';
+import InGameControlPad from './InGameControlPad';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -85,7 +82,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} />
+                        <GameMenuPanel game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} />
                     </div>
                     <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />
                 </div>

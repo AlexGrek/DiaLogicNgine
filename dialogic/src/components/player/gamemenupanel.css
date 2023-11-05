@@ -1,9 +1,9 @@
 .game-menu-container {
     width: 100%;
     height: 100%;
-    
+
     display: grid;
-      grid-template-rows: 90% 10%;
+    grid-template-rows: 90% 10%;
 
     transition: background .3s ease;
 }
@@ -16,25 +16,20 @@
     background: radial-gradient(circle at 50% 100%, #05050574, rgba(249, 249, 249, 0));
 }
 
-.game-menu-container button {
+.game-menu-button-group button {
     color: white;
     background-color: #05050574;
     border: none;
     transition: background-color .2s ease;
 }
 
-.game-menu-container button:hover {
+.game-menu-button-group button:hover {
     background-color: rgba(182, 166, 166, 0.6);
-}
-
-.game-menu-container:hover {
-    outline: 1px solid orangered;
 }
 
 .game-menu-bottom {
     height: 100%;
-    pointer-events: all;
-    outline: 1px solid yellow;
+    /* outline: 1px solid yellow; */
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
@@ -43,45 +38,49 @@
 
 .game-menu-screen {
     overflow: hidden;
-    outline: 2px solid greenyellow;
+    /* outline: 2px solid greenyellow; */
 }
 
 .game-menu-screen.opening {
     height: 100pt;
-    animation: changeHeight .3s ease-out forwards; 
+    animation: changeHeight .3s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
     width: 100%;
 }
 
-
-
 .game-menu-screen.closing {
     width: 100%;
-    animation: reverseHeight .3s ease-in forwards;
+    animation: reverseHeight .3s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
 }
 
 @keyframes changeHeight {
     0% {
-      height: 0;
-      opacity: 0;
+        height: 0;
+        opacity: 0;
+        transform: translateY(-10pt) scale(.3);
     }
-    100% {
-      height: 100%;
-      opacity: 1;
-    }
-  }
-  
-  @keyframes reverseHeight {
-    0% {
-      height: 100%;
-      opacity: 1;
-    }
-    100% {
-      height: 0;
-      opacity: .1;
-    }
-  }
 
-  .game-menu-widget-container {
+    100% {
+        height: 100%;
+        opacity: 1;
+        transform: translateY(0pt) scale(1);
+    }
+}
+
+@keyframes reverseHeight {
+    0% {
+        height: 100%;
+        opacity: 1;
+        transform: translateY(0pt) scale(1);
+    }
+
+    100% {
+        height: 0;
+        opacity: .1;
+        transform: translateY(-10pt) scale(.3);
+    }
+}
+
+.game-menu-widget-container {
     display: flex;
     height: 100%;
     width: 100%;
@@ -89,16 +88,156 @@
     justify-items: stretch;
     flex-direction: row;
     align-items: center;
-  }
+    perspective: 1000px;
+}
 
-  .game-menu-widget-container.opening {
+.game-menu-widget-container.opening {
     pointer-events: all;
-  }
-  
-  .game-menu-widget {
+}
+
+.game-menu-widget {
+    position: relative;
     width: 90%;
-    height: 90%;
-    border: 2px solid grey;
-    border-radius: 24px;
-    padding: 42px;
-  }
+    height: 94%;
+    border-radius: 14px;
+    border: 1px solid black;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transform-origin: center;
+}
+
+.game-menu-sub-button {
+    margin: 2pt;
+    padding: 4pt 13pt;
+}
+
+.game-menu-button-group {
+    pointer-events: all;
+    text-align: center;
+}
+
+.game-menu-button-main {
+    pointer-events: all;
+    width: 5em;
+    height: 15pt;
+    padding: 0;
+    background: none;
+    font-size: small;
+    margin: 0;
+    outline: 4px red;
+}
+
+.game-menu-button-main-toopen.opening {
+    animation: menuButtonDown .2s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
+
+.game-menu-button-main-toopen.closing {
+    animation: menuButtonUp .4s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
+
+.game-menu-button-main-toopen {
+    position: relative;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    background-color: #05050554;
+    font-weight: bolder;
+    font-family: monospace;
+}
+
+.game-menu-button-main-toopen:hover {
+    background-color: rgba(96, 89, 89, 0.6);
+}
+
+.game-menu-button-main-toclose {
+    position: relative;
+    width: 100%;
+    top: -150%;
+    height: 100%;
+    opacity: 0;
+    font-size: larger;
+    font-family: 'IconFont';
+    transition: opacity .25s ease-out;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.game-menu-button-main-toclose.opening {
+    opacity: 0.9;
+    display: block;
+    pointer-events: all;
+}
+
+.game-menu-button-main-toclose.opening:hover {
+    opacity: 1;
+    background-color: #05050554;
+}
+
+@keyframes menuButtonUp {
+    0% {
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-20pt) scaleX(2);
+    }
+
+    100% {
+        pointer-events: all;
+        opacity: 1;
+        transform: translateY(0) scaleX(1);
+    }
+}
+
+@keyframes menuButtonDown {
+    0% {
+        pointer-events: all;
+        opacity: .8;
+        transform: translateY(0) scaleX(1);
+    }
+
+    100% {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-20pt) scaleX(2);
+    }
+}
+
+.game-menu-sub-button.open {
+    background-color: rgba(245, 245, 245, 0.608);
+}
+
+.ui-widget-fact-renderer {
+    padding: 8pt;
+}
+
+.game-menu-widget.prev {
+    animation: widgetPrev .3s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
+
+.game-menu-widget {
+    animation: widgetAppear .4s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
+
+@keyframes widgetPrev {
+    0% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(100%) translateZ(-500px) rotateX(-30deg) rotateY(10deg);
+    }
+}
+
+@keyframes widgetAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(100%) translateZ(-100px) rotateX(-30deg) rotateY(-15deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0);
+       
+    }
+}
