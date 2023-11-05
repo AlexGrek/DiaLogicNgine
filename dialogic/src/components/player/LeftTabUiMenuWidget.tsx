@@ -36,14 +36,15 @@ const LeftTabUiMenuWidget: React.FC<LeftTabUiMenuWidgetProps<any>> = ({ data, de
     }
 
     const  handleItemSelect = (groupIndex: number, idx: number) => {
-        console.log(`Chosen: ${groupIndex}:${idx}`)
         setChosenGroupIndex(groupIndex)
         setChosenItemIndex(idx)
     }
 
     const renderGroupItems = (groupIndex: number, items: { label: string; value: string; data: any; }[]) => {
         return items.map((item, idx) => {
-            return <p key={idx+groupIndex*1000} className='left-tab-ui-menu-item' onClick={() => handleItemSelect(groupIndex, idx)}>
+            const add = (idx === chosenItemIndex && groupIndex === chosenGroupIndex) ? ' chosen' : ''
+            const className = `left-tab-ui-menu-item${add}`
+            return <p key={idx+groupIndex*1000} className={className} onClick={() => handleItemSelect(groupIndex, idx)}>
                 {item.label}
             </p>
         })

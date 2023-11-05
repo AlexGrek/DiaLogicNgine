@@ -115,7 +115,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
             contentRenderer: () => <LeftTabUiMenuWidget data={getFactsView()} detailsRenderer={renderFactDetails}/>
         },
         {
-            name: "Characters",
+            name: "People",
             contentRenderer: () => <LeftTabUiMenuWidget data={getCharsView()} detailsRenderer={renderCharDetails}/>
         }
     ]
