@@ -8,6 +8,7 @@ import { RenderView } from '../../exec/RenderView';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
 import { styleWithImage } from '../UiUtils';
 import InGameControlPad from './InGameControlPad';
+import GameMenuPanel from './GameMenuPanel';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -21,6 +22,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [background, setBackground] = React.useState<string | null>(null)
     const [prevbackground, setPrevbackground] = React.useState<string | null>(null)
     const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
+    const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
 
     useEffect(() => {
         const view = game.render(state, background)
@@ -39,7 +41,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         setTimeout(() => setInTransitionState(false), 200)
     }, [state])
 
-    const onFullScreen = () => {}
+    const onFullScreen = () => { }
 
     const animation = currentView?.backgroundChange?.effect === 'fast' ? 'fade' : null
 
@@ -56,7 +58,18 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         else {
             onStateUpd(newState)
         }
-        
+    }
+
+    const handleMenuPanelOpen = (open: boolean) => {
+        setMenuOpen(open)
+    }
+
+    const menuPanelClass = (base: string) => {
+        if (!menuOpen) {
+            return `${base} menu-close`
+        } else {
+            return `${base} menu-open`
+        }
     }
 
     if (currentView) {
@@ -66,14 +79,17 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         return (
             <div className='player-core-container' id='player-core'>
                 <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
-                <div key={background || 'bg'} id='player-current-background-host' className={backgroundContainerStyle('new', animation)} style={styleWithImage(background)}></div>
+                <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background)}></div>
                 <div className='player-core-widget-container' id='player-current-widget-host'>
-                <div className="dialog-control-pad">
-                    <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
+                    <div className="dialog-control-pad">
+                        <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
+                    </div>
+                    <div className='player-core-ingame-menu'>
+                        <GameMenuPanel state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} />
+                    </div>
+                    <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />
                 </div>
-                    <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd}/>
-                </div>
-                
+
             </div>
         )
     }
