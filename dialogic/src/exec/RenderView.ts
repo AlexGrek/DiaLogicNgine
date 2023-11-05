@@ -10,6 +10,12 @@ export interface ActorView {
     char: Character
 }
 
+export interface CharInfoRenderView {
+    description: string
+    name: string
+    avatar?: string
+}
+
 export interface RenderLink {
     text: string
     disabled: boolean

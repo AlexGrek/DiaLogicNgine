@@ -49,6 +49,7 @@ export interface State {
     gameVersion: string
     background?: string
     knownFacts: string[]
+    knownPeople: string[]
     progress: GameProgress
     quickReplyText: string | null
     engineVersion: string
@@ -67,6 +68,7 @@ export function createInitialState(game: GameDescription): State {
         shortHistory: [],
         gameVersion: game.general.version,
         knownFacts: [],
+        knownPeople: [],
         engineVersion: game.engineVersion,
         progress: createInitialGameProgress()
     }

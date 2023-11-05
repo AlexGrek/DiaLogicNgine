@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { State } from '../../exec/GameState';
-import { RenderView } from '../../exec/RenderView';
+import { CharInfoRenderView, RenderView } from '../../exec/RenderView';
 import Fact, { createEmptyFact, getFact } from '../../game/Fact';
 import { GameDescription } from '../../game/GameDescription';
-import LeftTabUiMenuWidget from './LeftTabUiMenuWidget';
+import LeftTabUiMenuWidget, { DataGroups } from './LeftTabUiMenuWidget';
 import './gamemenupanel.css';
 import TabsUiMenuWidget from './TabsUiMenuWidget';
+import { trace } from '../../Trace';
+import { getChar } from '../../game/Character';
+import { GameExecManager } from '../../exec/GameExecutor';
+import Markdown from 'react-markdown';
 
 
 interface GameMenuPanelProps {
@@ -14,11 +18,16 @@ interface GameMenuPanelProps {
     open: boolean
     onOpenClose: (open: boolean) => void
     game: GameDescription
+    executor: GameExecManager
 }
 
-const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpenClose, game }) => {
+const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpenClose, game, executor }) => {
     const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
     const [selectedWidgetPrev, setSelectedWidgetPrev] = useState<string | null>(null);
+
+    const factsCache = useRef<DataGroups<Fact>>([])
+    const charsCache = useRef<DataGroups<CharInfoRenderView>>([])
+
     useEffect(() => {
         setSelectedWidgetPrev(selectedWidget)
         setSelectedWidget(null)
@@ -45,33 +54,71 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
     }
 
     const renderFactDetails = (f: Fact) => {
-        return <p className='ui-widget-fact-renderer'>{f.full}</p>
+        return <div className='ui-widget-fact-renderer'><Markdown>{f.full}</Markdown></div>
     }
 
-    const getFactsView = () => {
-        return [{
-            group: "Facts",
-            items: state.knownFacts.map((factid) => {
-                let realFact = getFact(game, factid)
-                if (realFact == null) {
-                    realFact = createEmptyFact('error')
-                    realFact.short = `Error fact ${factid}`
-                    realFact.full = `Error: fact with uid ${factid} not found in game, looks like it is version mismatch`
-                }
-                return {
-                    label: realFact.short,
-                    value: realFact.uid,
-                    data: realFact
-                }
-            })
-        }]
+    const renderCharDetails = (d: CharInfoRenderView) => {
+        return <div className='ui-widget-char-renderer'>
+                <h2>{d.name}</h2>
+                <div><Markdown>{d.description}</Markdown></div>
+            </div>
+    }
+
+    const getFactsView = (): DataGroups<Fact> => {
+        if (factsCache.current == null || state.knownFacts.length != factsCache.current.length) {
+            trace("Recreating facts cache for UI")
+            const updatedFacts = [{
+                group: "Facts",
+                items: state.knownFacts.map((factid) => {
+                    let realFact = getFact(game, factid)
+                    if (realFact == null) {
+                        realFact = createEmptyFact('error')
+                        realFact.short = `Error fact ${factid}`
+                        realFact.full = `Error: fact with uid ${factid} not found in game, looks like it is version mismatch`
+                    }
+                    return {
+                        label: realFact.short,
+                        value: realFact.uid,
+                        data: realFact
+                    }
+                })
+            }]
+            factsCache.current = updatedFacts
+            return updatedFacts
+        }
+        return factsCache.current
+    }
+
+    const getCharsView = () => {
+        if (charsCache.current == null || state.knownPeople.length != charsCache.current.length) {
+            trace("Recreating facts cache for UI")
+            const chars = [{
+                group: "Known people",
+                items: state.knownPeople.map((charid) => {
+                    const descr = executor.getCharInfoDescription(state, charid)
+                    return {
+                        label: descr.name,
+                        value: charid,
+                        data: descr
+                    }
+                })
+            }]
+            charsCache.current = chars
+            return chars
+        }
+        return charsCache.current
     }
 
     const factTabs = () => {
         return [{
             name: "Facts",
             contentRenderer: () => <LeftTabUiMenuWidget data={getFactsView()} detailsRenderer={renderFactDetails}/>
-        }]
+        },
+        {
+            name: "Characters",
+            contentRenderer: () => <LeftTabUiMenuWidget data={getCharsView()} detailsRenderer={renderCharDetails}/>
+        }
+    ]
     }
 
     const renderWidgetButton = (name: string) => {

@@ -6,9 +6,10 @@ import Loc, { getLoc } from "../game/Loc";
 import { TextList, chooseText } from "../game/TextList";
 import { DialogWindowId, HistoryRecord, State, UiObjectId } from "./GameState";
 import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
-import { ActorView, BgChange, CharDialogRenderView, DialogRenderView, LocRouteRenderView, LocationRenderView, RenderLink, RenderView, RenderWidget } from "./RenderView";
+import { ActorView, BgChange, CharDialogRenderView, CharInfoRenderView, DialogRenderView, LocRouteRenderView, LocationRenderView, RenderLink, RenderView, RenderWidget } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 import Character, { CharacterDialog, getChar } from "../game/Character";
+import { useId } from "react";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -298,6 +299,16 @@ export class GameExecManager {
         return followed;
     }
 
+    private addToKnownPeople(state: State, charID: string) {
+        if (state.knownPeople.includes(charID)) {
+            return state
+        }
+        else {
+            state.knownPeople.push(charID)
+            return state
+        }
+    }
+
     private executeEntry(state: State) {
         const location = this.getCurrentLocation(state)
         if (location != null) {
@@ -312,6 +323,7 @@ export class GameExecManager {
             const [char, dialog] = charDialog
             let newState = this.withUpdatedBackground(state, dialog.background, dialog.chooseBgScript)
             newState.charDialog = char.uid
+            newState = this.addToKnownPeople(newState, char.uid)
             return newState
         }
 
@@ -624,6 +636,36 @@ export class GameExecManager {
             backgroundChange: bgChange,
             notifications: [], //TODO: add notification support
             step: state.stepCount
+        }
+    }
+
+    public getCharInfoDescription(state: State, charUid: string): CharInfoRenderView {
+        const char = getChar(this.game, charUid)
+        if (char === undefined) {
+            return { name: "error " + charUid, description: "char not found: " + charUid }
+        }
+        else {
+            try {
+                const descr = this.getCurrentText(char.description, state, char.chooseDescriptionScript)
+                const name = this.getCurrentText(char.displayName, state, char.chooseNameScript)
+
+                // avatar
+                let avatar = char.avatar.main
+
+                // get avatar from character script
+                if (char.chooseAvatarScript) {
+                    const { decision } = evaluateAsAnyProcessor(this.game, char.chooseAvatarScript, state)
+                    avatar = chooseImage(char.avatar, decision)
+                }
+                return {
+                    name: name,
+                    description: descr,
+                    avatar: avatar
+                }
+
+            } catch (exception) {
+                return { name: "error " + charUid, description: `char error: ${exception}` }
+            }
         }
     }
 }

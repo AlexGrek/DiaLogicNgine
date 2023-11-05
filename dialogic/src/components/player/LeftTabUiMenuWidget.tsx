@@ -67,7 +67,7 @@ const LeftTabUiMenuWidget: React.FC<LeftTabUiMenuWidgetProps<any>> = ({ data, de
             <div className='left-tab-ui-menu-left'>
                 {data.length > 0 && renderList()}
             </div>
-            <div className='left-tab-ui-menu-details'>
+            <div key={`${chosenItemIndex}${chosenGroupIndex}`} className='left-tab-ui-menu-details'>
                 {renderDetails()}
             </div>
         </div>

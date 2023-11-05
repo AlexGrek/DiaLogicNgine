@@ -39,7 +39,7 @@ const TabsUiMenuWidget: React.FC<TabsUiMenuWidgetProps<any>> = ({ data }) => {
             <div className='tab-ui-menu-top'>
                 {data.length > 0 && renderGroupItems(data)}
             </div>
-            <div className='tab-ui-menu-content'>
+            <div key={chosenItemIndex} className='tab-ui-menu-content'>
                 {(data.length > 0 && chosenItemIndex < data.length) && data[chosenItemIndex].contentRenderer()}
             </div>
         </div>
