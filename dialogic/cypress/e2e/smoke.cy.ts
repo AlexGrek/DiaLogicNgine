@@ -2,7 +2,7 @@ describe('smoke test', () => {
   it('passes', () => {
     cy.visit('http://localhost:3000/')
     cy.get('[data-event-key="saveload"]').click()
-    cy.get('h1').contains("Save/Load menu")
+    cy.get('h2').contains("Save/Load menu")
 
     cy.get('[data-event-key="config"]').click()
     cy.get('h3').contains('Game configuration menu')
