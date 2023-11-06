@@ -1,3 +1,4 @@
+import { trace } from "../Trace"
 import Character, { CharacterDialog, getChar } from "../game/Character"
 import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
 import { chooseImage } from "../game/ImageList"
@@ -227,11 +228,13 @@ export class RenderViewGenerator {
         }
         const [char, charDialog] = c
 
+        trace(`QuickReply: ${state.quickReplyText}`)
+
         // rendering window
         return {
             widget: "char",
-            canHostEvents: this.exec.canHostEvents(state, charDialog.eventHosts, charDialog.canHostEventsScript),
-            text: this.getCurrentText(charDialog.text, state, charDialog.chooseTextScript),
+            canHostEvents: this.exec.events.canHostEvents(state, charDialog.eventHosts, charDialog.canHostEventsScript),
+            text: state.quickReplyText || this.getCurrentText(charDialog.text, state, charDialog.chooseTextScript),
             links: this.getCurrentWindowLinks(state, charDialog),
             char: char,
             dialog: charDialog,
@@ -291,7 +294,7 @@ export class RenderViewGenerator {
             routes: this.getRoutesForLoc(state, loc),
             location: loc,
             text: this.getCurrentText(loc.text, state, loc.chooseTextScript),
-            canHostEvents: this.exec.canHostEvents(state, loc.eventHosts, loc.canHostEventsScript)
+            canHostEvents: this.exec.events.canHostEvents(state, loc.eventHosts, loc.canHostEventsScript)
         }
     }
 

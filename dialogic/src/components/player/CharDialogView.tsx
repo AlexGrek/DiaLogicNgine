@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { GameExecManager } from '../../exec/GameExecutor';
+import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { CharDialogRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
 import SpecialDialogVariants from './SpecialDialogVariants';
 import "./player.css";
-import DiscussionTopicPicker, { DiscussionTopicType } from './DiscussionTopicPicker';
+import DiscussionTopicPicker from './DiscussionTopicPicker';
 import { trace } from '../../Trace';
 
 interface CharDialogViewProps {
@@ -104,7 +104,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }
 
     const handleDiscussion = (topicType: DiscussionTopicType, topicValue: string) => {
-        
+        onStateUpd(game.discuss(state, topicType, topicValue, view.char.uid))
     }
 
     return (

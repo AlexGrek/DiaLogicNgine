@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { GameExecManager } from '../../exec/GameExecutor';
+import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
 import { CharDialogRenderView } from '../../exec/RenderView';
 import { State } from '../../exec/GameState';
 import "./player.css";
@@ -7,8 +7,6 @@ import { LocalizationManager } from '../../exec/Localization';
 import { createEmptyFact, getFact } from '../../game/Fact';
 import { trace } from '../../Trace';
 import { getLoc } from '../../game/Loc';
-
-export type DiscussionTopicType = "char" | "loc" | "item" | "fact"
 
 interface DiscussionTopicPickerProps {
     game: GameExecManager
@@ -42,14 +40,11 @@ const SimpleTextList: React.FC<{
 };
 
 const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, localization, state, view, onTopicSelected, onCancel }) => {
-    trace("something changed")
-
     const items = () => {
         return
     }
 
     const getFacts = () => {
-        trace("recalculating facts")
         return state.knownFacts.map((factid) => {
             let realFact = getFact(game.game, factid)
             if (!realFact) {
@@ -63,9 +58,18 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
         })
     }
 
+    const getChars = () => {
+        return state.knownPeople.map((charid) => {
+            const descr = game.renderer.getCharInfoDescription(state, charid)
+            return {
+                name: descr.name,
+                value: charid
+            }
+        })
+    }
+
     const getLocs = () => {
         return state.knownPlaces.map((id) => {
-            trace("recalculating locs")
             let loc = getLoc(game.game, id)
             if (!loc) {
                 return {
@@ -88,6 +92,10 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
         onTopicSelected("loc", value)
     }
 
+    const handleCharSelect = (value: string): void => {
+        onTopicSelected("char", value)
+    }
+
     return (
         <div className='discuss-picker-main'>
             <div className='discuss-picker-control-panel'>
@@ -95,7 +103,7 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
             </div>
             <div className='discuss-picker-menu'>
                 {view.dialogOptions.canDiscussChars && <DiscussionTab name={localization.local('People')}>
-                    children
+                    <SimpleTextList items={getChars()} onSelect={handleCharSelect}></SimpleTextList>
                 </DiscussionTab>}
                 {view.dialogOptions.canDiscussFacts && <DiscussionTab name={localization.local('Facts')}>
                     <SimpleTextList items={getFacts()} onSelect={handleFactSelect}></SimpleTextList>

@@ -9,6 +9,7 @@ import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./Na
 import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 import EventsProcessor from "./EventsProcessor";
+import DiscussionProcessor from "./DiscussionProcessor";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -415,7 +416,7 @@ export class GameExecManager {
     getCurrentbackground(instate: State, backgrounds: ImageList, chooseBackgroundScript: string | undefined): string | undefined {
         const main = backgrounds.main
         if (chooseBackgroundScript) {
-            const { state, decision } = evaluateAsAnyProcessor(this.game, chooseBackgroundScript, instate)
+            const { decision } = evaluateAsAnyProcessor(this.game, chooseBackgroundScript, instate)
             return chooseImage(backgrounds, decision)
         }
         return main
@@ -437,10 +438,38 @@ export class GameExecManager {
         return afterWindowUpd
     }
 
-    canHostEvents(state: State, eventHosts: string[] | null, canHostEventsScript: string | undefined) {
-        if (eventHosts == null) {
-            return false
+    discuss(state: State, category: DiscussionTopicType, id: string, charUid: string): State {
+        const disc = new DiscussionProcessor(this)
+        const char = getChar(this.game, charUid)
+        if (!char) {
+            return this.stateError(state, `Error: char ${charUid} not found`)
         }
-        return this.getBoolDecisionWithDefault(state, true, canHostEventsScript)
+        if (!char.dialog) {
+            return this.stateError(state, `Error: char ${charUid} has no dialog`)
+        }
+        let link = disc.unknownReaction()
+        if (category === "char") {
+            link = disc.ofChar(id, char.dialog, state)
+        }
+        if (category === "fact") {
+            link = disc.ofFact(id, char.dialog, state)
+        }
+        if (category === "item") {
+            link = disc.ofItem(id, char.dialog, state)
+        }
+        if (category === "loc") {
+            link = disc.ofLoc(id, char.dialog, state)
+        }
+        const afterLink = this.followLink(state, link)
+        const afterWindowUpd = this.executeEntry(afterLink)
+        return afterWindowUpd
+    }
+
+    stateError(state: State, message: string, exception?: any) {
+        const newState = lodash.cloneDeep(state)
+        newState.fatalError = { message: message, exception: exception }
+        return newState
     }
 }
+
+export type DiscussionTopicType = "char" | "loc" | "item" | "fact"

@@ -78,9 +78,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     }
 
     if (currentView) {
-
         const viewToRenderNow = (inTransitionState && prevView) ? prevView : currentView
-
         return (
             <div className='player-core-container' id='player-core'>
                 <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
@@ -96,7 +94,6 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />
                     </div>
                 </div>
-
             </div>
         )
     }
