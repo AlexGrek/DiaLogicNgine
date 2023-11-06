@@ -421,3 +421,84 @@
 .route-button-inside:hover p {
     font-size: large;
 }
+
+.discuss-picker-menu {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    width: 100%;
+    justify-items: flex-end;
+    perspective: 800px;
+}
+
+.discuss-picker-tab {
+    min-width: 17em;
+    margin: 6pt;
+    background-color: #04040452;
+    padding: 6pt 0pt;
+    backdrop-filter: blur(8px);
+    animation: discussMenuTabAppear .2s ease-out forwards;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+}
+
+.discuss-picker-body {
+    height: 22em;
+    overflow-y: auto;
+    padding: 4pt 0pt;
+}
+
+.discuss-picker-main {
+    max-width: 80vw;
+}
+
+.discuss-picker-name {
+    margin-left: auto;
+    text-align: center;
+    font-size: larger;
+    font-weight: lighter;
+    margin-bottom: 8pt;
+}
+
+.discuss-picker-stl-item {
+    min-height: 16pt;
+    padding: 2pt 4pt;
+    cursor: pointer;
+    transition: background-color .2s;
+}
+
+.discuss-picker-stl-item:hover {
+    background-color: #d9d9d952;
+}
+
+@keyframes discussMenuTabAppear {
+    0% {
+        transform: translateY(5%) scale(.9) rotateX(10deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform:  translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.discuss-picker-control-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: right;
+    margin-right: 6pt;
+}
+
+.discuss-picker-control-panel button {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 4pt 4pt;
+    margin: 1px;
+    background-color: rgba(20, 20, 20, 0.3);
+}
+
+.discuss-picker-control-panel button:hover {
+    background-color: rgba(126, 126, 126, 0.65);
+}

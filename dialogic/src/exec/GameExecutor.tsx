@@ -309,12 +309,50 @@ export class GameExecManager {
         }
     }
 
+    private addAllToKnownPlaces(state: State, loc: Loc) {
+        let newState = this.addToKnownPlaces(state, loc.uid)
+        const visibleNext = loc.routes.map(locid => {
+            const next = getLoc(this.game, locid)
+            console.log(`Adding location ${locid} as known`)
+            if (next == undefined) {
+                return null
+            }
+            if (next.isVisibleScript) {
+                const { decision } = evaluateAsBoolProcessor(this.game, next.isVisibleScript, newState)
+                if (decision) {
+                    // route is visible, may be accessible or not (we don't care)
+                    return next.uid
+                } else {
+                    return null
+                }
+            }
+            return locid
+        }).filter(uid => uid != null)
+        .map(nonnull => `${nonnull}`)
+        visibleNext.forEach((el) => {
+            newState = this.addToKnownPlaces(newState, el)
+        })
+        return newState
+    }
+
+    private addToKnownPlaces(state: State, loc: string) {
+        if (state.knownPlaces.includes(loc)) {
+            return state
+        }
+        else {
+            state.knownPlaces.push(loc)
+            return state
+        }
+    }
+
     private executeEntry(state: State) {
         const location = this.getCurrentLocation(state)
         if (location != null) {
             let newState = this.modifyStateScript(state, location.onEntryScript)
             newState = this.withUpdatedBackground(newState, location.backgrounds, location.choosebackgroundScript)
             newState.location = location.uid
+            // add this location and all visible routes to known places
+            newState = this.addAllToKnownPlaces(newState, location)
             return newState
         }
 

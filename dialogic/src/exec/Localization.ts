@@ -27,6 +27,9 @@ export function createTranslations(): Translations {
         "Menu": "",
         "Journal": "",
         "Known people": "",
-        "People": ""
+        "People": "",
+        "Items": "",
+        "Places": "",
+        "Cancel": "",
     }
 }

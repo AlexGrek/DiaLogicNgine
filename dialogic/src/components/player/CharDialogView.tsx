@@ -6,10 +6,12 @@ import { CharDialogRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
 import SpecialDialogVariants from './SpecialDialogVariants';
 import "./player.css";
+import DiscussionTopicPicker, { DiscussionTopicType } from './DiscussionTopicPicker';
+import { trace } from '../../Trace';
 
 interface CharDialogViewProps {
-    game: GameExecManager;
-    state: State;
+    game: GameExecManager
+    state: State
     view: CharDialogRenderView
     step: number
     onStateUpd: (newState: State) => void
@@ -23,6 +25,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     const localmanager = useRef<LocalizationManager>(new LocalizationManager(game.game))
 
     useEffect(() => {
+        // trace("view changed")
         if (state.shortHistory.length > 0) {
             const latest = document.getElementById("dialog-short-history-scrollable")
             if (latest) {
@@ -35,13 +38,15 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
         setDiscuss(false)
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
-    }, [view, state])
+    }, [view])
 
     useEffect(() => {
+        // trace("transitionOut changed")
         setInTransitionOut(transitionOut)
     }, [transitionOut])
 
     useEffect(() => {
+        // trace("game changed")
         localmanager.current = new LocalizationManager(game.game)
     }, [game])
 
@@ -92,6 +97,16 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
         disabled: !(view.dialogOptions.canDiscussChars || view.dialogOptions.canDiscussFacts || view.dialogOptions.canDiscussItems || view.dialogOptions.canDiscussLocations)
     }
 
+    const handleCancelSpecialUi = () => {
+        setDiscuss(false)
+        setInTransitionOut(false)
+        setInTransitionIn(true)
+    }
+
+    const handleDiscussion = (topicType: DiscussionTopicType, topicValue: string) => {
+        
+    }
+
     return (
         <div className={transitionOutClass("dialog-window-view")}>
             <div className={transitionInOutClass('dialog-widget-special-links')}>
@@ -105,6 +120,9 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
                 </div>
                 <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} />
                 <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} />
+            </div>}
+            {discuss && <div className='dialog-controls'>
+                <DiscussionTopicPicker localization={localmanager.current}  game={game} state={state} view={view} onCancel={handleCancelSpecialUi} onTopicSelected={handleDiscussion}/>
             </div>}
         </div>
     );
