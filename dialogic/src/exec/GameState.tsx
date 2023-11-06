@@ -1,5 +1,6 @@
 import { GameDescription } from "../game/GameDescription"
 import { GameProgress, createInitialGameProgress } from "./GameProgress"
+import { Translations } from "./Localization"
 
 export interface DialogWindowId {
     kind: "window"
@@ -70,6 +71,6 @@ export function createInitialState(game: GameDescription): State {
         knownFacts: [],
         knownPeople: [],
         engineVersion: game.engineVersion,
-        progress: createInitialGameProgress()
+        progress: createInitialGameProgress(),
     }
 }

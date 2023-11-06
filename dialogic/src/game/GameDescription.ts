@@ -1,4 +1,5 @@
 import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
+import { createTranslations, Translations } from "../exec/Localization";
 import Character, { Role } from "./Character";
 import Dialog from "./Dialog";
 import GameEvent, { EventHost } from "./Events";
@@ -9,7 +10,7 @@ import Loc from "./Loc";
 import QuestLine from "./Objectives";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION="0.6"
+export const ENGINE_VERSION="0.7"
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -57,6 +58,7 @@ export interface GameDescription {
     general: GeneralGameInfo
     config: Config
     objectives: QuestLine[]
+    translations: Translations
 }
 
 export function createDefaultGame(): GameDescription {
@@ -87,6 +89,7 @@ export function createDefaultGame(): GameDescription {
         items: [],
         events: [],
         eventHosts: [],
+        translations: createTranslations(),
         roles: [agedRole],
         props: [
             createNumberProp("testNumProp", 42),

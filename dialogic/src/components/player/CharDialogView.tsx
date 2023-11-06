@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { generateImageUrl } from '../../Utils';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
@@ -7,6 +7,8 @@ import { DialogLink } from '../../game/Dialog';
 import DialogVariants from './DialogVariants';
 import "./player.css";
 import LocButton from './LocButton';
+import SpecialDialogVariants from './SpecialDialogVariants';
+import { LocalizationManager } from '../../exec/Localization';
 
 interface CharDialogViewProps {
     game: GameExecManager;
@@ -19,6 +21,8 @@ interface CharDialogViewProps {
 
 const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
+    const [discuss, setDiscuss] = useState<boolean>(false)
+    const localmanager = useRef<LocalizationManager>(new LocalizationManager(game.game))
 
     useEffect(() => {
         if (state.shortHistory.length > 0) {
@@ -30,10 +34,14 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
                 }, 100)
             }
         }
-
+        setDiscuss(false)
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
     }, [view, state])
+
+    useEffect(() => {
+        localmanager.current = new LocalizationManager(game.game)
+    }, [game])
 
     const text = view.text
 
@@ -65,18 +73,17 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
         return `${base} transition-out${indexString}`
     }
 
-    const click = (link: DialogLink, textOfLink: string) => {
-        const clickData = { actor: null, text: text, answer: textOfLink, step: step } // TODO: add actor
-        onStateUpd(game.dialogVariantApply(state, link, clickData))
+    const handleSpecialDialogClick = (value: string) => {
+        if (value === "discuss") {
+            setDiscuss(true)
+        }
     }
 
-    const dialogVariants = () => {
-        return view.links.map((link, i) => {
-            const textOfLink = link.text
-            return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled} className='dialog-button' onClick={() => click(link.link, textOfLink)}>{textOfLink}</button>
-            </div>)
-        })
+    const discussLink = {
+        name: localmanager.current.local("Discuss..."),
+        icon: "w",
+        value: "discuss",
+        disabled: !(view.dialogOptions.canDiscussChars || view.dialogOptions.canDiscussFacts || view.dialogOptions.canDiscussItems || view.dialogOptions.canDiscussLocations)
     }
 
     return (
@@ -84,17 +91,15 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
             <div className={transitionInOutClass('dialog-widget-special-links')}>
                 
             </div>
-            <div className='dialog-controls'>
+            {!discuss && <div className='dialog-controls'>
                 <div key={step << 1} className={transitionOutClass("dialog-text")}>
-                    {/* <p className='dialog-prev-text' key={state.stepCount}>
-                            {prevText}
-                        </p> */}
                     <p className='dialog-current-text' key={step << 1}>
                         {state.fatalError ? state.fatalError.message : text}
                     </p>
                 </div>
+                <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={transitionOut} inTransitionIn={inTransitionIn} links={[discussLink]}/>
                 <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} />
-            </div>
+            </div>}
         </div>
     );
 };

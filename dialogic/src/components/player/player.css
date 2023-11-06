@@ -135,7 +135,7 @@
 
 @keyframes shrink {
     0% {
-        transform:scaleY(100%);
+        transform: scaleY(100%);
         opacity: 1;
     }
 
@@ -149,7 +149,7 @@
 .dialog-text {
     font-size: 22px;
     margin-right: 12pt;
-    background-color:  #04040422;
+    background-color: #04040422;
     padding: 10pt;
     overflow: hidden;
     position: relative;
@@ -226,6 +226,11 @@
     align-items: flex-end;
     /* outline: 2px solid grey; */
     padding-left: 5pt;
+}
+
+.dialog-variant-icon {
+    font-family: 'IconFont';
+    margin: 0 6pt;
 }
 
 .dialog-variants button {
