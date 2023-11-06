@@ -21,6 +21,12 @@ export class LocalizationManager {
 
 export function createTranslations(): Translations {
     return {
-        "Discuss...": ""
+        "Discuss...": "",
+        "Facts": "",
+        "Inventory": "",
+        "Menu": "",
+        "Journal": "",
+        "Known people": "",
+        "People": ""
     }
 }

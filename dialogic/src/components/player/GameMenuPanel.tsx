@@ -10,6 +10,7 @@ import { trace } from '../../Trace';
 import { getChar } from '../../game/Character';
 import { GameExecManager } from '../../exec/GameExecutor';
 import Markdown from 'react-markdown';
+import { LocalizationManager } from '../../exec/Localization';
 
 
 interface GameMenuPanelProps {
@@ -27,6 +28,8 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
 
     const factsCache = useRef<DataGroups<Fact>>([])
     const charsCache = useRef<DataGroups<CharInfoRenderView>>([])
+
+    const localmanager = useRef<LocalizationManager>(new LocalizationManager(game))
 
     useEffect(() => {
         setSelectedWidgetPrev(selectedWidget)
@@ -59,16 +62,16 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
 
     const renderCharDetails = (d: CharInfoRenderView) => {
         return <div className='ui-widget-char-renderer'>
-                <h2>{d.name}</h2>
-                <div><Markdown>{d.description}</Markdown></div>
-            </div>
+            <h2>{d.name}</h2>
+            <div><Markdown>{d.description}</Markdown></div>
+        </div>
     }
 
     const getFactsView = (): DataGroups<Fact> => {
         if (factsCache.current == null || state.knownFacts.length != factsCache.current.length) {
-            trace("Recreating facts cache for UI")
+            // trace("Recreating facts cache for UI")
             const updatedFacts = [{
-                group: "Facts",
+                group: localmanager.current.local("Facts"),
                 items: state.knownFacts.map((factid) => {
                     let realFact = getFact(game, factid)
                     if (realFact == null) {
@@ -91,9 +94,9 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
 
     const getCharsView = () => {
         if (charsCache.current == null || state.knownPeople.length != charsCache.current.length) {
-            trace("Recreating facts cache for UI")
+            // trace("Recreating facts cache for UI")
             const chars = [{
-                group: "Known people",
+                group: localmanager.current.local("Known people"),
                 items: state.knownPeople.map((charid) => {
                     const descr = executor.getCharInfoDescription(state, charid)
                     return {
@@ -111,20 +114,20 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
 
     const factTabs = () => {
         return [{
-            name: "Facts",
-            contentRenderer: () => <LeftTabUiMenuWidget data={getFactsView()} detailsRenderer={renderFactDetails}/>
+            name: localmanager.current.local("Facts"),
+            contentRenderer: () => <LeftTabUiMenuWidget data={getFactsView()} detailsRenderer={renderFactDetails} />
         },
         {
-            name: "People",
-            contentRenderer: () => <LeftTabUiMenuWidget data={getCharsView()} detailsRenderer={renderCharDetails}/>
+            name: localmanager.current.local("People"),
+            contentRenderer: () => <LeftTabUiMenuWidget data={getCharsView()} detailsRenderer={renderCharDetails} />
         }
-    ]
+        ]
     }
 
     const renderWidgetButton = (name: string) => {
         const classBaseName = 'game-menu-sub-button'
         const className = selectedWidget === name ? `${classBaseName} open` : classBaseName
-        return <button className={className} onClick={() => handleWidgetClick(name)}>{name}</button>
+        return <button className={className} onClick={() => handleWidgetClick(name)}>{localmanager.current.local(name)}</button>
     }
 
     return (

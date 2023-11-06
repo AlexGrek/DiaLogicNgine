@@ -12,6 +12,8 @@ import './configuration.css'
 import GeneralEditor from './GeneralEditor';
 import { IUpds } from '../../../App';
 import Note from '../../userguide/Note';
+import StringMapEditor from '../../common/StringMapEditor';
+import { Translations } from '../../../exec/Localization';
 
 interface ConfigurationMenuProps {
     game: GameDescription;
@@ -23,6 +25,7 @@ interface ConfigurationMenuProps {
 const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, handlers, visible }) => {
     const [currentGame, setCurrentGame] = useState<GameDescription>(game);
     const [generalEditorOpen, setGeneralEditorOpen] = useState<boolean>(false);
+    
     useEffect(() => {
         setCurrentGame(game);
     }, [game]);
@@ -83,6 +86,11 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                     <Panel header="Menu background">
                         <img className='menu-config-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
                         <PublicFileUrl extensions={IMAGES} value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)}></PublicFileUrl>
+                    </Panel>
+                    <Panel header='Localization'>
+                        <div>
+                            <StringMapEditor onChange={(transl) => onSetGame({...game, translations: transl})} value={game.translations}/>
+                        </div>
                     </Panel>
                 </PanelGroup>
             </Stack>
