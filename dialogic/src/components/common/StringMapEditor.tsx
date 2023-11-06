@@ -81,7 +81,7 @@ const StringMapEditor: React.FC<StringMapEditorProps> = ({ onChange, value, canB
             {renderValues()}
             <div className="string-map-editor-row">
                 <InputGroup>
-                    <Input value={newKey} onPressEnter={() => add()} onChange={setNewKey} placeholder='stat' />
+                    <Input value={newKey} onPressEnter={() => add()} onChange={setNewKey} placeholder='Create key...' />
                     <InputGroup.Button onClick={add}><PlusIcon /></InputGroup.Button>
                 </InputGroup>
             </div>

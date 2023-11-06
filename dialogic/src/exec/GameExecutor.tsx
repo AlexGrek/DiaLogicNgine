@@ -1,22 +1,25 @@
 import lodash from "lodash";
+import Character, { CharacterDialog, getChar } from "../game/Character";
 import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
-import { TextList, chooseText } from "../game/TextList";
-import { DialogWindowId, HistoryRecord, State, UiObjectId } from "./GameState";
+import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
-import { ActorView, BgChange, CharDialogRenderView, CharInfoRenderView, DialogRenderView, LocRouteRenderView, LocationRenderView, RenderLink, RenderView, RenderWidget } from "./RenderView";
+import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
-import Character, { CharacterDialog, getChar } from "../game/Character";
-import { useId } from "react";
+import EventsProcessor from "./EventsProcessor";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
     game: GameDescription
+    renderer: RenderViewGenerator
+    events: EventsProcessor
 
     constructor(game: GameDescription) {
         this.game = game
+        this.renderer = new RenderViewGenerator(this)
+        this.events = new EventsProcessor(this)
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
@@ -32,103 +35,6 @@ export class GameExecManager {
             return null
         }
         return [char, char.dialog]
-    }
-
-    getCurrentWindowText(instate: State, window: DialogWindow) {
-        if (instate.quickReplyText) {
-            return instate.quickReplyText
-        }
-        return this.getCurrentText(window.text, instate, window.chooseTextScript)
-    }
-
-    getCurrentWindowLinks(instate: State, window: { links: DialogLink[] }) {
-        const visibleLinks = window.links.filter((link => this.isLinkVisible(link, instate)))
-        const renderLinks: RenderLink[] = visibleLinks.map((link, index) => {
-            const [disabled, reason] = this.isLinkDisabled(link, instate)
-            return {
-                index: index,
-                link: link,
-                disabledReason: reason,
-                disabled: disabled,
-                text: link.text // TODO: support text procesing code
-            }
-        })
-        return renderLinks
-    }
-
-    isLinkVisible(link: DialogLink, instate: State) {
-        if (link.isVisible === undefined || link.isVisible === '') {
-            return true;
-        }
-        const { state, decision } = evaluateAsBoolProcessor(this.game, link.isVisible, instate)
-        return decision
-    }
-
-    isLinkDisabled(link: DialogLink, instate: State): Readonly<[boolean, string]> {
-        if (link.isEnabled === undefined || link.isEnabled === '') {
-            return [false, ''];
-        }
-        const { state, decision } = evaluateAsBoolProcessor(this.game, link.isEnabled, instate)
-        return [!decision, 'link disabled reason is not implemented']
-    }
-
-    getCurrentText(tlist: TextList, inState: State, script?: string) {
-        if (script) {
-            // NOTE: All state changes are IGNORED here! Use other functions to change state
-            const { state, decision } = evaluateAsAnyProcessor(this.game, script, inState)
-            return chooseText(tlist, decision)
-        }
-        return tlist.main
-    }
-
-    public getCurrentWindowActor(instate: State, window: DialogWindow): ActorView | null {
-
-        const actor = window.actor
-        if (!actor) {
-            return null
-        }
-
-        let charToSeacrh = actor.character
-
-        if (actor.currentCharacter) {
-            charToSeacrh = instate.charDialog || ''
-        }
-
-        const character = this.game.chars.find(item => item.uid === charToSeacrh)
-        if (character === undefined) {
-            console.error("Cannot find character " + charToSeacrh)
-            return null
-        }
-
-        var avatar = character.avatar.main
-
-        // get avatar from character script
-        if (character.chooseAvatarScript) {
-            // eslint-disable-next-line
-            const { state, decision } = evaluateAsAnyProcessor(this.game, character.chooseAvatarScript, instate)
-            avatar = chooseImage(character.avatar, decision)
-        }
-
-        if (actor.avatar !== undefined) {
-            // redefined avatar
-            console.log("redefined avatar")
-            avatar = chooseImage(character.avatar, actor.avatar)
-        }
-
-        var name = character.displayName.main
-
-        if (character.chooseNameScript) {
-            // eslint-disable-next-line
-            const { state, decision } = evaluateAsAnyProcessor(this.game, character.chooseNameScript, instate)
-            name = chooseText(character.displayName, decision)
-        }
-
-        return {
-            actor: actor,
-            avatar: avatar,
-            name: name,
-            char: character
-        }
     }
 
     getCurrentLocation(state: State): Readonly<Loc> | null {
@@ -161,7 +67,7 @@ export class GameExecManager {
 
     getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined) {
         if (script !== undefined && script !== '') {
-            const { state, decision } = evaluateAsBoolProcessor(this.game, script, instate)
+            const { decision } = evaluateAsBoolProcessor(this.game, script, instate)
             return decision
         }
         else {
@@ -328,7 +234,7 @@ export class GameExecManager {
             }
             return locid
         }).filter(uid => uid != null)
-        .map(nonnull => `${nonnull}`)
+            .map(nonnull => `${nonnull}`)
         visibleNext.forEach((el) => {
             newState = this.addToKnownPlaces(newState, el)
         })
@@ -531,179 +437,10 @@ export class GameExecManager {
         return afterWindowUpd
     }
 
-    /// RENDERING
-
-    renderDialog(state: State): DialogRenderView {
-        const dw = this.getCurrentDialogWindow(state)
-        if (dw == null) {
-            throw `Window ${JSON.stringify(state.position)} was not found`
-        }
-        const [dialog, window] = dw
-
-        // rendering window
-        return {
-            widget: "dialog",
-            actor: this.getCurrentWindowActor(state, window),
-            text: this.getCurrentWindowText(state, window),
-            links: this.getCurrentWindowLinks(state, window),
-            window: window
-        }
-    }
-
-    renderCharDialog(state: State): CharDialogRenderView {
-        const c = this.getCurrentCharDialog(state)
-        if (c == null) {
-            throw Error(`Window ${JSON.stringify(state.position)} was not found`)
-        }
-        const [char, charDialog] = c
-
-        // rendering window
-        return {
-            widget: "char",
-            canHostEvents: this.canHostEvents(state, charDialog.eventHosts, charDialog.canHostEventsScript),
-            text: this.getCurrentText(charDialog.text, state, charDialog.chooseTextScript),
-            links: this.getCurrentWindowLinks(state, charDialog),
-            char: char,
-            dialog: charDialog,
-            dialogOptions: {
-                canDiscussChars: true,
-                canDiscussFacts: true,
-                canDiscussItems: true,
-                canDiscussLocations: true,
-                canGiveItemsTo: true // TODO: make it dynamic
-            }
-        }
-    }
-
-    renderLoc(state: State): LocationRenderView {
-        const loc = this.getCurrentLocation(state)
-
-        if (loc == null) {
-            throw `Location ${JSON.stringify(state.position)} was not found`
-        }
-
-        return {
-            widget: "location",
-            links: this.getCurrentWindowLinks(state, loc),
-            routes: this.getRoutesForLoc(state, loc),
-            location: loc,
-            text: this.getCurrentText(loc.text, state, loc.chooseTextScript),
-            canHostEvents: this.canHostEvents(state, loc.eventHosts, loc.canHostEventsScript)
-        }
-    }
-
     canHostEvents(state: State, eventHosts: string[] | null, canHostEventsScript: string | undefined) {
         if (eventHosts == null) {
             return false
         }
         return this.getBoolDecisionWithDefault(state, true, canHostEventsScript)
-    }
-
-    getRoutesForLoc(instate: State, loc: Readonly<Loc>): LocRouteRenderView[] {
-        const routeLocs = loc.routes.map(uid => {
-            const loc = getLoc(this.game, uid)
-            if (!loc) {
-                throw `Route to ${uid} cannot be found`
-            }
-            return loc
-        })
-        const visibleRoutes = routeLocs.filter(route => {
-            if (route.isVisibleScript) {
-                const { state, decision } = evaluateAsBoolProcessor(this.game, route.isVisibleScript, instate)
-                return decision
-            }
-            return true
-        })
-        return visibleRoutes.map((route, i) => {
-            let disabled = false
-            if (route.isAccessibleScript) {
-                const { state, decision } = evaluateAsBoolProcessor(this.game, route.isAccessibleScript, instate)
-                disabled = !decision
-            }
-
-            return {
-                index: i,
-                name: route.displayName,
-                disabled: disabled,
-                disabledReason: 'disabled reason not implemented yet', //TODO: implement it
-                thumbnail: route.thumbnail ? route.thumbnail : null,
-                destination: route
-            }
-        })
-    }
-
-    renderUiWidget(state: State): RenderWidget {
-        if (state.fatalError) {
-            return {
-                widget: "error",
-                errorText: "Error: " + JSON.stringify(state.fatalError)
-            }
-        }
-
-        const currentUiWidget = state.position
-        try {
-            if (currentUiWidget.kind === "window") {
-                return this.renderDialog(state)
-            }
-            if (currentUiWidget.kind === "location") {
-                return this.renderLoc(state)
-            }
-            if (currentUiWidget.kind === "chardialog") {
-                return this.renderCharDialog(state)
-            }
-        } catch (exception) {
-            console.error(exception)
-            return {
-                widget: "error",
-                errorText: "Error while rendering: " + JSON.stringify(exception)
-            }
-        }
-        return {
-            widget: "error",
-            errorText: "Cannot find UI widget for " + JSON.stringify(state.position)
-        }
-    }
-
-    public render(state: State, oldbg: string | null): RenderView {
-        const bgChange: BgChange = (state.background == undefined || oldbg === state.background) ? null : {
-            nextbg: state.background,
-            effect: 'fast' //TODO: add more effects
-        }
-        return {
-            uiWidgetView: this.renderUiWidget(state),
-            backgroundChange: bgChange,
-            notifications: [], //TODO: add notification support
-            step: state.stepCount
-        }
-    }
-
-    public getCharInfoDescription(state: State, charUid: string): CharInfoRenderView {
-        const char = getChar(this.game, charUid)
-        if (char === undefined) {
-            return { name: "error " + charUid, description: "char not found: " + charUid }
-        }
-        else {
-            try {
-                const descr = this.getCurrentText(char.description, state, char.chooseDescriptionScript)
-                const name = this.getCurrentText(char.displayName, state, char.chooseNameScript)
-
-                // avatar
-                let avatar = char.avatar.main
-
-                // get avatar from character script
-                if (char.chooseAvatarScript) {
-                    const { decision } = evaluateAsAnyProcessor(this.game, char.chooseAvatarScript, state)
-                    avatar = chooseImage(char.avatar, decision)
-                }
-                return {
-                    name: name,
-                    description: descr,
-                    avatar: avatar
-                }
-
-            } catch (exception) {
-                return { name: "error " + charUid, description: `char error: ${exception}` }
-            }
-        }
     }
 }

@@ -22,7 +22,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
 
     useEffect(() => {
-        const view = game.render(state, background)
+        const view = game.renderer.render(state, background)
         setPrevView(currentView)
         setCurrentView(view)
 

@@ -98,7 +98,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
             const chars = [{
                 group: localmanager.current.local("Known people"),
                 items: state.knownPeople.map((charid) => {
-                    const descr = executor.getCharInfoDescription(state, charid)
+                    const descr = executor.renderer.getCharInfoDescription(state, charid)
                     return {
                         label: descr.name,
                         value: charid,
