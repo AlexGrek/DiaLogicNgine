@@ -89,6 +89,19 @@
     position: relative;
 }
 
+.player-core-uiwidget-container {
+    height: 100%;
+    width: 100%;
+    transition: opacity .2s;
+    opacity: 1;
+}
+
+.player-core-uiwidget-container.hiding {
+    opacity: 0;
+}
+
+
+
 .dialog-window-view {
     width: 100%;
     height: 100%;

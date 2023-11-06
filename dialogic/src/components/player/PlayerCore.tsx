@@ -69,6 +69,14 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         }
     }
 
+    const gameWidgetClass = (base: string) => {
+        if (menuOpen) {
+            return `${base} hiding`
+        } else {
+            return `${base}`
+        }
+    }
+
     if (currentView) {
 
         const viewToRenderNow = (inTransitionState && prevView) ? prevView : currentView
@@ -84,7 +92,9 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                     <div className='player-core-ingame-menu'>
                         <GameMenuPanel executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} />
                     </div>
-                    <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />
+                    <div className={gameWidgetClass('player-core-uiwidget-container')}>
+                        <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />
+                    </div>
                 </div>
 
             </div>

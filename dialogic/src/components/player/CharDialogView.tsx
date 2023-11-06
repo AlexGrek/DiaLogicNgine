@@ -38,7 +38,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
         setDiscuss(false)
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
-    }, [view])
+    }, [view, state])
 
     useEffect(() => {
         // trace("transitionOut changed")
