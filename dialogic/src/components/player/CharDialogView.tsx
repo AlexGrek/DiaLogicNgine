@@ -1,14 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { generateImageUrl } from '../../Utils';
 import { GameExecManager } from '../../exec/GameExecutor';
-import { HistoryRecord, State } from '../../exec/GameState';
-import { CharDialogRenderView, DialogRenderView, LocRouteRenderView, LocationRenderView } from '../../exec/RenderView';
-import { DialogLink } from '../../game/Dialog';
-import DialogVariants from './DialogVariants';
-import "./player.css";
-import LocButton from './LocButton';
-import SpecialDialogVariants from './SpecialDialogVariants';
+import { State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
+import { CharDialogRenderView } from '../../exec/RenderView';
+import DialogVariants from './DialogVariants';
+import SpecialDialogVariants from './SpecialDialogVariants';
+import "./player.css";
 
 interface CharDialogViewProps {
     game: GameExecManager;
@@ -21,6 +18,7 @@ interface CharDialogViewProps {
 
 const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
+    const [inTransitionOut, setInTransitionOut] = useState<boolean>(false)
     const [discuss, setDiscuss] = useState<boolean>(false)
     const localmanager = useRef<LocalizationManager>(new LocalizationManager(game.game))
 
@@ -40,13 +38,17 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }, [view, state])
 
     useEffect(() => {
+        setInTransitionOut(transitionOut)
+    }, [transitionOut])
+
+    useEffect(() => {
         localmanager.current = new LocalizationManager(game.game)
     }, [game])
 
     const text = view.text
 
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (transitionOut) {
+        if (inTransitionOut) {
             return transitionOutClass(base, index, maxindex)
         }
         if (!inTransitionIn)
@@ -62,7 +64,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }
 
     const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (!transitionOut) {
+        if (!inTransitionOut) {
             return base
         }
         let indexString = ''
@@ -75,7 +77,11 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
 
     const handleSpecialDialogClick = (value: string) => {
         if (value === "discuss") {
-            setDiscuss(true)
+            setTimeout(() => {
+                setInTransitionOut(false)
+                setDiscuss(true)
+            }, 200)
+            setInTransitionOut(true)
         }
     }
 
@@ -89,7 +95,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     return (
         <div className={transitionOutClass("dialog-window-view")}>
             <div className={transitionInOutClass('dialog-widget-special-links')}>
-                
+
             </div>
             {!discuss && <div className='dialog-controls'>
                 <div key={step << 1} className={transitionOutClass("dialog-text")}>
@@ -97,8 +103,8 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
                         {state.fatalError ? state.fatalError.message : text}
                     </p>
                 </div>
-                <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={transitionOut} inTransitionIn={inTransitionIn} links={[discussLink]}/>
-                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} />
+                <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} />
+                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} />
             </div>}
         </div>
     );
