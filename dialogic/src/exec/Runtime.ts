@@ -203,6 +203,7 @@ function addRuntimeObjectives(game: GameDescription, rt: RuntimeRt) {
 
         host[qline.uid] = rtqline
     })
+    return host
 }
 
 function addFacts(factsHost: any, game: GameDescription) {
