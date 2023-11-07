@@ -6,8 +6,10 @@ import { LocalizationManager } from '../../exec/Localization';
 import TabsUiMenuWidget from './TabsUiMenuWidget';
 import { trace } from '../../Trace';
 import { groupByProperty } from '../../Utils';
-import { QuestRenderView } from '../../exec/RenderView';
+import { QuestRenderView, TaskRenderView } from '../../exec/RenderView';
 import Markdown from 'react-markdown';
+import './objectivestab.css'
+import { ObjectiveStatus } from '../../exec/QuestProcessor';
 
 interface objectivesTabProps {
     gameExecutor: GameExecManager;
@@ -37,10 +39,29 @@ const objectivesTab: React.FC<objectivesTabProps> = ({ gameExecutor, state, loca
         return items
     }
 
+    const renderIcon = (status: ObjectiveStatus) => {
+        let icon = "Z"
+        if (status === "failed") {
+            icon = "Q"
+        }
+        if (status === "open") {
+            icon = "V"
+        }
+        return <span className='objectives-tab-task-icon'>
+            {icon}
+        </span>
+    }
+
+    const renderTask = (t: TaskRenderView) => {
+        return <p className='objectives-tab-renderer-item'>{renderIcon(t.status)}{t.name}</p>
+    }
+
     const renderQuestDetails = (d: QuestRenderView) => {
-        return <div className='ui-widget-char-renderer'>
+        return <div className='objectives-tab-renderer'>
             <h2>{d.name}</h2>
-            <div><Markdown>{`${JSON.stringify(d.tasks)}`}</Markdown></div>
+            <div className='objectives-tab-renderer-items'>
+                {d.tasks.map(renderTask)}
+            </div>
         </div>
     }
 
