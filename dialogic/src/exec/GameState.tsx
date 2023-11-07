@@ -94,3 +94,23 @@ export function createInitialState(game: GameDescription): State {
         notifications: []
     }
 }
+
+export function safeStateUpdate(safeState: State, upd: State): State {
+    safeState.knownFacts = upd.knownFacts
+    safeState.knownPeople = upd.knownFacts
+    safeState.knownPlaces = upd.knownPlaces
+    safeState.progress = upd.progress
+    safeState.notifications = upd.notifications
+    safeState.background = upd.background
+    safeState.charDialog = upd.charDialog
+    safeState.location = upd.location
+    safeState.fatalError = upd.fatalError
+    safeState.props = upd.props
+    safeState.quickReplyText = upd.quickReplyText
+    safeState.stepCount = upd.stepCount
+
+    // UI stack and position is NOT UPDATED
+    // same for short history
+
+    return safeState
+}

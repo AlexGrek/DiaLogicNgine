@@ -1,3 +1,4 @@
+import { GameExecManager } from "../../../exec/GameExecutor";
 import { RuntimeRt, createRtObject } from "../../../exec/Runtime";
 import { GameDescription } from "../../../game/GameDescription";
 
@@ -22,7 +23,7 @@ export function traverseRt(rt: RuntimeRt) {
 }
 
 export function createRtDoc(game: GameDescription): {[key: string]: string}  {
-    const rt = createRtObject(game)
+    const rt = createRtObject(game, new GameExecManager(game))
     const initial: {[key: string]: string} = {}
     const variables = traverseRt(rt)
     variables.forEach((el) => {

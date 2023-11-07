@@ -4,7 +4,8 @@ import { GameDescription } from "../game/GameDescription";
 import Prop from "../game/Prop";
 import { roleByUid } from "../game/Character";
 import QuestLine, { Quest, Task } from "../game/Objectives";
-import { addIfNotExist, contains } from "./QuestProcessor";
+import { ObjectiveStatus, addIfNotExist, contains } from "./QuestProcessor";
+import { GameExecManager } from "./GameExecutor";
 
 type StateProvider = () => State
 
@@ -113,91 +114,120 @@ class RuntimeFact {
 class RuntimeObjectiveQuestLine {
     stateProvider!: () => State;
     questline: QuestLine
+    context: GameExecManager
 
-    constructor(stateProvider: () => State, questline: QuestLine) {
+    constructor(context: GameExecManager, stateProvider: () => State, questline: QuestLine) {
         this.questline = questline
+        this.context = context
         this.stateProvider = stateProvider
+    }
+
+    public open() {
+        const state = this.stateProvider()
+        this.context.quests.openQuestLine(state, this.questline)
+    }
+
+    public close() {
+        const state = this.stateProvider()
+        this.context.quests.closeQuestLine(state, this.questline)
+    }
+
+    public get status() {
+        const state = this.stateProvider()
+        return this.context.quests.getQuestLineStatus(state, this.questline)
     }
 }
 
 class RuntimeObjectiveQuest {
     stateProvider!: () => State;
     quest: Quest
+    context: GameExecManager
 
-    constructor(stateProvider: () => State, quest: Quest, parent: QuestLine) {
+    constructor(context: GameExecManager, stateProvider: () => State, quest: Quest, parent: QuestLine) {
         this.quest = quest
+        this.context = context
         this.stateProvider = stateProvider
     }
 
     public fail() {
         const state = this.stateProvider()
-        addIfNotExist(state.progress.updates.failedQuests, this.quest.path)
+        this.context.quests.failQuest(state, this.quest)
     }
 
     public complete() {
         const state = this.stateProvider()
-        addIfNotExist(state.progress.updates.completedQuests, this.quest.path)
+        this.context.quests.completeQuest(state, this.quest)
     }
 
     public open() {
         const state = this.stateProvider()
-        addIfNotExist(state.progress.updates.openQuests, this.quest.path)
+        this.context.quests.openQuest(state, this.quest)
+    }
+
+    public get status(): ObjectiveStatus {
+        const state = this.stateProvider()
+        return this.context.quests.getQuestStatus(state, this.quest.path)
     }
 }
 
 class RuntimeObjectiveTask {
     stateProvider!: () => State;
     task: Task
+    context: GameExecManager
 
-    constructor(stateProvider: () => State, task: Task) {
+    constructor(context: GameExecManager, stateProvider: () => State, task: Task) {
         this.task = task
+        this.context = context
         this.stateProvider = stateProvider
     }
 
-    public get isCompleted() {
+    public get status(): ObjectiveStatus {
         const state = this.stateProvider()
-        return contains(state.progress.completedTasks, this.task.path) || contains(state.progress.failedTasks, this.task.path)
+        return this.context.quests.getTaskStatus(state, this.task)
+    }
+
+    public get isCompleted() {
+        return this.status === "completed"
     }
 
     public get isFailed() {
-        const state = this.stateProvider()
-        return contains(state.progress.failedTasks, this.task.path) || contains(state.progress.updates.failedTasks, this.task.path)
+        return this.status === "failed"
+    }
+
+    public get isOpen() {
+        return this.status === "open"
     }
 
     public fail() {
         const state = this.stateProvider()
-        addIfNotExist(state.progress.updates.failedTasks, this.task.path)
+        this.context.quests.failTask(state, this.task)
     }
 
     public complete() {
         const state = this.stateProvider()
-        addIfNotExist(state.progress.updates.completedTasks, this.task.path)
+        this.context.quests.completeTask(state, this.task)
     }
 
     public open() {
         const state = this.stateProvider()
-        addIfNotExist(state.progress.updates.openTasks, this.task.path)
+        this.context.quests.openTask(state, this.task)
     }
-}
-
-interface RuntimeObjectivesHost {
-    quests: any
-    tasks: any
 }
 
 function addRuntimeObjectives(game: GameDescription, rt: RuntimeRt) {
     const stateProvider = () => rt.mustGetState()
+    const context = rt.context
     const host: any = {}
     game.objectives.forEach(qline => {
-        const rtqline: any = new RuntimeObjectiveQuestLine(stateProvider, qline)
+        const rtqline: any = new RuntimeObjectiveQuestLine(context, stateProvider, qline)
 
         // add quests to the qline
         qline.quests.forEach(quest => {
-            rtqline[quest.uid] = new RuntimeObjectiveQuest(stateProvider, quest, qline)
+            rtqline[quest.uid] = new RuntimeObjectiveQuest(context, stateProvider, quest, qline)
 
             // add tasks to the quest
             quest.tasks.forEach(task => {
-                rtqline[quest.uid][task.uid] = new RuntimeObjectiveTask(stateProvider, task)
+                rtqline[quest.uid][task.uid] = new RuntimeObjectiveTask(context, stateProvider, task)
             })
         })
 
@@ -220,8 +250,10 @@ export class RuntimeRt {
     ch: any
     facts: any
     objectives: any
+    context: GameExecManager
 
-    constructor(props: any, chars: any, facts: any, game: GameDescription, state?: State) {
+    constructor(props: any, chars: any, facts: any, game: GameDescription, context: GameExecManager, state?: State) {
+        this.context = context
         this.props = props
         this.ch = chars
         this.facts = facts
@@ -246,14 +278,14 @@ export class RuntimeRt {
     }
 }
 
-export function createRtObject(game: GameDescription, state?: State) {
+export function createRtObject(game: GameDescription, context: GameExecManager, state?: State) {
     const propsHost: any = {}
     const charsHost: any = {}
     const factsHost: any = {}
     addProps(propsHost, game)
     addChars(charsHost, game)
     addFacts(factsHost, game)
-    var rt = new RuntimeRt(propsHost, charsHost, factsHost, game, state)
+    var rt = new RuntimeRt(propsHost, charsHost, factsHost, game, context, state)
     return rt
 }
 
@@ -272,11 +304,11 @@ function makeFunctionBody(s: string) {
     return `(function (rt, state, props, ch, facts) { ${s} })`
 }
 
-export function evaluateAsStateProcessor(game: GameDescription, s: string, prevState: State) {
+export function evaluateAsStateProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
     const body = makeFunctionBody(s)
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
-    const rt = createRtObject(game, stateCopy)
+    const rt = createRtObject(game, execManager, stateCopy)
     try {
         var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(newState))
@@ -292,12 +324,12 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, prevS
     }
 }
 
-export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevState: State) {
+export function evaluateAsBoolProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
     const body = makeFunctionBody(s)
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
-    const rt = createRtObject(game, stateCopy)
+    const rt = createRtObject(game, execManager, stateCopy)
     try {
         var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(stateCopy))
@@ -317,12 +349,12 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, prevSt
     }
 }
 
-export function evaluateAsAnyProcessor(game: GameDescription, s: string, prevState: State) {
+export function evaluateAsAnyProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
     const body = makeFunctionBody(s)
     console.log(body)
     var state = prevState
     var stateCopy = lodash.cloneDeep(prevState)
-    const rt = createRtObject(game, stateCopy)
+    const rt = createRtObject(game, execManager, stateCopy)
     try {
         var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
         if (stateIsValid(stateCopy))

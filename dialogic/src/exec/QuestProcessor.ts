@@ -1,21 +1,12 @@
 import lodash from "lodash";
 import { trace } from "../Trace";
 import { GameDescription } from "../game/GameDescription";
-import { Quest, getQuest, getQuestLine, getQuestTask } from "../game/Objectives";
+import QuestLine, { Quest, QuestPath, Task, getQuest, getQuestLine, getQuestTask } from "../game/Objectives";
 import { GameExecManager } from "./GameExecutor";
-import { GameProgress, ProgressUpdate, withResetProgressUpdate } from "./GameProgress";
-import { State, createInGameNotification } from "./GameState";
+import { GameProgress } from "./GameProgress";
+import { State, createInGameNotification, safeStateUpdate } from "./GameState";
 
-const isEmptyUpdates = (u: ProgressUpdate) => {
-    return u.completedTasks.length == 0 &&
-        u.failedTasks.length === 0 &&
-        u.openTasks.length === 0 &&
-        u.completedQuests.length === 0 &&
-        u.failedQuests.length === 0 &&
-        u.openQuests.length === 0 &&
-        u.openQuestLines.length === 0 &&
-        u.closedQuestLines.length === 0
-}
+export type ObjectiveStatus = "open" | "failed" | "completed" | "untouched"
 
 export function contains<T extends object>(array: T[], o: T) {
     const arrayOfStrings = array.map((item) => item.toString())
@@ -30,10 +21,10 @@ export function removeIfExist<T extends object>(array: T[], o: T) {
         // it's here, so remove
         trace(`Removing: ${objectString} from list of ${array.length}`)
         array.slice(index, 1)
-        return array 
+        return array
     }
     // it's not there
-    return array 
+    return array
 }
 
 export function addIfNotExist<T extends object>(array: T[], o: T) {
@@ -47,7 +38,7 @@ export function addIfNotExist<T extends object>(array: T[], o: T) {
     return array
 }
 
-function isQuestCompleted(game: GameDescription, progress: GameProgress, quest: Quest) {
+function isQuestCompleted(progress: GameProgress, quest: Quest) {
     if (quest.ordered) {
         const lastTask = quest.tasks[quest.tasks.length - 1]
         if (contains(progress.completedTasks, lastTask.path)) {
@@ -70,189 +61,205 @@ export default class QuestProcessor {
         this.exec = exec
     }
 
-    withProgress(state: State) {
-        if (isEmptyUpdates(state.progress.updates)) {
-            // do nothing if updates are empty
-            return state
+    private isQuestLineCompleted(state: State, questline: QuestLine) {
+        // check all quests completed or failed
+        return questline.quests.every((q) => {
+            const status = this.getQuestStatus(state, q.path)
+            return status === "completed" || status === "failed"
+        })
+    }
+
+    getTaskStatus(state: State, task: Task): ObjectiveStatus {
+        if (contains(state.progress.failedTasks, task.path)) {
+            return "failed"
+        }
+        if (contains(state.progress.completedTasks, task.path)) {
+            return "completed"
+        }
+        if (contains(state.progress.openTasks, task.path)) {
+            return "open"
+        }
+        return "untouched"
+    }
+
+    getQuestStatus(state: State, quest: QuestPath): ObjectiveStatus {
+        if (contains(state.progress.failedQuests, quest)) {
+            return "failed"
+        }
+        if (contains(state.progress.completedQuests, quest)) {
+            return "completed"
+        }
+        if (contains(state.progress.openQuests, quest)) {
+            return "open"
+        }
+        return "untouched"
+    }
+
+    getQuestLineStatus(state: State, questLine: QuestLine): ObjectiveStatus {
+        if (state.progress.closedQuestLines.includes(questLine.uid)) {
+            return "completed"
+        }
+        if (state.progress.openQuestLines.includes(questLine.uid)) {
+            return "open"
+        }
+        return "untouched"
+    }
+
+    failTask(state: State, task: Task) {
+        trace(`Failed task: ${task.path.toString()}`)
+        const taskId = task.path
+        addIfNotExist(state.progress.failedTasks, taskId)
+        removeIfExist(state.progress.openTasks, taskId)
+        const stateUpdate = this.exec.modifyStateScript(state, task.onFail)
+        safeStateUpdate(state, stateUpdate)
+
+        const found = getQuestTask(this.exec.game, taskId)
+        if (!found)
+            return
+        const [qline, q, tsk] = found
+
+        if (q.ordered || tsk.critical) {
+            // fail the whole quest
+            trace(`Failing the whole quest: ${q.path.toString()}`)
+            this.failQuest(state, q)
+        }
+        state.notifications.push(createInGameNotification("questprogress", q.name))
+    }
+
+    completeTask(state: State, task: Task) {
+        trace(`Completed task: ${task.path.toString()}`)
+        const taskId = task.path
+        addIfNotExist(state.progress.completedTasks, taskId)
+        removeIfExist(state.progress.openTasks, taskId)
+        const stateUpdate = this.exec.modifyStateScript(state, task.onComplete)
+        safeStateUpdate(state, stateUpdate)
+
+        const found = getQuestTask(this.exec.game, taskId)
+        if (!found)
+            return
+        const [qline, q, tsk] = found
+
+        // task passed - so quest may be completed
+        const indexOfTask = q.tasks.findIndex((task) => task.uid = tsk.uid)
+        if (indexOfTask === q.tasks.length - 1) {
+            // this task is last
+            trace("Last task processing: " + tsk.path.toString())
+            if (isQuestCompleted(state.progress, q)) {
+                // mark the whole as completed
+                this.completeQuest(state, q)
+            }
+        } else {
+            // not the last task - so open next one, please
+            const next = q.tasks[indexOfTask + 1]
+            trace(`Next task: ${next.path.toString()}`)
+            this.openTask(state, next)
         }
 
-
-        let progress = lodash.cloneDeep(state)
-        progress = this.processTasks(progress)
-        progress = this.processQuests(progress)
-        progress = this.processQuestLines(progress)
-
-        // TODO: call this thing recursive untill there are no more updates
-
-        const progressReset = withResetProgressUpdate(progress.progress)
-        return {...progress, progress: progressReset}
+        state.notifications.push(createInGameNotification("questprogress", q.name))
     }
 
-    private processTasks(state: State): State {
-        trace("Started tasks processing")
-        let stateWithChanges = state
+    openTask(state: State, task: Task) {
+        trace(`Open task: ${task.path.toString()}`)
+        const taskId = task.path
+        addIfNotExist(state.progress.openTasks, taskId)
 
-        stateWithChanges.progress.updates.failedTasks.forEach((taskId) => {
-            trace(`Failed task: ${taskId.toString()}`)
-            const found = getQuestTask(this.exec.game, taskId)
-            if (!found)
-                return
-            const [qline, q, tsk] = found
-            addIfNotExist(stateWithChanges.progress.failedTasks, taskId) // fail
-            removeIfExist(stateWithChanges.progress.openTasks, taskId)
-            stateWithChanges = this.exec.modifyStateScript(stateWithChanges, tsk.onFail)
+        const found = getQuestTask(this.exec.game, taskId)
+        if (!found)
+            return
+        const [qline, q, tsk] = found
 
-            if (q.ordered || tsk.critical) {
-                // fail the whole quest
-                trace(`Failing the whole quest: ${q.path.toString()}`)
-                addIfNotExist(stateWithChanges.progress.updates.failedQuests, q.path)
-            }
-
-            stateWithChanges.notifications.push(createInGameNotification("questprogress", q.name))
-        })
-
-        stateWithChanges.progress.updates.completedTasks.forEach((taskId) => {
-            trace(`Completed task: ${taskId.toString()}`)
-            const found = getQuestTask(this.exec.game, taskId)
-            if (!found)
-                return
-            const [qline, q, tsk] = found
-            addIfNotExist(stateWithChanges.progress.completedTasks, taskId)
-            removeIfExist(stateWithChanges.progress.openTasks, taskId)
-            stateWithChanges = this.exec.modifyStateScript(stateWithChanges, tsk.onComplete)
-
-            // task passed - so quest may be completed
-            const indexOfTask = q.tasks.findIndex((task) => task.uid = tsk.uid)
-            if (indexOfTask === q.tasks.length - 1) {
-                // this task is last
-                trace("Last task processing: " + tsk.path.toString())
-                if (isQuestCompleted(this.exec.game, stateWithChanges.progress, q)) {
-                    // mark the whole as completed
-                    addIfNotExist(stateWithChanges.progress.updates.completedQuests, q.path)
-                }
-            } else {
-                // not the last task - so open next one, please
-                const next = q.tasks[indexOfTask + 1]
-                trace(`Next task: ${next.path.toString()}`)
-                addIfNotExist(stateWithChanges.progress.updates.openTasks, next.path)
-            }
-
-            stateWithChanges.notifications.push(createInGameNotification("questprogress", q.name))
-        })
-
-        stateWithChanges.progress.updates.openTasks.forEach((taskId) => {
-            trace(`Opening task: ${taskId.toString()}`)
-            const found = getQuestTask(this.exec.game, taskId)
-            if (!found)
-                return
-            const [qline, q, tsk] = found
-            addIfNotExist(stateWithChanges.progress.openTasks, taskId) // open
-
-            // open quest
-            addIfNotExist(stateWithChanges.progress.updates.openQuests, q.path)
-
-            // open quest line
-            if (!stateWithChanges.progress.updates.openQuestLines.includes(qline.uid)) {
-                trace(`Opening quest line as well: ${qline.name}`)
-                stateWithChanges.progress.updates.openQuestLines.push(qline.uid)
-            }
-        })
-
-        return stateWithChanges
+        // try to open quest and questline
+        if (this.getQuestStatus(state, q.path) === "untouched") {
+            this.openQuest(state, q)
+        }
     }
 
-    private processQuests(state: State): State {
-        trace("Started quests processing")
-        let stateWithChanges = state
+    failQuest(state: State, quest: Quest) {
+        const questPath = quest.path
+        trace(`Failed quest: ${questPath.toString()}`)
 
-        stateWithChanges.progress.updates.completedQuests.forEach(questPath => {
-            trace(`Completed quest: ${questPath.toString()}`)
-            const found = getQuest(this.exec.game, questPath)
-            if (!found)
-                return
-            const [qline, q] = found
+        addIfNotExist(state.progress.failedQuests, questPath) // fail
+        removeIfExist(state.progress.openQuests, questPath)
 
-            addIfNotExist(stateWithChanges.progress.completedQuests, questPath) // complete
-            removeIfExist(stateWithChanges.progress.openQuests, questPath)
+        const update = this.exec.modifyStateScript(state, quest.onFail)
+        safeStateUpdate(state, update)
 
-            stateWithChanges = this.exec.modifyStateScript(stateWithChanges, q.onComplete)
+        // TODO: close quest line
 
-            stateWithChanges.notifications.push(createInGameNotification("questcompleted", q.name))
-        })
-
-        stateWithChanges.progress.updates.failedQuests.forEach(questPath => {
-            trace(`Failed quest: ${questPath.toString()}`)
-            const found = getQuest(this.exec.game, questPath)
-            if (!found)
-                return
-            const [qline, q] = found
-
-            addIfNotExist(stateWithChanges.progress.failedQuests, questPath) // fail
-            removeIfExist(stateWithChanges.progress.openQuests, questPath)
-
-            stateWithChanges = this.exec.modifyStateScript(stateWithChanges, q.onFail)
-
-            stateWithChanges.notifications.push(createInGameNotification("questfailed", q.name))
-            //TODO: close quest lines
-        })
-
-        stateWithChanges.progress.updates.openQuests.forEach(questPath => {
-            trace(`Open quest: ${questPath.toString()}`)
-            const found = getQuest(this.exec.game, questPath)
-            if (!found)
-                return
-            const [qline, q] = found
-
-            addIfNotExist(stateWithChanges.progress.openQuests, questPath) // open
-            stateWithChanges = this.exec.modifyStateScript(stateWithChanges, q.onOpen)
-
-            // open quest line
-            if (!stateWithChanges.progress.updates.openQuestLines.includes(qline.uid)) {
-                trace(`Opening quest line as well: ${qline.name}`)
-                stateWithChanges.progress.updates.openQuestLines.push(qline.uid)
-            }
-
-            stateWithChanges.notifications.push(createInGameNotification("questnew", q.name))
-        })
-
-        return stateWithChanges
+        state.notifications.push(createInGameNotification("questfailed", quest.name))
     }
 
-    private processQuestLines(state: State): State {
-        trace("Started questLines processing")
-        let stateWithChanges = state
+    openQuest(state: State, quest: Quest) {
+        const questPath = quest.path
+        trace(`Open quest: ${questPath.toString()}`)
 
-        stateWithChanges.progress.updates.openQuestLines.forEach(qlinePath => {
-            const qline = getQuestLine(this.exec.game, qlinePath)
-            if (qline == null)
-                return
+        const status = this.getQuestStatus(state, quest.path)
+        if (status !== "untouched") {
+            trace(`Quest  ${questPath.toString()} is already touched, skipping`)
+            return
+        }
 
-            // open quest line
-            if (!stateWithChanges.progress.openQuestLines.includes(qline.uid)) {
-                trace(`Opening quest line: ${qline.name}`)
-                stateWithChanges.progress.openQuestLines.push(qline.uid)
+        const found = getQuest(this.exec.game, questPath)
+        if (!found)
+            return
+        const [qline, q] = found
+
+        addIfNotExist(state.progress.openQuests, questPath) // open
+
+        const update = this.exec.modifyStateScript(state, quest.onOpen)
+        safeStateUpdate(state, update)
+
+        // try to open questline
+        if (this.getQuestLineStatus(state, qline) === "untouched") {
+            this.openQuestLine(state, qline)
+        }
+
+        // open first task if not open yet
+        if (quest.tasks.length > 0) {
+            const first = quest.tasks[0]
+            if (this.getTaskStatus(state, first) === "untouched") {
+                this.openTask(state, first)
             }
+        }
 
-            stateWithChanges.notifications.push(createInGameNotification("questlineopen", qline.name))
-        });
+        state.notifications.push(createInGameNotification("questnew", q.name))
+    }
 
-        stateWithChanges.progress.updates.closedQuestLines.forEach(qlinePath => {
-            const qline = getQuestLine(this.exec.game, qlinePath)
-            if (qline == null)
-                return
+    completeQuest(state: State, quest: Quest) {
+        const questPath = quest.path
+        trace(`Completed quest: ${questPath.toString()}`)
 
-            // remove quest line from opened
-            stateWithChanges.progress.openQuestLines = stateWithChanges.progress.openQuestLines.filter(q => q != qlinePath)
+        addIfNotExist(state.progress.completedQuests, questPath) // complete
+        removeIfExist(state.progress.openQuests, questPath)
 
-            // close quest line
-            if (!stateWithChanges.progress.closedQuestLines.includes(qline.uid)) {
-                trace(`Closing quest line: ${qline.name}`)
-                stateWithChanges.progress.closedQuestLines.push(qline.uid)
-            }
+        const update = this.exec.modifyStateScript(state, quest.onComplete)
+        safeStateUpdate(state, update)
 
-            stateWithChanges.notifications.push(createInGameNotification("questlineopen", qline.name))
-        });
+        // TODO: close quest line
 
-        return stateWithChanges
+        state.notifications.push(createInGameNotification("questfailed", quest.name))
+    }
+
+    openQuestLine(state: State, qline: QuestLine) {
+        trace(`Open quest line: ${qline.name}`)
+        if (this.getQuestLineStatus(state, qline) !== "untouched") {
+            return
+        }
+        state.progress.openQuestLines.push(qline.uid)
+        state.notifications.push(createInGameNotification("questlineopen", qline.name))
+    }
+
+    closeQuestLine(state: State, qline: QuestLine) {
+        trace(`Open quest line: ${qline.name}`)
+        if (this.getQuestLineStatus(state, qline) === "completed") {
+            return
+        }
+
+        state.progress.closedQuestLines.push(qline.uid)
+         // remove quest line from opened
+         state.progress.openQuestLines = state.progress.openQuestLines.filter(q => q != qline.uid)
+
+
+        state.notifications.push(createInGameNotification("questlineclose", qline.name))
     }
 }

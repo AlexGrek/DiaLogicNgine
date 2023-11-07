@@ -111,7 +111,7 @@ export class RenderViewGenerator {
         if (link.isVisible === undefined || link.isVisible === '') {
             return true;
         }
-        const { decision } = evaluateAsBoolProcessor(this.exec.game, link.isVisible, instate)
+        const { decision } = evaluateAsBoolProcessor(this.exec.game, link.isVisible, this.exec, instate)
         return decision
     }
 
@@ -119,7 +119,7 @@ export class RenderViewGenerator {
         if (link.isEnabled === undefined || link.isEnabled === '') {
             return [false, ''];
         }
-        const { decision } = evaluateAsBoolProcessor(this.exec.game, link.isEnabled, instate)
+        const { decision } = evaluateAsBoolProcessor(this.exec.game, link.isEnabled, this.exec, instate)
         return [!decision, 'link disabled reason is not implemented']
     }
 
@@ -169,7 +169,7 @@ export class RenderViewGenerator {
         // get avatar from character script
         if (character.chooseAvatarScript) {
             // eslint-disable-next-line
-            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseAvatarScript, instate)
+            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseAvatarScript, this.exec, instate)
             avatar = chooseImage(character.avatar, decision)
         }
 
@@ -183,7 +183,7 @@ export class RenderViewGenerator {
 
         if (character.chooseNameScript) {
             // eslint-disable-next-line
-            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseNameScript, instate)
+            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseNameScript, this.exec, instate)
             name = chooseText(character.displayName, decision)
         }
 
@@ -215,7 +215,7 @@ export class RenderViewGenerator {
     getCurrentText(tlist: TextList, inState: State, script?: string) {
         if (script) {
             // NOTE: All state changes are IGNORED here! Use other functions to change state
-            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, script, inState)
+            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, script, this.exec, inState)
             return chooseText(tlist, decision)
         }
         return tlist.main
@@ -258,7 +258,7 @@ export class RenderViewGenerator {
         })
         const visibleRoutes = routeLocs.filter(route => {
             if (route.isVisibleScript) {
-                const { decision } = evaluateAsBoolProcessor(this.exec.game, route.isVisibleScript, instate)
+                const { decision } = evaluateAsBoolProcessor(this.exec.game, route.isVisibleScript, this.exec, instate)
                 return decision
             }
             return true
@@ -266,7 +266,7 @@ export class RenderViewGenerator {
         return visibleRoutes.map((route, i) => {
             let disabled = false
             if (route.isAccessibleScript) {
-                const { decision } = evaluateAsBoolProcessor(this.exec.game, route.isAccessibleScript, instate)
+                const { decision } = evaluateAsBoolProcessor(this.exec.game, route.isAccessibleScript, this.exec, instate)
                 disabled = !decision
             }
 
@@ -358,7 +358,7 @@ export class RenderViewGenerator {
 
                 // get avatar from character script
                 if (char.chooseAvatarScript) {
-                    const { decision } = evaluateAsAnyProcessor(this.exec.game, char.chooseAvatarScript, state)
+                    const { decision } = evaluateAsAnyProcessor(this.exec.game, char.chooseAvatarScript, this.exec, state)
                     avatar = chooseImage(char.avatar, decision)
                 }
                 return {

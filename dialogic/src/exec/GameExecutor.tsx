@@ -71,7 +71,7 @@ export class GameExecManager {
 
     getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined) {
         if (script !== undefined && script !== '') {
-            const { decision } = evaluateAsBoolProcessor(this.game, script, instate)
+            const { decision } = evaluateAsBoolProcessor(this.game, script, this, instate)
             return decision
         }
         else {
@@ -228,7 +228,7 @@ export class GameExecManager {
                 return null
             }
             if (next.isVisibleScript) {
-                const { decision } = evaluateAsBoolProcessor(this.game, next.isVisibleScript, newState)
+                const { decision } = evaluateAsBoolProcessor(this.game, next.isVisibleScript, this, newState)
                 if (decision) {
                     // route is visible, may be accessible or not (we don't care)
                     return next.uid
@@ -290,9 +290,6 @@ export class GameExecManager {
             return newState
         }
 
-        // execute quests
-        newState = this.quests.withProgress(newState)
-
         return newState
     }
 
@@ -300,7 +297,7 @@ export class GameExecManager {
         var newState = this.withUpdatedStep(prevState)
         var directionFromLink = link.mainDirection
         if (link.isAlternativeLink && link.alternativeDirections.length > 0 && link.useAlternativeWhen) {
-            const { state, decision } = evaluateAsBoolProcessor(this.game, link.useAlternativeWhen, newState)
+            const { state, decision } = evaluateAsBoolProcessor(this.game, link.useAlternativeWhen, this, newState)
             newState = state
             if (decision) {
                 directionFromLink = link.alternativeDirections[0]
@@ -415,7 +412,7 @@ export class GameExecManager {
 
     modifyStateScript(instate: State, script?: string): State {
         if (script) {
-            return evaluateAsStateProcessor(this.game, script, instate)
+            return evaluateAsStateProcessor(this.game, script, this, instate)
         }
         return instate
     }
@@ -423,7 +420,7 @@ export class GameExecManager {
     getCurrentbackground(instate: State, backgrounds: ImageList, chooseBackgroundScript: string | undefined): string | undefined {
         const main = backgrounds.main
         if (chooseBackgroundScript) {
-            const { decision } = evaluateAsAnyProcessor(this.game, chooseBackgroundScript, instate)
+            const { decision } = evaluateAsAnyProcessor(this.game, chooseBackgroundScript, this, instate)
             return chooseImage(backgrounds, decision)
         }
         return main
@@ -433,7 +430,7 @@ export class GameExecManager {
         // execute code if needed BEFORE link is followed
         let modifiedState = state
         if (link.actionCode) {
-            modifiedState = evaluateAsStateProcessor(this.game, link.actionCode, modifiedState)
+            modifiedState = evaluateAsStateProcessor(this.game, link.actionCode, this, modifiedState)
         }
         modifiedState = this.withUpdatedHistory(this.followLink(modifiedState, link), clickData)
         return modifiedState;
