@@ -112,3 +112,14 @@ export function generateUidFromName(name: string) {
     const gluedWords = words.join('')
     return lowerFirst(gluedWords)
 }
+
+type GroupedData<T> = { [key: string]: T[] };
+
+export function groupByProperty<T>(array: T[], property: keyof T): GroupedData<T> {
+  return array.reduce((result, obj) => {
+    const key = String(obj[property]);
+    result[key] = result[key] || [];
+    result[key].push(obj);
+    return result;
+  }, {} as GroupedData<T>);
+}

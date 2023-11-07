@@ -31,5 +31,8 @@ export function createTranslations(): Translations {
         "Items": "",
         "Places": "",
         "Cancel": "",
+        "Open": "",
+        "Failed": "",
+        "Completed": "",
     }
 }

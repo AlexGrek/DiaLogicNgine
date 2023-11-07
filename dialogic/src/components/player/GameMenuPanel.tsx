@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { State } from '../../exec/GameState';
-import { CharInfoRenderView, RenderView } from '../../exec/RenderView';
+import { CharInfoRenderView, QuestRenderView, RenderView } from '../../exec/RenderView';
 import Fact, { createEmptyFact, getFact } from '../../game/Fact';
 import { GameDescription } from '../../game/GameDescription';
 import LeftTabUiMenuWidget, { DataGroups } from './LeftTabUiMenuWidget';
@@ -11,6 +11,8 @@ import { getChar } from '../../game/Character';
 import { GameExecManager } from '../../exec/GameExecutor';
 import Markdown from 'react-markdown';
 import { LocalizationManager } from '../../exec/Localization';
+import lodash from 'lodash';
+import { groupByProperty } from '../../Utils';
 
 
 interface GameMenuPanelProps {
@@ -67,6 +69,13 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
         </div>
     }
 
+    const renderQuestDetails = (d: QuestRenderView) => {
+        return <div className='ui-widget-char-renderer'>
+            <h2>{d.name}</h2>
+            <div><Markdown>{`${JSON.stringify(d.tasks)}`}</Markdown></div>
+        </div>
+    }
+
     const getFactsView = (): DataGroups<Fact> => {
         if (factsCache.current == null || state.knownFacts.length != factsCache.current.length) {
             // trace("Recreating facts cache for UI")
@@ -90,6 +99,27 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
             return updatedFacts
         }
         return factsCache.current
+    }
+
+    const getObjectives = (group: QuestRenderView[]): DataGroups<QuestRenderView> => {
+        const groupedByName = groupByProperty(group, "questLineName")
+        trace("Recreating QuestRenderView")
+        const qlinesNames = Object.keys(groupedByName).filter(key => Object.hasOwn(groupedByName, key))
+        const items = qlinesNames.map(qline => {
+            const content = groupedByName[qline]
+            return {
+                group: qline,
+                items: content.map(item => {
+                    return {
+                        label: item.name,
+                        value: item.name,
+                        data: item
+                    }
+                })
+            }
+        })
+        return items
+        // TODO: caching
     }
 
     const getCharsView = () => {
@@ -124,6 +154,24 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
         ]
     }
 
+    const objectivesTab = () => {
+        const objectivesView = executor.renderer.renderProgress(state)
+
+        return [{
+            name: localmanager.current.local("Open"),
+            contentRenderer: () => <LeftTabUiMenuWidget data={getObjectives(objectivesView.questsOpen)} detailsRenderer={renderQuestDetails} />
+        },
+        {
+            name: localmanager.current.local("Completed"),
+            contentRenderer: () => <LeftTabUiMenuWidget data={getObjectives(objectivesView.questsCompleted)} detailsRenderer={renderQuestDetails} />
+        },
+        {
+            name: localmanager.current.local("Failed"),
+            contentRenderer: () => <LeftTabUiMenuWidget data={getObjectives(objectivesView.questsFailed)} detailsRenderer={renderQuestDetails} />
+        }
+        ]
+    }
+
     const renderWidgetButton = (name: string) => {
         const classBaseName = 'game-menu-sub-button'
         const className = selectedWidget === name ? `${classBaseName} open` : classBaseName
@@ -136,6 +184,9 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
                 <div className={getClass('game-menu-widget-container')}>
                     {('Facts' === selectedWidget || 'Facts' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Facts')}>
                         <TabsUiMenuWidget data={factTabs()} />
+                    </div>}
+                    {('Journal' === selectedWidget || 'Journal' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Journal')}>
+                        <TabsUiMenuWidget data={objectivesTab()} />
                     </div>}
                 </div>
             </div>

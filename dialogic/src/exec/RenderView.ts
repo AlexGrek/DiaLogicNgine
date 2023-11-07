@@ -3,9 +3,11 @@ import Character, { CharacterDialog, getChar } from "../game/Character"
 import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
+import { Quest, QuestPath, getQuest, getQuestTask } from "../game/Objectives"
 import { TextList, chooseText } from "../game/TextList"
 import { GameExecManager } from "./GameExecutor"
 import { State } from "./GameState"
+import { ObjectiveStatus } from "./QuestProcessor"
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor } from "./Runtime"
 
 export interface ActorView {
@@ -19,6 +21,24 @@ export interface CharInfoRenderView {
     description: string
     name: string
     avatar?: string
+}
+
+export interface TaskRenderView {
+    name: string
+    status: ObjectiveStatus
+}
+
+export interface QuestRenderView {
+    name: string
+    status: ObjectiveStatus
+    tasks: TaskRenderView[]
+    questLineName: string
+}
+
+export interface ProgressRenderView {
+    questsOpen: QuestRenderView[]
+    questsCompleted: QuestRenderView[]
+    questsFailed: QuestRenderView[]
 }
 
 export interface RenderLink {
@@ -370,6 +390,43 @@ export class RenderViewGenerator {
             } catch (exception) {
                 return { name: "error " + charUid, description: `char error: ${exception}` }
             }
+        }
+    }
+
+    private renderTasks(state: State, quest: Quest): TaskRenderView[] {
+        return quest.tasks.map((task) => {
+            const status = this.exec.quests.getTaskStatus(state, task)
+            return {
+                name: task.text,
+                status: status
+            }
+        }).filter((render) => render.status !== "untouched")
+    }
+
+    private renderQuestGroup(state: State, group: QuestPath[], status: ObjectiveStatus) {
+        const game = this.exec.game
+        return group.map(qpath => {
+            const found = getQuest(game, qpath)
+            if (!found) {
+                return {
+                    name: "Error: " + qpath.toString(), status: status, tasks: [], questLineName: ""
+                }
+            }
+            const [questLine, quest] = found
+            return {
+                name: quest.name, status: status, tasks: this.renderTasks(state, quest), questLineName: questLine.name
+            }
+        })
+    }
+
+    public renderProgress(state: State): ProgressRenderView {
+        const open: QuestRenderView[] = this.renderQuestGroup(state, state.progress.openQuests, "open")
+        const failed: QuestRenderView[] = this.renderQuestGroup(state, state.progress.failedQuests, "failed")
+        const completed: QuestRenderView[] = this.renderQuestGroup(state, state.progress.completedQuests, "completed")
+        return {
+            questsCompleted: completed,
+            questsOpen: open,
+            questsFailed: failed
         }
     }
 }
