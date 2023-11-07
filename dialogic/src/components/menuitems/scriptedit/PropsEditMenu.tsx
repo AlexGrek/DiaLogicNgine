@@ -67,7 +67,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
         const copy = lodash.cloneDeep(props)
         var create = null;
         switch (createTypeChange) {
-            case "numeric":
+            case "number":
                 create = createNumberProp(createName, 0);
                 break;
             case "string":
