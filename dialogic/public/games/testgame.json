@@ -475,7 +475,7 @@
   "props": [ { "name": "testNumProp", "datatype": "number", "defaultValue": 42 }, { "datatype": "variant", "name": "testVariantProp", "variants": [ "a", "b", "c" ], "defaultValue": "b" } ],
   "buildVersion": 1,
   "startupDialog": { "kind": "window", "dialog": "dialog1", "window": "welcome" },
-  "engineVersion": "0.6",
+  "engineVersion": "0.7",
   "startMenu": {},
   "general": {
     "name": "Test game",
@@ -487,10 +487,24 @@
   "config": { "assetsPath": "" },
   "objectives": [
     {
-      "uid": "main",
+      "uid": "misc",
       "tags": [],
-      "quests": [ { "uid": "testObjective", "tasks": [ { "uid": "theTaskText", "text": "The task text", "critical": true } ], "tags": [], "ordered": true, "name": "Test objective" } ],
-      "name": "main"
+      "quests": [
+        {
+          "uid": "linearSimpleQuest",
+          "path": [ "misc", "linearSimpleQuest" ],
+          "tasks": [
+            { "uid": "task01", "text": "Task 01", "critical": true, "path": [ "misc", "linearSimpleQuest", "task01" ] },
+            { "uid": "task02", "text": "Task 02", "critical": true, "path": [ "misc", "linearSimpleQuest", "task02" ] },
+            { "uid": "task03", "text": "Task 03", "critical": true, "path": [ "misc", "linearSimpleQuest", "task03" ] }
+          ],
+          "tags": [],
+          "ordered": true,
+          "name": "Linear simple quest"
+        }
+      ],
+      "name": "Misc"
     }
-  ]
+  ],
+  "translations": { "Discuss...": "", "Facts": "", "Inventory": "", "Menu": "", "Journal": "", "Known people": "", "People": "", "Items": "", "Places": "", "Cancel": "", "Open": "", "Failed": "", "Completed": "" }
 }

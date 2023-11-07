@@ -19,10 +19,12 @@ export function removeIfExist<T extends object>(array: T[], o: T) {
     const index = arrayOfStrings.indexOf(objectString)
     if (index >= 0) {
         // it's here, so remove
-        trace(`Removing: ${objectString} from list of ${array.length}`)
-        array.slice(index, 1)
+        // trace(`Removing: ${objectString} from list of ${JSON.stringify(array)}`)
+        array.splice(index, 1)
+        // trace(`Removed: ${objectString} at ${index} from list of ${JSON.stringify(array)}`)
         return array
     }
+    // trace(`NOT Removing: ${objectString} from list of ${JSON.stringify(array)}`)
     // it's not there
     return array
 }
