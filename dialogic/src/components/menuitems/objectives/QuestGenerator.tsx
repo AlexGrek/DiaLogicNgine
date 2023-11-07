@@ -47,11 +47,11 @@ const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCrea
 
     const toStepFinal = () => {
         setGenStep(3)
-        const quest = createQuest(questId)
+        const quest = createQuest(questId, questline.uid)
         quest.name = questName
         const tasks = questTaskNames.map((taskName, index) => {
             const uid = questTaskIds[index]
-            const task = createTaskByUid(uid, index)
+            const task = createTaskByUid(uid, quest.path)
             task.text = taskName
             return task
         })

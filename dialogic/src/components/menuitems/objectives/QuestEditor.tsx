@@ -17,7 +17,7 @@ interface QuestEditorProps {
 }
 
 const QuestEditor: React.FC<QuestEditorProps> = ({ quest, game, onSetQuest }) => {
-    const [q, setQ] = useState<Quest>(createQuest(''));
+    const [q, setQ] = useState<Quest>(createQuest('', ''));
     const [editingItem, setEditingItem] = useState<number>(-1)
     const textFieldRef = useRef<HTMLInputElement>(null)
     const [itemMovingDownIndex, setItemMovingDownIndex] = useState<number>(-1)
@@ -70,7 +70,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ quest, game, onSetQuest }) =>
     }
 
     const handleCreateTask = () => {
-        const tasks = [...q.tasks, createTask(q.uid, q.tasks.length - 1)]
+        const tasks = [...q.tasks, createTask(q.path, q.tasks.length - 1)]
         setEditingItem(tasks.length - 1)
         onSetQuest({ ...q, tasks: tasks })
     }

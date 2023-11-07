@@ -42,7 +42,7 @@ interface TaskEditorProps {
 }
 
 const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }) => {
-    const [task, setTask] = useState<Task>(value || createTaskByUid("_", 0))
+    const [task, setTask] = useState<Task>(value || createTaskByUid("_", ["_", "_"]))
     const textFieldRef = useRef<HTMLInputElement>(null)
 
     // enable code editor props
@@ -50,7 +50,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }
     const [codeEditorOpen, setCodeEditorOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        setTask(value || createTaskByUid("_", 0))
+        setTask(value || createTaskByUid("_", quest.path))
         setTimeout(() => {
             console.log("Try to focus")
             if (textFieldRef.current && value) {
@@ -66,11 +66,15 @@ const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }
 
     const handleGenUid = () => {
         const id = generateUidFromName(task.text)
-        setTask({ ...task, uid: id })
+        handleSetUid(id)
     }
 
-    const textFieldEditor = (field: keyof Task, name?: string, focus = false) => {
-        const handleChange = (value: string) => setTask({ ...task, [field]: value })
+    const handleSetUid = (value: string) => {
+        setTask({ ...task, uid: value, path: [task.path[0], task.path[1], value]})
+    }
+
+    const textFieldEditor = (field: keyof Task, name: string, focus = false, changeHandler?: (value: string) => void) => {
+        const handleChange = changeHandler ? changeHandler : (value: string) => setTask({ ...task, [field]: value })
         const nameText = name || field
         return <div className='text-field-editor'><p className='editor-label' ref={focus ? textFieldRef : undefined}>{name}</p><Input name={nameText} value={`${task[field]}`} onChange={handleChange} /></div>
     }
@@ -105,7 +109,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }
         return <Stack direction='column' alignItems='stretch'>
             {textFieldEditor('text', "Task text", true)}
             <Button onClick={handleGenUid} appearance='subtle'>Generate UID</Button>
-            {textFieldEditor('uid', "Task JS UID")}
+            {textFieldEditor('uid', "Task JS UID", false, handleGenUid)}
             <Checkbox checked={task.critical} onChange={(_, checked) => setTask({ ...task, critical: checked })}>is critical (failure will fail the quest)</Checkbox>
             {renderCodeEditor(codeEditMenu)}
             <Divider>Scripting</Divider>
