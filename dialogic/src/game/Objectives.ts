@@ -1,4 +1,10 @@
+import { GameDescription } from "./GameDescription"
+
+export type QuestPath = [string, string]
+export type TaskPath = [string, string, string]
+
 export interface Task {
+    path: TaskPath
     uid: string
     text: string
     critical: boolean // if failed - all quest will be failed
@@ -11,12 +17,14 @@ export interface Task {
 
 export interface Quest {
     uid: string
+    path: QuestPath
     tasks: Task[]
     name: string
     tags: string[]
     ordered: true
     onComplete?: string
     onFail?: string
+    onOpen?: string
 }
 
 export default interface QuestLine {
@@ -26,25 +34,29 @@ export default interface QuestLine {
     tags: string[]
 }
 
-export function createTask(questuid: string, index: number): Task {
+export function createTask(questuid: QuestPath, index: number): Task {
+    const uid = `${questuid[1]}Task${index+1}`
     return {
-        uid: `${questuid}Task${index+1}`,
+        uid: uid,
         text: '',
-        critical: true
+        critical: true,
+        path: [questuid[0], questuid[1], uid]
     }
 }
 
-export function createTaskByUid(taskuid: string, index: number): Task {
+export function createTaskByUid(taskuid: string, questuid: QuestPath): Task {
     return {
         uid: taskuid,
         text: '',
-        critical: true
+        critical: true,
+        path: [questuid[0], questuid[1], taskuid]
     }
 }
 
-export function createQuest(questuid: string): Quest {
+export function createQuest(questuid: string, lineUID: string): Quest {
     return {
         uid: questuid,
+        path: [lineUID, questuid],
         tasks: [],
         tags: [],
         ordered: true,
@@ -59,4 +71,34 @@ export function createQuestLine(uid: string): QuestLine {
         quests: [],
         name: ''
     }
+}
+
+export function getQuestLine(game: GameDescription, uid: string): QuestLine | null {
+    const line = game.objectives.find(o => o.uid === uid)
+    return line || null
+}
+ 
+export function getQuest(game: GameDescription, uid: QuestPath) : [QuestLine, Quest] | null {
+    const [qline, q] = uid
+    const line = game.objectives.find(o => o.uid === qline)
+    if (!line)
+        return null
+    const quest = line.quests.find(qst => qst.uid === q)
+    if (!quest)
+        return null
+    return [line, quest]
+}
+
+export function getQuestTask(game: GameDescription, uid: TaskPath): [QuestLine, Quest, Task] | null {
+    const [qline, q, tsk] = uid
+    const line = game.objectives.find(o => o.uid === qline)
+    if (!line)
+        return null
+    const quest = line.quests.find(qst => qst.uid === q)
+    if (!quest)
+        return null
+    const task = quest.tasks.find(t => t.uid === tsk)
+    if (!task)
+        return null
+    return [line, quest, task]
 }

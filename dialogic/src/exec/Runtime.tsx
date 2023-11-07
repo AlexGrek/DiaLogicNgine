@@ -4,6 +4,7 @@ import { GameDescription } from "../game/GameDescription";
 import Prop from "../game/Prop";
 import { roleByUid } from "../game/Character";
 import QuestLine, { Quest, Task } from "../game/Objectives";
+import { addIfNotExist, contains } from "./QuestProcessor";
 
 type StateProvider = () => State
 
@@ -130,38 +131,78 @@ class RuntimeObjectiveQuest {
 
     public fail() {
         const state = this.stateProvider()
-        state.progress.failedQuests.push(this.quest.uid)
+        addIfNotExist(state.progress.updates.failedQuests, this.quest.path)
+    }
+
+    public complete() {
+        const state = this.stateProvider()
+        addIfNotExist(state.progress.updates.completedQuests, this.quest.path)
+    }
+
+    public open() {
+        const state = this.stateProvider()
+        addIfNotExist(state.progress.updates.openQuests, this.quest.path)
     }
 }
 
 class RuntimeObjectiveTask {
     stateProvider!: () => State;
     task: Task
-    parent: RuntimeObjectiveQuest
 
-    constructor(stateProvider: () => State, task: Task, parent: RuntimeObjectiveQuest) {
+    constructor(stateProvider: () => State, task: Task) {
         this.task = task
         this.stateProvider = stateProvider
-        this.parent = parent
     }
 
     public get isCompleted() {
         const state = this.stateProvider()
-        return state.progress.completedTasks.includes(this.task.uid)
+        return contains(state.progress.completedTasks, this.task.path) || contains(state.progress.failedTasks, this.task.path)
     }
 
     public get isFailed() {
         const state = this.stateProvider()
-        return state.progress.failedTasks.includes(this.task.uid)
+        return contains(state.progress.failedTasks, this.task.path) || contains(state.progress.updates.failedTasks, this.task.path)
     }
 
     public fail() {
         const state = this.stateProvider()
-        state.progress.failedTasks.push(this.task.uid)
-        if (this.task.critical) {
-            this.parent.fail()
-        }
+        addIfNotExist(state.progress.updates.failedTasks, this.task.path)
     }
+
+    public complete() {
+        const state = this.stateProvider()
+        addIfNotExist(state.progress.updates.completedTasks, this.task.path)
+    }
+
+    public open() {
+        const state = this.stateProvider()
+        addIfNotExist(state.progress.updates.openTasks, this.task.path)
+    }
+}
+
+interface RuntimeObjectivesHost {
+    quests: any
+    tasks: any
+}
+
+function addRuntimeObjectives(game: GameDescription, rt: RuntimeRt) {
+    const stateProvider = () => rt.mustGetState()
+    const host: any = {}
+    game.objectives.forEach(qline => {
+        const rtqline: any = new RuntimeObjectiveQuestLine(stateProvider, qline)
+
+        // add quests to the qline
+        qline.quests.forEach(quest => {
+            rtqline[quest.uid] = new RuntimeObjectiveQuest(stateProvider, quest, qline)
+
+            // add tasks to the quest
+            quest.tasks.forEach(task => {
+                rtqline[quest.uid][task.uid] = new RuntimeObjectiveTask(stateProvider, task)
+            })
+        })
+
+        host[qline.uid] = rtqline
+    })
 }
 
 function addFacts(factsHost: any, game: GameDescription) {
@@ -177,11 +218,13 @@ export class RuntimeRt {
     props: any
     ch: any
     facts: any
+    objectives: any
 
-    constructor(props: any, chars: any, facts: any, state?: State) {
+    constructor(props: any, chars: any, facts: any, game: GameDescription, state?: State) {
         this.props = props
         this.ch = chars
         this.facts = facts
+        this.objectives = addRuntimeObjectives(game, this)
         if (state)
             this.setState(state)
     }
@@ -193,6 +236,13 @@ export class RuntimeRt {
         this.ch.state = this.state
         this.facts.state = this.state
     }
+
+    public mustGetState(): State {
+        if (!this.state) {
+            throw Error("State is not defined while user code is running")
+        }
+        return this.state
+    }
 }
 
 export function createRtObject(game: GameDescription, state?: State) {
@@ -202,7 +252,7 @@ export function createRtObject(game: GameDescription, state?: State) {
     addProps(propsHost, game)
     addChars(charsHost, game)
     addFacts(factsHost, game)
-    var rt = new RuntimeRt(propsHost, charsHost, factsHost, state)
+    var rt = new RuntimeRt(propsHost, charsHost, factsHost, game, state)
     return rt
 }
 

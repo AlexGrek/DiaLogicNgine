@@ -2,6 +2,22 @@ import { GameDescription } from "../game/GameDescription"
 import { GameProgress, createInitialGameProgress } from "./GameProgress"
 import { Translations } from "./Localization"
 
+export type InGameNotificationType = "questnew" | "questfailed" | "questcompleted" | "questprogress" | "questlineopen" | "questlineclose" 
+
+export interface InGameNotification {
+    type: InGameNotificationType
+    text: string
+    item?: string
+}
+
+export function createInGameNotification(type: InGameNotificationType, text: string, item?: string) {
+    return {
+        type: type,
+        text: text,
+        item: item
+    }
+}
+
 export interface DialogWindowId {
     kind: "window"
     dialog: string
@@ -55,6 +71,7 @@ export interface State {
     progress: GameProgress
     quickReplyText: string | null
     engineVersion: string
+    notifications: InGameNotification[]
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -74,5 +91,6 @@ export function createInitialState(game: GameDescription): State {
         knownPlaces: [],
         engineVersion: game.engineVersion,
         progress: createInitialGameProgress(),
+        notifications: []
     }
 }

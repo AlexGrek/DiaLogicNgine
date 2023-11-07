@@ -109,7 +109,7 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
                     <SimpleTextList items={getFacts()} onSelect={handleFactSelect}></SimpleTextList>
                 </DiscussionTab>}
                 {view.dialogOptions.canDiscussItems && <DiscussionTab name={localization.local('Items')}>
-                    children
+                    not implemented yet
                 </DiscussionTab>}
                 {view.dialogOptions.canDiscussLocations && <DiscussionTab name={localization.local('Places')}>
                     <SimpleTextList items={getLocs()} onSelect={handleLocSelect}></SimpleTextList>

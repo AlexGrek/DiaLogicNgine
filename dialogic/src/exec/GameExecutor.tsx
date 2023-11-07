@@ -10,17 +10,20 @@ import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 import EventsProcessor from "./EventsProcessor";
 import DiscussionProcessor from "./DiscussionProcessor";
+import QuestProcessor from "./QuestProcessor";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
     game: GameDescription
     renderer: RenderViewGenerator
     events: EventsProcessor
+    quests: QuestProcessor
 
     constructor(game: GameDescription) {
         this.game = game
         this.renderer = new RenderViewGenerator(this)
         this.events = new EventsProcessor(this)
+        this.quests = new QuestProcessor(this)
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
@@ -253,9 +256,10 @@ export class GameExecManager {
     }
 
     private executeEntry(state: State) {
+        let newState = state
         const location = this.getCurrentLocation(state)
         if (location != null) {
-            let newState = this.modifyStateScript(state, location.onEntryScript)
+            newState = this.modifyStateScript(state, location.onEntryScript)
             newState = this.withUpdatedBackground(newState, location.backgrounds, location.choosebackgroundScript)
             newState.location = location.uid
             // add this location and all visible routes to known places
@@ -266,7 +270,7 @@ export class GameExecManager {
         const charDialog = this.getCurrentCharDialog(state)
         if (charDialog != null) {
             const [char, dialog] = charDialog
-            let newState = this.withUpdatedBackground(state, dialog.background, dialog.chooseBgScript)
+            newState = this.withUpdatedBackground(state, dialog.background, dialog.chooseBgScript)
             newState.charDialog = char.uid
             newState = this.addToKnownPeople(newState, char.uid)
             return newState
@@ -275,7 +279,7 @@ export class GameExecManager {
         const dw = this.getCurrentDialogWindow(state)
         if (dw != null) {
             const [_, window] = dw
-            let newState = state
+            newState = state
             if (window.backgrounds.main) {
                 newState = this.withUpdatedBackground(state, window.backgrounds, window.chooseBackgroundScript)
             }
@@ -286,7 +290,10 @@ export class GameExecManager {
             return newState
         }
 
-        return state
+        // execute quests
+        newState = this.quests.withProgress(newState)
+
+        return newState
     }
 
     private followLink(prevState: State, link: DialogLink): State {
@@ -406,7 +413,7 @@ export class GameExecManager {
         return state
     }
 
-    private modifyStateScript(instate: State, script?: string): State {
+    modifyStateScript(instate: State, script?: string): State {
         if (script) {
             return evaluateAsStateProcessor(this.game, script, instate)
         }
