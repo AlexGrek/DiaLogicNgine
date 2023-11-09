@@ -1,11 +1,11 @@
 import lodash, { isBoolean, isNumber, isString } from "lodash";
-import { State } from "./GameState";
-import { GameDescription } from "../game/GameDescription";
-import Prop from "../game/Prop";
 import { roleByUid } from "../game/Character";
+import { GameDescription } from "../game/GameDescription";
 import QuestLine, { Quest, Task } from "../game/Objectives";
-import { ObjectiveStatus, addIfNotExist, contains } from "./QuestProcessor";
+import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
+import { State } from "./GameState";
+import { ObjectiveStatus } from "./QuestProcessor";
 
 type StateProvider = () => State
 
@@ -338,14 +338,14 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, execMa
             console.warn(`User code damaged state object, old state returned instead`)
         }
         if (isBoolean(boolResult)) {
-            return {state: state, decision: boolResult}
+            return { state: state, decision: boolResult }
         } else {
-            return {state: state, decision: boolResult ? true : false} // convert to bool using ternary operator
+            return { state: state, decision: boolResult ? true : false } // convert to bool using ternary operator
         }
     } catch (exception) {
         console.warn("Exception while processing user code")
         console.error(exception)
-        return {state: { ...prevState, fatalError: { message: `Error in user code (bool processor): ${exception}`, exception: exception } }, decision: false}
+        return { state: { ...prevState, fatalError: { message: `Error in user code (bool processor): ${exception}`, exception: exception } }, decision: false }
     }
 }
 
@@ -362,11 +362,11 @@ export function evaluateAsAnyProcessor(game: GameDescription, s: string, execMan
         else {
             console.warn(`User code damaged state object, old state returned instead`)
         }
-        return {state: state, decision: boolResult}
+        return { state: state, decision: boolResult }
     } catch (exception) {
         console.warn("Exception while processing user code")
         console.error(exception)
-        return {state: { ...prevState, fatalError: { message: `Error in user code (bool processor): ${exception}`, exception: exception } }, decision: false}
+        return { state: { ...prevState, fatalError: { message: `Error in user code (bool processor): ${exception}`, exception: exception } }, decision: false }
     }
 }
 

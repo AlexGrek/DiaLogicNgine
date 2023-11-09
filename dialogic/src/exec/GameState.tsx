@@ -1,8 +1,7 @@
 import { GameDescription } from "../game/GameDescription"
 import { GameProgress, createInitialGameProgress } from "./GameProgress"
-import { Translations } from "./Localization"
 
-export type InGameNotificationType = "questnew" | "questfailed" | "questcompleted" | "questprogress" | "questlineopen" | "questlineclose" 
+export type InGameNotificationType = "questnew" | "questfailed" | "questcompleted" | "questprogress" | "questlineopen" | "questlineclose"
 
 export interface InGameNotification {
     type: InGameNotificationType

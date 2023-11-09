@@ -153,7 +153,7 @@
     }
 
     100% {
-        transform: scaleY(60%);
+        transform: scaleY(80%);
         opacity: 0;
     }
 }
@@ -193,8 +193,8 @@
     }
 
     0% {
-        transform: translate(0, 150%);
-        opacity: .1;
+        transform: translate(20pt, 0);
+        opacity: 0;
     }
 }
 

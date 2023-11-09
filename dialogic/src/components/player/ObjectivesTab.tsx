@@ -26,7 +26,7 @@ const objectivesTab: React.FC<objectivesTabProps> = ({ gameExecutor, state, loca
         const items = qlinesNames.map(qline => {
             const content = groupedByName[qline]
             return {
-                group: qline,
+                group: qline, 
                 items: content.map(item => {
                     return {
                         label: item.name,

@@ -1,12 +1,11 @@
 import React, { ReactNode } from 'react';
 import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
-import { CharDialogRenderView } from '../../exec/RenderView';
 import { State } from '../../exec/GameState';
-import "./player.css";
 import { LocalizationManager } from '../../exec/Localization';
+import { CharDialogRenderView } from '../../exec/RenderView';
 import { createEmptyFact, getFact } from '../../game/Fact';
-import { trace } from '../../Trace';
 import { getLoc } from '../../game/Loc';
+import "./player.css";
 
 interface DiscussionTopicPickerProps {
     game: GameExecManager
