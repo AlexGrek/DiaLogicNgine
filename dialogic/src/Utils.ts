@@ -116,10 +116,17 @@ export function generateUidFromName(name: string) {
 type GroupedData<T> = { [key: string]: T[] };
 
 export function groupByProperty<T>(array: T[], property: keyof T): GroupedData<T> {
-  return array.reduce((result, obj) => {
-    const key = String(obj[property]);
-    result[key] = result[key] || [];
-    result[key].push(obj);
-    return result;
-  }, {} as GroupedData<T>);
+    return array.reduce((result, obj) => {
+        const key = String(obj[property]);
+        result[key] = result[key] || [];
+        result[key].push(obj);
+        return result;
+    }, {} as GroupedData<T>);
+}
+
+export function trimArray<T>(arr: T[], maxLength: number): T[] {
+    if (arr.length > maxLength) {
+        return arr.slice(0, maxLength);
+    }
+    return arr;
 }

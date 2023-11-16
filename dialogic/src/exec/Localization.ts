@@ -38,6 +38,8 @@ export function createTranslations(): Translations {
         "Save": "",
         "About": "",
         "New game": "",
-        "Load": ""
+        "Load": "",
+        "Start new game": "",
+        "Confirm restart": ""
     }
 }

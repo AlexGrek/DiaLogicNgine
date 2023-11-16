@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { RenderView } from '../../exec/RenderView';
@@ -6,6 +6,7 @@ import { styleWithImage } from '../UiUtils';
 import GameMenuPanel from './GameMenuPanel';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
 import InGameControlPad from './InGameControlPad';
+import SavesManager from '../../savegame/LocalStorageSavesManager';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -20,6 +21,12 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [prevbackground, setPrevbackground] = React.useState<string | null>(null)
     const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
+
+    const savesManager = useRef<SavesManager>(new SavesManager(game.game.general.name))
+
+    useEffect(() => {
+        savesManager.current = new SavesManager(game.game.general.name)
+    }, [game.game])
 
     useEffect(() => {
         const view = game.renderer.render(state, background)
@@ -53,6 +60,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
             return;
         }
         else {
+            savesManager.current.newAutoSave(newState)
             onStateUpd(newState)
         }
     }
@@ -88,7 +96,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} onStateChange={onStateUpd}/>
+                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd}/>
                     </div>
                     <div className={gameWidgetClass('player-core-uiwidget-container')}>
                         <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />

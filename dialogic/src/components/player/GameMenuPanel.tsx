@@ -11,6 +11,7 @@ import TabsUiMenuWidget from './TabsUiMenuWidget';
 import './gamemenupanel.css';
 import ObjectivesTab from './ObjectivesTab';
 import MenuTab from './MenuTab';
+import SavesManager from '../../savegame/LocalStorageSavesManager';
 
 
 interface GameMenuPanelProps {
@@ -21,9 +22,10 @@ interface GameMenuPanelProps {
     game: GameDescription
     executor: GameExecManager
     onStateChange: (newstate: State) => void
+    savesManager: SavesManager
 }
 
-const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpenClose, game, executor, onStateChange }) => {
+const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpenClose, game, executor, onStateChange, savesManager }) => {
     const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
     const [selectedWidgetPrev, setSelectedWidgetPrev] = useState<string | null>(null);
 
@@ -150,7 +152,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpen
                         <ObjectivesTab gameExecutor={executor} state={state} localmanager={localmanager.current}/>
                     </div>}
                     {('Menu' === selectedWidget || 'Menu' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Menu')}>
-                        <MenuTab gameExecutor={executor} state={state} localmanager={localmanager.current} onStateChange={onStateChange}/>
+                        <MenuTab onCloseMenu={() => onOpenClose(false)} manager={savesManager} gameExecutor={executor} state={state} localmanager={localmanager.current} onStateChange={onStateChange}/>
                     </div>}
                 </div>
             </div>
