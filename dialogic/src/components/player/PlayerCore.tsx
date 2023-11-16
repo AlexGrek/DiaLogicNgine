@@ -88,7 +88,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} />
+                        <GameMenuPanel executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} onStateChange={onStateUpd}/>
                     </div>
                     <div className={gameWidgetClass('player-core-uiwidget-container')}>
                         <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />

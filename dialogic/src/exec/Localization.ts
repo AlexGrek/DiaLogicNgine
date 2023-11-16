@@ -34,5 +34,10 @@ export function createTranslations(): Translations {
         "Open": "",
         "Failed": "",
         "Completed": "",
+        "Create new save": "",
+        "Save": "",
+        "About": "",
+        "New game": "",
+        "Load": ""
     }
 }
