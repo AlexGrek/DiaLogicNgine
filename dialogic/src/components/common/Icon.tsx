@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type IconType = "fastforward" 
+export type IconType = "fastforward" | "image"
 
 interface IconProps {
     className?: string;
@@ -11,6 +11,8 @@ function getIcon(icon: IconType) {
     switch (icon) {
         case "fastforward":
             return "9"
+        case "image":
+            return "\ue005"
         default:
             return "\uE062"
     }

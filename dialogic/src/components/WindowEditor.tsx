@@ -5,6 +5,7 @@ import WindowWidgetContextMenu from './WindowWidgetContextMenu';
 import { IUpds } from '../App';
 import { GameDescription } from '../game/GameDescription';
 import LinkTypeTag from './LinkTypeTag';
+import Icon from './common/Icon';
 
 export interface IWindowEditorProps {
   window: DialogWindow;
@@ -51,7 +52,7 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
       key++
     }
     if (this.props.window.backgrounds.main) {
-      const tag = <Tag key={key} color="orange">bg</Tag>
+      const tag = <Tag key={key} color="orange"><Icon icon="image"/></Tag>
       tags.push(tag)
       key++
     }
