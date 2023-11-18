@@ -14,6 +14,7 @@ import { IUpds } from '../../../App';
 import Note from '../../userguide/Note';
 import StringMapEditor from '../../common/StringMapEditor';
 import { Translations } from '../../../exec/Localization';
+import StringListEditor from '../../common/StringListEditor';
 
 interface ConfigurationMenuProps {
     game: GameDescription;
@@ -25,7 +26,7 @@ interface ConfigurationMenuProps {
 const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, handlers, visible }) => {
     const [currentGame, setCurrentGame] = useState<GameDescription>(game);
     const [generalEditorOpen, setGeneralEditorOpen] = useState<boolean>(false);
-    
+
     useEffect(() => {
         setCurrentGame(game);
     }, [game]);
@@ -59,7 +60,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
     return (
         <div>
             <h3 className='center-header'>Game configuration menu</h3>
-            <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"}/>
+            <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"} />
             <Stack wrap={true} alignItems='stretch'>
                 <Panel style={{ minWidth: '30em', maxWidth: '40em' }}
                     bordered
@@ -83,13 +84,16 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                         <p>Startup dialog</p>
                         <DialogWindowPicker handlers={handlers} dialogs={currentGame.dialogs} chosen={[currentGame.startupDialog.dialog, currentGame.startupDialog.window]} onValueChange={onCurrentDialogChange}></DialogWindowPicker>
                     </Panel>
+                    <Panel header="Situations">
+                        <StringListEditor canBeEmpty value={currentGame.situations} onChange={(val) => onSetGame({ ...currentGame, situations: val })} />
+                    </Panel>
                     <Panel header="Menu background">
-                        <img className='menu-config-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
+                        <img className='menu-config-thumb-preview' src={publicImageSrc || undefined} alt="[no image]"></img>
                         <PublicFileUrl extensions={IMAGES} value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)}></PublicFileUrl>
                     </Panel>
                     <Panel header='Localization'>
                         <div>
-                            <StringMapEditor onChange={(transl) => onSetGame({...game, translations: transl})} value={game.translations}/>
+                            <StringMapEditor onChange={(transl) => onSetGame({ ...game, translations: transl })} value={game.translations} />
                         </div>
                     </Panel>
                 </PanelGroup>
