@@ -88,7 +88,7 @@ function addChars(chars: any, game: GameDescription) {
     return chars
 }
 
-class RuntimeFact {
+export class RuntimeFact {
     stateProvider!: () => State;
     uid!: string;
 
@@ -111,79 +111,79 @@ class RuntimeFact {
     }
 }
 
-class RuntimeObjectiveQuestLine {
-    stateProvider!: () => State;
-    questline: QuestLine
-    context: GameExecManager
+export class RuntimeObjectiveQuestLine {
+    _stateProvider!: () => State;
+    _questline: QuestLine
+    _context: GameExecManager
 
     constructor(context: GameExecManager, stateProvider: () => State, questline: QuestLine) {
-        this.questline = questline
-        this.context = context
-        this.stateProvider = stateProvider
+        this._questline = questline
+        this._context = context
+        this._stateProvider = stateProvider
     }
 
     public open() {
-        const state = this.stateProvider()
-        this.context.quests.openQuestLine(state, this.questline)
+        const state = this._stateProvider()
+        this._context.quests.openQuestLine(state, this._questline)
     }
 
     public close() {
-        const state = this.stateProvider()
-        this.context.quests.closeQuestLine(state, this.questline)
+        const state = this._stateProvider()
+        this._context.quests.closeQuestLine(state, this._questline)
     }
 
     public get status() {
-        const state = this.stateProvider()
-        return this.context.quests.getQuestLineStatus(state, this.questline)
+        const state = this._stateProvider()
+        return this._context.quests.getQuestLineStatus(state, this._questline)
     }
 }
 
-class RuntimeObjectiveQuest {
-    stateProvider!: () => State;
-    quest: Quest
-    context: GameExecManager
+export class RuntimeObjectiveQuest {
+    _stateProvider!: () => State;
+    _quest: Quest
+    _context: GameExecManager
 
     constructor(context: GameExecManager, stateProvider: () => State, quest: Quest, parent: QuestLine) {
-        this.quest = quest
-        this.context = context
-        this.stateProvider = stateProvider
+        this._quest = quest
+        this._context = context
+        this._stateProvider = stateProvider
     }
 
     public fail() {
-        const state = this.stateProvider()
-        this.context.quests.failQuest(state, this.quest)
+        const state = this._stateProvider()
+        this._context.quests.failQuest(state, this._quest)
     }
 
     public complete() {
-        const state = this.stateProvider()
-        this.context.quests.completeQuest(state, this.quest)
+        const state = this._stateProvider()
+        this._context.quests.completeQuest(state, this._quest)
     }
 
     public open() {
-        const state = this.stateProvider()
-        this.context.quests.openQuest(state, this.quest)
+        const state = this._stateProvider()
+        this._context.quests.openQuest(state, this._quest)
     }
 
     public get status(): ObjectiveStatus {
-        const state = this.stateProvider()
-        return this.context.quests.getQuestStatus(state, this.quest.path)
+        const state = this._stateProvider()
+        return this._context.quests.getQuestStatus(state, this._quest.path)
     }
 }
 
-class RuntimeObjectiveTask {
-    stateProvider!: () => State;
-    task: Task
-    context: GameExecManager
+export class RuntimeObjectiveTask {
+    _stateProvider!: () => State;
+    _task: Task
+    _context: GameExecManager
 
     constructor(context: GameExecManager, stateProvider: () => State, task: Task) {
-        this.task = task
-        this.context = context
-        this.stateProvider = stateProvider
+        this._task = task
+        this._context = context
+        this._stateProvider = stateProvider
     }
 
     public get status(): ObjectiveStatus {
-        const state = this.stateProvider()
-        return this.context.quests.getTaskStatus(state, this.task)
+        const state = this._stateProvider()
+        return this._context.quests.getTaskStatus(state, this._task)
     }
 
     public get isCompleted() {
@@ -199,18 +199,18 @@ class RuntimeObjectiveTask {
     }
 
     public fail() {
-        const state = this.stateProvider()
-        this.context.quests.failTask(state, this.task)
+        const state = this._stateProvider()
+        this._context.quests.failTask(state, this._task)
     }
 
     public complete() {
-        const state = this.stateProvider()
-        this.context.quests.completeTask(state, this.task)
+        const state = this._stateProvider()
+        this._context.quests.completeTask(state, this._task)
     }
 
     public open() {
-        const state = this.stateProvider()
-        this.context.quests.openTask(state, this.task)
+        const state = this._stateProvider()
+        this._context.quests.openTask(state, this._task)
     }
 }
 
