@@ -60,6 +60,11 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
       tags.push(tag)
       key++
     }
+    if (this.props.window.changeSituation) {
+      const tag = <Tag key={key} color="red">situation</Tag>
+      tags.push(tag)
+      key++
+    }
     return tags
   }
 

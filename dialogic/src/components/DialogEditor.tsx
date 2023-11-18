@@ -107,7 +107,7 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
 
     return (
       <div ref={this.itemReference}>
-        {this.props.visible &&<div className='window-editor-tools'>
+        {this.props.visible && <div className='window-editor-tools'>
           <CreateWindowButton createHandler={this.createDialogWindowHandler.bind(this)}></CreateWindowButton>
           <IconButton icon={<PushMessageIcon />} placement="left" onClick={() => this.setState({ chainOpen: true })}>
             Chain

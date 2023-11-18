@@ -86,15 +86,6 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         onStateUpd(game.dialogVariantApply(state, link, clickData))
     }
 
-    const dialogVariants = () => {
-        return view.links.map((link, i) => {
-            const textOfLink = link.text
-            return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled} className='dialog-button' onClick={() => click(link.link, textOfLink)}>{textOfLink}</button>
-            </div>)
-        })
-    }
-
     const renderShortHistoryItem = (item: HistoryRecord, latest: boolean, index: number) => {
         // TODO: add actor rendering
         return <div key={index} id={latest ? "history-record-latest" : `history-record-${item.step}`} className='dialog-history-record'>

@@ -251,6 +251,7 @@ export class RuntimeRt {
     facts: any
     objectives: any
     context: GameExecManager
+    situation: string | undefined
 
     constructor(props: any, chars: any, facts: any, game: GameDescription, context: GameExecManager, state?: State) {
         this.context = context
@@ -268,6 +269,7 @@ export class RuntimeRt {
         this.props.state = this.state
         this.ch.state = this.state
         this.facts.state = this.state
+        this.situation = this.state.situation
     }
 
     public mustGetState(): State {
@@ -301,16 +303,21 @@ export function stateIsValid(stateCandidate: any) {
 }
 
 function makeFunctionBody(s: string) {
-    return `(function (rt, state, props, ch, facts) { ${s} })`
+    return `(function (rt, state, props, ch, facts, objectives, situation) { ${s} })`
 }
 
-export function evaluateAsStateProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
+function evaluate(game: GameDescription, s: string, execManager: GameExecManager, prevState: State): [any, State] {
     const body = makeFunctionBody(s)
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
+    var returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation);
+    return [returned, stateCopy]
+}
+
+export function evaluateAsStateProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
     try {
-        var newState = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
+        var [newState, stateCopy] = evaluate(game, s, execManager, prevState)
         if (stateIsValid(newState))
             return newState as State
         else {
@@ -325,13 +332,9 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, execM
 }
 
 export function evaluateAsBoolProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
-    const body = makeFunctionBody(s)
-    console.log(body)
     var state = prevState
-    var stateCopy = lodash.cloneDeep(prevState)
-    const rt = createRtObject(game, execManager, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
+        var [boolResult, stateCopy] = evaluate(game, s, execManager, prevState)
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
@@ -350,19 +353,15 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, execMa
 }
 
 export function evaluateAsAnyProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
-    const body = makeFunctionBody(s)
-    console.log(body)
     var state = prevState
-    var stateCopy = lodash.cloneDeep(prevState)
-    const rt = createRtObject(game, execManager, stateCopy)
     try {
-        var boolResult = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts);
+        var [anyResult, stateCopy] = evaluate(game, s, execManager, prevState)
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
             console.warn(`User code damaged state object, old state returned instead`)
         }
-        return { state: state, decision: boolResult }
+        return { state: state, decision: anyResult }
     } catch (exception) {
         console.warn("Exception while processing user code")
         console.error(exception)

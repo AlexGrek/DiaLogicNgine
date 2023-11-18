@@ -71,6 +71,7 @@ export interface DialogWindow {
     actor?: Actor
     tags: string[]
     changeLocationInBg?: string
+    changeSituation?: string
 }
 
 export const createWindow = (uid: string) => {

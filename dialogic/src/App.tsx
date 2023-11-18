@@ -49,6 +49,7 @@ export interface IUpds {
   handleLocChange: (locs: Loc[]) => void;
   handlePropChange: (props: Prop[]) => void;
   createProp: (prop: Prop) => void;
+  createSituation: (situation: string) => void;
   notify: NotifyCallback
   copy: (obj: any, typename: string) => void
   paste: () => CopiedObject | undefined
@@ -161,6 +162,10 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({ game: { ...this.state.game, props: [...this.state.game.props, prop] } })
   }
 
+  private createSituation(s: string) {
+    this.setState({ game: { ...this.state.game, situations: [...this.state.game.situations, s] } })
+  }
+
 
   private displayStyle(name: string) {
     return {
@@ -221,7 +226,8 @@ export default class App extends React.Component<IAppProps, IAppState> {
       createProp: this.createProp.bind(this),
       notify: this.handleNotify.bind(this),
       copy: this.handleCopy.bind(this),
-      paste: this.handlePaste.bind(this)
+      paste: this.handlePaste.bind(this),
+      createSituation: this.createSituation.bind(this)
     }
 
     let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);

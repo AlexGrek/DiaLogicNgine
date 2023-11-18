@@ -10,7 +10,7 @@ import Loc from "./Loc";
 import QuestLine from "./Objectives";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION="0.7"
+export const ENGINE_VERSION="0.8"
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -58,6 +58,7 @@ export interface GameDescription {
     general: GeneralGameInfo
     config: Config
     objectives: QuestLine[]
+    situations: string[]
     translations: Translations
 }
 
@@ -89,6 +90,7 @@ export function createDefaultGame(): GameDescription {
         items: [],
         events: [],
         eventHosts: [],
+        situations: [],
         translations: createTranslations(),
         roles: [agedRole],
         props: [

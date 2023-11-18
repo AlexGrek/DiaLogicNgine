@@ -53,10 +53,26 @@ export class PatchFrom06To07 implements Patch {
     }
 }
 
+export class PatchFrom07To08 implements Patch {
+    from(): string {
+        return "0.7"
+    }
+    to(): string {
+        return "0.8"
+    }
+    apply(obj: any): GameDescription {
+        // do the patch work
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        obj["situations"] = []
+        return obj as GameDescription
+    }
+}
+
 const PATCHES = [
     new PatchFrom04To05(),
     new PatchFrom05To06(),
-    new PatchFrom06To07()
+    new PatchFrom06To07(),
+    new PatchFrom07To08()
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {

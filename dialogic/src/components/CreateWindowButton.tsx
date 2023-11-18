@@ -46,7 +46,7 @@ export default class CreateWindowButton extends React.Component<ICreateWindowBut
                         value={this.state.uid}
                         onChange={this.inputHandler.bind(this)}
                         onKeyDown={this.handleKeyPress.bind(this)}
-                         />
+                    />
                     <InputGroup.Button disabled={this.state.uid.length === 0}
                         onClick={this.handleAddClick.bind(this)}>
                         <PlusRound />

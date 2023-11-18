@@ -14,6 +14,7 @@ import { ImageList } from '../game/ImageList';
 import ImageListEditor from './common/text_list/ImageListEditor';
 import ActorEditor from './common/actor/ActorEditor';
 import LocationPicker from './linkedit/LocationPicker';
+import SituationModifier from './common/situation/SituationModifier';
 
 const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -24,10 +25,10 @@ const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
         "always first alternative": "return 1;"
     },
     "header": "alternative text choose"
-  }
+}
 
 
-  type CodeEditMenu = "chooseText" | "chooseBackground" | "onEntry"
+type CodeEditMenu = "chooseText" | "chooseBackground" | "onEntry"
 
 interface DialogWindowEditDrawerProps {
     window: DialogWindow;
@@ -72,11 +73,11 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                 modifyWindowBy(updaterOnEntr);
                 break;
         }
-        
-        setCodeEditorOpen(false);
-      }
 
-      const renderCodeEditor = (menu: CodeEditMenu) => {
+        setCodeEditorOpen(false);
+    }
+
+    const renderCodeEditor = (menu: CodeEditMenu) => {
         var code: string | undefined = ""
         var onSaveClose = editCode
         var ui = CODE_EDITOR_UI_TEXTSELECTOR
@@ -116,7 +117,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         setWindow({ ...windowState, text: s });
     }
 
-    const onCloseHandler = (a: boolean) => {
+    const onCloseHandler = (_a: boolean) => {
         handlers.handleDialogWindowChange(windowState, null);
         onClose();
     }
@@ -141,6 +142,13 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         })
     }
 
+    const handleChangeSituation = (val: string | null) => {
+        const newValue = val
+        return modifyWindowBy(window => {
+            return { ...window, changeSituation: newValue || undefined }
+        })
+    }
+
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(false)}>
             <Drawer.Header>
@@ -160,19 +168,20 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             </div>
                             <PanelGroup accordion bordered>
                                 <Panel header="Actor" defaultExpanded>
-                                    <ActorEditor value={windowState.actor? windowState.actor : null} game={game} onChange={(actor) => setWindow({...windowState, actor: actor})}/>
+                                    <ActorEditor value={windowState.actor ? windowState.actor : null} game={game} onChange={(actor) => setWindow({ ...windowState, actor: actor })} />
                                 </Panel>
                                 <Panel header="Misc">
-                                    <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
-                                    {windowState.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={windowState.changeLocationInBg} onLocChange={onChangeLocationInBg} /> }
+                                    <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(_value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                                    {windowState.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={windowState.changeLocationInBg} onLocChange={onChangeLocationInBg} />}
+                                    <SituationModifier game={game} handlers={handlers} onChange={handleChangeSituation} value={windowState.changeSituation || null}/>
                                 </Panel>
                                 <Panel header="Technical info">
-                                <p>Display as JSON:</p>
-                            <Input as='textarea' rows={6} readOnly value={JSON.stringify(windowState)}></Input>
-                            <Checkbox checked={changesMade}>changes</Checkbox>
+                                    <p>Display as JSON:</p>
+                                    <Input as='textarea' rows={6} readOnly value={JSON.stringify(windowState)}></Input>
+                                    <Checkbox checked={changesMade}>changes</Checkbox>
                                 </Panel>
                             </PanelGroup>
-                            
+
                         </Col>
                         <Col xs={10} className="window-editor-grid-content">
                             <div className='window-editor-grid-header'>
@@ -180,23 +189,19 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                             </div>
                             <PanelGroup accordion bordered>
                                 <Panel header="Text" defaultExpanded>
-                                <TextListEditor focus textList={windowState.text} onChange={onTextChange}></TextListEditor>
+                                    <TextListEditor focus textList={windowState.text} onChange={onTextChange}></TextListEditor>
                                 </Panel>
                                 <Panel header="Background image">
-                                <ImageListEditor imageList={windowState.backgrounds} onChange={onBackgroundChange}/>
+                                    <ImageListEditor imageList={windowState.backgrounds} onChange={onBackgroundChange} />
                                 </Panel>
                                 <Panel header="Scripting">
-                                <div className='window-editor-code-editors-stack'>
-                                <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript}/>
-                                <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript}/>
-                                <CodeSampleButton onClick={() => codeEdit("onEntry")} name='onEntry' code={windowState.entryScript}/>
-                            </div>
+                                    <div className='window-editor-code-editors-stack'>
+                                        <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript} />
+                                        <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript} />
+                                        <CodeSampleButton onClick={() => codeEdit("onEntry")} name='onEntry' code={windowState.entryScript} />
+                                    </div>
                                 </Panel>
                             </PanelGroup>
-                            
-                            
-                            
-                            
                         </Col>
                         <Col xs={8}>
                             <div className='window-editor-grid-header'>

@@ -71,6 +71,7 @@ export interface State {
     quickReplyText: string | null
     engineVersion: string
     notifications: InGameNotification[]
+    situation?: string
 }
 
 export function createInitialState(game: GameDescription): State {
