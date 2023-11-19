@@ -58,7 +58,7 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
         const descr = man.loadGameDescr(nameText)
         setName(nameText)
         if (descr)
-            onSetGame(descr)
+            loadJson(JSON.stringify(descr))
     }
 
     const onChooseToLoad = (newName: ValueType) => {
