@@ -52,9 +52,10 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
             }
             return {
                 name: realFact.short,
-                value: realFact.uid
+                value: realFact.uid,
+                visible: realFact.discussable
             }
-        })
+        }).filter(f => f.visible)
     }
 
     const getChars = () => {
@@ -62,9 +63,10 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
             const descr = game.renderer.getCharInfoDescription(state, charid)
             return {
                 name: descr.name,
-                value: charid
+                value: charid,
+                visible: descr.charObject.discussable
             }
-        })
+        }).filter(ch => ch.visible)
     }
 
     const getLocs = () => {
@@ -73,12 +75,14 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
             if (!loc) {
                 return {
                     name: `No location found <${id}>`,
-                    value: id
+                    value: id,
+                    visible: true
                 }
             }
             return {
                 name: loc.displayName,
-                value: id
+                value: id,
+                visible: loc.discussable
             }
         })
     }

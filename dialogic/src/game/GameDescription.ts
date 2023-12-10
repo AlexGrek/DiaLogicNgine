@@ -10,7 +10,7 @@ import Loc from "./Loc";
 import QuestLine from "./Objectives";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION="0.8"
+export const ENGINE_VERSION="0.9"
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -80,7 +80,9 @@ export function createDefaultGame(): GameDescription {
         overrideProps: [{ "name": "age", "datatype": "number", "defaultValue": 27 }],
         roles: ["aged"],
         avatar: emptyImageList(),
-        description: { main: "", list: [] }
+        description: { main: "", list: [] },
+        discussable: true
+        
     }
     let game: GameDescription = {
         dialogs: [d1],

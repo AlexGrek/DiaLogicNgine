@@ -12,6 +12,7 @@ export default interface Loc {
     text: TextList
     links: DialogLink[]
     routes: string[]
+    discussable: boolean
 
     // scripting
 

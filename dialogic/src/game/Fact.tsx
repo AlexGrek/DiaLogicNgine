@@ -4,13 +4,15 @@ export default interface Fact {
     uid: string;
     short: string;
     full: string;
+    discussable: boolean
 }
 
 export function createEmptyFact(uid: string) {
     return {
         uid: uid,
         short: "",
-        full: ""
+        full: "",
+        discussable: true
     }
 }
 

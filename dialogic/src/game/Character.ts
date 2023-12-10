@@ -120,6 +120,7 @@ export default interface Character {
     avatar: ImageList
     description: TextList
     dialog?: CharacterDialog
+    discussable: boolean
 }
 
 
@@ -137,7 +138,8 @@ export function createEmptyCharacter(uid: string): Character {
         avatar: emptyImageList(),
         description: {
             main: "", list: []
-        }
+        },
+        discussable: true
     }
 }
 

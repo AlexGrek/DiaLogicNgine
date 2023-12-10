@@ -1,5 +1,5 @@
 import { trace } from "../Trace"
-import Character, { CharacterDialog, getChar } from "../game/Character"
+import Character, { CharacterDialog, createEmptyCharacter, getChar } from "../game/Character"
 import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
@@ -21,6 +21,7 @@ export interface CharInfoRenderView {
     description: string
     name: string
     avatar?: string
+    charObject: Character
 }
 
 export interface TaskRenderView {
@@ -366,7 +367,7 @@ export class RenderViewGenerator {
     public getCharInfoDescription(state: State, charUid: string): CharInfoRenderView {
         const char = getChar(this.exec.game, charUid)
         if (char === undefined) {
-            return { name: "error " + charUid, description: "char not found: " + charUid }
+            return { name: "error " + charUid, description: "char not found: " + charUid, charObject: createEmptyCharacter(charUid) }
         }
         else {
             try {
@@ -384,11 +385,12 @@ export class RenderViewGenerator {
                 return {
                     name: name,
                     description: descr,
-                    avatar: avatar
+                    avatar: avatar,
+                    charObject: char
                 }
 
             } catch (exception) {
-                return { name: "error " + charUid, description: `char error: ${exception}` }
+                return { name: "error " + charUid, description: `char error: ${exception}`, charObject: createEmptyCharacter("error") }
             }
         }
     }
