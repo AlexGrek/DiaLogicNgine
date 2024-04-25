@@ -1,0 +1,517 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@300&display=swap');
+
+@font-face {
+    font-family: 'PalanquinRegular';
+    src: local('IconFont'), url(../../fonts/palanquin-regular.ttf) format('truetype');
+}
+
+.player-core-widget-container {
+    max-height: 100%;
+}
+
+.player-bg-host {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+}
+
+.player-bg-host.bg-host-old.fade {
+    animation: disappear .8s ease-in-out forwards;
+}
+
+.player-bg-host.bg-host-old {
+    z-index: 1;
+}
+
+.player-bg-host.bg-host-new {
+    z-index: 10;
+}
+
+.player-bg-host.bg-host-new.menu-open {
+    filter: blur(10px);
+}
+
+.player-bg-host.bg-host-new.fade {
+    animation: appear 1s ease-in-out forwards;
+    opacity: 0;
+    animation-delay: 0.3s;
+}
+
+@keyframes disappear {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+.player-core-widget-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+}
+
+.player-main {
+    max-width: 1700px;
+}
+
+.player-core-container {
+    margin: 12pt;
+    max-width: 95%;
+    max-height: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: black;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    border-radius: 6px;
+    margin: auto;
+    position: relative;
+}
+
+.player-core-uiwidget-container {
+    height: 100%;
+    width: 100%;
+    transition: opacity .2s;
+    opacity: 1;
+}
+
+.player-core-uiwidget-container.hiding {
+    opacity: 0;
+}
+
+
+
+.dialog-window-view {
+    width: 100%;
+    height: 100%;
+    padding-top: 5px;
+    display: grid;
+
+    grid-template-columns: 5fr 4fr;
+    grid-template-rows: 4fr 3fr;
+    justify-items: end;
+    /* align-items: end; */
+
+    flex-direction: column;
+    font-family: PalanquinRegular, sans-serif;
+    justify-content: start;
+
+    background: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 59%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.dialog-control-pad {
+    position: absolute;
+    z-index: 10;
+    grid-column: 1;
+    grid-row: 1;
+    place-self: start start;
+}
+
+.player-core-ingame-menu {
+    position: absolute;
+    z-index: 9;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.dialog-text {
+    width: 100%;
+    text-align: right;
+}
+
+.dialog-text.transition-out {
+    animation: shrink .15s ease-out forwards;
+}
+
+@keyframes shrink {
+    0% {
+        transform: scaleY(100%);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scaleY(80%);
+        opacity: 0;
+    }
+}
+
+
+.dialog-text {
+    font-size: 22px;
+    margin-right: 12pt;
+    background-color: #04040422;
+    padding: 10pt;
+    overflow: hidden;
+    position: relative;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    /* font-family: 'M PLUS 1p', sans-serif; */
+}
+
+.dialog-current-text {
+    width: 100%;
+    animation-name: nexttext;
+    animation-duration: .15s;
+    /* or: Xms */
+    animation-iteration-count: 1;
+    animation-direction: normal;
+    /* or: normal */
+    animation-timing-function: ease-out;
+    /* or: ease, ease-in, ease-in-out, linear, cubic-bezier(x1, y1, x2, y2) */
+    animation-fill-mode: forwards;
+    /* or: backwards, both, none */
+    animation-delay: 0s;
+    /* or: Xms */
+}
+
+@keyframes nexttext {
+    100% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    0% {
+        transform: translate(20pt, 0);
+        opacity: 0;
+    }
+}
+
+.dialog-prev-text {
+    position: absolute;
+    top: 14pt;
+    right: 10pt;
+    width: 100%;
+    animation-name: prevtext;
+    animation-duration: .5s;
+    /* or: Xms */
+    animation-iteration-count: 1;
+    animation-direction: normal;
+    /* or: normal */
+    animation-timing-function: ease-in-out;
+    /* or: ease, ease-in, ease-in-out, linear, cubic-bezier(x1, y1, x2, y2) */
+    animation-fill-mode: forwards;
+    /* or: backwards, both, none */
+    animation-delay: 0s;
+    /* or: Xms */
+}
+
+@keyframes prevtext {
+    0% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(0, -150%);
+        opacity: 0;
+    }
+}
+
+.dialog-variants {
+    font-size: 20px;
+    max-width: 100%;
+    text-align: right;
+    margin: 15pt 0 15pt 15pt;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    /* outline: 2px solid grey; */
+    padding-left: 5pt;
+}
+
+.dialog-variant-icon {
+    font-family: 'IconFont';
+    margin: 0 6pt;
+}
+
+.dialog-variants button {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 4pt 4pt;
+    margin: 0 1em 3pt 0;
+    background-color: rgba(20, 20, 20, 0.3);
+    transition-property: background-color opacity transform;
+    transition-duration: .2s;
+    transform-style: preserve-3d;
+    transform-origin: top center;
+}
+
+@keyframes dialog-variants-appear {
+    0% {
+        transform: rotateX(90deg) translateY(10%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: rotateX(0) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes dialog-variants-dissappear {
+    0% {
+        transform: rotateX(0) translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: rotateX(90deg) translateY(10%);
+        opacity: 0;
+    }
+}
+
+.dialog-variant-button-container {
+    perspective: 800px;
+}
+
+.dialog-variants button:hover {
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(40, 40, 40, 0.8);
+    transition-duration: .1s;
+    transform: rotateX(28deg) translateY(6%);
+}
+
+.dialog-variant-button-container.transition-out button {
+    animation: dialog-variants-dissappear .2s ease-in forwards;
+}
+
+.dialog-variant-button-container.transition-in button {
+    animation: dialog-variants-appear .2s ease-out forwards;
+}
+
+
+.dialog-short-history {
+    grid-column: 2;
+    grid-row: 1;
+    position: relative;
+    scroll-behavior: smooth;
+    overflow: auto;
+    opacity: .6;
+}
+
+.dialog-controls {
+    grid-column: 2;
+    grid-row: 2;
+    place-self: start end;
+    /* outline: 2px solid yellowgreen; */
+}
+
+.dialog-widget-special-links {
+    grid-column: 1;
+    grid-row: 2;
+    place-self: end start;
+    max-width: 70%;
+    min-height: 300pt;
+    margin-bottom: 30pt;
+    perspective: 800px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.dialog-widget-special-links.transition-out {
+    animation: disappear .2s ease-in forwards;
+}
+
+.dialog-widget-special-links.transition-in {
+    animation: appear .2s ease-in forwards;
+}
+
+.dialog-history-record {
+    margin-left: auto;
+    margin-right: 0;
+    max-width: 70%;
+    opacity: .8;
+    text-align: right;
+    margin-right: 12pt;
+    margin-bottom: 1em;
+}
+
+.dialog-history-record-text {
+    font-size: 14pt;
+    margin-right: 1em;
+}
+
+.dialog-history-record-ans {
+
+    font-size: 13pt;
+    color: rgb(120, 120, 120);
+    margin-left: auto;
+    margin-right: 4pt;
+}
+
+.dialog-actor-container {
+    position: relative;
+    right: 10%;
+    bottom: -10pt;
+    text-align: center;
+    width: fit-content;
+    background-color: rgba(6, 1, 35, 0.142);
+    padding: 2pt;
+    border-radius: 2pt;
+}
+
+.dialog-actor-container img {
+    max-width: 100pt;
+    max-height: 130pt;
+    display: block;
+    border-radius: 2pt;
+}
+
+.dialog-actor-name {
+    color: lightblue;
+}
+
+.route-button {
+    width: 130pt;
+    height: 100pt;
+    border: none;
+    padding: 0;
+    background-size: cover;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    color: white;
+    margin: 6px;
+    transform-style: preserve-3d;
+    transition-property: transform;
+    transform-origin: top center;
+    transition-duration: .2s;
+}
+
+.route-button:hover {
+    transform: rotateX(8deg) translateY(6%);
+}
+
+.route-button-inside {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    height: 100%;
+    width: 100%;
+    transition-property: background-color;
+    transition-duration: .3s;
+}
+
+.route-button-inside:hover {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.route-button-inside p {
+    padding: 1pt;
+    border-radius: 2pt;
+    background-color: rgba(0, 0, 0, 0.2);
+    transition-property: font-size;
+    transition-duration: .2s;
+}
+
+.route-button-inside:hover p {
+    font-size: large;
+}
+
+.discuss-picker-menu {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    width: 100%;
+    justify-items: flex-end;
+    perspective: 800px;
+}
+
+.discuss-picker-tab {
+    min-width: 17em;
+    margin: 6pt;
+    background-color: #04040452;
+    padding: 6pt 0pt;
+    backdrop-filter: blur(8px);
+    animation: discussMenuTabAppear .2s ease-out forwards;
+    transform-style: preserve-3d;
+    transform-origin: center center;
+}
+
+.discuss-picker-body {
+    height: 22em;
+    overflow-y: auto;
+    padding: 4pt 0pt;
+}
+
+.discuss-picker-main {
+    max-width: 80vw;
+}
+
+.discuss-picker-name {
+    margin-left: auto;
+    text-align: center;
+    font-size: larger;
+    font-weight: lighter;
+    margin-bottom: 8pt;
+}
+
+.discuss-picker-stl-item {
+    min-height: 16pt;
+    padding: 2pt 4pt;
+    cursor: pointer;
+    transition: background-color .2s;
+}
+
+.discuss-picker-stl-item:hover {
+    background-color: #d9d9d952;
+}
+
+@keyframes discussMenuTabAppear {
+    0% {
+        transform: translateY(5%) scale(.9) rotateX(10deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform:  translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.discuss-picker-control-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: right;
+    margin-right: 6pt;
+}
+
+.discuss-picker-control-panel button {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 4pt 4pt;
+    margin: 1px;
+    background-color: rgba(20, 20, 20, 0.3);
+}
+
+.discuss-picker-control-panel button:hover {
+    background-color: rgba(126, 126, 126, 0.65);
+}

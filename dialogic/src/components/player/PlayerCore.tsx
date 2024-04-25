@@ -7,6 +7,7 @@ import GameMenuPanel from './GameMenuPanel';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
 import InGameControlPad from './InGameControlPad';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
+import GameUiElementsView from './GameUiElementsView';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -93,7 +94,8 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                 <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background)}></div>
                 <div className='player-core-widget-container' id='player-current-widget-host'>
                     <div className="dialog-control-pad">
-                        <InGameControlPad onFullscreen={() => onFullScreen()}></InGameControlPad>
+                        <InGameControlPad onFullscreen={() => onFullScreen()} uiElements={currentView?.uiElements || []}></InGameControlPad>
+                        <GameUiElementsView elements={currentView?.uiElements || []}/>
                     </div>
                     <div className='player-core-ingame-menu'>
                         <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd}/>

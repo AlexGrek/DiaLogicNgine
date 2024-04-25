@@ -1,0 +1,15 @@
+.image-picker-header {
+    font-size: large;
+}
+
+.image-picker-container {
+    border: 1px solid rgba(40, 60, 80, .8);
+    padding: 6pt;
+    border-radius: 4pt;
+    margin: 3px;
+}
+
+.image-picker-container > img {
+    max-width: 100%;
+    max-height: 260px;
+}

@@ -1,0 +1,6 @@
+.notification-panel {
+    position: fixed;
+    right: 10px;
+    top: 5px;
+    z-index: 10000;
+}

@@ -4,13 +4,14 @@ import Character, { Role } from "./Character";
 import Dialog from "./Dialog";
 import GameEvent, { EventHost } from "./Events";
 import Fact from "./Fact";
+import GameUiElementDescr, { initGameUiElementDescr } from "./GameUiElementDescr";
 import { emptyImageList } from "./ImageList";
 import { Item } from "./Items";
 import Loc from "./Loc";
 import QuestLine from "./Objectives";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION="0.9"
+export const ENGINE_VERSION="0.10"
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -60,6 +61,7 @@ export interface GameDescription {
     objectives: QuestLine[]
     situations: string[]
     translations: Translations
+    uiElements: GameUiElementDescr
 }
 
 export function createDefaultGame(): GameDescription {
@@ -110,7 +112,8 @@ export function createDefaultGame(): GameDescription {
             name: "Miscellanous",
             tags: ['main', 'misc'],
             quests: []
-        }]
+        }],
+        uiElements: initGameUiElementDescr()
     };
 
     return game

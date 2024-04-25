@@ -1,9 +1,8 @@
-import { LocalStorage } from "storage-manager-js"
 import { GameDescription } from "./game/GameDescription"
-import { KeyValuePair } from "./Utils"
+import { KeyValuePair, LocalStorage } from "./Utils"
 
 export interface GameList {
-    games: {[key: string] : GameDescription}
+    games: { [key: string]: GameDescription }
 }
 
 export class SaveLoadManager {
@@ -21,7 +20,7 @@ export class SaveLoadManager {
     }
 
     private readGameList(): GameList {
-        return this.readLs("gameList", {games: {}})
+        return this.readLs("gameList", { games: {} })
     }
 
     saveGameDescr(name: string, value: GameDescription) {
@@ -37,7 +36,7 @@ export class SaveLoadManager {
 
     listGameDescr(): KeyValuePair<string, GameDescription>[] {
         const gameList = this.readGameList()
-        return Object.entries(gameList.games).map(([key, value]) => ({key: key, value: value}))
+        return Object.entries(gameList.games).map(([key, value]) => ({ key: key, value: value }))
     }
 
     listGameNames(): string[] {

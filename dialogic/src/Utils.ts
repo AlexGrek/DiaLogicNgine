@@ -1,6 +1,8 @@
 import lodash, { lowerFirst, upperFirst } from "lodash";
 
-const isValidIdentifier = require('is-valid-identifier')
+export function isValidIdentifier(str: string): boolean {
+    return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(str);
+}
 
 function allEnumValuesOf(type: any) {
     return Object.keys(type).filter((item) => {
@@ -129,4 +131,53 @@ export function trimArray<T>(arr: T[], maxLength: number): T[] {
         return arr.slice(0, maxLength);
     }
     return arr;
+}
+
+export class LocalStorage {
+    static set(key: string, value: any): void {
+        try {
+            const serializedValue = JSON.stringify(value);
+            localStorage.setItem(key, serializedValue);
+        } catch (error) {
+            console.error("Error storing to local storage:", error);
+        }
+    }
+
+    static get<T>(key: string): T | null {
+        try {
+            const serializedValue = localStorage.getItem(key);
+            if (serializedValue === null) {
+                return null;
+            }
+            return JSON.parse(serializedValue) as T;
+        } catch (error) {
+            console.error("Error retrieving from local storage:", error);
+            return null;
+        }
+    }
+
+    static removeItem(key: string): void {
+        try {
+            localStorage.removeItem(key);
+        } catch (error) {
+            console.error("Error removing from local storage:", error);
+        }
+    }
+
+    static has(key: string): boolean {
+        try {
+            return localStorage.getItem(key) !== null;
+        } catch (error) {
+            console.error("Error checking local storage item:", error);
+            return false;
+        }
+    }
+
+    static clear(): void {
+        try {
+            localStorage.clear();
+        } catch (error) {
+            console.error("Error clearing local storage:", error);
+        }
+    }
 }

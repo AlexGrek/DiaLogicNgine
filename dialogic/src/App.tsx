@@ -22,7 +22,8 @@ import ItemsMenu from './components/menuitems/items/ItemsMenu';
 import { Item } from './game/Items';
 import lodash from 'lodash';
 import NotificationBar from './components/notification/NotificationBar';
-import logYaml from './Trace';
+import GameUiElementDescr from './game/GameUiElementDescr';
+import UiElementsMenu from './components/menuitems/uielements/UiElementsMenu';
 
 export interface IAppProps {
 
@@ -212,6 +213,9 @@ export default class App extends React.Component<IAppProps, IAppState> {
       <div style={this.displayStyle("items")}>
         <ItemsMenu visible={this.isVisible("items")} items={this.state.game.items} onSetItems={(items: Item[]) => this.setState({ game: { ...this.state.game, items: items } })} game={this.state.game} />
       </div>
+      <div style={this.displayStyle("ui")}>
+        <UiElementsMenu visible={this.isVisible("ui")} ui={this.state.game.uiElements} onSetUi={(items: GameUiElementDescr) => this.setState({ game: { ...this.state.game, uiElements: items } })} game={this.state.game} />
+      </div>
     </div>
   }
 
@@ -237,7 +241,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
           <Header className='app-header-container'>
             <p className='app-header-text'>🇺🇦 DiaLogic Ngine</p>
             <NotificationBar notification={this.state.notifications[this.state.notifications.length - 1]}></NotificationBar>
-            </Header>
+          </Header>
           {/* <NotificationViewPanel notifications={this.state.notifications}></NotificationViewPanel> */}
           <Container className='root-section'>
             <Sidebar className='app-main-sidebar'>

@@ -19,7 +19,7 @@ import EventHostsEditor from '../../common/EventHostsEditor';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
-    "functionName": "chooseAltText",
+    "functionName": "loc",
     "functionTemplates": {
         "no action": "",
         "always main": "return 0;",
@@ -243,7 +243,6 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                             </Col>
                         </Row>
                     </Grid>
-
                 }
 
             </Drawer.Body>

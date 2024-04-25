@@ -1,0 +1,54 @@
+.fact-edit-uid {
+    font-size: smaller;
+    font-family: monospace;
+    opacity: .5;
+    margin-top: 4pt;
+    width: 100%;
+    text-align: center;
+}
+
+.facts-create-panel {
+    padding: 6pt;
+}
+
+.facts-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8pt;
+}
+
+.fact-item {
+    margin: 4pt;
+    padding: 4pt;
+    border-radius: 4pt;
+    width: 20em;
+    min-height: 6em;
+    background-color: #1a1d24;
+    cursor: pointer;
+    transition: background .3s;
+}
+
+.fact-uid {
+    font-family: monospace;
+    opacity: .6;
+    margin-left: 4pt;
+}
+
+.fact-item:hover {
+    outline: 1px solid #287ca1;
+    background-color: #3c3f43;
+}
+
+.fact-header {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    justify-content: center;
+    padding: 3pt;
+}
+
+.fact-short {
+    margin-top: 8pt;
+    font-size: larger;
+    margin-left: 4pt;
+    margin-right: 4pt;
+}

@@ -1,6 +1,7 @@
 import lodash from "lodash";
 import { GameDescription, createDefaultConfig } from "./GameDescription";
 import { createTranslations } from "../exec/Localization";
+import { initGameUiElementDescr } from "./GameUiElementDescr";
 
 export default interface Patch {
     from(): string;
@@ -93,12 +94,29 @@ export class PatchFrom08To09 implements Patch {
     }
 }
 
+export class PatchFrom09To010 implements Patch {
+    from(): string {
+        return "0.9"
+    }
+    to(): string {
+        return "0.10"
+    }
+    apply(obj: any): GameDescription {
+        // do the patch work
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData: GameDescription = obj
+        obj.uiElements = initGameUiElementDescr()
+        return objData as GameDescription
+    }
+}
+
 const PATCHES = [
     new PatchFrom04To05(),
     new PatchFrom05To06(),
     new PatchFrom06To07(),
     new PatchFrom07To08(),
-    new PatchFrom08To09()
+    new PatchFrom08To09(),
+    new PatchFrom09To010(),
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {

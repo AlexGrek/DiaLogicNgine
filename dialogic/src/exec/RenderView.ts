@@ -1,12 +1,14 @@
 import { trace } from "../Trace"
 import Character, { CharacterDialog, createEmptyCharacter, getChar } from "../game/Character"
 import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
+import GameUiElementDescr from "../game/GameUiElementDescr"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
 import { Quest, QuestPath, getQuest } from "../game/Objectives"
 import { TextList, chooseText } from "../game/TextList"
 import { GameExecManager } from "./GameExecutor"
 import { State } from "./GameState"
+import { UiElementRenderView } from "./GameUiElementsProcessor"
 import { ObjectiveStatus } from "./QuestProcessor"
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor } from "./Runtime"
 
@@ -119,6 +121,7 @@ export interface RenderView {
     backgroundChange: BgChange
     notifications: PlayerNotification[]
     step: number
+    uiElements: UiElementRenderView[]
 }
 
 export class RenderViewGenerator {
@@ -190,7 +193,7 @@ export class RenderViewGenerator {
         // get avatar from character script
         if (character.chooseAvatarScript) {
             // eslint-disable-next-line
-            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseAvatarScript, this.exec, instate)
+            const { decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseAvatarScript, this.exec, instate)
             avatar = chooseImage(character.avatar, decision)
         }
 
@@ -204,7 +207,7 @@ export class RenderViewGenerator {
 
         if (character.chooseNameScript) {
             // eslint-disable-next-line
-            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseNameScript, this.exec, instate)
+            const { decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseNameScript, this.exec, instate)
             name = chooseText(character.displayName, decision)
         }
 
@@ -221,7 +224,7 @@ export class RenderViewGenerator {
         if (dw == null) {
             throw `Window ${JSON.stringify(state.position)} was not found`
         }
-        const [dialog, window] = dw
+        const [_dialog, window] = dw
 
         // rendering window
         return {
@@ -236,7 +239,7 @@ export class RenderViewGenerator {
     getCurrentText(tlist: TextList, inState: State, script?: string) {
         if (script) {
             // NOTE: All state changes are IGNORED here! Use other functions to change state
-            const { state, decision } = evaluateAsAnyProcessor(this.exec.game, script, this.exec, inState)
+            const { decision } = evaluateAsAnyProcessor(this.exec.game, script, this.exec, inState)
             return chooseText(tlist, decision)
         }
         return tlist.main
@@ -360,8 +363,13 @@ export class RenderViewGenerator {
             uiWidgetView: this.renderUiWidget(state),
             backgroundChange: bgChange,
             notifications: [], //TODO: add notification support
-            step: state.stepCount
+            step: state.stepCount,
+            uiElements: this.renderUiElements(state)
         }
+    }
+
+    renderUiElements(state: State): UiElementRenderView[] {
+        return this.exec.uiEls.getVisibleUiElements(state)
     }
 
     public getCharInfoDescription(state: State, charUid: string): CharInfoRenderView {

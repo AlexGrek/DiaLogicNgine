@@ -1,5 +1,5 @@
 import lodash from "lodash"
-import { LocalStorage } from "storage-manager-js"
+import { LocalStorage } from "../Utils"
 import { trace } from "../Trace"
 import { trimArray } from "../Utils"
 import { State } from "../exec/GameState"

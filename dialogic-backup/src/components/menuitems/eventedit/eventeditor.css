@@ -1,0 +1,73 @@
+.events-widget {
+    background-color: rgba(200, 200, 200, .07);
+    border-radius: 6pt;
+    padding: 8pt;
+    margin-top: 2pt;
+}
+
+.events-widget input {
+    font-family: monospace;
+}
+
+.events-widget-header {
+    font-size: large;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 4pt;
+}
+
+.events-predefined-eventhost {
+    font-family: monospace;
+}
+
+.events-list-control-panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin: 4pt;
+}
+
+.event-short-container {
+    border-radius: 4pt;
+    margin: 3pt;
+    background-color: rgba(200, 200, 200, .1);
+    transition: background .3s;
+    padding: 4pt;
+    min-height: 5em;
+    cursor: pointer;
+}
+
+.event-short-container:hover {
+    background-color: rgba(200, 200, 200, .2);
+}
+ 
+.event-probability-tag {
+    background-color: darkslategray;
+    display: inline-block;
+    width: 3em;
+    text-align: center;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    padding: 1pt 4pt;
+    border-radius: 3pt;
+    margin-right: 4pt;
+}
+
+.event-short-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.event-highptiority-mark {
+    background-color: darkgoldenrod;
+    display: inline-block;
+    width: 2em;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+    padding: 1pt 4pt;
+    border-radius: 3pt;
+    margin-right: 2pt;
+}

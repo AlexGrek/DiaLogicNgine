@@ -1,0 +1,43 @@
+.note-outer {
+    background-color: #1e2d48;
+    box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.55);
+    margin: 6pt;
+    opacity: .9;
+    display: flex;
+    flex-direction: row;
+    width: max-content;
+}
+
+.note-outer.warning {
+    background: repeating-linear-gradient(
+        45deg,
+        #84671253,
+        #84671253 10px,
+        #5b3f07d4 10px,
+        #5b3f07d4 20px);
+}
+
+.note-container {
+    padding: 8pt 12pt;
+    color: rgba(255, 255, 255, 0.879);
+    overflow: hidden;
+}
+
+.note-pin {
+    width: 4pt;
+    background-color: #3a5890;
+    box-shadow: 2px 0px 12px 0px rgba(0, 18, 26, 0.75);
+}
+
+.note-pin.warning {
+    background-color: rgb(216, 213, 31);
+    box-shadow: 2px 0px 22px 0px rgba(200, 181, 13, 0.881);
+}
+
+.note-around {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    overflow: hidden;
+}

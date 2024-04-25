@@ -1,0 +1,55 @@
+.notification-dissapearing {
+    animation: disappear 3s ease 4s forwards;
+}
+
+@keyframes disappear {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes appearFromRight {
+    0% {
+      opacity: 0;
+      transform: translateY(4pt);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+.notification-appearing {
+    opacity: 0.1;
+    /* outline: 1px solid red; */
+    margin-top: 2pt;
+    margin-right: 6pt;
+    transform: translateX(100%);
+    animation: appearFromRight .4s ease 0s forwards;
+}
+
+.notification-error {
+    font-weight: bold;
+    color: orange;
+}
+
+.notification-info {
+    font-weight: lighter;
+}
+
+.notification-success {
+    color: greenyellow;
+}
+
+.notification-warning {
+    font-weight: bold;
+    color: yellow;
+}
+
+.notification-text {
+    margin-left: 4pt;
+}

@@ -1,0 +1,49 @@
+.locprBackground {
+    width: 160pt;
+    height: 100pt;
+    margin: 10pt 8pt;
+    cursor: pointer;
+    background-size: cover;
+    border-radius: 4pt;
+    background-color: rgba(30,30,30,0.75);
+    box-shadow: 0px 0px 13px 3px rgba(0,0,0,0.75);
+}
+
+.locprBackground:hover {
+    outline: 1px solid gray;
+}
+
+.locprInner {
+    background: linear-gradient(170deg, rgba(200,200,200,0.3) 0%, rgba(200,200,200,0.1) 25%, rgba(2,0,0,0.2) 60%, rgba(0,0,0,.9) 100%);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 4pt;
+    padding-top: 50%;
+    text-align: center;
+}
+
+.locItems {
+    margin-left: 12pt;
+    margin-top: 8pt;
+    display: flex;
+    align-items: center;
+}
+
+.location-thumb-preview {
+    max-width: 100%;
+    max-height: 128px;
+    border-radius: 4pt;
+    margin: 2pt;
+}
+
+.loc-route {
+    width: 100%;
+    background-color: rgba(200,180,160,0.1);
+    border-radius: 4pt;
+    margin: 2pt;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

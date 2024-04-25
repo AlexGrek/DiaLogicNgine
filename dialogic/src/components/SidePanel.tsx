@@ -12,6 +12,7 @@ import PlayOutlineIcon from '@rsuite/icons/PlayOutline';
 import FunnelTimeIcon from '@rsuite/icons/FunnelTime';
 import DeviceOtherIcon from '@rsuite/icons/DeviceOther';
 import ExploreIcon from '@rsuite/icons/Explore';
+import TreemapIcon from '@rsuite/icons/Treemap';
 import { IUpds } from '../App';
 
 export interface ISidePanelProps {
@@ -112,6 +113,9 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               </Nav.Item>
               <Nav.Item eventKey="items" icon={<DeviceOtherIcon />} onClick={() => this.props.onMenuSwitch("items")}>
                 Items
+              </Nav.Item>
+              <Nav.Item eventKey="ui" icon={<TreemapIcon />} onClick={() => this.props.onMenuSwitch("ui")}>
+                UI Elements
               </Nav.Item>
             </Nav>
           </Sidenav.Body>

@@ -1,0 +1,274 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+
+#root {
+  height: 100%;
+  outline: 1px solid green;
+}
+
+.root-container {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.root-section {
+  height: 100%;
+}
+
+.main-sidebar, .app-main-sidebar {
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.content-container {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.App {
+  text-align: center;
+  height: 100%;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.app-header-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #282c34;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+  height: 22pt;
+  overflow-y: hidden;
+}
+
+.app-header-text {
+  margin-left: 6pt;
+  font-family: 'HeaderFont';
+  font-size: 14pt;
+  text-shadow: 1px 1px 8px black;
+  text-align: left;
+}
+
+.window-editor-windows-container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-content: first baseline;
+}
+
+.window-widget-main {
+  flex: 0 0 auto;
+  height: fit-content;
+  margin: 12px;
+  width: 23em;
+  background-color: black;
+  border-radius: 8pt;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+}
+
+.window-widget-header {
+  background-color: #282c30;
+  padding: 4pt 6pt;
+  border-radius: 8pt 8pt 0 0;
+  font-size: larger;
+}
+
+.window-widget-main:hover {
+  background-color: slategray;
+}
+
+.window-widget-content {
+  padding: 8pt;
+  margin-top: 1pt;
+  margin-bottom: 1pt;
+  cursor: pointer;
+  min-height: 4em;
+}
+
+.window-widget-content-text {
+  overflow: hidden;
+}
+
+.window-widget-links-list {
+  margin-top: 2pt;
+  margin-left: 0;
+  padding: 0;
+  min-height: 14pt;
+  list-style-type: none;
+}
+
+.window-widget-links-list > li {
+  margin-left: 6pt;
+  margin-top: 4pt;
+}
+
+.window-widget-link-direction-text {
+  margin-left: 6pt;
+}
+
+.window-widget-footer {
+  background-color: #282c34ce;
+  padding: 5pt 0pt;
+  border-radius: 0pt 0pt 8pt 8pt;
+  font-size: small;
+  cursor: pointer;
+}
+
+.highlighted {
+  outline: 2px solid yellow;
+}
+
+.window-editor-grid.rs-grid-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.window-editor-grid-header {
+  width: 100%;
+  text-align: center;
+  font-weight: 200;
+  font-size: large;
+  margin-bottom: 4pt;
+  margin-top: 5pt;
+}
+
+.window-editor-drawer-body {
+  padding: 0;
+}
+
+.window-editor-grid-content {
+  background-color: #4c52603b;
+  height: 100%;
+  border-radius: 0 0 8pt 8pt;
+  padding-bottom: 12pt;
+}
+
+.window-editor-code-editors-stack {
+  display: flex;
+}
+
+.link-short-view {
+  min-height: 4em;
+  width: 100%;
+  margin: 3pt;
+  border-radius: 4pt;
+  background-color: #4c52603b;
+  cursor: pointer;
+  padding: 2pt 4pt;
+}
+
+.links-editor-instrument-keys {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  margin-top: 4pt;
+}
+
+.link-short-view-text {
+  font-size: 14pt;
+}
+
+.link-short-view-target {
+  width: 100%;
+  text-align: right;
+}
+
+.link-short-view:hover {
+  background-color: rgba(86, 98, 112, 0.3);
+}
+
+.link-editor-body {
+  background-color: #4c52603b;
+  padding: 4pt;
+  border-radius: 4pt;
+}
+
+.link-editor-section {
+  background-color: rgba(0,0,0,0.1);
+  border-radius: 4pt;
+  padding: 6pt;
+  margin-top: 3pt;
+}
+
+.links-editor-panel {
+  padding-right: 3pt;
+  overflow-x: hidden;
+}
+
+.link-type-tag-icon {
+  font-family: 'IconFont';
+  font-size: 10pt;
+}
+
+.link-type-tag-regular {
+  padding: 0 3pt;
+}
+
+.link-editor-toolbar {
+  width: 100%;
+  align-items: flex-end;
+}
+
+.window-tag-list {
+  width: 100%;
+  text-align: center;
+}
+
+/* common */
+
+.editor-label {
+  opacity: .8;
+  font-size: smaller;
+  margin-bottom: 0;
+  margin-top: 6pt;
+}
+
+
+div.text-field-editor {
+  width: 100%;
+}
+
+.center-header {
+  width: 100%;
+  text-align: center;
+  font-size: larger;
+  font-weight: lighter;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.icon-container {
+  font-family: 'IconFont';
+}

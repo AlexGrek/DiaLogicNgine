@@ -1,0 +1,17 @@
+.objectives-tab-renderer {
+    padding: 12pt;
+}
+
+.objectives-tab-renderer-items {
+    padding: 4pt;
+}
+
+.objectives-tab-renderer-item {
+    height: 24pt;
+}
+
+.objectives-tab-task-icon {
+    font-family: 'IconFont';
+    margin-right: 6pt;
+    font-size: larger;
+}

@@ -1,0 +1,41 @@
+.name-ao {
+    font-size: 11pt;
+    margin: 2pt;
+    font-weight: normal;
+    font-family: monospace;
+    font-variant: normal;
+}
+
+.name-ao:hover {
+    text-decoration: underline;
+    color: yellowgreen;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.button-import-ao {
+    margin-left: 5pt;
+    font-size: x-small;
+    background: none;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    opacity: 0.3;
+    height: 14pt;
+    width: 14pt;
+    display: inline;
+    border-radius: 50%;
+}
+
+.button-import-ao:hover {
+    opacity: 1;
+}
+
+.checkbox-ao ul {
+    list-style-type: none;
+    margin: 0;
+    padding-left: 10pt;
+}
+
+.checkbox-ao li {
+    float: left;
+    margin: 0;
+}

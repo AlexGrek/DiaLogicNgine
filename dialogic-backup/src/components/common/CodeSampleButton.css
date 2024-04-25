@@ -1,0 +1,26 @@
+.button-content-cs {
+    text-align: left;
+    min-width: 16em;
+    height: 42pt;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.header-cs {
+    text-align: justify;
+    margin-bottom: 0;
+    font-size: 10pt;
+}
+
+.name-cs {
+    font-weight: bolder;
+    margin-left: .6em;
+}
+
+.button-content-cs pre {
+    margin: 3pt;
+    font-size: small;
+    line-height: 100%;
+    overflow: hidden;
+}

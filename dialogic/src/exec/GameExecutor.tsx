@@ -11,6 +11,7 @@ import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcess
 import EventsProcessor from "./EventsProcessor";
 import DiscussionProcessor from "./DiscussionProcessor";
 import QuestProcessor from "./QuestProcessor";
+import GameUiElementsProcessor from "./GameUiElementsProcessor";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -18,12 +19,14 @@ export class GameExecManager {
     renderer: RenderViewGenerator
     events: EventsProcessor
     quests: QuestProcessor
+    uiEls: GameUiElementsProcessor
 
     constructor(game: GameDescription) {
         this.game = game
         this.renderer = new RenderViewGenerator(this)
         this.events = new EventsProcessor(this)
         this.quests = new QuestProcessor(this)
+        this.uiEls = new GameUiElementsProcessor(this)
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
