@@ -85,7 +85,7 @@
     background-color: black;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     border-radius: 6px;
-    margin: auto;
+    margin: 0;
     position: relative;
 }
 
@@ -162,7 +162,8 @@
 .dialog-text {
     font-size: 22px;
     margin-right: 12pt;
-    background-color: #04040422;
+    background-color: #04040446;
+    margin-right: 24pt;
     padding: 10pt;
     overflow: hidden;
     position: relative;

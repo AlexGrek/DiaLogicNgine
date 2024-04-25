@@ -78,7 +78,6 @@
 }
 
 .player-core-container {
-    margin: 12pt;
     max-width: 95%;
     max-height: 100%;
     aspect-ratio: 16 / 9;
@@ -87,6 +86,7 @@
     border-radius: 6px;
     margin: auto;
     position: relative;
+    right: 0;
 }
 
 .player-core-uiwidget-container {
@@ -162,7 +162,8 @@
 .dialog-text {
     font-size: 22px;
     margin-right: 12pt;
-    background-color: #04040422;
+    background-color: #04040446;
+    margin-right: 24pt;
     padding: 10pt;
     overflow: hidden;
     position: relative;
@@ -315,7 +316,8 @@
     grid-column: 2;
     grid-row: 2;
     place-self: start end;
-    /* outline: 2px solid yellowgreen; */
+    outline: 2px solid yellowgreen;
+    overflow: hidden;
 }
 
 .dialog-widget-special-links {
@@ -365,8 +367,7 @@
 
 .dialog-actor-container {
     position: relative;
-    right: 10%;
-    bottom: -10pt;
+    margin-left: auto;
     text-align: center;
     width: fit-content;
     background-color: rgba(6, 1, 35, 0.142);
@@ -378,7 +379,7 @@
     max-width: 100pt;
     max-height: 130pt;
     display: block;
-    border-radius: 2pt;
+    border-radius: 3pt;
 }
 
 .dialog-actor-name {

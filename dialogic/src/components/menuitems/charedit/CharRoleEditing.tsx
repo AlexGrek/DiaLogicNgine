@@ -1,9 +1,8 @@
-import React, { useState, useEffect, CSSProperties } from 'react';
+import React, { useState, CSSProperties } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
-import Character, { Role, createEmptyRole, roleByUid } from '../../../game/Character';
+import Character, { Role, roleByUid } from '../../../game/Character';
 import './charediting.css';
-import { Button, ButtonGroup, InputPicker, Panel, PanelGroup, Table } from 'rsuite';
-import TextListEditor from '../../common/text_list/TextListEditor';
+import { Button, ButtonGroup, SelectPicker, Table } from 'rsuite';
 import Prop, { createBoolProp } from '../../../game/Prop';
 import lodash from 'lodash';
 import PropsEditorDrawer from '../scriptedit/PropsEditorDrawer';
@@ -27,11 +26,15 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
     const [editingStyle, setEditingStyle] = useState<CSSProperties>({})
     const [defaultValueEditing, setDefaultValueEditing] = useState<Prop | null>(null)
 
-    const addRole = (uid: string) => {
+    const addRole = (uid: string | null) => {
+        if (uid == null) {
+            return
+        }
         const update = {
             ...char,
             roles: [...char.roles, uid]
         }
+        console.log("Role added: " + uid)
         onCharacterChange(update)
     }
 
@@ -101,7 +104,7 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
     const roleSelected = (e: React.MouseEvent, i: number) => {
         const target = e.currentTarget
         const parent = target.parentElement
-        const pnode = target.parentNode
+        // const pnode = target.parentNode
 
         const rect = target.getBoundingClientRect()
 
@@ -125,7 +128,7 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
         // console.log(`offsetTop ${target.parentElement?.offsetTop} offsetLeft ${target.parentElement?.offsetLeft} offsetHeight ${target.parentElement?.offsetHeight} offsetwidth ${target.parentElement?.offsetWidth}`)
     }
 
-    const createTableData = (r: Role, char: Character) => {
+    const createTableData = (r: Role, _char: Character) => {
         return r.props.map((el, i) => {
             const overridden = getOverridden(el.name)
             const value = overridden !== undefined ? overridden.defaultValue : el.defaultValue
@@ -218,7 +221,7 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
     return (
         <div className='char-role-editing'>
             <div className='char-role-add'>
-                <InputPicker size="lg" placeholder="Assign role" data={dataForNewRoleAdd} onChange={addRole} />
+                <SelectPicker size="lg" placeholder="Assign role" data={dataForNewRoleAdd} onChange={addRole} />
             </div>
             <div className='char-role-display'>
                 {renderAppliedRoleEditor(editingIndex)}
