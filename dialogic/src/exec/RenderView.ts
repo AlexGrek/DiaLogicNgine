@@ -1,7 +1,6 @@
 import { trace } from "../Trace"
 import Character, { CharacterDialog, createEmptyCharacter, getChar } from "../game/Character"
 import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
-import GameUiElementDescr from "../game/GameUiElementDescr"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
 import { Quest, QuestPath, getQuest } from "../game/Objectives"

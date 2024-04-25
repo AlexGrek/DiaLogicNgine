@@ -1,8 +1,7 @@
-import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
 import React, { useState } from 'react';
-import { Button, Checkbox, Divider, Drawer, Dropdown, Input, InputGroup, Stack } from 'rsuite';
-import { generateImageUrl, isValidJsIdentifier, mergeDicts } from '../../../Utils';
+import { Button, Checkbox, Divider, Drawer, Input, Stack } from 'rsuite';
+import { generateImageUrl, mergeDicts } from '../../../Utils';
 import { GameDescription } from '../../../game/GameDescription';
 import { Item, createEmptyItem } from '../../../game/Items';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
@@ -98,8 +97,8 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
             <ImagePicker value={it.image} onChange={val => setImage("image", val || undefined)}>Image</ImagePicker>
             <ImagePicker value={it.thumbnail} onChange={val => setImage("thumbnail", val || undefined)}>Thumbnail</ImagePicker>
             <Divider>Properties</Divider>
-            <Checkbox checked={it.unique} onChange={(value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
-            <Checkbox checked={it.canGive} onChange={(value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
+            <Checkbox checked={it.unique} onChange={(_value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
+            <Checkbox checked={it.canGive} onChange={(_value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
             <Divider>Stats</Divider>
             <p><ItemsPicker placeholder='Copy stats from...' game={game} onPickItem={copyStats} excludeUids={[it.uid]}/></p>
             <StringMapEditor value={it.stats} onChange={value => setEditingObject({ ...editingObject, stats: value })}></StringMapEditor>

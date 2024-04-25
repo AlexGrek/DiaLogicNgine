@@ -62,7 +62,7 @@ export interface DialogWindowListUpdater {
 
 export default class App extends React.Component<IAppProps, IAppState> {
 
-  constructor(props: IAppProps, state: IAppState) {
+  constructor(props: IAppProps, _state: IAppState) {
     super(props);
 
 
