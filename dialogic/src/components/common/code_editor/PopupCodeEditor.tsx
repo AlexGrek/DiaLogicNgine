@@ -105,7 +105,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
             setCode(ui.functionTemplates[name])
         }
         return Object.entries(ui.functionTemplates).map(example => {
-            const [name, code] = example
+            const [name, _code] = example
             return <button className="load-example-btn-code" onClick={() => applyCodeTemplate(name)} key={name}>{name}</button>
         })
     }
@@ -117,7 +117,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     return open ? (
-        <Modal size={'full'} open={open} onClose={() => onSaveClose(codeVal)} backdrop={true}>
+        <Modal size={'lg'} open={open} onClose={() => onSaveClose(codeVal)} backdrop="static" style={{outline: "1px solid grey", backdropFilter: "blur(7px)"}}>
             <Modal.Header>
                 <Modal.Title>{ui.header}</Modal.Title>
             </Modal.Header>
@@ -132,7 +132,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                             {renderDoc()}
                         </div>
                     </div>
-                    <div className='editor-panel-code'>
+                    <div className='editor-panel-code' style={{minHeight: "50vh"}}>
                         function {ui.functionName}({argumentsCommaSeparated(getArguments())}) {"{"}
                         {renderEditor()}
                         {"}"}

@@ -6,6 +6,7 @@
     grid-template-rows: 90% 10%;
 
     transition: background .3s ease;
+    font-family: 'Involve';
 }
 
 .game-menu-container.closing {

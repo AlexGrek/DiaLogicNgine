@@ -24,3 +24,9 @@ code {
   src: local('IconFont'), url(./fonts/ElegantIcons.ttf) format('truetype');
 }
 
+@font-face {
+  font-family: 'Involve';
+  src: url('/Involve-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
