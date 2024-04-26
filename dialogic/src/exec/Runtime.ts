@@ -6,7 +6,7 @@ import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
 import { CarriedItem, State } from "./GameState";
 import { ObjectiveStatus } from "./QuestProcessor";
-import { Item, getItemByIdOrNull } from "../game/Items";
+import { getItemByIdOrNull } from "../game/Items";
 
 type StateProvider = () => State
 
