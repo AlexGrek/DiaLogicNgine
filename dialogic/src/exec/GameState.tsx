@@ -53,6 +53,11 @@ export interface HistoryRecord {
     step: number
 }
 
+export interface CarriedItem {
+    item: string
+    quantity: number
+}
+
 export interface State {
     position: UiObjectId
     stepCount: number
@@ -72,6 +77,7 @@ export interface State {
     engineVersion: string
     notifications: InGameNotification[]
     situation?: string
+    carriedItems: CarriedItem[]
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -91,7 +97,8 @@ export function createInitialState(game: GameDescription): State {
         knownPlaces: [],
         engineVersion: game.engineVersion,
         progress: createInitialGameProgress(),
-        notifications: []
+        notifications: [],
+        carriedItems: []
     }
 }
 
@@ -108,6 +115,7 @@ export function safeStateUpdate(safeState: State, upd: State): State {
     safeState.props = upd.props
     safeState.quickReplyText = upd.quickReplyText
     safeState.stepCount = upd.stepCount
+    safeState.carriedItems = upd.carriedItems
 
     // UI stack and position is NOT UPDATED
     // same for short history

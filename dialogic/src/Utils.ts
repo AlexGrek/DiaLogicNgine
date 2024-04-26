@@ -1,4 +1,4 @@
-import lodash, { lowerFirst, upperFirst } from "lodash";
+import { lowerFirst, upperFirst } from "lodash";
 
 export function isValidIdentifier(str: string): boolean {
     return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(str);
@@ -180,4 +180,21 @@ export class LocalStorage {
             console.error("Error clearing local storage:", error);
         }
     }
+}
+
+export function deepEqual<T extends Record<string | number, any>>(obj1: T, obj2: T): boolean {
+    if (obj1 === obj2) return true;
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) return false;
+
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    if (keys1.length !== keys2.length) return false;
+
+    for (const key of keys1) {
+        if (!Object.prototype.hasOwnProperty.call(obj2, key)) return false;
+        if (!deepEqual(obj1[key as keyof T], obj2[key as keyof T])) return false;
+    }
+
+    return true;
 }

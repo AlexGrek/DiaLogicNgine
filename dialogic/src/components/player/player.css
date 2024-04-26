@@ -515,3 +515,86 @@
 .discuss-picker-control-panel button:hover {
     background-color: rgba(126, 126, 126, 0.65);
 }
+
+/* items picker */
+
+.player-items-picker-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+}
+
+.player-items-picker-item {
+    height: 50pt;
+    width: 50pt;
+    margin: 2pt;
+    cursor: pointer;
+    border-radius: 7pt;
+    background-size: cover;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.player-items-picker-item:hover {
+    background-color: #34343440;
+}
+
+.player-items-picker {
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: space-evenly;
+    overflow-y: auto;
+    font-size: small;
+}
+
+.player-items-descr {
+    height: 8em;
+    background-color: #34343440;
+    display: flex;
+    flex-direction: row;
+}
+
+.player-items-picker-item-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: auto;
+    align-items: baseline;
+    margin: 2pt 3pt;
+}
+
+.items-descr-data {
+    width: 100%;
+    overflow-y: auto;
+}
+
+.items-descr-header {
+    font-size: large;
+    background-color: #1f1f1f58;
+    font-family: 'Involve', sans-serif;
+    overflow: hidden;
+    border: 1px solid grey;
+    margin: 2pt;
+    border-radius: 4pt;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
+    transition: box-shadow 0.3s ease-in-out;
+    
+}
+
+.items-descr-header:hover {
+    background-color: #535353b0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.player-items-picker-tip-text {
+    margin-top: auto;
+    margin-bottom: 4pt;
+    opacity: .6;
+}
+
+.items-descr-image-img {
+    max-height: 100%;
+    max-width: 70pt;
+}

@@ -10,6 +10,7 @@ export interface Item {
     image?: string
     thumbnail?: string,
     canGive: boolean
+    stackable: boolean
 }
 
 export function createEmptyItem(uid: string): Item {
@@ -26,6 +27,28 @@ export function createEmptyItem(uid: string): Item {
         tags: [],
         canGive: true,
         stats: {},
-        discussable: true
+        discussable: true,
+        stackable: false
     }
+}
+
+export function getItemByIdOrNull(items: Item[], uid: string): Item | null {
+    const foundItem = items.find(item => item.uid === uid);
+    return foundItem || null;
+}
+
+export function getItemByIdOrUnknown(items: Item[], uid: string): Item {
+    const foundItem = items.find(item => item.uid === uid);
+    return foundItem || {
+        uid: uid,
+        name: "UNKNOWN ITEM",
+        description: `Item with id ${uid} was not found`,
+        price: 0,
+        unique: false,
+        tags: [],
+        canGive: true,
+        stats: {},
+        discussable: true,
+        stackable: true
+    };
 }

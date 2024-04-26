@@ -3,7 +3,6 @@ import { generateImageUrl } from '../../Utils';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
 import { DialogRenderView } from '../../exec/RenderView';
-import { DialogLink } from '../../game/Dialog';
 import DialogVariants from './DialogVariants';
 import "./player.css";
 
@@ -53,21 +52,21 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         }
     }
 
-    const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (transitionOut) {
-            return transitionOutClass(base, index, maxindex)
-        }
-        if (!inTransitionIn)
-            return base
+    // const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
+    //     if (transitionOut) {
+    //         return transitionOutClass(base, index, maxindex)
+    //     }
+    //     if (!inTransitionIn)
+    //         return base
 
-        // we are in transition in, so...
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-in-${inumber}`
-        }
-        return `${base} transition-in${indexString}`
-    }
+    //     // we are in transition in, so...
+    //     let indexString = ''
+    //     if (index !== undefined && maxindex) {
+    //         const inumber = index > maxindex ? maxindex : index
+    //         indexString = ` transition-in-${inumber}`
+    //     }
+    //     return `${base} transition-in${indexString}`
+    // }
 
     const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
         if (!transitionOut) {
@@ -81,13 +80,12 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         return `${base} transition-out${indexString}`
     }
 
-    const click = (link: DialogLink, textOfLink: string) => {
-        const clickData = { actor: null, text: text, answer: textOfLink, step: step } // TODO: add actor
-        onStateUpd(game.dialogVariantApply(state, link, clickData))
-    }
+    // const click = (link: DialogLink, textOfLink: string) => {
+    //     const clickData = { actor: null, text: text, answer: textOfLink, step: step } // TODO: add actor
+    //     onStateUpd(game.dialogVariantApply(state, link, clickData))
+    // }
 
     const renderShortHistoryItem = (item: HistoryRecord, latest: boolean, index: number) => {
-        // TODO: add actor rendering
         return <div key={index} id={latest ? "history-record-latest" : `history-record-${item.step}`} className='dialog-history-record'>
             <p className='dialog-history-record-text'>{item.text}</p>
             <p className='dialog-history-record-ans'>{item.answer}</p>

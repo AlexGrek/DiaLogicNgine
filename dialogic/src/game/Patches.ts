@@ -105,7 +105,10 @@ export class PatchFrom09To010 implements Patch {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
         const objData: GameDescription = obj
-        obj.uiElements = initGameUiElementDescr()
+        for (let char of objData.items) {
+            char["stackable"] = false
+        }
+        objData.uiElements = initGameUiElementDescr()
         return objData as GameDescription
     }
 }

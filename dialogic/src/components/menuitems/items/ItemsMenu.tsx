@@ -66,7 +66,7 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
             setEditingObject({ ...editingObject, tags: value })
         }
 
-        const setCheck = (prop: "canGive" | "unique", value: boolean) => {
+        const setCheck = (prop: "canGive" | "unique" | "stackable", value: boolean) => {
             setEditingObject({ ...editingObject, [prop]: value })
         }
 
@@ -99,6 +99,7 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
             <Divider>Properties</Divider>
             <Checkbox checked={it.unique} onChange={(_value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
             <Checkbox checked={it.canGive} onChange={(_value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>
+            <Checkbox checked={it.stackable} onChange={(_value, checked) => setCheck("stackable", checked)}>Stackable</Checkbox>
             <Divider>Stats</Divider>
             <p><ItemsPicker placeholder='Copy stats from...' game={game} onPickItem={copyStats} excludeUids={[it.uid]}/></p>
             <StringMapEditor value={it.stats} onChange={value => setEditingObject({ ...editingObject, stats: value })}></StringMapEditor>

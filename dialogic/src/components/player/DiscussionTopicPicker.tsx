@@ -1,11 +1,12 @@
 import React, { ReactNode } from 'react';
 import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
-import { State } from '../../exec/GameState';
+import { CarriedItem, State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { CharDialogRenderView } from '../../exec/RenderView';
 import { createEmptyFact, getFact } from '../../game/Fact';
 import { getLoc } from '../../game/Loc';
 import "./player.css";
+import InputPickerView from './InputPickerView';
 
 interface DiscussionTopicPickerProps {
     game: GameExecManager
@@ -39,10 +40,6 @@ const SimpleTextList: React.FC<{
 };
 
 const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, localization, state, view, onTopicSelected, onCancel }) => {
-    const items = () => {
-        return
-    }
-
     const getFacts = () => {
         return state.knownFacts.map((factid) => {
             let realFact = getFact(game.game, factid)
@@ -99,6 +96,10 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
         onTopicSelected("char", value)
     }
 
+    const handleItemSelect = (item: CarriedItem, _index: number): void => {
+        onTopicSelected("item", item.item)
+    }
+
     return (
         <div className='discuss-picker-main'>
             <div className='discuss-picker-control-panel'>
@@ -112,7 +113,7 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
                     <SimpleTextList items={getFacts()} onSelect={handleFactSelect}></SimpleTextList>
                 </DiscussionTab>}
                 {view.dialogOptions.canDiscussItems && <DiscussionTab name={localization.local('Items')}>
-                    not implemented yet
+                   <InputPickerView items={state.carriedItems} onChoose={handleItemSelect} context={game}/>
                 </DiscussionTab>}
                 {view.dialogOptions.canDiscussLocations && <DiscussionTab name={localization.local('Places')}>
                     <SimpleTextList items={getLocs()} onSelect={handleLocSelect}></SimpleTextList>

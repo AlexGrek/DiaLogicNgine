@@ -4,13 +4,14 @@ import { GameDescription } from "../game/GameDescription";
 import QuestLine, { Quest, Task } from "../game/Objectives";
 import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
-import { State } from "./GameState";
+import { CarriedItem, State } from "./GameState";
 import { ObjectiveStatus } from "./QuestProcessor";
+import { Item, getItemByIdOrNull } from "../game/Items";
 
 type StateProvider = () => State
 
 function addProp(stateProvider: StateProvider, object: any, prop: Prop, prefix: string) {
-    const getOrDefault = (stateProvider: StateProvider, object: any, name: string, prefix: string, def: any) => {
+    const getOrDefault = (stateProvider: StateProvider, _object: any, _name: string, prefix: string, def: any) => {
         const state: State = stateProvider()
         const fullname = `${prefix}${prop.name}`
         if (state.props[fullname] !== undefined) {
@@ -19,7 +20,7 @@ function addProp(stateProvider: StateProvider, object: any, prop: Prop, prefix: 
         return def
     }
 
-    const setToState = (stateProvider: StateProvider, object: any, prop: Prop, prefix: string, value: any) => {
+    const setToState = (stateProvider: StateProvider, _object: any, prop: Prop, prefix: string, value: any) => {
         const state: State = stateProvider()
         const fullname = `${prefix}${prop.name}`
         switch (prop.datatype) {
@@ -138,12 +139,101 @@ export class RuntimeObjectiveQuestLine {
     }
 }
 
+export class RuntimeItemsManager {
+    state!: State
+    _context: GameExecManager
+
+    constructor(context: GameExecManager) {
+        this._context = context
+    }
+
+    private getIndexByItemId(carriedItems: CarriedItem[], uid: string): number {
+        for (let i = 0; i < carriedItems.length; i++) {
+            if (carriedItems[i].item === uid) {
+                return i;
+            }
+        }
+        return -1; // Return -1 if the item is not found
+    }
+
+    public add(itemUid: string) {
+        let item = getItemByIdOrNull(this._context.game.items, itemUid);
+        if (item != null) {
+            let index = this.getIndexByItemId(this.state.carriedItems, itemUid);
+            if (item.stackable && index >= 0) {
+                // just increase number
+                this.state.carriedItems[index].quantity += 1
+            } else {
+                // append to list
+                this.state.carriedItems.push({item: itemUid, quantity: 1})
+            }
+        } else {
+            console.error("Item not found: " + itemUid)
+        }
+    }
+
+    public remove(itemUid: string) {
+        // warning: ai-generated
+        const index = this.getIndexByItemId(this.state.carriedItems, itemUid);
+        if (index !== -1) {
+            const item = this.state.carriedItems[index];
+            if (item.quantity === 1) {
+                // Remove the item from the carried items array if there is only one left
+                this.state.carriedItems.splice(index, 1);
+            } else {
+                // Decrease the quantity if the item is stackable and there are multiple of it
+                item.quantity -= 1;
+            }
+        } else {
+            console.error("Item not found: " + itemUid);
+        }
+    }
+
+    public list(): CarriedItem[] {
+        return this.state.carriedItems;
+    }
+
+    public listWithTag(tag: string): CarriedItem[] {
+        const carriedItemsWithTag: CarriedItem[] = [];
+        this.state.carriedItems.forEach(carriedItem => {
+            const item = getItemByIdOrNull(this._context.game.items, carriedItem.item);
+            if (item && item.tags.includes(tag)) {
+                carriedItemsWithTag.push(carriedItem);
+            }
+        });
+        return carriedItemsWithTag;
+    }
+    
+
+    public has(itemUid: string): boolean {
+        return this.getIndexByItemId(this.state.carriedItems, itemUid) !== -1;
+    }
+
+    public count(itemUid: string): number {
+        let count = 0;
+        this.state.carriedItems.forEach(carriedItem => {
+            if (carriedItem.item === itemUid) {
+                count += carriedItem.quantity; // Add quantity for stackable and unstackable items
+            }
+        });
+        return count;
+    }
+
+    public countTotal(): number {
+        let count = 0;
+        this.state.carriedItems.forEach(carriedItem => {
+                count += carriedItem.quantity;
+        });
+        return count;
+    }
+}
+
 export class RuntimeObjectiveQuest {
     _stateProvider!: () => State;
     _quest: Quest
     _context: GameExecManager
 
-    constructor(context: GameExecManager, stateProvider: () => State, quest: Quest, parent: QuestLine) {
+    constructor(context: GameExecManager, stateProvider: () => State, quest: Quest, _parent: QuestLine) {
         this._quest = quest
         this._context = context
         this._stateProvider = stateProvider
@@ -250,6 +340,7 @@ export class RuntimeRt {
     ch: any
     facts: any
     objectives: any
+    items: RuntimeItemsManager
     context: GameExecManager
     situation: string | undefined
 
@@ -259,6 +350,7 @@ export class RuntimeRt {
         this.ch = chars
         this.facts = facts
         this.objectives = addRuntimeObjectives(game, this)
+        this.items = new RuntimeItemsManager(context)
         if (state)
             this.setState(state)
     }
@@ -269,6 +361,7 @@ export class RuntimeRt {
         this.props.state = this.state
         this.ch.state = this.state
         this.facts.state = this.state
+        this.items.state = this.state
         this.situation = this.state.situation
     }
 
@@ -303,7 +396,7 @@ export function stateIsValid(stateCandidate: any) {
 }
 
 function makeFunctionBody(s: string) {
-    return `(function (rt, state, props, ch, facts, objectives, situation) { ${s} })`
+    return `(function (rt, state, props, ch, facts, objectives, situation, items) { ${s} })`
 }
 
 function evaluate(game: GameDescription, s: string, execManager: GameExecManager, prevState: State): [any, State] {
@@ -311,7 +404,7 @@ function evaluate(game: GameDescription, s: string, execManager: GameExecManager
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
-    var returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation);
+    var returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items);
     return [returned, stateCopy]
 }
 
