@@ -72,9 +72,9 @@ export class GameExecManager {
         return newState
     }
 
-    getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined) {
+    getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined, contextVars?: any) {
         if (script !== undefined && script !== '') {
-            const { decision } = evaluateAsBoolProcessor(this.game, script, this, instate)
+            const { decision } = evaluateAsBoolProcessor(this.game, script, this, instate, contextVars)
             return decision
         }
         else {
@@ -199,7 +199,7 @@ export class GameExecManager {
             location: directionUid,
             kind: "location"
         }
-        return newState;
+        return this.events.withPossibleEvent(newState);
     }
 
     locRouteApply(state: State, view: LocRouteRenderView): State {
@@ -296,7 +296,7 @@ export class GameExecManager {
         return newState
     }
 
-    private followLink(prevState: State, link: DialogLink): State {
+    followLink(prevState: State, link: DialogLink): State {
         var newState = this.withUpdatedStep(prevState)
         var directionFromLink = link.mainDirection
         if (link.isAlternativeLink && link.alternativeDirections.length > 0 && link.useAlternativeWhen) {
@@ -429,7 +429,7 @@ export class GameExecManager {
         return main
     }
 
-    private applyLink(state: State, link: DialogLink, clickData: HistoryRecord): State {
+    applyLink(state: State, link: DialogLink, clickData: HistoryRecord): State {
         // execute code if needed BEFORE link is followed
         let modifiedState = state
         if (link.actionCode) {

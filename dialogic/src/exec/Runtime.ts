@@ -139,6 +139,24 @@ export class RuntimeObjectiveQuestLine {
     }
 }
 
+export class RuntimeHistoryAccessManager {
+    _stateProvider!: () => State
+    _context: GameExecManager
+
+    constructor(context: GameExecManager, runtime: RuntimeRt) {
+        this._context = context
+        this._stateProvider = () => runtime.mustGetState()
+    }
+
+    public eventHappened(eventName: string) {
+        return this._stateProvider().happenedEvents.includes(eventName)
+    }
+
+    public thisEventHappened(context: any) {
+        return this._stateProvider().happenedEvents.includes(context["thisEvent"])
+    }
+}
+
 export class RuntimeItemsManager {
     state!: State
     _context: GameExecManager
@@ -306,7 +324,7 @@ export class RuntimeObjectiveTask {
 
 function addRuntimeObjectives(game: GameDescription, rt: RuntimeRt) {
     const stateProvider = () => rt.mustGetState()
-    const context = rt.context
+    const context = rt.contextManager
     const host: any = {}
     game.objectives.forEach(qline => {
         const rtqline: any = new RuntimeObjectiveQuestLine(context, stateProvider, qline)
@@ -341,16 +359,19 @@ export class RuntimeRt {
     facts: any
     objectives: any
     items: RuntimeItemsManager
-    context: GameExecManager
+    history: RuntimeHistoryAccessManager
+    contextManager: GameExecManager
     situation: string | undefined
+    contextVars: any
 
-    constructor(props: any, chars: any, facts: any, game: GameDescription, context: GameExecManager, state?: State) {
-        this.context = context
+    constructor(props: any, chars: any, facts: any, game: GameDescription, contextManager: GameExecManager, state?: State) {
+        this.contextManager = contextManager
         this.props = props
         this.ch = chars
         this.facts = facts
+        this.history = new RuntimeHistoryAccessManager(contextManager, this)
         this.objectives = addRuntimeObjectives(game, this)
-        this.items = new RuntimeItemsManager(context)
+        this.items = new RuntimeItemsManager(contextManager)
         if (state)
             this.setState(state)
     }
@@ -396,21 +417,22 @@ export function stateIsValid(stateCandidate: any) {
 }
 
 function makeFunctionBody(s: string) {
-    return `(function (rt, state, props, ch, facts, objectives, situation, items) { ${s} })`
+    return `(function (rt, state, props, ch, facts, objectives, situation, items, context) { ${s} })`
 }
 
-function evaluate(game: GameDescription, s: string, execManager: GameExecManager, prevState: State): [any, State] {
+function evaluate(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any): [any, State] {
     const body = makeFunctionBody(s)
     console.log(body)
     var stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
-    var returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items);
+    rt.contextVars = contextVars;
+    var returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
     return [returned, stateCopy]
 }
 
-export function evaluateAsStateProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
+export function evaluateAsStateProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any) {
     try {
-        var [newState, stateCopy] = evaluate(game, s, execManager, prevState)
+        var [newState, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
         if (stateIsValid(newState))
             return newState as State
         else {
@@ -424,10 +446,10 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, execM
     }
 }
 
-export function evaluateAsBoolProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
+export function evaluateAsBoolProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any) {
     var state = prevState
     try {
-        var [boolResult, stateCopy] = evaluate(game, s, execManager, prevState)
+        var [boolResult, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
@@ -445,10 +467,10 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, execMa
     }
 }
 
-export function evaluateAsAnyProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State) {
+export function evaluateAsAnyProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any) {
     var state = prevState
     try {
-        var [anyResult, stateCopy] = evaluate(game, s, execManager, prevState)
+        var [anyResult, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {

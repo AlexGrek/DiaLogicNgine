@@ -46,6 +46,10 @@ export function createDialogLink(): DialogLink {
     return { mainDirection: { type: LinkType.Local, direction: "" }, text: "", alternativeDirections: [] }
 }
 
+export function createImmediateDialogLink(target: DialogWindowId): DialogLink {
+    return { mainDirection: { type: LinkType.Push, direction: "", qualifiedDirection: target }, text: "", alternativeDirections: [] }
+}
+
 export interface Actor {
     character: string
     currentCharacter: boolean,

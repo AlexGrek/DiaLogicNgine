@@ -182,6 +182,33 @@ export class LocalStorage {
     }
 }
 
+export function haveCommonElement(array1: string[], array2: string[]): boolean {
+    // Loop through each element in array1
+    for (const element of array1) {
+        // If array2 includes the current element, return true
+        if (array2.includes(element)) {
+            return true;
+        }
+    }
+    // If no common element is found, return false
+    return false;
+}
+
+export function partition<T>(array: T[], predicate: (value: T) => boolean): [T[], T[]] {
+    const trueArray: T[] = [];
+    const falseArray: T[] = [];
+
+    for (const element of array) {
+        if (predicate(element)) {
+            trueArray.push(element);
+        } else {
+            falseArray.push(element);
+        }
+    }
+
+    return [trueArray, falseArray];
+}
+
 export function deepEqual<T extends Record<string | number, any>>(obj1: T, obj2: T): boolean {
     if (obj1 === obj2) return true;
     if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) return false;

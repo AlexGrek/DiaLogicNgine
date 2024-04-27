@@ -62,6 +62,7 @@ export interface State {
     position: UiObjectId
     stepCount: number
     positionStack: UiObjectId[]
+    positionHistory: UiObjectId[]
     location: string | null
     charDialog: string | null
     props: { [key: string]: any }
@@ -78,6 +79,7 @@ export interface State {
     notifications: InGameNotification[]
     situation?: string
     carriedItems: CarriedItem[]
+    happenedEvents: string[]
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -85,6 +87,7 @@ export function createInitialState(game: GameDescription): State {
         position: game.startupDialog,
         quickReplyText: null,
         positionStack: [],
+        positionHistory: [],
         location: null,
         charDialog: null,
         props: {},
@@ -98,7 +101,8 @@ export function createInitialState(game: GameDescription): State {
         engineVersion: game.engineVersion,
         progress: createInitialGameProgress(),
         notifications: [],
-        carriedItems: []
+        carriedItems: [],
+        happenedEvents: []
     }
 }
 
