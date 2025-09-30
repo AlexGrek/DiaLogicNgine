@@ -14,6 +14,8 @@ import DeviceOtherIcon from '@rsuite/icons/DeviceOther';
 import ExploreIcon from '@rsuite/icons/Explore';
 import TreemapIcon from '@rsuite/icons/Treemap';
 import { IUpds } from '../App';
+import { SquareDashedMousePointer } from 'lucide-react';
+import Icon from '@rsuite/icons/lib/Icon';
 
 export interface ISidePanelProps {
   game: GameDescription
@@ -116,6 +118,9 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
               </Nav.Item>
               <Nav.Item eventKey="ui" icon={<TreemapIcon />} onClick={() => this.props.onMenuSwitch("ui")}>
                 UI Elements
+              </Nav.Item>
+              <Nav.Item eventKey="pac" icon={<Icon as={() => <SquareDashedMousePointer />}></Icon>} onClick={() => this.props.onMenuSwitch("pac")}>
+                Point And Click
               </Nav.Item>
             </Nav>
           </Sidenav.Body>

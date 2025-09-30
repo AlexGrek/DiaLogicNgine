@@ -19,6 +19,7 @@
     "json-beautify-fix": "^1.1.3",
     "list-react-files": "^0.2.0",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.544.0",
     "react": "^18.2.0",
     "react-accessible-treeview": "^2.4.0",
     "react-dom": "^18.2.0",

@@ -76,6 +76,9 @@ export interface DialogWindow {
     tags: string[]
     changeLocationInBg?: string
     changeSituation?: string
+
+    // special widget types
+    specialWidget?: string
 }
 
 export const createWindow = (uid: string) => {

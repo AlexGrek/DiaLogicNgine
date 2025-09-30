@@ -24,6 +24,7 @@ import lodash from 'lodash';
 import NotificationBar from './components/notification/NotificationBar';
 import GameUiElementDescr from './game/GameUiElementDescr';
 import UiElementsMenu from './components/menuitems/uielements/UiElementsMenu';
+import PointAncClick from './components/menuitems/pointandclick/PointAncClick';
 
 export interface IAppProps {
 
@@ -99,7 +100,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
   }
 
   private handleDialogEdit(dialog: Dialog) {
-    let newDialogs = this.state.game.dialogs.map(d => {
+    const newDialogs = this.state.game.dialogs.map(d => {
       if (d.name === dialog.name) {
         console.log(`Dialog ${d.name} updated.`)
         return dialog;
@@ -113,7 +114,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
     if (!dialog_uid) {
       dialog_uid = this.state.activeDialog
     }
-    let newDialogs = this.state.game.dialogs.map(d => {
+    const newDialogs = this.state.game.dialogs.map(d => {
       if (d.name === dialog_uid) {
         const dialogWindows = func(d.windows);
         const newDialog = { ...d, windows: dialogWindows }
@@ -216,11 +217,14 @@ export default class App extends React.Component<IAppProps, IAppState> {
       <div style={this.displayStyle("ui")}>
         <UiElementsMenu visible={this.isVisible("ui")} ui={this.state.game.uiElements} onSetUi={(items: GameUiElementDescr) => this.setState({ game: { ...this.state.game, uiElements: items } })} game={this.state.game} />
       </div>
+      <div style={this.displayStyle("poc")}>
+        <PointAncClick visible={this.isVisible("poc")} ui={this.state.game.uiElements} onSetUi={(items: GameUiElementDescr) => this.setState({ game: { ...this.state.game, uiElements: items } })} game={this.state.game} />
+      </div>
     </div>
   }
 
   public render() {
-    let updates: IUpds = {
+    const updates: IUpds = {
       handleDialogEdit: this.handleDialogEdit.bind(this),
       handleDialogCreate: this.handleDialogCreate.bind(this),
       handleDialogApplyChange: this.handleDialogApplyChange.bind(this),
@@ -234,7 +238,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
       createSituation: this.createSituation.bind(this)
     }
 
-    let chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);
+    const chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);
     return (
       <CustomProvider theme="dark">
         <Container className='root-container'>
