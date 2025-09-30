@@ -8,7 +8,7 @@ export default interface Dialog {
 }
 
 export function createDialog(name: string) {
-    let dialog = { name: name, windows: [] }
+    const dialog = { name: name, windows: [] }
     return dialog;
 }
 export interface SimpleTextGenerator {
@@ -82,7 +82,7 @@ export interface DialogWindow {
 }
 
 export const createWindow = (uid: string) => {
-    const window: DialogWindow = { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList(), tags: [] }
+    const window: DialogWindow = { uid: uid, text: emptyTextList(), links: [], backgrounds: emptyImageList(), tags: [], specialWidget: null }
     return window;
 }
 

@@ -4,6 +4,7 @@ import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
 import { Quest, QuestPath, getQuest } from "../game/Objectives"
+import { PointAndClick, PointAndClickZone } from "../game/PointAndClick"
 import { TextList, chooseText } from "../game/TextList"
 import { GameExecManager } from "./GameExecutor"
 import { State } from "./GameState"
@@ -59,6 +60,18 @@ export interface DialogRenderView {
     window: DialogWindow
 }
 
+export interface PointAndClickZoneRenderView {
+    disabled: boolean
+    disabledReason: string
+    zone: PointAndClickZone
+}
+
+export interface PacRenderView {
+    widget: "pac"
+    pac: PointAndClick
+    items: PointAndClickZoneRenderView[]
+}
+
 export interface LocRouteRenderView {
     destination: Loc
     name: string
@@ -107,7 +120,7 @@ export interface BgRenderChange {
     effect: BgChangeEffect | null
 }
 
-export type RenderWidget = DialogRenderView | LocationRenderView | CharDialogRenderView | ErrorView
+export type RenderWidget = DialogRenderView | LocationRenderView | CharDialogRenderView | ErrorView | PacRenderView
 
 export type BgChange = BgRenderChange | null
 
@@ -121,6 +134,13 @@ export interface RenderView {
     notifications: PlayerNotification[]
     step: number
     uiElements: UiElementRenderView[]
+}
+
+interface WindowData {
+    actor: ActorView | null;
+    text: string;
+    links: RenderLink[];
+    window: DialogWindow;
 }
 
 export class RenderViewGenerator {
@@ -217,20 +237,69 @@ export class RenderViewGenerator {
         }
     }
 
-    renderDialog(state: State): DialogRenderView {
+
+
+    renderSpecialWidget(state: State, widget: string, data: WindowData, dialog: string): RenderWidget {
+        const [widgetType, widgetId] = widget.split("::");
+        switch (widgetType) {
+            case "pac":
+                {
+                    const pac = this.exec.game.pacWidgets.find(item => item.id == widgetId);
+                    if (!pac) {
+                        throw `Widget PointAndClick ${JSON.stringify(widget)} was not found`
+                    }
+                    const visibleZones = pac.zones.filter((zone) => {
+                        if (zone.isVisibleIfScript) {
+                            const { decision } = evaluateAsBoolProcessor(this.exec.game, zone.isVisibleIfScript, this.exec, state)
+                            return decision
+                        }
+                        return true
+                    }).map(zone => {
+                        let disabled = false;
+                        if (zone.isDisabledIfScript) {
+                            const { decision } = evaluateAsBoolProcessor(this.exec.game, zone.isDisabledIfScript, this.exec, state)
+                            disabled = decision
+                        }
+                        const zoneRv: PointAndClickZoneRenderView = {
+                            disabledReason: "", disabled, zone
+                        }
+                        return zoneRv
+                    });
+                    const pacRv: PacRenderView =
+                    {
+                        widget: "pac",
+                        pac,
+                        items: visibleZones
+                    };
+                    return pacRv;
+                }
+            default:
+                throw `Widget type ${JSON.stringify(widget)} was not found`
+        }
+    }
+
+    renderDialog(state: State): RenderWidget {
         const dw = this.exec.getCurrentDialogWindow(state)
         if (dw == null) {
             throw `Window ${JSON.stringify(state.position)} was not found`
         }
-        const [_dialog, window] = dw
+        const [dialog, window] = dw
 
-        // rendering window
-        return {
-            widget: "dialog",
+        const windowData = {
             actor: this.getCurrentWindowActor(state, window),
             text: this.getCurrentWindowText(state, window),
             links: this.getCurrentWindowLinks(state, window),
             window: window
+        }
+
+        if (window.specialWidget != null) {
+            return this.renderSpecialWidget(state, window.specialWidget, windowData, dialog)
+        }
+
+        // rendering window
+        return {
+            widget: "dialog",
+            ...windowData
         }
     }
 
@@ -255,7 +324,7 @@ export class RenderViewGenerator {
         // rendering window
         return {
             widget: "char",
-            canHostEvents: this.exec.events.canHostEvents(state, charDialog.eventHosts, charDialog.canHostEventsScript),
+            canHostEvents: this.exec.events.canHostEvents(state, charDialog.eventHosts || [], charDialog.canHostEventsScript),
             text: state.quickReplyText || this.getCurrentText(charDialog.text, state, charDialog.chooseTextScript),
             links: this.getCurrentWindowLinks(state, charDialog),
             char: char,
@@ -316,7 +385,7 @@ export class RenderViewGenerator {
             routes: this.getRoutesForLoc(state, loc),
             location: loc,
             text: this.getCurrentText(loc.text, state, loc.chooseTextScript),
-            canHostEvents: this.exec.events.canHostEvents(state, loc.eventHosts, loc.canHostEventsScript)
+            canHostEvents: this.exec.events.canHostEvents(state, loc.eventHosts || [], loc.canHostEventsScript)
         }
     }
 

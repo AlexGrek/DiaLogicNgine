@@ -9,10 +9,10 @@ import { emptyImageList } from "./ImageList";
 import { Item } from "./Items";
 import Loc from "./Loc";
 import QuestLine from "./Objectives";
-import { PointAndClickZone } from "./PointAndClick";
+import { PointAndClick, PointAndClickZone } from "./PointAndClick";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION="0.10"
+export const ENGINE_VERSION = "0.10"
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -33,7 +33,7 @@ export interface GeneralGameInfo {
     name: string
     version: string
     authors: string[]
-    extras: { [key: string]: string | number}
+    extras: { [key: string]: string | number }
     description: string
 }
 
@@ -63,15 +63,15 @@ export interface GameDescription {
     situations: string[]
     translations: Translations
     uiElements: GameUiElementDescr
-    pacWidgets: PointAndClickZone[]
+    pacWidgets: PointAndClick[]
 }
 
 export function createDefaultGame(): GameDescription {
-    let d1 = {
+    const d1: Dialog = {
         name: "dialog1", windows: [
             {
                 "uid": "welcome", "text": { "main": "Welcome to the game!", "list": [] },
-                "backgrounds": { "list": [] }, "links": [], tags: []
+                "backgrounds": { "list": [] }, "links": [], tags: [], specialWidget: null
             },
         ]
     };
@@ -86,8 +86,47 @@ export function createDefaultGame(): GameDescription {
         avatar: emptyImageList(),
         description: { main: "", list: [] },
         discussable: true
-        
     }
+
+    const demoPointAndClickZones: PointAndClickZone[] = [
+        {
+            id: 'door',
+            name: 'Old Door',
+            x: 15,
+            y: 25,
+            width: 20,
+            height: 50,
+            idleOpacity: 0.2,
+            hoverOpacity: 0.8,
+        },
+        {
+            id: 'window',
+            name: 'Window',
+            x: 50,
+            y: 20,
+            width: 15,
+            height: 25,
+            idleOpacity: 0.3,
+            hoverOpacity: 0.9,
+        },
+        {
+            id: 'table',
+            name: 'Wooden Table',
+            x: 65,
+            y: 60,
+            width: 25,
+            height: 30,
+            idleOpacity: 0.25,
+            hoverOpacity: 0.85,
+        },
+    ];
+
+    const demoPac: PointAndClick = {
+        id: "demoPointAndClick",
+        zones: demoPointAndClickZones,
+        eventHosts: []
+    }
+
     const game: GameDescription = {
         dialogs: [d1],
         facts: [],
@@ -116,7 +155,9 @@ export function createDefaultGame(): GameDescription {
             quests: []
         }],
         uiElements: initGameUiElementDescr(),
-        pacWidgets: []
+        pacWidgets: [
+            demoPac
+        ]
     };
 
     return game

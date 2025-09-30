@@ -8,4 +8,20 @@ export interface PointAndClickZone {
   image?: string; // optional zone image
   idleOpacity?: number; // opacity when not hovered (0-1)
   hoverOpacity?: number; // opacity when hovered (0-1)
+
+  // scripting
+
+  isDisabledIfScript?: string
+  isVisibleIfScript?: string
+  onClickScript?: string
+}
+
+export interface PointAndClick {
+  id: string;
+  background?: string;
+  zones: PointAndClickZone[];
+
+  // events
+  eventHosts: string[] | null
+  canHostEventsScript?: string
 }
