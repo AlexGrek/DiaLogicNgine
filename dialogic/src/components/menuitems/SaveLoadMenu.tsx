@@ -108,12 +108,10 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
         setName(nameWithoutExt)
         setNameText(nameWithoutExt)
         const url = 'games/' + s
-        console.log('Loading server file ' + url)
         fetch(url).then(
             res => res.json()
         ).then(
             json => {
-                console.log("Game json file downloaded")
                 loadJson(JSON.stringify(json))
             }
         )

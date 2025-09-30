@@ -27,7 +27,6 @@ export const avatarImageUrl = (game: GameDescription, characterOrUid: string | C
         character = characterOrUid
     }
     
-    console.log(`Generating style: ${image}`)
     if (image === undefined) {
         if (character) {
             if (character.avatar.main) {

@@ -52,13 +52,11 @@ const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }
     useEffect(() => {
         setTask(value || createTaskByUid("_", quest.path))
         setTimeout(() => {
-            console.log("Try to focus")
             if (textFieldRef.current && value) {
                 textFieldRef.current.focus()
-                console.log("focus")
             }
         }, 100)
-    }, [value])
+    }, [quest.path, value])
 
     const handleSave = () => {
         onSetTask(task)

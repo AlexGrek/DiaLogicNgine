@@ -226,7 +226,6 @@ export class GameExecManager {
         let newState = this.addToKnownPlaces(state, loc.uid)
         const visibleNext = loc.routes.map(locid => {
             const next = getLoc(this.game, locid)
-            console.log(`Adding location ${locid} as known`)
             if (next == undefined) {
                 return null
             }

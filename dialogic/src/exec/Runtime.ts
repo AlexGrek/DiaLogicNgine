@@ -183,7 +183,7 @@ export class RuntimeItemsManager {
                 this.state.carriedItems[index].quantity += 1
             } else {
                 // append to list
-                this.state.carriedItems.push({item: itemUid, quantity: 1})
+                this.state.carriedItems.push({ item: itemUid, quantity: 1 })
             }
         } else {
             console.error("Item not found: " + itemUid)
@@ -221,7 +221,7 @@ export class RuntimeItemsManager {
         });
         return carriedItemsWithTag;
     }
-    
+
 
     public has(itemUid: string): boolean {
         return this.getIndexByItemId(this.state.carriedItems, itemUid) !== -1;
@@ -240,7 +240,7 @@ export class RuntimeItemsManager {
     public countTotal(): number {
         let count = 0;
         this.state.carriedItems.forEach(carriedItem => {
-                count += carriedItem.quantity;
+            count += carriedItem.quantity;
         });
         return count;
     }
@@ -378,7 +378,6 @@ export class RuntimeRt {
 
     public setState(s: State) {
         this.state = s
-        console.log("Setting state")
         this.props.state = this.state
         this.ch.state = this.state
         this.facts.state = this.state
@@ -401,7 +400,7 @@ export function createRtObject(game: GameDescription, context: GameExecManager, 
     addProps(propsHost, game)
     addChars(charsHost, game)
     addFacts(factsHost, game)
-    var rt = new RuntimeRt(propsHost, charsHost, factsHost, game, context, state)
+    const rt = new RuntimeRt(propsHost, charsHost, factsHost, game, context, state)
     return rt
 }
 
@@ -422,17 +421,16 @@ function makeFunctionBody(s: string) {
 
 function evaluate(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any): [any, State] {
     const body = makeFunctionBody(s)
-    console.log(body)
-    var stateCopy = lodash.cloneDeep(prevState)
+    const stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
     rt.contextVars = contextVars;
-    var returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
+    const returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
     return [returned, stateCopy]
 }
 
 export function evaluateAsStateProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any) {
     try {
-        var [newState, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
+        const [newState, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
         if (stateIsValid(newState))
             return newState as State
         else {
@@ -447,9 +445,9 @@ export function evaluateAsStateProcessor(game: GameDescription, s: string, execM
 }
 
 export function evaluateAsBoolProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any) {
-    var state = prevState
+    let state = prevState
     try {
-        var [boolResult, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
+        const [boolResult, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {
@@ -468,9 +466,9 @@ export function evaluateAsBoolProcessor(game: GameDescription, s: string, execMa
 }
 
 export function evaluateAsAnyProcessor(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any) {
-    var state = prevState
+    let state = prevState
     try {
-        var [anyResult, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
+        const [anyResult, stateCopy] = evaluate(game, s, execManager, prevState, contextVars)
         if (stateIsValid(stateCopy))
             state = stateCopy
         else {

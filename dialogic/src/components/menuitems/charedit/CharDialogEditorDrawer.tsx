@@ -87,7 +87,6 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
     const mustBeDialog = char.dialog || createCharacterDialog()
 
     const setDialog = (val?: CharacterDialog) => {
-        console.log("Setting dialog: " + JSON.stringify(val))
         setChar({ ...char, dialog: val })
     }
 

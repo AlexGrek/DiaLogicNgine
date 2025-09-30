@@ -15,11 +15,11 @@ interface ActorEditorProps {
 const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
 
     const data = game.chars.map(ch => {
-            return {value: ch.uid, label: ch.uid}
-        })
+        return { value: ch.uid, label: ch.uid }
+    })
 
     const changeChar = (val: string | null) => {
-        var update;
+        let update;
         if (val === null || val === "") {
             onChange(undefined);
             return;
@@ -30,12 +30,11 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
             update = lodash.cloneDeep(value)
         }
         update.character = val;
-        console.log(update)
         onChange(update);
     }
 
     const changeAvatar = (val: string | number | null | undefined) => {
-        var update;
+        let update;
         if (value === null) {
             update = createActor()
         } else {
@@ -45,19 +44,18 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
             return;
         }
         update.avatar = val === null ? "main" : val;
-        console.log(update)
         onChange(update);
     }
 
     const createDataForChar = (c: string) => {
-        const char = game.chars.find(item => item.uid === c) 
+        const char = game.chars.find(item => item.uid === c)
         if (char === undefined) {
             return []
         }
         const images = char.avatar
-        var items = images.list.map((image, i) => {
+        const items = images.list.map((image, i) => {
             const v = image.name ? image.name : i
-            return {value: v, label: v}
+            return { value: v, label: v }
         })
         // if (images.main) {
         //     const main = {value: "main", label: "main"}
@@ -79,7 +77,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
                     changeAvatar(undefined)
                 }
             }}>Set different avatar</Checkbox>
-            { value.avatar === undefined ? <div></div> : <SelectPicker data={createDataForChar(value.character)} value={value.avatar === "main" ? null : value.avatar} onChange={changeAvatar} placeholder="main"></SelectPicker>}
+            {value.avatar === undefined ? <div></div> : <SelectPicker data={createDataForChar(value.character)} value={value.avatar === "main" ? null : value.avatar} onChange={changeAvatar} placeholder="main"></SelectPicker>}
         </div>
     }
 
@@ -88,7 +86,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
             if (value?.character) {
                 const char = game.chars.find(item => item.uid === value.character)
                 if (char && char.avatar.main) {
-                    return {backgroundImage: `url("${generateImageUrl(char.avatar.main)}")`}
+                    return { backgroundImage: `url("${generateImageUrl(char.avatar.main)}")` }
                 }
             }
             return {}
@@ -100,7 +98,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
         if (!char) {
             return {}
         }
-        var imageUri: string | undefined;
+        let imageUri: string | undefined;
         if (lodash.isNumber(image)) {
             if (image >= char.avatar.list.length) {
                 console.error(`image ${image} not found it ${JSON.stringify(char)}`)
@@ -125,13 +123,13 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
         if (!imageUri) {
             return {}
         }
-        return {backgroundImage: `url("${generateImageUrl(imageUri)}")`}
+        return { backgroundImage: `url("${generateImageUrl(imageUri)}")` }
     }
 
     const setCurrentChar = (val: boolean) => {
         if (val) {
             const was = value ? value : createActor()
-            onChange({...was, currentCharacter: true})
+            onChange({ ...was, currentCharacter: true })
         } else {
             // false is the new value
             onChange(undefined)
@@ -143,9 +141,9 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
     return (
         <div className='actor-editor-main' style={generateStyle(value?.avatar)}>
             Actor:
-            <Toggle checkedChildren="Current dialog character" unCheckedChildren="Current dialog character" checked={!!isCurrentChar} onChange={(val) => setCurrentChar(val)}/>
+            <Toggle checkedChildren="Current dialog character" unCheckedChildren="Current dialog character" checked={!!isCurrentChar} onChange={(val) => setCurrentChar(val)} />
             <br></br>
-            {!isCurrentChar && <SelectPicker placeholder="no actor" data={data} value={value ? value.character : null} onChange={(val) => changeChar(val)}/>}
+            {!isCurrentChar && <SelectPicker placeholder="no actor" data={data} value={value ? value.character : null} onChange={(val) => changeChar(val)} />}
             {value && !isCurrentChar ? renderEditors() : null}
         </div>
     );

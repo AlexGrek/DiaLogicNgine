@@ -24,7 +24,6 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
             if (latest) {
                 setTimeout(() => {
                     latest.scrollTop = latest.scrollHeight;
-                    console.log("Scroll to bottom applied")
                 }, 100)
 
             }
@@ -42,7 +41,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         if (actor === null) {
             return <div></div>
         } else {
-            var image = null;
+            let image = null;
             if (actor.avatar) {
                 image = <img alt={actor.name} src={generateImageUrl(actor.avatar)}></img>
             }

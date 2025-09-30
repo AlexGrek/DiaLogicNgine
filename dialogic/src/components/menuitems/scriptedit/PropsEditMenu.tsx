@@ -36,10 +36,10 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
     const [createMenuOpen, setCreateMenuOpen] = useState<boolean>(false);
     useEffect(() => {
         setEditingIndex(editingIndex);
-    }, [props]);
+    }, [editingIndex, props]);
 
     if (visible !== undefined && visible === false) {
-        return <div/>
+        return <div />
     }
 
     const canCreate = creatable !== undefined ? creatable : true;
@@ -56,16 +56,14 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
     }
 
     const updateProp = (index: number, value: Prop) => {
-        console.log(`Got value: ${JSON.stringify(value)} at index ${index}`)
         const copy = lodash.cloneDeep(props)
         copy[index] = value
-        console.log(`Updating: ${JSON.stringify(copy)}`)
         onSetProps(copy)
     }
 
     const createProp = () => {
         const copy = lodash.cloneDeep(props)
-        var create = null;
+        let create = null;
         switch (createTypeChange) {
             case "number":
                 create = createNumberProp(createName, 0);
@@ -98,7 +96,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
             return
         }
         const copy = lodash.cloneDeep(props)
-        copy.push({...p, name: newUid})
+        copy.push({ ...p, name: newUid })
         onSetProps(copy)
     }
 
@@ -170,8 +168,8 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
 
     const createOrPasteMenu = () => {
         const buttons = <Stack>
-            <IconButton icon={<PlusIcon/>} onClick={() => setCreateMenuOpen(!createMenuOpen)}>Create</IconButton>
-            {handlers && <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['prop']}/>}
+            <IconButton icon={<PlusIcon />} onClick={() => setCreateMenuOpen(!createMenuOpen)}>Create</IconButton>
+            {handlers && <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['prop']} />}
         </Stack>
         return <div className="props-menu-buttons">
             {buttons}
@@ -211,7 +209,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                                 <Button onClick={() => deleteProp(rowData.index)}>
                                     <TrashIcon />
                                 </Button>
-                                {handlers ? <CopyButton handlers={handlers} typename={'prop'} obj={rowData.item} buttonStyle='onlyIcon'/> : null}
+                                {handlers ? <CopyButton handlers={handlers} typename={'prop'} obj={rowData.item} buttonStyle='onlyIcon' /> : null}
                             </ButtonGroup>
                         )}
                     </Table.Cell>

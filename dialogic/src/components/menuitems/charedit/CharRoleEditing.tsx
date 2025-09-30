@@ -34,12 +34,10 @@ const CharRoleEditing: React.FC<CharRoleEditingProps> = ({ game, char, onCharact
             ...char,
             roles: [...char.roles, uid]
         }
-        console.log("Role added: " + uid)
         onCharacterChange(update)
     }
 
     const removeRoleAndOverrides = (role: Role) => {
-        console.log("Removing the following role: " + JSON.stringify(role))
         setEditingIndex(-1)
         const propsCopy = lodash.cloneDeep(char.overrideProps)
         const rolesCopy = lodash.cloneDeep(char.roles)

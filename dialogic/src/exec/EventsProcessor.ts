@@ -1,3 +1,4 @@
+import { trace } from "../Trace"
 import { haveCommonElement, partition } from "../Utils"
 import { createImmediateDialogLink } from "../game/Dialog"
 import GameEvent from "../game/Events"
@@ -6,7 +7,7 @@ import { GameExecManager } from "./GameExecutor"
 import { State } from "./GameState"
 
 export default class EventsProcessor {
-    
+
     exec: GameExecManager
 
     constructor(exec: GameExecManager) {
@@ -33,32 +34,29 @@ export default class EventsProcessor {
     }
 
     processPossibleEvents(oldState: State, eventHosts: (string | null)[]): State {
-        let hosts = []
-        for (let host of eventHosts) {
+        const hosts: string[] = []
+        for (const host of eventHosts) {
             if (host != null) {
                 hosts.push(host)
             }
         }
-        let possibleEvents = this.exec.game.events.filter((ev) => haveCommonElement(ev.targets, hosts))
-        console.log(`Possible events here: ${JSON.stringify(possibleEvents)}`)
-        let [priority, nonPriority] = partition(possibleEvents, ev => ev.highPriority)
+        const possibleEvents = this.exec.game.events.filter((ev) => haveCommonElement(ev.targets, hosts))
+        const [priority, nonPriority] = partition(possibleEvents, ev => ev.highPriority)
 
         // sort priority and non-priority separately
         const prioritySorted = priority.sort((a, b) => a.probability - b.probability)
         const nonPrioritySorted = nonPriority.sort((a, b) => b.probability - a.probability)
-        console.log(`Priority: ${JSON.stringify(prioritySorted)}`)
-        console.log(`Non-Priority: ${JSON.stringify(nonPrioritySorted)}`)
 
-        for (let ev of [...prioritySorted, ...nonPrioritySorted]) {
+        for (const ev of [...prioritySorted, ...nonPrioritySorted]) {
             if (this.checkEventCanHappen(oldState, ev)) {
                 // soooo the event can happen! But will it happen?
-                let probability = ev.probability
-                let chance = this.random0to100()
+                const probability = ev.probability
+                const chance = this.random0to100()
                 if (chance <= probability) {
-                    console.log(`Event happened with chance ${chance}: ${JSON.stringify(ev)}`)
+                    trace(`Event happened with chance ${chance}: ${JSON.stringify(ev)}`)
                     return this.happen(oldState, ev)
                 } else {
-                    console.log(`Event not happened with chance ${chance}: ${JSON.stringify(ev)}`)
+                    trace(`Event not happened with chance ${chance}: ${JSON.stringify(ev)}`)
                 }
             }
         }
@@ -66,11 +64,11 @@ export default class EventsProcessor {
     }
 
     checkEventCanHappen(state: State, event: GameEvent): boolean {
-        return this.exec.getBoolDecisionWithDefault(state, true, event.canHappenScript, {"thisEvent": event.name})
+        return this.exec.getBoolDecisionWithDefault(state, true, event.canHappenScript, { "thisEvent": event.name })
     }
 
     withPossibleEvent(oldState: State): State {
-        let pos = oldState.position
+        const pos = oldState.position
         if (pos.kind === "location") {
             // location can host events
             const loc = getLoc(this.exec.game, pos.location)

@@ -36,8 +36,6 @@ const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers
 
     const deleteQuestLine = (q: QuestLine) => {
         const upd = questlines.filter((ch) => ch.uid !== q.uid)
-        console.log("Deleting quest line " + q.uid)
-        console.log(`Was: ${questlines.length}, is: ${upd.length}`)
         updateQuestLines(upd)
         setEditingIndex(0)
     }

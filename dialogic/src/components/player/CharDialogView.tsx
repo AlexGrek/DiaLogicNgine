@@ -31,7 +31,6 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
             if (latest) {
                 setTimeout(() => {
                     latest.scrollTop = latest.scrollHeight;
-                    console.log("Scroll to bottom applied")
                 }, 100)
             }
         }

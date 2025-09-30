@@ -78,7 +78,6 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
     }
 
     const addRouteFromTo = (from: string, to: string) => {
-        console.log(`Trying to connect locs: ${from} -> ${to}`)
 
         const locations = lodash.cloneDeep(game.locs)
         let thisLocIndex = locations.findIndex((loc) => loc.uid === location.uid)

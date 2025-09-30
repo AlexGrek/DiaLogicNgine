@@ -187,7 +187,7 @@ export class RenderViewGenerator {
             return null
         }
 
-        var avatar = character.avatar.main
+        let avatar = character.avatar.main
 
         // get avatar from character script
         if (character.chooseAvatarScript) {
@@ -198,11 +198,10 @@ export class RenderViewGenerator {
 
         if (actor.avatar !== undefined) {
             // redefined avatar
-            console.log("redefined avatar")
             avatar = chooseImage(character.avatar, actor.avatar)
         }
 
-        var name = character.displayName.main
+        let name = character.displayName.main
 
         if (character.chooseNameScript) {
             // eslint-disable-next-line

@@ -96,7 +96,6 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     const accessibleObjectAddClick = (name: string) => {
-        console.log("add clicked: " + name);
         setCode(codeVal + name);
     }
 

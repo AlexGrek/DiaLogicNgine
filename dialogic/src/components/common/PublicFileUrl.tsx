@@ -20,11 +20,10 @@ const PublicFileUrl: React.FC<PublicFileUrlProps> = ({ extensions, value, onChan
             res => res.json()
         ).then(
             json => {
-                console.log("json file list of files: " + JSON.stringify(json))
                 setData(json)
             }
         )
-    }, [extensions]);
+    }, [extensions, requestUrl]);
 
     const convertListToView = (values_list: string[]) => {
         return values_list.filter(

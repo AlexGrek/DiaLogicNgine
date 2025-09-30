@@ -20,7 +20,7 @@ const PasteButton: React.FC<PasteButtonProps> = ({ handlers, customText, onPaste
     const press = () => {
         if (requireNewUid) {
             if (!isValidJsIdentifier(creatingUID)) {
-                console.log("Paste: invalid identifier " + creatingUID)
+                console.error("Paste: invalid identifier " + creatingUID)
                 return
             }
         }
@@ -33,10 +33,10 @@ const PasteButton: React.FC<PasteButtonProps> = ({ handlers, customText, onPaste
                 return
             }
             // object in buffer is of unsupported type
-            console.log(`Paste: unsupported object '${pasted.typename}'`)
+            console.error(`Paste: unsupported object '${pasted.typename}'`)
             handlers.notify("error", `Paste: unsupported object '${pasted.typename}'`)
         } else {
-            console.log(`Paste: buffer is empty`)
+            console.error(`Paste: buffer is empty`)
             handlers.notify("error", `Paste: buffer is empty`)
         }
 

@@ -79,8 +79,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ char, window_uid, l
         </div>
     } else {
         // view mode
-        let linksList = links.map((el, index) => {
-            console.log(`Link: ${el}`)
+        const linksList = links.map((el, index) => {
             return <LinkShortView index={index} key={index} link={el} onLinkClick={onLinkClick}></LinkShortView>
         })
         linksEditorContent = <div className='links-list'>
@@ -96,7 +95,6 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ char, window_uid, l
     }
 
     const getChangedPos = (currentPos: number, newPos: number) => {
-        console.log(currentPos, newPos);
         const copy = [...links]
         const [dragged] = copy.splice(currentPos, 1)
         copy.splice(newPos, 0, dragged)

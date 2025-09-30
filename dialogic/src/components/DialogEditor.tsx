@@ -55,7 +55,6 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
 
   public createDialogWindowHandler(newWindow: DialogWindow) {
     if (this.props.dialog) {
-      console.log(`Creating new dialog window: {newWindow}`)
       let updatedWinList = this.props.dialog.windows.concat(newWindow);
       this.props.handlers.handleDialogEdit({ ...this.props.dialog, windows: updatedWinList })
       if (this.itemReference.current) {
@@ -66,7 +65,6 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
 
   public addMultipleDialogWindowsHandler(newWindow: DialogWindow[]) {
     if (this.props.dialog) {
-      console.log(`Creating new dialog windows: ${newWindow.length}`)
       let updatedWinList = this.props.dialog.windows.concat(newWindow);
       this.props.handlers.handleDialogEdit({ ...this.props.dialog, windows: updatedWinList })
       if (this.itemReference.current) {
@@ -81,9 +79,7 @@ export default class DialogEditor extends React.Component<IDialogEditorProps, ID
 
   private openAnotherWindowHandler(window: DialogWindow) {
     this.setState({ editorOpen: false });
-    console.log(this.state);
     setTimeout(() => {
-      console.log(this.state)
       this.setState({ editingWindow: window, editorOpen: true })
     }, 300);
   }
