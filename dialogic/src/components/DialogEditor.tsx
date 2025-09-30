@@ -1,123 +1,143 @@
-import * as React from 'react';
-import Dialog, { DialogWindow, createDialog } from '../game/Dialog';
-import PushMessageIcon from '@rsuite/icons/PushMessage';
-import { IconButton, Panel, Placeholder } from 'rsuite';
-import WindowEditor from './WindowEditor';
-import CreateWindowButton from './CreateWindowButton';
-import { IUpds } from '../App';
-import DialogWindowEditDrawer from './DialogWindowEditDrawer';
-import { GameDescription } from '../game/GameDescription';
-import "./dialog.css"
-import ChainEditor from './chain/ChainEditor';
-
-export interface DialogHandlers {
-  createDialogWindowHandler: (newWindow: DialogWindow) => void;
-  windowChosenHandler: (window: DialogWindow) => void;
-  openAnotherWindowHandler: (window: DialogWindow) => void;
-  closeWindowEditorHandler: Function;
-}
+import React, { useState, useCallback, useRef, memo } from "react";
+import Dialog, { DialogWindow, createDialog } from "../game/Dialog";
+import PushMessageIcon from "@rsuite/icons/PushMessage";
+import { IconButton, Panel, Placeholder } from "rsuite";
+import WindowEditor from "./WindowEditor";
+import CreateWindowButton from "./CreateWindowButton";
+import { IUpds } from "../App";
+import DialogWindowEditDrawer from "./DialogWindowEditDrawer";
+import { GameDescription } from "../game/GameDescription";
+import "./dialog.css";
+import ChainEditor from "./chain/ChainEditor";
 
 export interface IDialogEditorProps {
   dialog?: Dialog;
   handlers: IUpds;
   game: GameDescription;
-  visible: boolean
+  visible: boolean;
 }
 
-export interface IDialogEditorState {
-  editorOpen: boolean;
-  editingWindow: DialogWindow | undefined;
-  chainOpen: boolean;
-}
+const DialogEditor: React.FC<IDialogEditorProps> = ({
+  dialog,
+  handlers,
+  game,
+  visible,
+}) => {
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingWindow, setEditingWindow] = useState<DialogWindow | undefined>(
+    undefined
+  );
+  const [chainOpen, setChainOpen] = useState(false);
 
-export default class DialogEditor extends React.Component<IDialogEditorProps, IDialogEditorState> {
-  public constructor(props: IDialogEditorProps) {
-    super(props)
+  const itemRef = useRef<HTMLDivElement>(null);
 
-    this.state = {
-      editorOpen: false,
-      editingWindow: undefined,
-      chainOpen: false
-    }
-  }
+  const createDialogWindowHandler = useCallback(
+    (newWindow: DialogWindow) => {
+      if (!dialog) return;
+      const updatedWinList = dialog.windows.concat(newWindow);
+      handlers.handleDialogEdit({ ...dialog, windows: updatedWinList });
+      if (itemRef.current) {
+        itemRef.current.scrollIntoView({ block: "end", behavior: "smooth" });
+      }
+    },
+    [dialog, handlers]
+  );
 
-  public render() {
-    if (this.props.dialog) {
-      return this.renderDialog(this.props.dialog.windows);
-    } else {
-      return <Panel header="Select dialog in the left panel" shaded>
+  const addMultipleDialogWindowsHandler = useCallback(
+    (newWindows: DialogWindow[]) => {
+      if (!dialog) return;
+      const updatedWinList = dialog.windows.concat(newWindows);
+      handlers.handleDialogEdit({ ...dialog, windows: updatedWinList });
+      if (itemRef.current) {
+        itemRef.current.scrollIntoView({ block: "end", behavior: "smooth" });
+      }
+    },
+    [dialog, handlers]
+  );
+
+  const windowChosenHandler = useCallback((window: DialogWindow) => {
+    setEditingWindow(window);
+    setEditorOpen(true);
+  }, []);
+
+  const openAnotherWindowHandler = useCallback((window: DialogWindow) => {
+    setEditorOpen(false);
+    setTimeout(() => {
+      setEditingWindow(window);
+      setEditorOpen(true);
+    }, 300);
+  }, []);
+
+  const closeWindowEditorHandler = useCallback(() => {
+    setEditorOpen(false);
+  }, []);
+
+  const renderWindows = useCallback(
+    (windows: DialogWindow[], dlg: Dialog) =>
+      windows.map((win) => (
+        <WindowEditor
+          game={game}
+          dialog={dlg}
+          window={win}
+          key={win.uid}
+          handlers={handlers}
+          onWindowChosen={() => windowChosenHandler(win)}
+        />
+      )),
+    [game, handlers, windowChosenHandler]
+  );
+
+  if (!dialog) {
+    return (
+      <Panel header="Select dialog in the left panel" shaded>
         <Placeholder.Paragraph />
       </Panel>
-    }
-  }
-
-  private itemReference = React.createRef<HTMLDivElement>()
-
-  public createDialogWindowHandler(newWindow: DialogWindow) {
-    if (this.props.dialog) {
-      let updatedWinList = this.props.dialog.windows.concat(newWindow);
-      this.props.handlers.handleDialogEdit({ ...this.props.dialog, windows: updatedWinList })
-      if (this.itemReference.current) {
-        this.itemReference.current.scrollIntoView({ block: 'end', behavior: 'smooth' })
-      }
-    }
-  }
-
-  public addMultipleDialogWindowsHandler(newWindow: DialogWindow[]) {
-    if (this.props.dialog) {
-      let updatedWinList = this.props.dialog.windows.concat(newWindow);
-      this.props.handlers.handleDialogEdit({ ...this.props.dialog, windows: updatedWinList })
-      if (this.itemReference.current) {
-        this.itemReference.current.scrollIntoView({ block: 'end', behavior: 'smooth' })
-      }
-    }
-  }
-
-  private windowChosenHandler(window: DialogWindow) {
-    this.setState({ editingWindow: window, editorOpen: true })
-  }
-
-  private openAnotherWindowHandler(window: DialogWindow) {
-    this.setState({ editorOpen: false });
-    setTimeout(() => {
-      this.setState({ editingWindow: window, editorOpen: true })
-    }, 300);
-  }
-
-  private closeWindowEditorHandler(window: DialogWindow) {
-    this.setState({ editorOpen: false });
-  }
-
-  public renderWindows(windows: DialogWindow[], dialog: Dialog) {
-    return windows.map(win =>
-      <WindowEditor game={this.props.game} dialog={dialog} window={win} key={win.uid} handlers={this.props.handlers} onWindowChosen={() => this.windowChosenHandler(win)}></WindowEditor>)
-  }
-
-  public renderDialog(windows: DialogWindow[]) {
-    const dialogHandlers = {
-      createDialogWindowHandler: this.createDialogWindowHandler.bind(this),
-      windowChosenHandler: this.windowChosenHandler.bind(this),
-      closeWindowEditorHandler: this.closeWindowEditorHandler.bind(this),
-      openAnotherWindowHandler: this.openAnotherWindowHandler.bind(this)
-    }
-
-    return (
-      <div ref={this.itemReference}>
-        {this.props.visible && <div className='window-editor-tools'>
-          <CreateWindowButton createHandler={this.createDialogWindowHandler.bind(this)}></CreateWindowButton>
-          <IconButton icon={<PushMessageIcon />} placement="left" onClick={() => this.setState({ chainOpen: true })}>
-            Chain
-          </IconButton>
-        </div>}
-        <div className='window-editor-windows-container'>
-          {
-            this.props.dialog ?
-              this.renderWindows(windows, this.props.dialog) : ""
-          }
-        </div>
-        <ChainEditor game={this.props.game} dialog={this.props.dialog || createDialog("")} visible={this.state.chainOpen} dialogName={this.props.dialog?.name} onSetVisible={(vis) => this.setState({ chainOpen: vis })} onApply={this.addMultipleDialogWindowsHandler.bind(this)} />
-        {(this.state.editingWindow && this.props.dialog) ? <DialogWindowEditDrawer dialogHandlers={dialogHandlers} game={this.props.game} open={this.state.editorOpen} window={this.state.editingWindow} dialog={this.props.dialog} onClose={this.closeWindowEditorHandler.bind(this)} handlers={this.props.handlers}></DialogWindowEditDrawer> : ""}
-      </div>
     );
   }
-}
+
+  return (
+    <div ref={itemRef}>
+      {visible && (
+        <div className="window-editor-tools">
+          <CreateWindowButton createHandler={createDialogWindowHandler} />
+          <IconButton
+            icon={<PushMessageIcon />}
+            placement="left"
+            onClick={() => setChainOpen(true)}
+          >
+            Chain
+          </IconButton>
+        </div>
+      )}
+      <div className="window-editor-windows-container">
+        {renderWindows(dialog.windows, dialog)}
+      </div>
+      <ChainEditor
+        game={game}
+        dialog={dialog || createDialog("")}
+        visible={chainOpen}
+        dialogName={dialog?.name}
+        onSetVisible={setChainOpen}
+        onApply={addMultipleDialogWindowsHandler}
+      />
+      {editingWindow && dialog && (
+        <DialogWindowEditDrawer
+          dialogHandlers={{
+            createDialogWindowHandler,
+            windowChosenHandler,
+            closeWindowEditorHandler,
+            openAnotherWindowHandler,
+          }}
+          game={game}
+          open={editorOpen}
+          window={editingWindow}
+          dialog={dialog}
+          onClose={closeWindowEditorHandler}
+          handlers={handlers}
+        />
+      )}
+    </div>
+  );
+};
+
+export default DialogEditor;
