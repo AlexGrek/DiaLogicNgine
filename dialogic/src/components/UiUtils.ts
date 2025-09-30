@@ -15,7 +15,7 @@ export const styleWithImage = (background?: string | null) => {
 }
 
 export const avatarImageUrl = (game: GameDescription, characterOrUid: string | Character, image: string | number | undefined): string | null => {
-    var character: Character;
+    let character: Character;
     if (lodash.isString(characterOrUid)) {
         const charFound = game.chars.find(item => item.uid === characterOrUid)
         if (!charFound) {
@@ -38,7 +38,7 @@ export const avatarImageUrl = (game: GameDescription, characterOrUid: string | C
         return null
     }
 
-    var imageUri: string | undefined;
+    let imageUri: string | undefined;
     if (lodash.isNumber(image)) {
         if (image >= character.avatar.list.length) {
             console.error(`image ${image} not found it ${JSON.stringify(character)}`)

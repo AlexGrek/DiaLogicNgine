@@ -52,9 +52,10 @@ export interface IUpds {
   handlePropChange: (props: Prop[]) => void;
   createProp: (prop: Prop) => void;
   createSituation: (situation: string) => void;
-  notify: NotifyCallback
-  copy: (obj: any, typename: string) => void
-  paste: () => CopiedObject | undefined
+  notify: NotifyCallback;
+  copy: (obj: any, typename: string) => void;
+  paste: () => CopiedObject | undefined;
+  handleGameUpdate: (game: GameDescription) => void;
 }
 
 export interface DialogWindowListUpdater {
@@ -185,6 +186,10 @@ export default class App extends React.Component<IAppProps, IAppState> {
     this.setState({ notifications: notifications })
   }
 
+  private handleGameUpdate(game: GameDescription) {
+    this.setState({ game })
+  }
+
   private renderContent(updates: IUpds, chosenDialog: Dialog | undefined) {
     return <div>
       <div style={this.displayStyle("dialog")}>
@@ -235,7 +240,8 @@ export default class App extends React.Component<IAppProps, IAppState> {
       notify: this.handleNotify.bind(this),
       copy: this.handleCopy.bind(this),
       paste: this.handlePaste.bind(this),
-      createSituation: this.createSituation.bind(this)
+      createSituation: this.createSituation.bind(this),
+      handleGameUpdate: this.handleGameUpdate.bind(this)
     }
 
     const chosenDialog = this.state.game.dialogs.find(d => d.name === this.state.activeDialog);

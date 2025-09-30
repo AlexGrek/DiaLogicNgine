@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Button, Drawer, Input, Grid, Row, Col, Checkbox, Stack, PanelGroup, Panel } from 'rsuite';
+import React, { useState, useEffect } from 'react';
+import { Button, Drawer, Input, Grid, Row, Col, Checkbox, PanelGroup, Panel } from 'rsuite';
 import { IUpds } from '../App';
-import Dialog, { Actor, DialogLink, DialogWindow } from '../game/Dialog';
+import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
 import { DialogHandlers } from './DialogEditor';
 import LinksEditorPanel from './LinksEditorPanel';
-import PublicFileUrl, { IMAGES } from './common/PublicFileUrl';
 import TextListEditor from './common/text_list/TextListEditor';
 import { TextList } from '../game/TextList';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from './common/code_editor/PopupCodeEditor';

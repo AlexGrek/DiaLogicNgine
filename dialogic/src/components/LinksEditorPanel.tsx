@@ -11,7 +11,6 @@ import PasteButton from './common/copypaste/PasteButton';
 import PlusRoundIcon from '@rsuite/icons/PlusRound';
 import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
 import { Draggable } from "react-drag-reorder";
-import lodash from 'lodash';
 import Character from '../game/Character';
 
 interface LinksEditorPanelProps {
