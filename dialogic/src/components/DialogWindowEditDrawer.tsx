@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Drawer, Input, Grid, Row, Col, Checkbox, PanelGroup, Panel } from 'rsuite';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Button, Drawer, Input, Grid, Row, Col, Checkbox, PanelGroup, Panel, SelectPicker } from 'rsuite';
 import { IUpds } from '../App';
 import Dialog, { DialogLink, DialogWindow } from '../game/Dialog';
 import { GameDescription } from '../game/GameDescription';
@@ -59,27 +59,40 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
     const editCode = (menu: CodeEditMenu, val: string) => {
         const upd = val === "" ? undefined : val;
         switch (menu) {
-            case "chooseText":
-                const updater = (window: DialogWindow) => { return { ...window, chooseTextScript: upd } };
+            case "chooseText": {
+                const updater = (window: DialogWindow) => ({
+                    ...window,
+                    chooseTextScript: upd,
+                });
                 modifyWindowBy(updater);
                 break;
-            case "chooseBackground":
-                const updaterBg = (window: DialogWindow) => { return { ...window, chooseBackgroundScript: upd } };
+            }
+            case "chooseBackground": {
+                const updaterBg = (window: DialogWindow) => ({
+                    ...window,
+                    chooseBackgroundScript: upd,
+                });
                 modifyWindowBy(updaterBg);
                 break;
-            case "onEntry":
-                const updaterOnEntr = (window: DialogWindow) => { return { ...window, entryScript: upd } };
+            }
+            case "onEntry": {
+                const updaterOnEntr = (window: DialogWindow) => ({
+                    ...window,
+                    entryScript: upd,
+                });
                 modifyWindowBy(updaterOnEntr);
                 break;
+            }
         }
 
         setCodeEditorOpen(false);
-    }
+    };
+
 
     const renderCodeEditor = (menu: CodeEditMenu) => {
-        var code: string | undefined = ""
-        var onSaveClose = editCode
-        var ui = CODE_EDITOR_UI_TEXTSELECTOR
+        let code: string | undefined = ""
+        const onSaveClose = editCode
+        let ui = CODE_EDITOR_UI_TEXTSELECTOR
         switch (menu) {
             case "chooseText":
                 code = windowState.chooseTextScript
@@ -148,11 +161,22 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
         })
     }
 
+    const specialWidgets = useMemo(() => {
+        const widgets = [];
+        for (const widget of game.pacWidgets || []) {
+            widgets.push(`pac::${widget.id}`)
+        }
+        return widgets.map((item) => {
+            return { label: item, value: item }
+        })
+    }, [game])
+
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(false)}>
             <Drawer.Header>
                 <Drawer.Title>{windowState.uid}</Drawer.Title>
                 <Drawer.Actions>
+                    <SelectPicker data={specialWidgets} placeholder="Special display widget" style={{ marginRight: "1em" }} value={windowState.specialWidget} onChange={(sw) => setWindow({ ...windowState, specialWidget: sw })}></SelectPicker>
                     <Button onClick={() => onCloseHandler(false)} appearance="primary">
                         Save
                     </Button>
@@ -172,7 +196,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                                 <Panel header="Misc">
                                     <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(_value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
                                     {windowState.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={windowState.changeLocationInBg} onLocChange={onChangeLocationInBg} />}
-                                    <SituationModifier game={game} handlers={handlers} onChange={handleChangeSituation} value={windowState.changeSituation || null}/>
+                                    <SituationModifier game={game} handlers={handlers} onChange={handleChangeSituation} value={windowState.changeSituation || null} />
                                 </Panel>
                                 <Panel header="Technical info">
                                     <p>Display as JSON:</p>

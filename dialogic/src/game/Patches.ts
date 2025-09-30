@@ -80,13 +80,13 @@ export class PatchFrom08To09 implements Patch {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
         const objData: GameDescription = obj
-        for (let loc of objData.locs) {
+        for (const loc of objData.locs) {
             loc["discussable"] = true
         }
-        for (let char of objData.chars) {
+        for (const char of objData.chars) {
             char["discussable"] = true
         }
-        for (let fact of objData.facts) {
+        for (const fact of objData.facts) {
             fact["discussable"] = true
         }
 
@@ -105,10 +105,28 @@ export class PatchFrom09To010 implements Patch {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
         const objData: GameDescription = obj
-        for (let char of objData.items) {
+        for (const char of objData.items) {
             char["stackable"] = false
         }
         objData.uiElements = initGameUiElementDescr()
+        return objData as GameDescription
+    }
+}
+
+export class PatchFrom10To011 implements Patch {
+    from(): string {
+        return "0.10"
+    }
+    to(): string {
+        return "0.11"
+    }
+    apply(obj: any): GameDescription {
+        // do the patch work
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData: GameDescription = obj
+        if (!objData.pacWidgets) {
+            objData.pacWidgets = []
+        }
         return objData as GameDescription
     }
 }
@@ -120,6 +138,7 @@ const PATCHES = [
     new PatchFrom07To08(),
     new PatchFrom08To09(),
     new PatchFrom09To010(),
+    new PatchFrom10To011(),
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {

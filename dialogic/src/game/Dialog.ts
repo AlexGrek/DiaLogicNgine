@@ -78,7 +78,7 @@ export interface DialogWindow {
     changeSituation?: string
 
     // special widget types
-    specialWidget?: string
+    specialWidget: string | null
 }
 
 export const createWindow = (uid: string) => {

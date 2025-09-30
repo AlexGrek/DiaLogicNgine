@@ -9,6 +9,7 @@ import { emptyImageList } from "./ImageList";
 import { Item } from "./Items";
 import Loc from "./Loc";
 import QuestLine from "./Objectives";
+import { PointAndClickZone } from "./PointAndClick";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
 export const ENGINE_VERSION="0.10"
@@ -62,6 +63,7 @@ export interface GameDescription {
     situations: string[]
     translations: Translations
     uiElements: GameUiElementDescr
+    pacWidgets: PointAndClickZone[]
 }
 
 export function createDefaultGame(): GameDescription {
@@ -86,7 +88,7 @@ export function createDefaultGame(): GameDescription {
         discussable: true
         
     }
-    let game: GameDescription = {
+    const game: GameDescription = {
         dialogs: [d1],
         facts: [],
         chars: [narratorCharacter],
@@ -113,7 +115,8 @@ export function createDefaultGame(): GameDescription {
             tags: ['main', 'misc'],
             quests: []
         }],
-        uiElements: initGameUiElementDescr()
+        uiElements: initGameUiElementDescr(),
+        pacWidgets: []
     };
 
     return game
