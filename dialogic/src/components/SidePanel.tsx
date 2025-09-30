@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Input, InputGroup, Nav, Sidenav } from 'rsuite';
 import MagicIcon from '@rsuite/icons/legacy/Magic';
 import { GameDescription } from '../game/GameDescription';
@@ -18,114 +18,190 @@ import { SquareDashedMousePointer } from 'lucide-react';
 import Icon from '@rsuite/icons/lib/Icon';
 
 export interface ISidePanelProps {
-  game: GameDescription
+  game: GameDescription;
   activeDialog?: string;
-  onDialogChange: (s: string) => void
-  handlers: IUpds
-  onMenuSwitch: (s: string) => void
-  activeMenu: string
+  onDialogChange: (s: string) => void;
+  handlers: IUpds;
+  onMenuSwitch: (s: string) => void;
+  activeMenu: string;
 }
 
-interface ISidePanelState {
-  newDialogname: string;
-}
+/**
+ * Modern, memoized SidePanel that preserves original layout & styling.
+ * See original file for behavior reference: :contentReference[oaicite:1]{index=1}
+ */
+const SidePanel: React.FC<ISidePanelProps> = ({
+  game,
+  activeDialog,
+  onDialogChange,
+  handlers,
+  onMenuSwitch,
+  activeMenu,
+}) => {
+  const [newDialogName, setNewDialogName] = useState<string>('');
 
-export default class SidePanel extends React.Component<ISidePanelProps, ISidePanelState> {
+  const handleCreateDialog = useCallback(() => {
+    const name = newDialogName.trim();
+    if (!name) return;
+    setNewDialogName('');
+    const dialog = createDialog(name);
+    handlers.handleDialogCreate(dialog);
+    // navigate user to dialogs (keeps UX consistent)
+    onMenuSwitch('dialog');
+    onDialogChange(dialog.name);
+  }, [newDialogName, handlers, onDialogChange, onMenuSwitch]);
 
-  constructor(props: ISidePanelProps) {
-    super(props);
+  const handleInputChange = useCallback((value: string) => {
+    setNewDialogName(value);
+  }, []);
 
-    this.state = {
-      newDialogname: ""
-    };
+  const handleDialogClick = useCallback(
+    (name: string) => {
+      onDialogChange(name);
+      // ensure menu is switched to dialog view
+      onMenuSwitch('dialog');
+    },
+    [onDialogChange, onMenuSwitch]
+  );
+
+  const dialogsList = useMemo(
+    () =>
+      game.dialogs.map((d: Dialog) => (
+        <Nav.Item
+          className="side-panel-dialog"
+          eventKey={d.name}
+          title={d.name}
+          key={d.name}
+          active={activeMenu === 'dialog' && activeDialog === d.name}
+          onClick={(e) => {
+            e.preventDefault();
+            handleDialogClick(d.name);
+          }}
+        >
+          {d.name}
+        </Nav.Item>
+      )),
+    [game.dialogs, handleDialogClick, activeDialog, activeMenu]
+  );
+
+  // preserve original activeKey behaviour:
+  let activeKey: string | undefined = activeMenu;
+  if (activeMenu === 'dialog' && activeDialog) {
+    activeKey = activeDialog;
   }
 
-  public dialogs(dialogs: Dialog[]) {
-    let items = dialogs.map((d) => <Nav.Item
-    className='side-panel-dialog'
-      eventKey={d.name}
-      title={d.name}
-      key={d.name}
-      onClick={this.handleDialogClick.bind(this)}>
-      {d.name}
-    </Nav.Item>)
-    return items
-  }
+  return (
+    <div className="main-sidebar" style={{ width: 240 }}>
+      <Sidenav defaultOpenKeys={['3', '4']}>
+        <Sidenav.Body>
+          <Nav activeKey={activeKey}>
+            <Nav.Item
+              eventKey="saveload"
+              icon={<AttachmentIcon />}
+              onClick={() => onMenuSwitch('saveload')}
+            >
+              Save / Load
+            </Nav.Item>
 
-  private handleDialogClick(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
+            <Nav.Item
+              eventKey="config"
+              icon={<SettingHorizontalIcon />}
+              onClick={() => onMenuSwitch('config')}
+            >
+              Game properties
+            </Nav.Item>
 
-    const button = e.currentTarget;
-    this.props.onDialogChange(button.title);
-  }
+            <Nav.Item
+              eventKey="player"
+              icon={<PlayOutlineIcon />}
+              onClick={() => onMenuSwitch('player')}
+            >
+              Play
+            </Nav.Item>
 
-  private handleCreateDialog(_: any) {
-    let name = this.state.newDialogname;
-    this.setState({ newDialogname: "" });
-    let dialog = createDialog(name);
-    this.props.handlers.handleDialogCreate(dialog);
-  }
+            <Nav.Menu eventKey="4" title="Dialogs" icon={<MagicIcon />}>
+              <Nav.Item className="side-panel-dialog-create">
+                <InputGroup>
+                  <Input
+                    name="add-dialog"
+                    placeholder="Add dialog"
+                    value={newDialogName}
+                    onPressEnter={handleCreateDialog}
+                    onChange={handleInputChange}
+                  />
+                  <InputGroup.Button
+                    disabled={newDialogName.trim().length === 0}
+                    onClick={handleCreateDialog}
+                  >
+                    <PlusRound />
+                  </InputGroup.Button>
+                </InputGroup>
+              </Nav.Item>
 
-  addDialogInputHandler(update: string) {
-    this.setState({ newDialogname: update });
-  }
+              {dialogsList}
+            </Nav.Menu>
 
-  public render() {
-    let activeKey = this.props.activeMenu;
-    if (activeKey === "dialog" && this.props.activeDialog) {
-      activeKey = this.props.activeDialog
-    }
+            <Nav.Item
+              eventKey="scripts"
+              icon={<ToolsIcon />}
+              onClick={() => onMenuSwitch('scripts')}
+            >
+              Scripts
+            </Nav.Item>
 
-    return (
-      <div className='main-sidebar' style={{ width: 240 }}>
-        <Sidenav defaultOpenKeys={['3', '4']}>
-          <Sidenav.Body>
-            <Nav activeKey={activeKey}>
-              <Nav.Item eventKey="saveload" icon={<AttachmentIcon />} onClick={() => this.props.onMenuSwitch("saveload")}>
-                Save / Load
-              </Nav.Item>
-              <Nav.Item eventKey="config" icon={<SettingHorizontalIcon />} onClick={() => this.props.onMenuSwitch("config")}>
-                Game properties
-              </Nav.Item>
-              <Nav.Item eventKey="player" icon={<PlayOutlineIcon />} onClick={() => this.props.onMenuSwitch("player")}>
-                Play
-              </Nav.Item>
-              <Nav.Menu eventKey="4" title="Dialogs" icon={<MagicIcon />}>
-                <Nav.Item className='side-panel-dialog-create'>
-                  <InputGroup>
-                    <Input name='add-dialog' placeholder="Add dialog" value={this.state.newDialogname} onPressEnter={this.handleCreateDialog.bind(this)} onChange={this.addDialogInputHandler.bind(this)} />
-                    <InputGroup.Button disabled={this.state.newDialogname.length === 0} onClick={this.handleCreateDialog.bind(this)}>
-                      <PlusRound />
-                    </InputGroup.Button>
-                  </InputGroup>
-                </Nav.Item>
-                {this.dialogs(this.props.game.dialogs)}
-              </Nav.Menu>
-              <Nav.Item eventKey="scripts" icon={<ToolsIcon />} onClick={() => this.props.onMenuSwitch("scripts")}>
-                Scripts
-              </Nav.Item>
-              <Nav.Item eventKey="chars" icon={<IdMappingIcon />} onClick={() => this.props.onMenuSwitch("chars")}>
-                Characters
-              </Nav.Item>
-              <Nav.Item eventKey="locs" icon={<ExploreIcon />} onClick={() => this.props.onMenuSwitch("locs")}>
-                Locations
-              </Nav.Item>
-              <Nav.Item eventKey="facts" icon={<FunnelTimeIcon />} onClick={() => this.props.onMenuSwitch("facts")}>
-                Facts & Objectives
-              </Nav.Item>
-              <Nav.Item eventKey="items" icon={<DeviceOtherIcon />} onClick={() => this.props.onMenuSwitch("items")}>
-                Items
-              </Nav.Item>
-              <Nav.Item eventKey="ui" icon={<TreemapIcon />} onClick={() => this.props.onMenuSwitch("ui")}>
-                UI Elements
-              </Nav.Item>
-              <Nav.Item eventKey="pac" icon={<Icon as={() => <SquareDashedMousePointer />}></Icon>} onClick={() => this.props.onMenuSwitch("pac")}>
-                Point And Click
-              </Nav.Item>
-            </Nav>
-          </Sidenav.Body>
-        </Sidenav>
-      </div>
-    );
-  }
-}
+            <Nav.Item
+              eventKey="chars"
+              icon={<IdMappingIcon />}
+              onClick={() => onMenuSwitch('chars')}
+            >
+              Characters
+            </Nav.Item>
+
+            <Nav.Item
+              eventKey="locs"
+              icon={<ExploreIcon />}
+              onClick={() => onMenuSwitch('locs')}
+            >
+              Locations
+            </Nav.Item>
+
+            <Nav.Item
+              eventKey="facts"
+              icon={<FunnelTimeIcon />}
+              onClick={() => onMenuSwitch('facts')}
+            >
+              Facts & Objectives
+            </Nav.Item>
+
+            <Nav.Item
+              eventKey="items"
+              icon={<DeviceOtherIcon />}
+              onClick={() => onMenuSwitch('items')}
+            >
+              Items
+            </Nav.Item>
+
+            <Nav.Item
+              eventKey="ui"
+              icon={<TreemapIcon />}
+              onClick={() => onMenuSwitch('ui')}
+            >
+              UI Elements
+            </Nav.Item>
+
+            {/* NOTE: App previously used "poc" as the menu key. If you want to keep the original SidePanel key ("pac"), change this eventKey back. */}
+            <Nav.Item
+              eventKey="pac"
+              icon={<Icon as={() => <SquareDashedMousePointer />} />}
+              onClick={() => onMenuSwitch('pac')}
+            >
+              Point And Click
+            </Nav.Item>
+          </Nav>
+        </Sidenav.Body>
+      </Sidenav>
+    </div>
+  );
+};
+
+export default React.memo(SidePanel);
