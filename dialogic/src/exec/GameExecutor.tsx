@@ -6,12 +6,13 @@ import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
-import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
+import { LocRouteRenderView, PacRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 import EventsProcessor from "./EventsProcessor";
 import DiscussionProcessor from "./DiscussionProcessor";
 import QuestProcessor from "./QuestProcessor";
 import GameUiElementsProcessor from "./GameUiElementsProcessor";
+import { PointAndClickZone } from "../game/PointAndClick";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -46,6 +47,10 @@ export class GameExecManager {
 
     getCurrentLocation(state: State): Readonly<Loc> | null {
         return tryGetLocationById(this.game, state.position)
+    }
+
+    pacZoneApply(zone: PointAndClickZone, view: PacRenderView): State {
+        throw new Error('Method not implemented.');
     }
 
     private goToLocalLink(directionName: string, prevState: State) {
