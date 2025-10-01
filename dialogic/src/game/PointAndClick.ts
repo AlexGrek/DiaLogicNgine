@@ -25,3 +25,13 @@ export interface PointAndClick {
   eventHosts: string[] | null
   canHostEventsScript?: string
 }
+
+export function createEmptyPac(uid: string): PointAndClick {
+  return {
+    id: uid,
+    background: undefined,
+    zones: [],
+    eventHosts: [],
+    canHostEventsScript: undefined
+  }
+}

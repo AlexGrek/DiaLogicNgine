@@ -38,6 +38,7 @@ import NotificationBar from "./components/notification/NotificationBar";
 import GameUiElementDescr from "./game/GameUiElementDescr";
 import UiElementsMenu from "./components/menuitems/uielements/UiElementsMenu";
 import PointAncClick from "./components/menuitems/pointandclick/PointAncClick";
+import { PointAndClick } from "./game/PointAndClick";
 
 export interface CopiedObject {
   value: any;
@@ -287,12 +288,12 @@ export default function App() {
           game={game}
         />
       </div>
-      <div style={{ display: menu === "poc" ? "block" : "none" }}>
+      <div style={{ display: menu === "pac" ? "block" : "none" }}>
         <PointAncClick
-          visible={menu === "poc"}
-          ui={game.uiElements}
-          onSetUi={(items: GameUiElementDescr) =>
-            setGame((prev) => ({ ...prev, uiElements: items }))
+          visible={menu === "pac"}
+          items={game.pacWidgets}
+          onSetItems={(items: PointAndClick[]) =>
+            setGame((prev) => ({ ...prev, pacWidgets: items }))
           }
           game={game}
         />

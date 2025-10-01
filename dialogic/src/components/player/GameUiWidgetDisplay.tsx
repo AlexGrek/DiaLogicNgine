@@ -6,6 +6,7 @@ import { RenderView } from '../../exec/RenderView';
 import CharDialogView from './CharDialogView';
 import DialogWindowView from './DialogWindowView';
 import LocView from './LocView';
+import PacView from './PacView';
 
 interface GameUiWidgetDisplayProps {
     game: GameExecManager;
@@ -29,6 +30,10 @@ const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, 
 
     if (view.uiWidgetView.widget === 'char') {
         return <CharDialogView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
+    }
+
+    if (view.uiWidgetView.widget === 'pac') {
+        return <PacView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
     }
 
     return (
