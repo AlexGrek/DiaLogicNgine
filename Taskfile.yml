@@ -6,9 +6,9 @@ tasks:
     deps: [backend, frontend]
 
   backend:
-    desc: Start FastAPI backend (port 8000, reload)
+    desc: Start FastAPI backend (port 4267, reload)
     dir: backend
-    cmd: uv run uvicorn app.main:app --reload --port 8000
+    cmd: uv run uvicorn app.main:app --reload --port 4267
 
   frontend:
     desc: Start Vite frontend dev server

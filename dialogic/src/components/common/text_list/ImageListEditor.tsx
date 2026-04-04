@@ -4,15 +4,18 @@ import { Button, Input, InputGroup, Nav, Stack } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
 import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
-import PublicFileUrl, { IMAGES } from '../PublicFileUrl';
+import ServerImageSelect from '../ServerImageSelect';
 import { generateImageUrl } from '../../../Utils';
+
+const isServerImage = (v: string) => !v.startsWith('game_assets/') && !v.startsWith('/') && !v.startsWith('http')
 
 interface ImageListEditorProps {
     imageList: ImageList;
     onChange: (t: ImageList) => void;
+    projectName?: string;
 }
 
-const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange }) => {
+const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName = 'default' }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
 
     const CREATE_INDEX = -100500
@@ -88,11 +91,14 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange }
     }
 
     const editor =
-        <PublicFileUrl extensions={IMAGES} value={editingText === "" ? undefined : editingText } onChange={onTextChange}/>
+        <ServerImageSelect value={editingText === "" ? undefined : editingText} onChange={onTextChange} projectName={projectName} />
 
     const displayImage = (uri: string) => {
+        const src = isServerImage(uri)
+            ? `/api/v1/projects/${projectName}/image_thumbs/${encodeURIComponent(uri)}`
+            : generateImageUrl(uri)
         return <div>
-            <img alt="image preview" height="128" src={generateImageUrl(uri)}/>
+            <img alt="image preview" height="128" src={src}/>
         </div>
     }
 

@@ -44,8 +44,11 @@ export function isValidJsIdentifier(id?: string) {
     return isValidIdentifier(id)
 }
 
-export function generateImageUrl(uri: string) {
-    return `game_assets/${uri}`
+export function generateImageUrl(uri: string, projectName = 'default') {
+    if (!uri) return ''
+    if (uri.startsWith('/') || uri.startsWith('http://') || uri.startsWith('https://')) return uri
+    if (uri.startsWith('game_assets/')) return `/${uri}`
+    return `/api/v1/projects/${projectName}/images/${encodeURIComponent(uri)}`
 }
 
 export function generateImageUrlCss(uri: string) {

@@ -50,8 +50,8 @@ const LocationView: React.FC<LocationViewProps> = ({ game, state, location, onSt
 
     const styleWithImage = (background?: string) => {
         if (background) {
-            return { 
-                backgroundImage: `url("game_assets/${background}")`
+            return {
+                backgroundImage: `url("/api/v1/projects/default/images/${encodeURIComponent(background)}")`
             }
         }
         else

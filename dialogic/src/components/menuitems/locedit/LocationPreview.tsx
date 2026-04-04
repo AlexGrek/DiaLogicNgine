@@ -1,5 +1,6 @@
 import React from 'react';
 import Loc from '../../../game/Loc';
+import { generateImageUrl } from '../../../Utils';
 import './loc.css'
 
 interface LocationPreviewProps {
@@ -11,8 +12,8 @@ interface LocationPreviewProps {
 const LocationPreview: React.FC<LocationPreviewProps> = ({ location, index, onClick }) => {
     const style = (background?: string) => {
         if (background) {
-            return { 
-                backgroundImage: `url("game_assets/${background}")`
+            return {
+                backgroundImage: `url("${generateImageUrl(background)}")`
             }
         }
         else

@@ -4,9 +4,7 @@ import { GameDescription, GeneralGameInfo } from '../../../game/GameDescription'
 import { NotifyCallback } from '../../../UiNotifications';
 import DialogWindowPicker from '../../common/DialogWindowPicker';
 import { Button, ButtonGroup, Panel, PanelGroup, Stack } from 'rsuite';
-import ImageListEditor from '../../common/text_list/ImageListEditor';
-import PublicFileUrl, { IMAGES } from '../../common/PublicFileUrl';
-import { generateImageUrl } from '../../../Utils';
+import ImagePicker from '../../common/ImagePicker';
 import lodash from 'lodash';
 import './configuration.css'
 import GeneralEditor from './GeneralEditor';
@@ -48,8 +46,6 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
         onSetGame({ ...game, startMenu: changes })
     }
 
-    const publicImageSrc = game.startMenu.menuBackground ? generateImageUrl(game.startMenu.menuBackground) : null;
-
     const renderGeneralProp = (name: keyof GeneralGameInfo) => {
         const prop = game.general[name]
         return <p id={`general-prop-${name}`}>
@@ -88,8 +84,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                         <StringListEditor canBeEmpty value={currentGame.situations} onChange={(val) => onSetGame({ ...currentGame, situations: val })} />
                     </Panel>
                     <Panel header="Menu background">
-                        <img className='menu-config-thumb-preview' src={publicImageSrc || undefined} alt="[no image]"></img>
-                        <PublicFileUrl extensions={IMAGES} value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)}></PublicFileUrl>
+                        <ImagePicker value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)} />
                     </Panel>
                     <Panel header='Localization'>
                         <div>

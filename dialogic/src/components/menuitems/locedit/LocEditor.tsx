@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Loc, { getLocEventHostName } from '../../../game/Loc';
 import { Button, CheckPicker, Checkbox, Col, Divider, Drawer, Grid, IconButton, Input, Panel, PanelGroup, Row } from 'rsuite';
-import PublicFileUrl, { IMAGES } from '../../common/PublicFileUrl';
+import ImagePicker from '../../common/ImagePicker';
 import LinksEditorPanel from '../../LinksEditorPanel';
 import { DialogLink, DialogWindow } from '../../../game/Dialog';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import { TextList } from '../../../game/TextList';
-import { generateImageUrl, generateUidFromName, isValidJsIdentifier } from '../../../Utils';
+import { generateUidFromName, isValidJsIdentifier } from '../../../Utils';
 import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
 import './loc.css'
 import lodash from 'lodash';
@@ -164,8 +164,6 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
         }
     }
 
-    const publicImageSrc = location.thumbnail ? generateImageUrl(location.thumbnail) : null;
-
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(true)}>
             <Drawer.Header>
@@ -190,9 +188,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                 <div className='location-params'>
                                     <p>UID (has to be unique)</p>
                                     <Input value={location.uid} readOnly={loc.uid !== ""} onChange={uidNameChange}></Input>
-                                    <p>Thumbnail image</p>
-                                    <img className='location-thumb-preview' src={publicImageSrc || undefined} alt="[no thumbnail]"></img>
-                                    <PublicFileUrl extensions={IMAGES} value={location.thumbnail} onChange={thumbChange}></PublicFileUrl>
+                                    <ImagePicker value={location.thumbnail} onChange={thumbChange}>Thumbnail image</ImagePicker>
 
                                     <Divider>Routes</Divider>
                                     <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>

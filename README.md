@@ -23,8 +23,8 @@ task dev
 | Service | URL |
 |---------|-----|
 | Editor (Vite) | http://localhost:5173 |
-| API (FastAPI) | http://localhost:8000 |
-| API docs | http://localhost:8000/docs |
+| API (FastAPI) | http://localhost:4267 |
+| API docs | http://localhost:4267/docs |
 
 The Vite dev server proxies `/api/*` to the backend automatically — no CORS config needed.
 

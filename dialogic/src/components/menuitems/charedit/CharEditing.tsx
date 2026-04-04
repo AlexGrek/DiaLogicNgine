@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { generateImageUrl } from '../../../Utils';
 import { Button, ButtonGroup, Panel, PanelGroup } from 'rsuite';
 import Character from '../../../game/Character';
 import { GameDescription } from '../../../game/GameDescription';
@@ -82,7 +83,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
             return null
         }
         const uri = img.main
-        return <img alt="background preview" height="128" src={`game_assets/${uri}`}></img>
+        return <img alt="background preview" height="128" src={generateImageUrl(uri)}></img>
     }
 
     const renderDeleteButton = () => {
