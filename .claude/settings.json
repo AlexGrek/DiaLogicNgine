@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir backend:*)",
+      "Bash(uv init:*)",
+      "Bash(uv add:*)",
+      "Bash(uv run:*)",
+      "Bash(curl -s http://localhost:8000/api/v1/health)",
+      "Bash(curl -s http://localhost:8000/api/v1/health/ready)",
+      "Bash(curl -s -X PUT http://localhost:8003/api/v1/projects/demo/images/big.png -F 'file=@/tmp/big.png;type=image/png')",
+      "Bash(curl -s \"http://localhost:8003/api/v1/projects/demo/images\")",
+      "Bash(curl -s -o /dev/null -w \"thumb status: %{http_code}\\\\n\" \"http://localhost:8003/api/v1/projects/demo/image_thumbs/big.png\")",
+      "Bash(task --version)",
+      "Bash(task --list)"
+    ]
+  }
+}

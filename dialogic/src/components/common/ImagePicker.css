@@ -13,3 +13,19 @@
     max-width: 100%;
     max-height: 260px;
 }
+
+.image-picker-nav {
+    margin-bottom: 6px;
+}
+
+.image-picker-server {
+    width: 100%;
+}
+
+.image-picker-menu-thumb {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.05);
+}

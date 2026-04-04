@@ -1,0 +1,16 @@
+version: '3'
+
+tasks:
+  dev:
+    desc: Start backend and frontend dev servers concurrently
+    deps: [backend, frontend]
+
+  backend:
+    desc: Start FastAPI backend (port 8000, reload)
+    dir: backend
+    cmd: uv run uvicorn app.main:app --reload --port 8000
+
+  frontend:
+    desc: Start Vite frontend dev server
+    dir: dialogic
+    cmd: npm run dev
