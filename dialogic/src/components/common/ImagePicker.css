@@ -12,20 +12,320 @@
 .image-picker-container > img {
     max-width: 100%;
     max-height: 260px;
+    margin-top: 6px;
+    display: block;
 }
 
-.image-picker-nav {
-    margin-bottom: 6px;
+/* Inline select row */
+.image-picker-select-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
 }
 
-.image-picker-server {
+.image-picker-value-label {
+    flex: 1;
+    font-size: 12px;
+    color: #aaa;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 0;
+}
+
+/* Modal layout */
+.image-picker-modal .rs-modal-body {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.image-picker-modal-body {
+    display: flex;
+    height: 440px;
+    overflow: hidden;
+}
+
+/* Left sidebar */
+.image-picker-modal-sidebar {
+    width: 160px;
+    min-width: 160px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 0;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.image-picker-modal-source {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #bbb;
+    user-select: none;
+    border-left: 3px solid transparent;
+    transition: background 0.12s, color 0.12s;
+}
+
+.image-picker-modal-source:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.image-picker-modal-source.active {
+    background: rgba(52, 152, 219, 0.15);
+    color: #fff;
+    border-left-color: #3498db;
+}
+
+/* Other-project sub-list */
+.image-picker-modal-other-projects {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 4px;
+    padding-top: 4px;
+}
+
+.image-picker-modal-other-project {
+    padding: 7px 16px 7px 28px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #999;
+    user-select: none;
+    border-left: 3px solid transparent;
+    transition: background 0.12s, color 0.12s;
+}
+
+.image-picker-modal-other-project:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #ddd;
+}
+
+.image-picker-modal-other-project.active {
+    background: rgba(52, 152, 219, 0.10);
+    color: #fff;
+    border-left-color: #3498db;
+}
+
+/* Grid area */
+.image-picker-modal-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 10px;
+}
+
+.image-picker-modal-item {
+    width: 100px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    padding: 4px;
+    text-align: center;
+    transition: border-color 0.12s, background 0.12s;
+}
+
+.image-picker-modal-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.image-picker-modal-item.selected {
+    border-color: #3498db;
+    background: rgba(52, 152, 219, 0.12);
+}
+
+.image-picker-modal-item img {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.04);
+    display: block;
+    margin: 0 auto 4px;
+}
+
+.image-picker-modal-item span {
+    font-size: 11px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #aaa;
+    max-width: 96px;
+}
+
+.image-picker-modal-empty {
+    color: #666;
+    font-size: 13px;
+    padding: 24px;
+}
+
+/* Footer */
+.image-picker-modal-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
 }
 
-.image-picker-menu-thumb {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.05);
+.image-picker-modal-selected-name {
+    flex: 1;
+    font-size: 12px;
+    color: #aaa;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
 }
+
+.image-picker-modal-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* AI Generate panel */
+.imggen-panel {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    overflow: hidden;
+}
+
+.imggen-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 240px;
+    min-width: 240px;
+}
+
+.imggen-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.imggen-field label {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.imggen-size-row {
+    display: flex;
+    gap: 12px;
+}
+
+.imggen-size-row .imggen-field {
+    flex: 1;
+}
+
+.imggen-result {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding-top: 4px;
+}
+
+.imggen-placeholder {
+    color: #555;
+    font-size: 13px;
+    margin-top: 40px;
+    text-align: center;
+}
+
+.imggen-error {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 20px;
+    text-align: center;
+    padding: 0 8px;
+}
+
+.imggen-preview {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 4px;
+    object-fit: contain;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.imggen-result-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.imggen-preview {
+    cursor: zoom-in;
+}
+
+.imggen-progress-wrap {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    margin-top: 16px;
+    overflow: hidden;
+}
+
+.imggen-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #3498db, #5dade2);
+    border-radius: 3px;
+    transition: width 0.1s linear;
+}
+
+.imggen-progress-label {
+    position: absolute;
+    right: 0;
+    top: 10px;
+    font-size: 11px;
+    color: #666;
+}
+
+/* Fullscreen preview overlay */
+@keyframes imggen-fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes imggen-scalein {
+    from { transform: scale(0.88); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+.imggen-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    animation: imggen-fadein 0.18s ease;
+}
+
+.imggen-fullscreen img {
+    max-width: 92vw;
+    max-height: 92vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+    animation: imggen-scalein 0.2s ease;
+    cursor: default;
+}
+

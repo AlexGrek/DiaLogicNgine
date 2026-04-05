@@ -12,7 +12,8 @@
       "Bash(curl -s -o /dev/null -w \"thumb status: %{http_code}\\\\n\" \"http://localhost:8003/api/v1/projects/demo/image_thumbs/big.png\")",
       "Bash(task --version)",
       "Bash(task --list)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm search:*)"
     ]
   }
 }

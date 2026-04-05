@@ -1,6 +1,7 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
+import { Button } from 'rsuite';
 import { generateImageUrl } from '../../Utils';
-import ServerImageSelect from './ServerImageSelect';
+import ImagePickerModal from './ImagePickerModal';
 import './ImagePicker.css'
 
 const isServerImage = (v: string) => !v.startsWith('game_assets/') && !v.startsWith('/') && !v.startsWith('http')
@@ -22,20 +23,30 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
     children,
     projectName = 'default',
 }) => {
+    const [modalOpen, setModalOpen] = useState(false);
+
     const previewSrc = value && isServerImage(value)
         ? `/api/v1/projects/${projectName}/image_thumbs/${encodeURIComponent(value)}`
         : generateImageUrl(value ?? '');
 
+    const valueLabel = value || 'No image selected';
+
     return (
         <div className='image-picker-container'>
             <div className='image-picker-header'>{children}</div>
-            <ServerImageSelect
-                extensions={extensions}
+            <div className='image-picker-select-row'>
+                <span className='image-picker-value-label' title={valueLabel}>{valueLabel}</span>
+                <Button size="sm" onClick={() => setModalOpen(true)}>Browse…</Button>
+            </div>
+            {value && <img alt="preview" src={previewSrc} />}
+            <ImagePickerModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
                 value={value}
                 onChange={onChange}
+                extensions={extensions}
                 projectName={projectName}
             />
-            <img alt="no image" src={previewSrc} />
         </div>
     );
 };

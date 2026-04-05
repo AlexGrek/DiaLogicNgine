@@ -106,7 +106,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })} />
                 </Panel>
                 <Panel header="Avatar Image">
-                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value })} />
+                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value })} projectName={game.general.name} />
                 </Panel>
                 <Panel header="Roles">
                     <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />

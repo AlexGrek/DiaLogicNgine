@@ -3,3 +3,4 @@
 
 backend/storage
 backend/.venv
+backend/.env

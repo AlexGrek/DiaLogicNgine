@@ -94,8 +94,8 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible 
             <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display item name'></Input>
             <Input value={it.description} onChange={(val) => updateItem("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
             <Divider>Images</Divider>
-            <ImagePicker value={it.image} onChange={val => setImage("image", val || undefined)}>Image</ImagePicker>
-            <ImagePicker value={it.thumbnail} onChange={val => setImage("thumbnail", val || undefined)}>Thumbnail</ImagePicker>
+            <ImagePicker value={it.image} onChange={val => setImage("image", val || undefined)} projectName={game.general.name}>Image</ImagePicker>
+            <ImagePicker value={it.thumbnail} onChange={val => setImage("thumbnail", val || undefined)} projectName={game.general.name}>Thumbnail</ImagePicker>
             <Divider>Properties</Divider>
             <Checkbox checked={it.unique} onChange={(_value, checked) => setCheck("unique", checked)}>Unique</Checkbox>
             <Checkbox checked={it.canGive} onChange={(_value, checked) => setCheck("canGive", checked)}>Can give to NPC</Checkbox>

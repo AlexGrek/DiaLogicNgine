@@ -33,5 +33,11 @@ export function useServerImages(projectName: string) {
         [projectName],
     );
 
-    return { images, uploading, fetchImages, uploadFile, thumbUrl, fileInputRef };
+    const deleteImage = useCallback(async (filename: string) => {
+        await fetch(`/api/v1/projects/${projectName}/images/${encodeURIComponent(filename)}`, {
+            method: 'DELETE',
+        });
+    }, [projectName]);
+
+    return { images, uploading, fetchImages, uploadFile, deleteImage, thumbUrl, fileInputRef };
 }

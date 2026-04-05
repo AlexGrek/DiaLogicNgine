@@ -1,4 +1,5 @@
 import lodash from "lodash";
+import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 import { GameDescription, createDefaultConfig } from "./GameDescription";
 import { createTranslations } from "../exec/Localization";
 import { initGameUiElementDescr } from "./GameUiElementDescr";
@@ -148,12 +149,15 @@ export function loadJsonStringAndPatch(json: string, currentEngine: string) {
     if (version === undefined || version === null || !lodash.isString(version)) {
         throw Error("Cannot read property 'engineVersion' of json data, this is not a game")
     }
-    if (version === currentEngine) {
-        // no need to patch anything
-        return parsed as GameDescription
-    } else {
-        return patchGame(parsed, version, currentEngine)
+    const result: GameDescription = version === currentEngine
+        ? parsed as GameDescription
+        : patchGame(parsed, version, currentEngine);
+
+    if (!result.general?.name) {
+        result.general = { ...result.general, name: uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: '-', length: 2 }) };
     }
+
+    return result;
 }
 
 function patchGame(parsed: any, version: string, currentEngine: string): GameDescription {

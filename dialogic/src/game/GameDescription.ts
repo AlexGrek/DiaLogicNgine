@@ -1,3 +1,4 @@
+import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
 import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
 import { createTranslations, Translations } from "../exec/Localization";
 import Character, { Role } from "./Character";
@@ -146,7 +147,7 @@ export function createDefaultGame(): GameDescription {
         startupDialog: createDialogWindowId(d1.name, d1.windows[0].uid),
         engineVersion: ENGINE_VERSION,
         startMenu: {},
-        general: createGeneralGameInfo(),
+        general: { ...createGeneralGameInfo(), name: uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: '-', length: 2 }) },
         config: createDefaultConfig(),
         objectives: [{
             uid: 'misc',

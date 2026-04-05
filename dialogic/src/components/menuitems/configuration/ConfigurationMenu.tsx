@@ -82,7 +82,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                         <StringListEditor canBeEmpty value={currentGame.situations} onChange={(val) => onSetGame({ ...currentGame, situations: val })} />
                     </Panel>
                     <Panel header="Menu background">
-                        <ImagePicker value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)} />
+                        <ImagePicker value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)} projectName={game.general.name} />
                     </Panel>
                     <Panel header='Localization'>
                         <div>

@@ -27,7 +27,8 @@
     "react-markdown": "^9.0.0",
     "rsuite": "^5.59.0",
     "screenfull": "^6.0.2",
-    "storage-manager-js": "^4.0.7"
+    "storage-manager-js": "^4.0.7",
+    "unique-names-generator": "^4.7.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

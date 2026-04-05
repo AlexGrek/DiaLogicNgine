@@ -40,6 +40,14 @@ def _make_thumbnail(contents: bytes, dest: Path) -> None:
         img.save(dest, format=save_fmt)
 
 
+@router.get("/projects")
+async def list_projects():
+    projects_dir = (STORAGE_ROOT / "projects").resolve()
+    if not projects_dir.exists():
+        return {"projects": []}
+    return {"projects": [d.name for d in sorted(projects_dir.iterdir()) if d.is_dir()]}
+
+
 @router.put("/projects/{project_name}/images/{filename}")
 async def upload_image(project_name: str, filename: str, file: UploadFile):
     mime = file.content_type or mimetypes.guess_type(filename)[0] or ""
@@ -81,3 +89,15 @@ async def serve_thumbnail(project_name: str, filename: str):
     if not path.exists():
         raise HTTPException(status_code=404, detail="Thumbnail not found")
     return FileResponse(path)
+
+
+@router.delete("/projects/{project_name}/images/{filename}")
+async def delete_image(project_name: str, filename: str):
+    img_path = _safe_path(_image_dir(project_name), filename)
+    thumb_path = _safe_path(_thumb_dir(project_name), filename)
+    if not img_path.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    img_path.unlink()
+    if thumb_path.exists():
+        thumb_path.unlink()
+    return {"status": "ok"}
