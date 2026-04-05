@@ -1,5 +1,4 @@
-import { open } from 'fs/promises';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Nav } from 'rsuite';
 
 export interface StaticTab {
@@ -44,7 +43,7 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs, keepOpen }) => {
         }
     }
 
-    const renderContentAllTabs = () => {
+    const _renderContentAllTabs = () => {
         if (tabs.length === 0) {
             return <div><p><mark>ERROR: no tabs to render</mark></p></div>
         }

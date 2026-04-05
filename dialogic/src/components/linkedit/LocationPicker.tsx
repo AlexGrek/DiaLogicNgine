@@ -1,6 +1,6 @@
 import React from 'react';
 import Loc from '../../game/Loc';
-import { InputPicker, SelectPicker } from 'rsuite';
+import { SelectPicker } from 'rsuite';
 
 interface LocationPickerProps {
     locs: Loc[];

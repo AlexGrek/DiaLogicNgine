@@ -21,12 +21,12 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({validator, text_
         setText(text_initial);
     }, [text_initial]);
 
-    const handleCancel = (e: any) => {
+    const handleCancel = (_e: any) => {
         setOpen(false);
         onClose();
     }
 
-    const handleConfirm = (e: any) => {
+    const handleConfirm = (_e: any) => {
         setOpen(false);
         onConfirm(text);
     }

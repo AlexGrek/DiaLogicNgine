@@ -21,7 +21,7 @@ interface MagicProps {
     game?: GameDescription
 }
 
-const Magic: React.FC<MagicProps> = ({ operations, game }) => {
+const Magic: React.FC<MagicProps> = ({ operations }) => {
     const [errorText, setErrorText] = useState<string | null>(null)
     const [chosenOp, setChosenOp] = useState<MagicOperation | null>(null);
 
@@ -90,7 +90,7 @@ const Magic: React.FC<MagicProps> = ({ operations, game }) => {
                         clone.parameters[key] = val
                         setChosenOp(clone)
                     }
-                    editor = <InputNumber value={value} onChange={(val => onChange(val))} />
+                    editor = <InputNumber value={value} onChange={(val) => { if (val !== null) onChange(val) }} />
                 }
                 editor = <div>
                     <p>{key}: {editor}</p>

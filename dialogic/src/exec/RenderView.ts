@@ -1,6 +1,6 @@
 import { trace } from "../Trace"
 import Character, { CharacterDialog, createEmptyCharacter, getChar } from "../game/Character"
-import { Actor, DialogLink, DialogWindow } from "../game/Dialog"
+import Dialog, { Actor, DialogLink, DialogWindow } from "../game/Dialog"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
 import { Quest, QuestPath, getQuest } from "../game/Objectives"
@@ -239,7 +239,7 @@ export class RenderViewGenerator {
 
 
 
-    renderSpecialWidget(state: State, widget: string, data: WindowData, dialog: string): RenderWidget {
+    renderSpecialWidget(state: State, widget: string, _data: WindowData, _dialog: Dialog): RenderWidget {
         const [widgetType, widgetId] = widget.split("::");
         switch (widgetType) {
             case "pac":

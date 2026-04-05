@@ -1,7 +1,7 @@
 import MinusIcon from '@rsuite/icons/Minus';
 import PlusIcon from '@rsuite/icons/Plus';
 import React, { useEffect, useState } from 'react';
-import { Button, Input, InputGroup } from 'rsuite';
+import { Input, InputGroup } from 'rsuite';
 import './StringListEditor.css';
 import lodash from 'lodash';
 import { isNumeric } from '../../Utils';

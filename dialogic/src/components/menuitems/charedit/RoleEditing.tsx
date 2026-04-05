@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
-import Character, { Role } from '../../../game/Character';
+import { Role } from '../../../game/Character';
 import './charediting.css';
-import CharRoleEditing from './CharRoleEditing';
 import PropsEditMenu from '../scriptedit/PropsEditMenu';
-import Prop from '../../../game/Prop';
 import { Input, Panel, PanelGroup, Tag } from 'rsuite';
-import TextListEditor from '../../common/text_list/TextListEditor';
 import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 
 interface RoleEditingProps {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import StaticTabs from '../../common/StaticTabs';

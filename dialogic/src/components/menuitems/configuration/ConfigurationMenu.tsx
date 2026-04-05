@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createDialogWindowId } from '../../../exec/GameState';
 import { GameDescription, GeneralGameInfo } from '../../../game/GameDescription';
-import { NotifyCallback } from '../../../UiNotifications';
 import DialogWindowPicker from '../../common/DialogWindowPicker';
 import { Button, ButtonGroup, Panel, PanelGroup, Stack } from 'rsuite';
 import ImagePicker from '../../common/ImagePicker';
@@ -11,7 +10,6 @@ import GeneralEditor from './GeneralEditor';
 import { IUpds } from '../../../App';
 import Note from '../../userguide/Note';
 import StringMapEditor from '../../common/StringMapEditor';
-import { Translations } from '../../../exec/Localization';
 import StringListEditor from '../../common/StringListEditor';
 
 interface ConfigurationMenuProps {

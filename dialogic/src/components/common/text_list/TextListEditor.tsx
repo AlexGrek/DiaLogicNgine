@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TextList } from '../../../game/TextList';
-import { Button, Input, InputGroup, Nav, Stack } from 'rsuite';
+import { Input, InputGroup, Nav } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
 import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';

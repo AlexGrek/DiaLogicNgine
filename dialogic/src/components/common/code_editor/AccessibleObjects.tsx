@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import TreeView, { INode, TreeViewData, flattenTree } from "react-accessible-treeview";
-import OneColumnIcon from '@rsuite/icons/OneColumn';
+import TreeView, { flattenTree } from "react-accessible-treeview";
 import ArrowRightIcon from '@rsuite/icons/ArrowRight';
 import ArrowDownIcon from '@rsuite/icons/ArrowDown';
 import './AccessibleObjects.css';
@@ -48,7 +47,7 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
         return flattenTree(rootNode)
     }
     
-    const [objects, setObjects] = useState<TreeViewData>(prepareData(objectDescrMap));
+    const [objects, setObjects] = useState(prepareData(objectDescrMap));
     useEffect(() => {
         setObjects(prepareData(objectDescrMap));
     }, [objectDescrMap]);
@@ -61,7 +60,7 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
         }
     }
 
-    const objectClick = (e: any, oname: string) => {
+    const objectClick = (_e: any, oname: string) => {
         onObjectClick(oname);
         return true;
     }
@@ -80,14 +79,9 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
                         element,
                         isBranch,
                         isExpanded,
-                        isSelected,
-                        isDisabled,
-                        isHalfSelected,
                         getNodeProps,
                         level,
-                        handleSelect,
                         handleExpand,
-                        dispatch,
                     }) => {
                         return (
                             <>

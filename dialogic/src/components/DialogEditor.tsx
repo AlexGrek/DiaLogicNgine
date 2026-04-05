@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, memo } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Dialog, { DialogWindow, createDialog } from "../game/Dialog";
 import PushMessageIcon from "@rsuite/icons/PushMessage";
 import { IconButton, Panel, Placeholder } from "rsuite";
@@ -9,6 +9,11 @@ import DialogWindowEditDrawer from "./DialogWindowEditDrawer";
 import { GameDescription } from "../game/GameDescription";
 import "./dialog.css";
 import ChainEditor from "./chain/ChainEditor";
+
+export interface DialogHandlers {
+    createDialogWindowHandler: (window: DialogWindow) => void;
+    openAnotherWindowHandler: (window: DialogWindow) => void;
+}
 
 export interface IDialogEditorProps {
   dialog?: Dialog;

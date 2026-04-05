@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Col, Divider, Drawer, Grid, Input, Panel, PanelGroup, Row } from 'rsuite';
 import { IUpds } from '../../../App';
-import Character, { Behavior, CharacterDialog, createCharacterDialog, getCharEventHostName } from '../../../game/Character';
+import Character, { CharacterDialog, createCharacterDialog, getCharEventHostName } from '../../../game/Character';
 import { DialogLink } from '../../../game/Dialog';
 import { GameDescription } from '../../../game/GameDescription';
 import { TextList } from '../../../game/TextList';
@@ -117,7 +117,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
                                     <p>Char UID</p>
                                     <Input value={char.uid} readOnly></Input>
                                     <Divider>Events</Divider>
-                                    <Checkbox checked={mustBeDialog.eventHosts !== null} onChange={(v, checked) =>{
+                                    <Checkbox checked={mustBeDialog.eventHosts !== null} onChange={(_v, checked) =>{
                                         if (!checked) {
                                             setDialog({...mustBeDialog, eventHosts: null})
                                         } else {

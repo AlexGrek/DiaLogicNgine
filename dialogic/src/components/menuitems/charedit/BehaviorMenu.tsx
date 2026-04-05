@@ -34,7 +34,7 @@ const BehaviorEditor: React.FC<BehaviorEditorProps> = ({ game, value, onSetBehav
         onSetBehavior({...value, reactions: copy})
     }
 
-    const pasteReaction = (rany: any, typename: string) => {
+    const pasteReaction = (rany: any, _typename: string) => {
         const r = rany as Reaction
         const copy = [...value.reactions]
         copy.push(r)

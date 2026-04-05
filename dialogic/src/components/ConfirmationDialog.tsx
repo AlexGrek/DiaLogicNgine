@@ -15,12 +15,12 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ text, header, o
         setOpen(true);
     }, []);
 
-    const handleCancel = (e: any) => {
+    const handleCancel = (_e: any) => {
         setOpen(false);
         onClose();
     }
 
-    const handleConfirm = (e: any) => {
+    const handleConfirm = (_e: any) => {
         setOpen(false);
         onConfirm();
     }

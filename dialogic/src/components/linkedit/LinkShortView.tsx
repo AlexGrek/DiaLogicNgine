@@ -1,6 +1,6 @@
 import React from 'react';
 import 'animate.css';
-import Dialog, { DialogLink, LinkType } from '../../game/Dialog';
+import { DialogLink, LinkType } from '../../game/Dialog';
 import LinkTypeTag from '../LinkTypeTag';
 import { Tag } from 'rsuite';
 

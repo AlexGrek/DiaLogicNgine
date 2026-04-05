@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Button, ButtonGroup, Tooltip, Whisper } from 'rsuite';
 
 interface ButtonPanelSelectorProps<T> {

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { GameDescription } from '../../game/GameDescription';
+import React, { useState } from 'react';
 import { IUpds } from '../../App';
 import { Button, Checkbox, Divider, Input, InputPicker, Modal } from 'rsuite';
 import Dialog, { createActor, createDialog, createWindow } from '../../game/Dialog';
@@ -68,7 +67,7 @@ const QuickWindowCreator: React.FC<QuickWindowCreatorProps> = ({ dialogs, onCrea
             <Divider>Window</Divider>
             <Input name="windowName" onChange={setWindowName} value={windowName} placeholder='New window name'/>
             <Input name="windowText" onChange={setWindowText} value={windowText} placeholder='New window text' as='textarea'/>
-            <Checkbox name="currentActor" checked={currentActor} onChange={(val, ch) => setCurrentActor(ch)}>Actor: current</Checkbox>
+            <Checkbox name="currentActor" checked={currentActor} onChange={(_val, ch) => setCurrentActor(ch)}>Actor: current</Checkbox>
         </div>
     }
 

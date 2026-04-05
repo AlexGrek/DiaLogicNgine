@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AutoComplete, Button, Col, Drawer, Grid, Input, InputNumber, Row, Toggle } from 'rsuite';
+import { AutoComplete, Button, Drawer, Input, InputNumber, Toggle } from 'rsuite';
 import { GameDescription } from '../../../game/GameDescription';
-import { IUpds } from '../../../App';
 import Prop from '../../../game/Prop';
 import './propeditor.css'
 import LocationPicker from '../../linkedit/LocationPicker';
@@ -46,7 +45,8 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
             </div>
         }
         if (prop.datatype === "number") {
-            const setNumber = (v: number | string) => {
+            const setNumber = (v: number | string | null) => {
+                if (v === null) return
                 if (typeof(v) === "string") {
                     setProp({...prop, defaultValue: Number.parseFloat(v)})
                 } else {

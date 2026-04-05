@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Divider, Drawer, IconButton, Input, Panel } from 'rsuite';
 import Dialog, { Actor, DialogWindow, createDialogLink, createWindow } from '../../game/Dialog';
 import PlusIcon from '@rsuite/icons/Plus';

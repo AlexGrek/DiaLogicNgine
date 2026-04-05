@@ -1,14 +1,9 @@
-import PlusIcon from '@rsuite/icons/Plus';
-import lodash from 'lodash';
 import React, { useState } from 'react';
-import { Button, CheckPicker, Checkbox, Col, Divider, Drawer, Dropdown, Grid, IconButton, Input, InputGroup, Row } from 'rsuite';
-import { generateImageUrl, isValidJsIdentifier } from '../../../Utils';
+import { CheckPicker, Col, Grid, IconButton, Input, Row } from 'rsuite';
+import { isValidJsIdentifier } from '../../../Utils';
 import { GameDescription } from '../../../game/GameDescription';
 import { Item, createEmptyItem } from '../../../game/Items';
-import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
-import ImagePicker from '../../common/ImagePicker';
 import StringListEditor from '../../common/StringListEditor';
-import StringMapEditor from '../../common/StringMapEditor';
 import './eventeditor.css';
 import { IUpds } from '../../../App';
 import { getLocEventHostName } from '../../../game/Loc';

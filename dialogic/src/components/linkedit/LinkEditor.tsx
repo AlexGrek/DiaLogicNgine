@@ -267,7 +267,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
             const data = dialog.windows.map(d => d.uid);
             const formattedData = data.map(d => ({ value: d, label: d }));
             return <div>
-                <InputPicker onCreate={(value, item, event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)}></InputPicker>
+                <InputPicker onCreate={(value, _item, _event) => onCreateLocalDialog(value)} creatable={true} data={formattedData} value={linkdir.direction} onChange={(value) => editLocalDirection(linkdir, isMainLink, aindex, value)}></InputPicker>
                 <p>{data.includes(linkdir.direction || "") ? gotoLink(linkdir) : createLink(linkdir)}</p>
             </div>
         }
@@ -390,7 +390,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
                     <CodeSampleButton onClick={() => codeEdit("isEnabled")} name='isEnabled' code={link.isEnabled}></CodeSampleButton>
                 </Panel>
                 <Panel className='misc-panel' header="Misc">
-                    <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
+                    <Checkbox checked={link.changeLocationInBg !== undefined} onChange={(_value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
                     {link.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={link.changeLocationInBg} onLocChange={onChangeLocationInBg} />}
                 </Panel>
                 <Panel className='alternatives-panel' header="Alternatives">

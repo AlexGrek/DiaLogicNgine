@@ -1,6 +1,6 @@
 import CopyIcon from '@rsuite/icons/Copy';
-import React, { ReactNode } from 'react';
-import { Button, ButtonProps, IconButton } from 'rsuite';
+import React from 'react';
+import { Button, IconButton } from 'rsuite';
 import { IUpds } from '../../../App';
 
 export type CopyButtonStyle = "onlyIcon" | "link"

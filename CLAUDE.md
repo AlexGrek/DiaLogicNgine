@@ -84,3 +84,64 @@ All editor state lives in `App.tsx` as `useState<GameDescription>`. All mutation
 ### Save/load
 
 `SaveLoadManager.ts` serializes/deserializes `GameDescription` to/from JSON. `savegame/LocalStorageSavesManager.ts` handles browser localStorage persistence for runtime save slots.
+
+## Backend
+
+A FastAPI + uvicorn Python backend lives in `backend/`. It serves file storage for the editor.
+
+### Stack
+
+- **Python** (>=3.14), managed with **uv**
+- **FastAPI** + **uvicorn** for the HTTP server
+- **Pillow** for image thumbnail generation
+
+### Running the server
+
+```bash
+cd backend
+uv run python main.py          # reload mode on port 8000
+```
+
+### Structure
+
+```
+backend/
+  main.py                     — entry point (uvicorn launcher)
+  app/
+    main.py                   — FastAPI app creation
+    api/v1/
+      router.py               — registers all route modules
+      health.py               — GET /api/v1/health, /api/v1/health/ready
+      images.py               — image upload/serve/thumbnail routes
+storage/projects/{project}/   — uploaded files root (never write outside this)
+```
+
+### Image API (`/api/v1/projects/{project_name}/`)
+
+- `PUT  /images/{filename}` — upload image (validates MIME, generates 256px thumbnail)
+- `GET  /images` — list images for a project
+- `GET  /images/{filename}` — serve original image
+- `GET  /image_thumbs/{filename}` — serve thumbnail
+
+### Adding a new route module
+
+1. Create `backend/app/api/v1/<module>.py` with an `APIRouter`.
+2. Register it in `backend/app/api/v1/router.py`:
+   ```python
+   from app.api.v1 import <module>
+   router.include_router(<module>.router)
+   ```
+
+### Conventions
+
+- All routes are prefixed `/api/v1/`.
+- Use `PUT` for idempotent file uploads, `POST` for non-idempotent resource creation.
+- Validate `Content-Type` at upload boundaries — reject unknown types with HTTP 415.
+- Always resolve paths and verify with `Path.is_relative_to()` before writing files.
+- Return `{"status": "ok"}` for simple confirmations; richer dicts for resource responses.
+
+### Adding a dependency
+
+```bash
+cd backend && uv add <package>
+```

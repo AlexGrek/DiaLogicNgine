@@ -1,2 +1,5 @@
 /venv
 /storage
+
+backend/storage
+backend/.venv

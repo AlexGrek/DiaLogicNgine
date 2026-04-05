@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GeneralGameInfo } from '../../../game/GameDescription';
-import { Drawer, Input, InputProps } from 'rsuite';
+import { Drawer, Input } from 'rsuite';
 import StringListEditor from '../../common/StringListEditor';
 import StringMapEditor from '../../common/StringMapEditor';
 

@@ -2,7 +2,7 @@ import PeoplesMapIcon from '@rsuite/icons/PeoplesMap';
 import PlusIcon from '@rsuite/icons/Plus';
 import lodash from 'lodash';
 import React, { useState } from 'react';
-import { Dropdown, Input, InputGroup, Nav, Notification } from 'rsuite';
+import { Dropdown, Input, InputGroup, Nav } from 'rsuite';
 import { IUpds } from '../../../App';
 import { isValidJsIdentifier } from '../../../Utils';
 import { Role, createEmptyRole } from '../../../game/Character';
@@ -17,7 +17,7 @@ interface RolesMenuProps {
     handlers: IUpds;
 }
 
-const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame, handlers: IUpds }) => {
+const RolesMenu: React.FC<RolesMenuProps> = ({ game, onSetGame }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [creatingUID, setCreatingUID] = useState<string>("");
 

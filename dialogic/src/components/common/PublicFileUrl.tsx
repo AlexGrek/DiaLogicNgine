@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { InputPicker, SelectPicker } from 'rsuite';
+import { SelectPicker } from 'rsuite';
 
 interface PublicFileUrlProps {
     extensions: string[];

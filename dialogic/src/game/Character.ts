@@ -1,6 +1,5 @@
 import Prop from "./Prop";
 import { TextList, emptyTextList } from "./TextList";
-import Proxy from "./Proxy"
 import { ImageList, emptyImageList } from "./ImageList";
 import { GameDescription } from "./GameDescription";
 import { DialogWindowId } from "../exec/GameState";

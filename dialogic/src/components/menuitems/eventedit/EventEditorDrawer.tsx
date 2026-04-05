@@ -119,7 +119,7 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, handlers, 
                             <div className='location-params'>
                                 <PanelGroup accordion bordered>
                                     <Panel header="Probalility" defaultExpanded>
-                                        <Checkbox checked={ev.highPriority} onChange={(value, checked) => setEv({ ...ev, highPriority: checked })}>High priority</Checkbox>
+                                        <Checkbox checked={ev.highPriority} onChange={(_value, checked) => setEv({ ...ev, highPriority: checked })}>High priority</Checkbox>
                                         <p>
                                             <span>{ev.probability}%</span>
                                             <Slider
@@ -141,7 +141,7 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, handlers, 
                         </Col>
                         <Col xs={6}>
                             <p>Destination</p>
-                            <Checkbox checked={ev.link !== null} onChange={(value, checked) => checked ? onSetDialogWindow(game.startupDialog.dialog, game.startupDialog.window) : setEv({ ...ev, link: null })}>Push to another window</Checkbox>
+                            <Checkbox checked={ev.link !== null} onChange={(_value, checked) => checked ? onSetDialogWindow(game.startupDialog.dialog, game.startupDialog.window) : setEv({ ...ev, link: null })}>Push to another window</Checkbox>
                             {ev.link && <DialogWindowPicker handlers={handlers} dialogs={game.dialogs} chosen={[ev.link.dialog, ev.link.window]} onValueChange={onSetDialogWindow} />}
                         </Col>
                     </Row>
