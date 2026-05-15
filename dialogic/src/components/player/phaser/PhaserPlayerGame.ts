@@ -12,27 +12,45 @@ export interface PhaserPlayerGameHandle {
 }
 
 export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge): PhaserPlayerGameHandle {
+    const initialW = Math.max(parent.clientWidth || 0, 1);
+    const initialH = Math.max(parent.clientHeight || 0, 1);
+
     const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         parent,
         backgroundColor: '#05080f',
         scale: {
             mode: Phaser.Scale.RESIZE,
-            width: '100%',
-            height: '100%',
             parent,
+            width: initialW,
+            height: initialH,
+            autoRound: true,
         },
-        scene: [],
         dom: { createContainer: false },
         fps: { target: 60 },
         render: {
             antialias: true,
+            antialiasGL: true,
             pixelArt: false,
             roundPixels: false,
         },
     };
 
     const game = new Phaser.Game(config);
+
+    const resizeToParent = () => {
+        const cssW = Math.max(parent.clientWidth || 0, 1);
+        const cssH = Math.max(parent.clientHeight || 0, 1);
+        game.scale.resize(cssW, cssH);
+    };
+
+    let ro: ResizeObserver | null = null;
+    const onWindowResize = () => resizeToParent();
+    if (typeof ResizeObserver !== 'undefined') {
+        ro = new ResizeObserver(() => resizeToParent());
+        ro.observe(parent);
+    }
+    window.addEventListener('resize', onWindowResize);
 
     const sceneDefs: { key: string; ctor: new () => Phaser.Scene }[] = [
         { key: BG_SCENE, ctor: BackgroundScene },
@@ -50,12 +68,18 @@ export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge
         sceneDefs.forEach(({ key }) => {
             game.scene.start(key, { bridge });
         });
+        resizeToParent();
+        setTimeout(resizeToParent, 50);
     });
 
     return {
         game,
         destroy: () => {
-            try { game.destroy(true, false); } catch { /* noop */ }
+            try {
+                if (ro) ro.disconnect();
+                window.removeEventListener('resize', onWindowResize);
+                game.destroy(true, false);
+            } catch { /* noop */ }
         },
     };
 }

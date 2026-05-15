@@ -130,16 +130,25 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
 
     return (
         <div
-            ref={containerRef}
             style={{
+                position: 'relative',
                 width: '100%',
                 height: '100%',
-                minHeight: 'calc(100vh - 60px)',
-                position: 'relative',
+                minHeight: 0,
+                flex: '1 1 auto',
                 overflow: 'hidden',
-                background: '#05080f',
             }}
-        />
+        >
+            <div
+                ref={containerRef}
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    overflow: 'hidden',
+                    background: '#05080f',
+                }}
+            />
+        </div>
     );
 };
 
