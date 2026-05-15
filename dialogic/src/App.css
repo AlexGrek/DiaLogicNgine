@@ -288,3 +288,32 @@ div.text-field-editor {
 .icon-container {
   font-family: 'IconFont';
 }
+
+/* Smooth modal animations: replace rsuite's elastic bounce with a clean spring ease */
+.rs-anim-bounce-in {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation-duration: 0.35s !important;
+}
+
+.rs-anim-bounce-out {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation-duration: 0.18s !important;
+}
+
+/* Smooth drawer slide: spring ease-out on enter, standard ease on exit */
+.rs-anim-slide-in {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation-duration: 0.35s !important;
+}
+
+.rs-anim-slide-out {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation-duration: 0.22s !important;
+}
+
+/* Backdrop fade: match the smoothed timing */
+.rs-modal-backdrop.rs-anim-fade,
+.rs-drawer-backdrop.rs-anim-fade {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-duration: 0.25s !important;
+}

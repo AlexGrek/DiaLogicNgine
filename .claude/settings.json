@@ -20,7 +20,9 @@
       "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/game_engine)",
       "Skill(frontend)",
       "Skill(frontend:*)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/ai-integration)"
     ],
     "additionalDirectories": [
       "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"
