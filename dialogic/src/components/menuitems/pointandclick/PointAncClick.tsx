@@ -22,6 +22,7 @@ const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
         if (index >= items.length || index < 0) {
             return;
         }
+        setEditingIndex(index)
         setEditingObject(items[index] || null)
     }
 
