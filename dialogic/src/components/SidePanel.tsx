@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Input, InputGroup, Nav, Sidenav } from 'rsuite';
 import { useLocation, useNavigate } from 'react-router-dom';
+import HomeIcon from '@rsuite/icons/legacy/Home';
 import MagicIcon from '@rsuite/icons/legacy/Magic';
 import { GameDescription } from '../game/GameDescription';
 import Dialog, { createDialog } from '../game/Dialog';
@@ -29,13 +30,14 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
   const [newDialogName, setNewDialogName] = useState<string>('');
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
-  const activeSection = pathSegments[0] ?? 'dialog';
+  const activeSection = pathSegments[0] ?? 'home';
   const activeDialogFromUrl = activeSection === 'dialog' ? decodeURIComponent(pathSegments[1] ?? '') : '';
 
   const activeKey = useMemo(() => {
+    if (location.pathname === '/') return 'home';
     if (activeSection === 'dialog' && activeDialogFromUrl) return activeDialogFromUrl;
     return activeSection;
-  }, [activeSection, activeDialogFromUrl]);
+  }, [location.pathname, activeSection, activeDialogFromUrl]);
 
   const handleCreateDialog = useCallback(() => {
     const name = newDialogName.trim();
@@ -75,6 +77,14 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
       <Sidenav defaultOpenKeys={['3', '4']}>
         <Sidenav.Body>
           <Nav activeKey={activeKey}>
+            <Nav.Item
+              eventKey="home"
+              icon={<HomeIcon />}
+              onClick={() => navigate('/')}
+            >
+              Home
+            </Nav.Item>
+
             <Nav.Item
               eventKey="saveload"
               icon={<AttachmentIcon />}

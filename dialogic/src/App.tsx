@@ -8,7 +8,6 @@ import {
   Sidebar,
 } from "rsuite";
 import {
-  Navigate,
   Outlet,
   Route,
   Routes,
@@ -40,6 +39,7 @@ import UiElementsMenu from "./components/menuitems/uielements/UiElementsMenu";
 import PointAncClick from "./components/menuitems/pointandclick/PointAncClick";
 import { PointAndClick } from "./game/PointAndClick";
 import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
+import HomePage from "./components/home/HomePage";
 
 export interface CopiedObject {
   value: unknown;
@@ -188,9 +188,13 @@ function PacRoute() {
 
 // ---- Layout ----
 
-function AppLayout() {
+interface AppLayoutProps {
+  game: GameDescription;
+  setGame: React.Dispatch<React.SetStateAction<GameDescription>>;
+}
+
+function AppLayout({ game, setGame }: AppLayoutProps) {
   const [activeDialog, setActiveDialog] = useState("1");
-  const [game, setGame] = useState<GameDescription>(createDefaultGame);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [copied, setCopied] = useState<CopiedObject | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -207,7 +211,7 @@ function AppLayout() {
       ...prev,
       dialogs: prev.dialogs.map((d) => (d.name === dialog.name ? dialog : d)),
     }));
-  }, []);
+  }, [setGame]);
 
   const handleDialogApplyChange = useCallback(
     (func: DialogWindowListUpdater, dialog_uid: string | null) => {
@@ -221,7 +225,7 @@ function AppLayout() {
         };
       });
     },
-    [activeDialog]
+    [activeDialog, setGame]
   );
 
   const handleDialogWindowChange = useCallback(
@@ -236,23 +240,23 @@ function AppLayout() {
 
   const handleDialogCreate = useCallback((dialog: Dialog) => {
     setGame((prev) => ({ ...prev, dialogs: [...prev.dialogs, dialog] }));
-  }, []);
+  }, [setGame]);
 
   const handleLocChange = useCallback((locs: Loc[]) => {
     setGame((prev) => ({ ...prev, locs }));
-  }, []);
+  }, [setGame]);
 
   const handlePropChange = useCallback((props: Prop[]) => {
     setGame((prev) => ({ ...prev, props }));
-  }, []);
+  }, [setGame]);
 
   const createProp = useCallback((prop: Prop) => {
     setGame((prev) => ({ ...prev, props: [...prev.props, prop] }));
-  }, []);
+  }, [setGame]);
 
   const createSituation = useCallback((s: string) => {
     setGame((prev) => ({ ...prev, situations: [...prev.situations, s] }));
-  }, []);
+  }, [setGame]);
 
   const handleNotify = useCallback(
     (type: NotificationType, text: string, header?: string | null) => {
@@ -263,7 +267,7 @@ function AppLayout() {
 
   const handleGameUpdate = useCallback((g: GameDescription) => {
     setGame(g);
-  }, []);
+  }, [setGame]);
 
   const updates: IUpds = useMemo(
     () => ({
@@ -298,61 +302,63 @@ function AppLayout() {
 
   const outletContext: AppOutletContext = useMemo(
     () => ({ game, updates, setGame, handleNotify, setActiveDialog }),
-    [game, updates, handleNotify]
+    [game, updates, setGame, handleNotify]
   );
 
   const lastNotification = notifications[notifications.length - 1];
 
   return (
-    <CustomProvider theme="dark">
-      <Container className="root-container">
-        <Header className="app-header-container">
-          <div className="app-header-left">
-            <p className="app-header-text">🇺🇦 DiaLogic Ngine</p>
-            <SettingsButton onClick={() => setSettingsOpen(true)} />
-          </div>
-          <NotificationBar notification={lastNotification} />
-        </Header>
-        <SettingsPanel
-          open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          settings={appSettings}
-          onSettingsChange={setAppSettings}
-        />
-        <Container className="root-section">
-          <Sidebar className="app-main-sidebar">
-            <SidePanel game={game} handlers={updates} />
-          </Sidebar>
-          <Content className="content-container">
-            <Outlet context={outletContext} />
-          </Content>
-        </Container>
-        <Footer>Footer</Footer>
+    <Container className="root-container">
+      <Header className="app-header-container">
+        <div className="app-header-left">
+          <p className="app-header-text">🇺🇦 DiaLogic Ngine</p>
+          <SettingsButton onClick={() => setSettingsOpen(true)} />
+        </div>
+        <NotificationBar notification={lastNotification} />
+      </Header>
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        settings={appSettings}
+        onSettingsChange={setAppSettings}
+      />
+      <Container className="root-section">
+        <Sidebar className="app-main-sidebar">
+          <SidePanel game={game} handlers={updates} />
+        </Sidebar>
+        <Content className="content-container">
+          <Outlet context={outletContext} />
+        </Content>
       </Container>
-    </CustomProvider>
+      <Footer>Footer</Footer>
+    </Container>
   );
 }
 
 // ---- App (router) ----
 
 export default function App() {
+  const [game, setGame] = useState<GameDescription>(createDefaultGame);
+
   return (
-    <Routes>
-      <Route path="/" element={<AppLayout />}>
-        <Route index element={<Navigate to="/dialog" replace />} />
-        <Route path="dialog" element={<DialogRoute />} />
-        <Route path="dialog/:dialogId" element={<DialogRoute />} />
-        <Route path="player" element={<PlayerRoute />} />
-        <Route path="saveload" element={<SaveLoadRoute />} />
-        <Route path="config" element={<ConfigRoute />} />
-        <Route path="locs" element={<LocsRoute />} />
-        <Route path="chars" element={<CharsRoute />} />
-        <Route path="scripts" element={<ScriptsRoute />} />
-        <Route path="facts" element={<FactsRoute />} />
-        <Route path="items" element={<ItemsRoute />} />
-        <Route path="ui" element={<UiRoute />} />
-        <Route path="pac" element={<PacRoute />} />
-      </Route>
-    </Routes>
+    <CustomProvider theme="dark">
+      <Routes>
+        <Route path="/" element={<HomePage onOpenProject={setGame} />} />
+        <Route element={<AppLayout game={game} setGame={setGame} />}>
+          <Route path="dialog" element={<DialogRoute />} />
+          <Route path="dialog/:dialogId" element={<DialogRoute />} />
+          <Route path="player" element={<PlayerRoute />} />
+          <Route path="saveload" element={<SaveLoadRoute />} />
+          <Route path="config" element={<ConfigRoute />} />
+          <Route path="locs" element={<LocsRoute />} />
+          <Route path="chars" element={<CharsRoute />} />
+          <Route path="scripts" element={<ScriptsRoute />} />
+          <Route path="facts" element={<FactsRoute />} />
+          <Route path="items" element={<ItemsRoute />} />
+          <Route path="ui" element={<UiRoute />} />
+          <Route path="pac" element={<PacRoute />} />
+        </Route>
+      </Routes>
+    </CustomProvider>
   );
 }

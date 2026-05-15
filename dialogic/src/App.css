@@ -311,6 +311,83 @@ div.text-field-editor {
   animation-duration: 0.22s !important;
 }
 
+/* Home page */
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #1a1d24;
+  padding: 0 16px 40px;
+}
+
+.home-hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+}
+
+.home-title {
+  font-family: 'HeaderFont', sans-serif;
+  font-size: 36pt;
+  margin: 0 0 8px;
+  text-shadow: 1px 1px 16px rgba(0,0,0,0.8);
+}
+
+.home-subtitle {
+  font-size: 13pt;
+  color: #aaa;
+  margin: 0;
+}
+
+.home-content {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.home-new-btn {
+  width: 100%;
+}
+
+.home-section-label {
+  font-size: 11pt;
+  color: #888;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.home-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.home-project-card {
+  width: 100%;
+}
+
+.home-project-name {
+  font-size: 13pt;
+  font-weight: 500;
+}
+
+.home-project-title {
+  display: block;
+  font-size: 10pt;
+  color: #888;
+  margin-top: 2px;
+}
+
+.home-empty {
+  width: 100%;
+  color: #666;
+  text-align: center;
+}
+
 /* Backdrop fade: match the smoothed timing */
 .rs-modal-backdrop.rs-anim-fade,
 .rs-drawer-backdrop.rs-anim-fade {

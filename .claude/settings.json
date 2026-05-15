@@ -22,7 +22,9 @@
       "Skill(frontend:*)",
       "Bash(npx eslint *)",
       "Bash(python3 -m json.tool)",
-      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/ai-integration)"
+      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/ai-integration)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)"
     ],
     "additionalDirectories": [
       "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"
