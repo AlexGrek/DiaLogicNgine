@@ -4,6 +4,7 @@ import { Input, InputGroup, Nav } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
 import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
+import LlmTextarea from '../LlmTextarea';
 
 interface TextListEditorProps {
     textList: TextList;
@@ -99,7 +100,7 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
     }
 
     const editor =
-        <Input className='text-list-text-editor' as="textarea" value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5} ref={textFieldRef}></Input>
+        <LlmTextarea className='text-list-text-editor' value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5} ref={textFieldRef} />
 
     return (
         <div>

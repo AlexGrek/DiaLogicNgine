@@ -142,3 +142,62 @@ async def generate_dialog(req: GenerateDialogRequest) -> list[dict]:
         )
 
     return windows
+
+
+# ---------------------------------------------------------------------------
+# Generate free-form text from a prompt
+# ---------------------------------------------------------------------------
+
+_DEFAULT_TEXT_SYSTEM_PROMPT = """\
+You are a creative writing assistant for a visual novel game.
+Write text based on the user's description.
+Be concise and evocative. Return only the text with no preamble or explanation.\
+"""
+
+
+class GenerateTextRequest(BaseModel):
+    capability: str
+    prompt: str
+    system_prompt: str = ""
+
+
+@router.post("/generate-text")
+async def generate_text(req: GenerateTextRequest) -> dict:
+    """Submit an urgent LLM task and return generated free-form text."""
+    _check_config()
+
+    model = req.capability.removeprefix("llm.")
+    system_content = req.system_prompt.strip() or _DEFAULT_TEXT_SYSTEM_PROMPT
+    payload = {
+        "model": model,
+        "stream": False,
+        "messages": [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": req.prompt},
+        ],
+    }
+
+    async with httpx.AsyncClient(timeout=120) as client:
+        r = await client.post(
+            f"{OFFLOADMQ_URL}/api/task/submit_blocking",
+            json={
+                "capability": req.capability,
+                "urgent": True,
+                "restartable": False,
+                "payload": payload,
+                "apiKey": OFFLOADMQ_API_KEY,
+            },
+        )
+
+    if r.status_code != 200:
+        raise HTTPException(status_code=r.status_code, detail=r.text)
+
+    data = r.json()
+    result = data.get("result") or data.get("output") or {}
+    message = result.get("message", {})
+    content = message.get("content", "")
+
+    if not content:
+        raise HTTPException(status_code=502, detail="LLM returned empty response")
+
+    return {"text": content.strip()}
