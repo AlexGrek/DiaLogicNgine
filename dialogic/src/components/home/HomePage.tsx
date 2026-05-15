@@ -1,27 +1,56 @@
-import React, { useState } from 'react';
-import { Button, Panel, Stack } from 'rsuite';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Input, InputGroup, Loader, Panel, Stack } from 'rsuite';
 import { useNavigate } from 'react-router-dom';
-import { SaveLoadManager } from '../../SaveLoadManager';
-import { GameDescription } from '../../game/GameDescription';
-import { KeyValuePair } from '../../Utils';
+import { GameDescription, createDefaultGame } from '../../game/GameDescription';
+import { listServerProjects, loadProjectFromServer, saveProjectToServer } from '../../api/projectsApi';
 
 interface HomePageProps {
-  onOpenProject: (game: GameDescription) => void;
+  onOpenProject: (game: GameDescription, name: string) => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
   const navigate = useNavigate();
-  const [projects] = useState<KeyValuePair<string, GameDescription>[]>(
-    () => new SaveLoadManager().listGameDescr()
-  );
+  const [serverProjects, setServerProjects] = useState<string[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [newName, setNewName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [openingName, setOpeningName] = useState<string | null>(null);
 
-  const handleOpen = (name: string) => {
-    const game = new SaveLoadManager().loadGameDescr(name);
-    if (game) {
-      onOpenProject(game);
+  const refreshList = useCallback(() => {
+    setLoadingList(true);
+    listServerProjects()
+      .then(setServerProjects)
+      .catch(() => setServerProjects([]))
+      .finally(() => setLoadingList(false));
+  }, []);
+
+  useEffect(() => { refreshList(); }, [refreshList]);
+
+  const handleCreate = useCallback(async () => {
+    const name = newName.trim();
+    if (!name) return;
+    setCreating(true);
+    try {
+      const game = createDefaultGame();
+      game.general.name = name;
+      await saveProjectToServer(name, game);
+      onOpenProject(game, name);
       navigate('/dialog');
+    } catch {
+      setCreating(false);
     }
-  };
+  }, [newName, onOpenProject, navigate]);
+
+  const handleOpen = useCallback(async (name: string) => {
+    setOpeningName(name);
+    try {
+      const game = await loadProjectFromServer(name);
+      onOpenProject(game, name);
+      navigate('/dialog');
+    } catch {
+      setOpeningName(null);
+    }
+  }, [onOpenProject, navigate]);
 
   return (
     <div className="home-page">
@@ -29,44 +58,57 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
         <p className="home-title">🇺🇦 DiaLogic Ngine</p>
         <p className="home-subtitle">Visual novel &amp; dialogue game editor</p>
       </div>
+
       <div className="home-content">
-        <Button
-          appearance="primary"
-          size="lg"
-          className="home-new-btn"
-          onClick={() => navigate('/dialog')}
-        >
-          + New Project
-        </Button>
+        <Panel bordered className="home-create-panel">
+          <p className="home-section-label">New project</p>
+          <InputGroup>
+            <Input
+              placeholder="Project name"
+              value={newName}
+              onChange={setNewName}
+              onPressEnter={handleCreate}
+              disabled={creating}
+            />
+            <InputGroup.Button
+              appearance="primary"
+              disabled={!newName.trim() || creating}
+              onClick={handleCreate}
+            >
+              {creating ? <Loader size="xs" /> : 'Create'}
+            </InputGroup.Button>
+          </InputGroup>
+        </Panel>
 
-        {projects.length > 0 && (
-          <div className="home-projects">
-            <p className="home-section-label">Saved projects</p>
-            <Stack direction="column" spacing={8}>
-              {projects.map((p) => (
-                <Panel key={p.key} bordered className="home-project-card">
-                  <Stack justifyContent="space-between" alignItems="center">
-                    <div>
-                      <span className="home-project-name">{p.key}</span>
-                      {p.value.general?.name && p.value.general.name !== p.key && (
-                        <span className="home-project-title">{p.value.general.name}</span>
-                      )}
-                    </div>
-                    <Button appearance="primary" onClick={() => handleOpen(p.key)}>
-                      Open
-                    </Button>
-                  </Stack>
-                </Panel>
-              ))}
-            </Stack>
-          </div>
-        )}
-
-        {projects.length === 0 && (
-          <Panel bordered className="home-empty">
-            <p>No saved projects yet. Create a new one to get started.</p>
-          </Panel>
-        )}
+        <div className="home-projects">
+          <p className="home-section-label">
+            Saved projects
+            {loadingList && <Loader size="xs" style={{ marginLeft: 8 }} />}
+          </p>
+          {!loadingList && serverProjects.length === 0 && (
+            <Panel bordered className="home-empty">
+              <p>No projects yet — create one above.</p>
+            </Panel>
+          )}
+          <Stack direction="column" spacing={8}>
+            {serverProjects.map((name) => (
+              <Panel key={name} bordered className="home-project-card">
+                <Stack justifyContent="space-between" alignItems="center">
+                  <span className="home-project-name">{name}</span>
+                  <Button
+                    appearance="primary"
+                    size="sm"
+                    loading={openingName === name}
+                    disabled={openingName !== null}
+                    onClick={() => handleOpen(name)}
+                  >
+                    Open
+                  </Button>
+                </Stack>
+              </Panel>
+            ))}
+          </Stack>
+        </div>
       </div>
     </div>
   );

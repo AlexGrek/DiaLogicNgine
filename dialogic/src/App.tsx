@@ -78,6 +78,8 @@ export type AppOutletContext = {
   setGame: React.Dispatch<React.SetStateAction<GameDescription>>;
   handleNotify: NotifyCallback;
   setActiveDialog: (id: string) => void;
+  projectName: string;
+  setProjectName: (name: string) => void;
 };
 
 // ---- Route components ----
@@ -104,14 +106,7 @@ function PlayerRoute() {
 }
 
 function SaveLoadRoute() {
-  const { game, setGame, handleNotify } = useOutletContext<AppOutletContext>();
-  return (
-    <SaveLoadMenu
-      onNotify={handleNotify}
-      onSetGame={setGame}
-      currentGame={game}
-    />
-  );
+  return <SaveLoadMenu />;
 }
 
 function ConfigRoute() {
@@ -191,9 +186,11 @@ function PacRoute() {
 interface AppLayoutProps {
   game: GameDescription;
   setGame: React.Dispatch<React.SetStateAction<GameDescription>>;
+  projectName: string;
+  setProjectName: (name: string) => void;
 }
 
-function AppLayout({ game, setGame }: AppLayoutProps) {
+function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProps) {
   const [activeDialog, setActiveDialog] = useState("1");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [copied, setCopied] = useState<CopiedObject | undefined>(undefined);
@@ -301,8 +298,8 @@ function AppLayout({ game, setGame }: AppLayoutProps) {
   );
 
   const outletContext: AppOutletContext = useMemo(
-    () => ({ game, updates, setGame, handleNotify, setActiveDialog }),
-    [game, updates, setGame, handleNotify]
+    () => ({ game, updates, setGame, handleNotify, setActiveDialog, projectName, setProjectName }),
+    [game, updates, setGame, handleNotify, projectName, setProjectName]
   );
 
   const lastNotification = notifications[notifications.length - 1];
@@ -339,12 +336,18 @@ function AppLayout({ game, setGame }: AppLayoutProps) {
 
 export default function App() {
   const [game, setGame] = useState<GameDescription>(createDefaultGame);
+  const [projectName, setProjectName] = useState<string>("");
+
+  const handleOpenProject = useCallback((g: GameDescription, name: string) => {
+    setGame(g);
+    setProjectName(name);
+  }, []);
 
   return (
     <CustomProvider theme="dark">
       <Routes>
-        <Route path="/" element={<HomePage onOpenProject={setGame} />} />
-        <Route element={<AppLayout game={game} setGame={setGame} />}>
+        <Route path="/" element={<HomePage onOpenProject={handleOpenProject} />} />
+        <Route element={<AppLayout game={game} setGame={setGame} projectName={projectName} setProjectName={setProjectName} />}>
           <Route path="dialog" element={<DialogRoute />} />
           <Route path="dialog/:dialogId" element={<DialogRoute />} />
           <Route path="player" element={<PlayerRoute />} />

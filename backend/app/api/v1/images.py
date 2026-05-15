@@ -40,14 +40,6 @@ def _make_thumbnail(contents: bytes, dest: Path) -> None:
         img.save(dest, format=save_fmt)
 
 
-@router.get("/projects")
-async def list_projects():
-    projects_dir = (STORAGE_ROOT / "projects").resolve()
-    if not projects_dir.exists():
-        return {"projects": []}
-    return {"projects": [d.name for d in sorted(projects_dir.iterdir()) if d.is_dir()]}
-
-
 @router.put("/projects/{project_name}/images/{filename}")
 async def upload_image(project_name: str, filename: str, file: UploadFile):
     mime = file.content_type or mimetypes.guess_type(filename)[0] or ""

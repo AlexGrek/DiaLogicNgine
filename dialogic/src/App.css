@@ -388,6 +388,43 @@ div.text-field-editor {
   text-align: center;
 }
 
+/* Save/Load page */
+
+.saveload-page {
+  padding: 20px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.saveload-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.saveload-section {
+  width: 100%;
+}
+
+.saveload-project-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.saveload-project-row:last-child {
+  border-bottom: none;
+}
+
+.saveload-project-name {
+  font-size: 13pt;
+  display: flex;
+  align-items: center;
+}
+
 /* Backdrop fade: match the smoothed timing */
 .rs-modal-backdrop.rs-anim-fade,
 .rs-drawer-backdrop.rs-anim-fade {

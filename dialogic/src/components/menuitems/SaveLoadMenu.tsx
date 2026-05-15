@@ -1,157 +1,156 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Input, Panel, Radio, RadioGroup, Stack } from 'rsuite';
-import { ValueType } from 'rsuite/esm/Radio';
-import { SaveLoadManager } from '../../SaveLoadManager';
-import { trace } from '../../Trace';
-import { NotifyCallback } from '../../UiNotifications';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Divider, Input, InputGroup, Loader, Panel, Stack, Tag } from 'rsuite';
+import { useOutletContext } from 'react-router-dom';
+import { AppOutletContext } from '../../App';
 import { ENGINE_VERSION, GameDescription } from '../../game/GameDescription';
 import { loadJsonStringAndPatch } from '../../game/Patches';
-import PublicFileUrl from '../common/PublicFileUrl';
-import Note from '../userguide/Note';
-import SaveLoadJsonDrawer from './SaveLoadJsonDrawer';
+import { listServerProjects, loadProjectFromServer, saveProjectToServer } from '../../api/projectsApi';
 import DownloadAsJson from './saveload/DownloadAsJson';
 import UploadJson from './saveload/UploadJson';
 
-interface SaveLoadMenuProps {
-    currentGame: GameDescription;
-    onSetGame: (game: GameDescription) => void;
-    onNotify: NotifyCallback;
-}
+const SaveLoadMenu: React.FC = () => {
+  const { game, setGame, handleNotify, projectName, setProjectName } = useOutletContext<AppOutletContext>();
 
-const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onNotify }) => {
-    const [game, setGame] = useState<GameDescription>(currentGame);
-    const [name, setName] = useState<string>("");
-    const [jsonMode, setJsonMode] = useState<boolean>(false);
-    const [nameText, setNameText] = useState<string>("");
-    const [list, setList] = useState<string[]>([])
-    const [serverFile, setServerFile] = useState<string | undefined>(undefined)
+  const [serverProjects, setServerProjects] = useState<string[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [openingName, setOpeningName] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState(projectName);
 
-    const handleSetServerFile = (value: string | null) => {
-        setServerFile(value || undefined)
+  useEffect(() => { setNameInput(projectName); }, [projectName]);
+
+  const refreshList = useCallback(() => {
+    setLoadingList(true);
+    listServerProjects()
+      .then(setServerProjects)
+      .catch(() => setServerProjects([]))
+      .finally(() => setLoadingList(false));
+  }, []);
+
+  useEffect(() => { refreshList(); }, [refreshList]);
+
+  const handleSave = useCallback(async () => {
+    const name = nameInput.trim();
+    if (!name) return;
+    setSaving(true);
+    try {
+      await saveProjectToServer(name, game);
+      setProjectName(name);
+      handleNotify('success', `Saved "${name}"`, null);
+      refreshList();
+    } catch (e) {
+      handleNotify('error', `Save failed: ${e}`, null);
+    } finally {
+      setSaving(false);
     }
+  }, [nameInput, game, setProjectName, handleNotify, refreshList]);
 
-    useEffect(() => {
-        setGame(currentGame);
-    }, [currentGame]);
-
-    const updateSaves = () => {
-        const man = new SaveLoadManager()
-        setList(man.listGameNames())
-        trace("Update saves")
+  const handleLoad = useCallback(async (name: string) => {
+    setOpeningName(name);
+    try {
+      const loaded = await loadProjectFromServer(name);
+      setGame(loaded);
+      setProjectName(name);
+      setNameInput(name);
+      handleNotify('success', `Loaded "${name}"`, null);
+    } catch (e) {
+      handleNotify('error', `Load failed: ${e}`, null);
+    } finally {
+      setOpeningName(null);
     }
+  }, [setGame, setProjectName, handleNotify]);
 
-    useEffect(() => {
-        updateSaves()
-    }, [])
-
-    const onSave = () => {
-        const man = new SaveLoadManager()
-        man.saveGameDescr(nameText, game)
-        setName(nameText)
-        updateSaves()
-        onNotify("success", `Game saved to slot ${nameText}`, null)
+  const handleJsonUpload = useCallback((text: string) => {
+    try {
+      const parsed: GameDescription = loadJsonStringAndPatch(text, ENGINE_VERSION);
+      if (!('dialogs' in parsed && 'facts' in parsed)) {
+        handleNotify('error', 'Invalid game JSON', null);
+        return;
+      }
+      setGame(parsed);
+      handleNotify('success', 'Imported from JSON file', null);
+    } catch (e) {
+      handleNotify('error', `JSON parse error: ${e}`, null);
     }
+  }, [setGame, handleNotify]);
 
-    const onLoad = () => {
-        const man = new SaveLoadManager()
-        const descr = man.loadGameDescr(nameText)
-        setName(nameText)
-        if (descr)
-            loadJson(JSON.stringify(descr))
-    }
+  return (
+    <div className="saveload-page">
+      <h2 className="center-header">Save / Load</h2>
 
-    const onChooseToLoad = (newName: ValueType) => {
-        setName(`${newName}`)
-        setNameText(`${newName}`)
-    }
+      <div className="saveload-content">
+        {/* Current project */}
+        <Panel bordered className="saveload-section">
+          <p className="home-section-label">Current project</p>
+          <Stack spacing={8} alignItems="flex-end">
+            <InputGroup style={{ flex: 1 }}>
+              <InputGroup.Addon>Name</InputGroup.Addon>
+              <Input
+                value={nameInput}
+                onChange={setNameInput}
+                onPressEnter={handleSave}
+                placeholder="Enter project name…"
+              />
+            </InputGroup>
+            <Button
+              appearance="primary"
+              disabled={!nameInput.trim() || saving}
+              loading={saving}
+              onClick={handleSave}
+            >
+              Save to server
+            </Button>
+          </Stack>
+        </Panel>
 
-    const renderSavedGames = (games: string[]) => {
-        return games.map(el => {
-            return <Radio key={el} value={el}>{el}</Radio>
-        })
-    }
+        {/* Server projects */}
+        <Panel bordered className="saveload-section">
+          <Stack justifyContent="space-between" alignItems="center" style={{ marginBottom: 10 }}>
+            <p className="home-section-label" style={{ margin: 0 }}>Server projects</p>
+            <Button size="xs" appearance="subtle" onClick={refreshList} disabled={loadingList}>
+              {loadingList ? <Loader size="xs" /> : 'Refresh'}
+            </Button>
+          </Stack>
 
-    const loadJson = (text: string) => {
-        const isGameType = (game: any) => {
-            return "dialogs" in game &&
-                "facts" in game
-        }
-        try {
-            const parsed: GameDescription = loadJsonStringAndPatch(text, ENGINE_VERSION)
-            if (!isGameType(parsed)) {
-                onNotify("error", "Failed to parse JSON", null)
-                return;
-            }
-            setJsonMode(false)
-            onSetGame(parsed)
-            if (nameText === '') {
-                setNameText(parsed.general.name)
-            }
-        } catch (e) {
-            onNotify("error", `${e}`, "JSON parsing error")
-            return;
-        }
+          {!loadingList && serverProjects.length === 0 && (
+            <p style={{ color: '#666', fontSize: '0.9em' }}>No projects saved on server yet.</p>
+          )}
 
-    }
+          <Stack direction="column" spacing={6}>
+            {serverProjects.map((name) => (
+              <div key={name} className="saveload-project-row">
+                <span className="saveload-project-name">
+                  {name}
+                  {name === projectName && (
+                    <Tag size="sm" color="cyan" style={{ marginLeft: 8 }}>current</Tag>
+                  )}
+                </span>
+                <Button
+                  size="sm"
+                  appearance="ghost"
+                  loading={openingName === name}
+                  disabled={openingName !== null}
+                  onClick={() => handleLoad(name)}
+                >
+                  Load
+                </Button>
+              </div>
+            ))}
+          </Stack>
+        </Panel>
 
-    const jsonModeLoader = () => {
-        const close = () => setJsonMode(false)
-        return <SaveLoadJsonDrawer gameInput={game} visible={jsonMode} onClose={close} onJsonLoad={loadJson}></SaveLoadJsonDrawer>
-    }
-
-    const loadServerFile = (s: string | undefined) => {
-        if (s === undefined) {
-            return
-        }
-        const nameWithoutExt = s.replaceAll('.json', '')
-        setName(nameWithoutExt)
-        setNameText(nameWithoutExt)
-        const url = 'games/' + s
-        fetch(url).then(
-            res => res.json()
-        ).then(
-            json => {
-                loadJson(JSON.stringify(json))
-            }
-        )
-    }
-
-    const handleJsonUpload = (data: string) => {
-        loadJson(data)
-    }
-
-
-    return (
-        <div>
-            <h2 className='center-header'>Save/Load menu</h2>
-            <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"} />
-            <p>Name: <Input value={nameText} onChange={setNameText}></Input></p>
-            <Button disabled={nameText.length < 1} onClick={() => onSave()}>Save</Button>
-            <Button disabled={nameText.length < 1} onClick={() => onLoad()}>Load</Button>
-            <Button color="cyan" appearance="ghost" onClick={() => setJsonMode(true)}>JSON mode</Button>
-            <p>endgame.</p>
-            <Stack wrap justifyContent='space-between'>
-                <Panel>
-                    <p>Saved in local storage:</p>
-                    <RadioGroup value={name} onChange={(value, _) => onChooseToLoad(value)}>
-                        {renderSavedGames(list).reverse()}
-                    </RadioGroup>
-                </Panel>
-                <Panel id='server-file-loader' bordered>
-                    <p>Load server file:</p>
-                    <PublicFileUrl extensions={['json']} onChange={handleSetServerFile} requestUrl="games/list.json" />
-                    <Button id='load-server-file' disabled={serverFile === undefined} onClick={() => loadServerFile(serverFile)}>Load file</Button>
-                </Panel>
-                <Panel bordered>
-                    <p>Download game as JSON file</p>
-                    <DownloadAsJson data={game} filename={nameText}></DownloadAsJson>
-                    <p>Load JSON file</p>
-                    <UploadJson onUpload={handleJsonUpload}></UploadJson>
-                </Panel>
-            </Stack>
-            {jsonModeLoader()}
-        </div>
-    );
+        {/* Import / Export */}
+        <Panel bordered className="saveload-section">
+          <p className="home-section-label">Import / Export JSON</p>
+          <Stack spacing={12} alignItems="center">
+            <DownloadAsJson data={game} filename={`${nameInput || 'game'}.json`} />
+            <Divider vertical />
+            <UploadJson onUpload={handleJsonUpload} />
+          </Stack>
+        </Panel>
+      </div>
+    </div>
+  );
 };
 
 export default SaveLoadMenu;
