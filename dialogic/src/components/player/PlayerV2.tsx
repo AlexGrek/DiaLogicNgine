@@ -116,14 +116,9 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
         }
     }, [state, exec]);
 
-    const startNewGame = () => {
-        startedRef.current = true;
-        eventsRef.current.emit(BridgeEvents.HIDE_MAIN_MENU);
-    };
-
     useEffect(() => {
         const emitter = eventsRef.current;
-        const handler = () => { startNewGame(); };
+        const handler = () => { startedRef.current = true; };
         emitter.on(BridgeEvents.HIDE_MAIN_MENU, handler);
         return () => { emitter.off(BridgeEvents.HIDE_MAIN_MENU, handler); };
     }, []);
