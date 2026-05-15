@@ -301,6 +301,12 @@ type NotifyCallback = (type: NotificationType, text: string, header?: string | n
 
 ---
 
+## Styling conventions
+
+**Horizontal margins:** All items (list rows, cards, panels, form fields, etc.) are rendered without horizontal margins by default. When adding or editing any component, add appropriate horizontal margins (e.g., `style={{ marginLeft: 8, marginRight: 8 }}` or an rsuite spacing class) wherever elements would otherwise sit flush against container edges.
+
+---
+
 ## Key patterns
 
 **Always** use `useCallback` for handlers passed as props to avoid re-render cascades.

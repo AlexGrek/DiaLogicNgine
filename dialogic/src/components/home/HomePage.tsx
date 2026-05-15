@@ -81,7 +81,7 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
         </Panel>
 
         <div className="home-projects">
-          <p className="home-section-label">
+          <p className="home-section-label" style={{ marginLeft: 8 }}>
             Saved projects
             {loadingList && <Loader size="xs" style={{ marginLeft: 8 }} />}
           </p>

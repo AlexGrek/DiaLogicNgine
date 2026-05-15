@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import ConfirmationDialog from './ConfirmationDialog';
 import { Input, InputGroup, Nav, Sidenav } from 'rsuite';
 import { useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@rsuite/icons/legacy/Home';
@@ -28,6 +29,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [newDialogName, setNewDialogName] = useState<string>('');
+  const [confirmHome, setConfirmHome] = useState(false);
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const activeSection = pathSegments[0] ?? 'home';
@@ -80,7 +82,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
             <Nav.Item
               eventKey="home"
               icon={<HomeIcon />}
-              onClick={() => navigate('/')}
+              onClick={() => setConfirmHome(true)}
             >
               Home
             </Nav.Item>
@@ -189,6 +191,14 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
           </Nav>
         </Sidenav.Body>
       </Sidenav>
+      {confirmHome && (
+        <ConfirmationDialog
+          header="Go to Home?"
+          text="Any unsaved changes will be lost. Go to the home page?"
+          onConfirm={() => { setConfirmHome(false); navigate('/'); }}
+          onClose={() => setConfirmHome(false)}
+        />
+      )}
     </div>
   );
 };

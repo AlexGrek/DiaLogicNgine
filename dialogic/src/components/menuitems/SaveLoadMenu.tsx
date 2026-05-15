@@ -5,6 +5,7 @@ import { AppOutletContext } from '../../App';
 import { ENGINE_VERSION, GameDescription } from '../../game/GameDescription';
 import { loadJsonStringAndPatch } from '../../game/Patches';
 import { listServerProjects, loadProjectFromServer, saveProjectToServer } from '../../api/projectsApi';
+import { SaveLoadManager } from '../../SaveLoadManager';
 import DownloadAsJson from './saveload/DownloadAsJson';
 import UploadJson from './saveload/UploadJson';
 
@@ -12,6 +13,7 @@ const SaveLoadMenu: React.FC = () => {
   const { game, setGame, handleNotify, projectName, setProjectName } = useOutletContext<AppOutletContext>();
 
   const [serverProjects, setServerProjects] = useState<string[]>([]);
+  const [localProjects, setLocalProjects] = useState<string[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [saving, setSaving] = useState(false);
   const [openingName, setOpeningName] = useState<string | null>(null);
@@ -21,6 +23,7 @@ const SaveLoadMenu: React.FC = () => {
 
   const refreshList = useCallback(() => {
     setLoadingList(true);
+    setLocalProjects(new SaveLoadManager().listGameNames());
     listServerProjects()
       .then(setServerProjects)
       .catch(() => setServerProjects([]))
@@ -57,6 +60,20 @@ const SaveLoadMenu: React.FC = () => {
       handleNotify('error', `Load failed: ${e}`, null);
     } finally {
       setOpeningName(null);
+    }
+  }, [setGame, setProjectName, handleNotify]);
+
+  const handleLoadLocal = useCallback((name: string) => {
+    const descr = new SaveLoadManager().loadGameDescr(name);
+    if (!descr) return;
+    try {
+      const loaded: GameDescription = loadJsonStringAndPatch(JSON.stringify(descr), ENGINE_VERSION);
+      setGame(loaded);
+      setProjectName(name);
+      setNameInput(name);
+      handleNotify('success', `Loaded "${name}" from local storage`, null);
+    } catch (e) {
+      handleNotify('error', `Local load failed: ${e}`, null);
     }
   }, [setGame, setProjectName, handleNotify]);
 
@@ -138,6 +155,31 @@ const SaveLoadMenu: React.FC = () => {
             ))}
           </Stack>
         </Panel>
+
+        {/* Local storage (read-only, backwards compat) */}
+        {localProjects.length > 0 && (
+          <Panel bordered className="saveload-section">
+            <Stack justifyContent="space-between" alignItems="center" style={{ marginBottom: 10 }}>
+              <p className="home-section-label" style={{ margin: 0 }}>Local saves</p>
+              <Tag size="sm" color="yellow">read-only</Tag>
+            </Stack>
+            <Stack direction="column" spacing={6}>
+              {localProjects.map((name) => (
+                <div key={name} className="saveload-project-row">
+                  <span className="saveload-project-name">{name}</span>
+                  <Button
+                    size="sm"
+                    appearance="ghost"
+                    disabled={openingName !== null}
+                    onClick={() => handleLoadLocal(name)}
+                  >
+                    Load
+                  </Button>
+                </div>
+              ))}
+            </Stack>
+          </Panel>
+        )}
 
         {/* Import / Export */}
         <Panel bordered className="saveload-section">
