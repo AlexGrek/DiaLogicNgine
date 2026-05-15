@@ -25,7 +25,7 @@ const SaveLoadMenu: React.FC = () => {
     setLoadingList(true);
     setLocalProjects(new SaveLoadManager().listGameNames());
     listServerProjects()
-      .then(setServerProjects)
+      .then((data) => setServerProjects(data.projects.map((p) => p.name)))
       .catch(() => setServerProjects([]))
       .finally(() => setLoadingList(false));
   }, []);

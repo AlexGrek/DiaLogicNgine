@@ -322,3 +322,5 @@ type NotifyCallback = (type: NotificationType, text: string, header?: string | n
 2. Add a route function in `App.tsx` that calls `useOutletContext<AppOutletContext>()`
 3. Add a `<Route path="<key>" element={<NewRoute />} />` inside `AppLayout`'s `<Route>`
 4. Add a `Nav.Item` + `onClick={() => navigate('/<key>')}` in `SidePanel.tsx`
+
+Always add data-testids to new components for testing purposes.

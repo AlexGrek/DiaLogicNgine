@@ -111,6 +111,14 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
               Play
             </Nav.Item>
 
+            <Nav.Item
+              eventKey="playerv2"
+              icon={<PlayOutlineIcon />}
+              onClick={() => navigate('/playerv2')}
+            >
+              Play (Phaser)
+            </Nav.Item>
+
             <Nav.Menu eventKey="4" title="Dialogs" icon={<MagicIcon />}>
               <Nav.Item className="side-panel-dialog-create">
                 <InputGroup>

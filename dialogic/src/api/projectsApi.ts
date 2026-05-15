@@ -3,11 +3,29 @@ import { loadJsonStringAndPatch } from '../game/Patches';
 
 const BASE = '/api/v1';
 
-export async function listServerProjects(): Promise<string[]> {
-  const res = await fetch(`${BASE}/projects`);
+export interface ProjectMeta {
+  name: string;
+  displayName?: string;
+  authors?: string[];
+  description?: string;
+  version?: string;
+  mainImageUrl?: string | null;
+  dialogCount?: number;
+  characterCount?: number;
+  locationCount?: number;
+}
+
+export interface ProjectsPage {
+  projects: ProjectMeta[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export async function listServerProjects(page = 1): Promise<ProjectsPage> {
+  const res = await fetch(`${BASE}/projects?page=${page}`);
   if (!res.ok) throw new Error(`Failed to list projects: ${res.status}`);
-  const data = await res.json();
-  return data.projects as string[];
+  return res.json();
 }
 
 export async function saveProjectToServer(name: string, game: GameDescription): Promise<void> {
