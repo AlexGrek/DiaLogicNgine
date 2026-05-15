@@ -38,19 +38,26 @@ export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge
 
     const game = new Phaser.Game(config);
 
+    let destroyed = false;
+    const pendingTimeouts = new Set<number>();
+    const scheduleTimeout = (fn: () => void, ms: number) => {
+        const id = window.setTimeout(() => {
+            pendingTimeouts.delete(id);
+            if (destroyed) return;
+            fn();
+        }, ms);
+        pendingTimeouts.add(id);
+        return id;
+    };
+
     const resizeToParent = () => {
+        if (destroyed) return;
+        // Scale manager is destroyed asynchronously; snapTo is nulled on destroy.
+        if (!game.scale || !(game.scale as unknown as { snapTo?: unknown }).snapTo) return;
         const cssW = Math.max(parent.clientWidth || 0, 1);
         const cssH = Math.max(parent.clientHeight || 0, 1);
         game.scale.resize(cssW, cssH);
     };
-
-    let ro: ResizeObserver | null = null;
-    const onWindowResize = () => resizeToParent();
-    if (typeof ResizeObserver !== 'undefined') {
-        ro = new ResizeObserver(() => resizeToParent());
-        ro.observe(parent);
-    }
-    window.addEventListener('resize', onWindowResize);
 
     const sceneDefs: { key: string; ctor: new () => Phaser.Scene }[] = [
         { key: BG_SCENE, ctor: BackgroundScene },
@@ -65,19 +72,22 @@ export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge
     });
 
     game.events.once(Phaser.Core.Events.READY, () => {
+        if (destroyed) return;
         sceneDefs.forEach(({ key }) => {
             game.scene.start(key, { bridge });
         });
-        resizeToParent();
-        setTimeout(resizeToParent, 50);
+        // Phaser.Scale.RESIZE mode auto-tracks the parent; just kick once
+        // after boot in case the parent's initial layout settled late.
+        scheduleTimeout(resizeToParent, 50);
     });
 
     return {
         game,
         destroy: () => {
+            destroyed = true;
+            pendingTimeouts.forEach((id) => window.clearTimeout(id));
+            pendingTimeouts.clear();
             try {
-                if (ro) ro.disconnect();
-                window.removeEventListener('resize', onWindowResize);
                 game.destroy(true, false);
             } catch { /* noop */ }
         },
