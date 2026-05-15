@@ -13,20 +13,20 @@ import ChainEditor from "./chain/ChainEditor";
 export interface DialogHandlers {
     createDialogWindowHandler: (window: DialogWindow) => void;
     openAnotherWindowHandler: (window: DialogWindow) => void;
+    windowChosenHandler: (window: DialogWindow) => void;
+    closeWindowEditorHandler: () => void;
 }
 
 export interface IDialogEditorProps {
   dialog?: Dialog;
   handlers: IUpds;
   game: GameDescription;
-  visible: boolean;
 }
 
 const DialogEditor: React.FC<IDialogEditorProps> = ({
   dialog,
   handlers,
   game,
-  visible,
 }) => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingWindow, setEditingWindow] = useState<DialogWindow | undefined>(
@@ -102,18 +102,16 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
 
   return (
     <div ref={itemRef}>
-      {visible && (
-        <div className="window-editor-tools">
-          <CreateWindowButton createHandler={createDialogWindowHandler} />
-          <IconButton
-            icon={<PushMessageIcon />}
-            placement="left"
-            onClick={() => setChainOpen(true)}
-          >
-            Chain
-          </IconButton>
-        </div>
-      )}
+      <div className="window-editor-tools">
+        <CreateWindowButton createHandler={createDialogWindowHandler} />
+        <IconButton
+          icon={<PushMessageIcon />}
+          placement="left"
+          onClick={() => setChainOpen(true)}
+        >
+          Chain
+        </IconButton>
+      </div>
       <div className="window-editor-windows-container">
         {renderWindows(dialog.windows, dialog)}
       </div>

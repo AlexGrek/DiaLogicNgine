@@ -3,7 +3,6 @@ import { GameDescription } from '../../game/GameDescription';
 import beautify from 'json-beautify-fix';
 import { Button, Drawer, Input } from 'rsuite';
 import copy from 'copy-to-clipboard';
-import { NotifyCallback } from '../../UiNotifications';
 
 
 interface SaveLoadJsonDrawerProps {

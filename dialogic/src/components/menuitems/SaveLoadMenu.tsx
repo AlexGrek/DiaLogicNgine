@@ -16,10 +16,9 @@ interface SaveLoadMenuProps {
     currentGame: GameDescription;
     onSetGame: (game: GameDescription) => void;
     onNotify: NotifyCallback;
-    visible: boolean
 }
 
-const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onNotify, visible }) => {
+const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onNotify }) => {
     const [game, setGame] = useState<GameDescription>(currentGame);
     const [name, setName] = useState<string>("");
     const [jsonMode, setJsonMode] = useState<boolean>(false);
@@ -121,8 +120,6 @@ const SaveLoadMenu: React.FC<SaveLoadMenuProps> = ({ currentGame, onSetGame, onN
         loadJson(data)
     }
 
-    if (!visible)
-        return <div />
 
     return (
         <div>

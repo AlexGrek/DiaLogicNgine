@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { CheckPicker, Col, Grid, IconButton, Input, Row } from 'rsuite';
-import { isValidJsIdentifier } from '../../../Utils';
+import { CheckPicker, Col, Grid, IconButton, Row } from 'rsuite';
 import { GameDescription } from '../../../game/GameDescription';
 import { Item, createEmptyItem } from '../../../game/Items';
 import StringListEditor from '../../common/StringListEditor';
@@ -17,17 +16,12 @@ interface EventsEditorTabProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void
     handlers: IUpds
-    visible: boolean
 }
 
-const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, handlers, visible }) => {
+const EventsEditorTab: React.FC<EventsEditorTabProps> = ({ game, onSetGame, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<GameEvent | null>(null)
     const [filterByTargets, setFilterByTargets] = useState<string[]>([])
-
-    if (!visible) {
-        return <div/>
-    }
 
     const predefinedHosts = [
         ...game.locs.map(loc => getLocEventHostName(loc)).filter(el => el !== null),

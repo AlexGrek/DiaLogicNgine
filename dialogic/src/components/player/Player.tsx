@@ -12,10 +12,9 @@ import "./player.css";
 interface PlayerProps {
     game: GameDescription;
     handlers?: IUpds;
-    visible: boolean
 }
 
-const Player: React.FC<PlayerProps> = ({ game, visible }) => {
+const Player: React.FC<PlayerProps> = ({ game }) => {
     const [gamedscr, setGame] = useState<GameDescription>(game);
     const [gameExecutor, setGameExecutor] = useState<GameExecManager>(new GameExecManager(game));
     const [gameState, setGameState] = useState<State>(createInitialState(game))
@@ -32,7 +31,7 @@ const Player: React.FC<PlayerProps> = ({ game, visible }) => {
         setGameState(s)
     }
 
-    return !visible ? <p></p> : (
+    return (
         <div className='player-window'>
             <div className='player-top-panel'>
                 <ButtonGroup className='player-controls'>

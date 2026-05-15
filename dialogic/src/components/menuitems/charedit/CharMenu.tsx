@@ -1,5 +1,4 @@
 import UserBadgeIcon from '@rsuite/icons/UserBadge';
-import diff from 'deep-diff';
 import lodash from 'lodash';
 import React, { useState } from 'react';
 import { Nav } from 'rsuite';
@@ -68,8 +67,6 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
 
     const setCharacter = (i: number, value: Character) => {
         const copy = lodash.cloneDeep(game.chars)
-        diff(copy[i], value)
-        // console.log(`upd char from ${JSON.stringify(copy[i])} to ${JSON.stringify(value)}, diff: ${JSON.stringify(difference)}`)
         copy[i] = value
         updateCharacterList(copy)
     }

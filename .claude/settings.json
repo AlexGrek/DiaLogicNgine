@@ -13,7 +13,14 @@
       "Bash(task --version)",
       "Bash(task --list)",
       "Bash(npx tsc:*)",
-      "Bash(npm search:*)"
+      "Bash(npm search:*)",
+      "Bash(npx vite *)",
+      "Bash(xargs cat)",
+      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/frontend)",
+      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/game_engine)"
+    ],
+    "additionalDirectories": [
+      "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"
     ]
   }
 }

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Input, InputGroup, Nav, Sidenav } from 'rsuite';
+import { useLocation, useNavigate } from 'react-router-dom';
 import MagicIcon from '@rsuite/icons/legacy/Magic';
 import { GameDescription } from '../game/GameDescription';
 import Dialog, { createDialog } from '../game/Dialog';
@@ -19,26 +20,22 @@ import Icon from '@rsuite/icons/lib/Icon';
 
 export interface ISidePanelProps {
   game: GameDescription;
-  activeDialog?: string;
-  onDialogChange: (s: string) => void;
   handlers: IUpds;
-  onMenuSwitch: (s: string) => void;
-  activeMenu: string;
 }
 
-/**
- * Modern, memoized SidePanel that preserves original layout & styling.
- * See original file for behavior reference: :contentReference[oaicite:1]{index=1}
- */
-const SidePanel: React.FC<ISidePanelProps> = ({
-  game,
-  activeDialog,
-  onDialogChange,
-  handlers,
-  onMenuSwitch,
-  activeMenu,
-}) => {
+const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [newDialogName, setNewDialogName] = useState<string>('');
+
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const activeSection = pathSegments[0] ?? 'dialog';
+  const activeDialogFromUrl = activeSection === 'dialog' ? decodeURIComponent(pathSegments[1] ?? '') : '';
+
+  const activeKey = useMemo(() => {
+    if (activeSection === 'dialog' && activeDialogFromUrl) return activeDialogFromUrl;
+    return activeSection;
+  }, [activeSection, activeDialogFromUrl]);
 
   const handleCreateDialog = useCallback(() => {
     const name = newDialogName.trim();
@@ -46,23 +43,12 @@ const SidePanel: React.FC<ISidePanelProps> = ({
     setNewDialogName('');
     const dialog = createDialog(name);
     handlers.handleDialogCreate(dialog);
-    // navigate user to dialogs (keeps UX consistent)
-    onMenuSwitch('dialog');
-    onDialogChange(dialog.name);
-  }, [newDialogName, handlers, onDialogChange, onMenuSwitch]);
+    navigate(`/dialog/${encodeURIComponent(dialog.name)}`);
+  }, [newDialogName, handlers, navigate]);
 
   const handleInputChange = useCallback((value: string) => {
     setNewDialogName(value);
   }, []);
-
-  const handleDialogClick = useCallback(
-    (name: string) => {
-      onDialogChange(name);
-      // ensure menu is switched to dialog view
-      onMenuSwitch('dialog');
-    },
-    [onDialogChange, onMenuSwitch]
-  );
 
   const dialogsList = useMemo(
     () =>
@@ -72,23 +58,17 @@ const SidePanel: React.FC<ISidePanelProps> = ({
           eventKey={d.name}
           title={d.name}
           key={d.name}
-          active={activeMenu === 'dialog' && activeDialog === d.name}
+          active={activeSection === 'dialog' && activeDialogFromUrl === d.name}
           onClick={(e) => {
             e.preventDefault();
-            handleDialogClick(d.name);
+            navigate(`/dialog/${encodeURIComponent(d.name)}`);
           }}
         >
           {d.name}
         </Nav.Item>
       )),
-    [game.dialogs, handleDialogClick, activeDialog, activeMenu]
+    [game.dialogs, navigate, activeSection, activeDialogFromUrl]
   );
-
-  // preserve original activeKey behaviour:
-  let activeKey: string | undefined = activeMenu;
-  if (activeMenu === 'dialog' && activeDialog) {
-    activeKey = activeDialog;
-  }
 
   return (
     <div className="main-sidebar" style={{ width: 240 }}>
@@ -98,7 +78,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="saveload"
               icon={<AttachmentIcon />}
-              onClick={() => onMenuSwitch('saveload')}
+              onClick={() => navigate('/saveload')}
             >
               Save / Load
             </Nav.Item>
@@ -106,7 +86,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="config"
               icon={<SettingHorizontalIcon />}
-              onClick={() => onMenuSwitch('config')}
+              onClick={() => navigate('/config')}
             >
               Game properties
             </Nav.Item>
@@ -114,7 +94,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="player"
               icon={<PlayOutlineIcon />}
-              onClick={() => onMenuSwitch('player')}
+              onClick={() => navigate('/player')}
             >
               Play
             </Nav.Item>
@@ -144,7 +124,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="scripts"
               icon={<ToolsIcon />}
-              onClick={() => onMenuSwitch('scripts')}
+              onClick={() => navigate('/scripts')}
             >
               Scripts
             </Nav.Item>
@@ -152,7 +132,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="chars"
               icon={<IdMappingIcon />}
-              onClick={() => onMenuSwitch('chars')}
+              onClick={() => navigate('/chars')}
             >
               Characters
             </Nav.Item>
@@ -160,7 +140,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="locs"
               icon={<ExploreIcon />}
-              onClick={() => onMenuSwitch('locs')}
+              onClick={() => navigate('/locs')}
             >
               Locations
             </Nav.Item>
@@ -168,7 +148,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="facts"
               icon={<FunnelTimeIcon />}
-              onClick={() => onMenuSwitch('facts')}
+              onClick={() => navigate('/facts')}
             >
               Facts & Objectives
             </Nav.Item>
@@ -176,7 +156,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="items"
               icon={<DeviceOtherIcon />}
-              onClick={() => onMenuSwitch('items')}
+              onClick={() => navigate('/items')}
             >
               Items
             </Nav.Item>
@@ -184,16 +164,15 @@ const SidePanel: React.FC<ISidePanelProps> = ({
             <Nav.Item
               eventKey="ui"
               icon={<TreemapIcon />}
-              onClick={() => onMenuSwitch('ui')}
+              onClick={() => navigate('/ui')}
             >
               UI Elements
             </Nav.Item>
 
-            {/* NOTE: App previously used "poc" as the menu key. If you want to keep the original SidePanel key ("pac"), change this eventKey back. */}
             <Nav.Item
               eventKey="pac"
               icon={<Icon as={() => <SquareDashedMousePointer />} />}
-              onClick={() => onMenuSwitch('pac')}
+              onClick={() => navigate('/pac')}
             >
               Point And Click
             </Nav.Item>

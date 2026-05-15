@@ -1,6 +1,21 @@
 version: '3'
 
+vars:
+  RELEASE: dialogic
+  NAMESPACE: dialogic
+  CHART: ./helm-chart
+  FRONTEND_DIR: ./dialogic
+  BACKEND_DIR: ./backend
+  IMAGE: grekodocker/dialogic-bundle
+  BUILDX_LOCAL_CACHE: ./.buildx-cache
+  BUILDX_LOCAL_CACHE_NEW: ./.buildx-cache-new
+  BUILDX_BUILDER: multiarch-builder
+  GIT_HASH:
+    sh: git rev-parse --short HEAD
+
 tasks:
+  # ── Dev environment ──────────────────────────────────────────────────────────
+
   dev:
     desc: Start backend and frontend dev servers concurrently
     deps: [backend, frontend]
@@ -14,3 +29,88 @@ tasks:
     desc: Start Vite frontend dev server
     dir: dialogic
     cmd: npm run dev
+
+  frontend:build:
+    desc: Build the frontend for production (output → dialogic/dist/)
+    dir: "{{.FRONTEND_DIR}}"
+    cmd: npm run build
+
+  frontend:install:
+    desc: Install frontend npm dependencies
+    dir: "{{.FRONTEND_DIR}}"
+    cmd: npm install
+
+  # ── Docker ───────────────────────────────────────────────────────────────────
+
+  docker:build:
+    desc: Build frontend (host), then build linux/amd64 image with local buildx cache
+    cmds:
+      - task: frontend:build
+      - mkdir -p {{.BUILDX_LOCAL_CACHE}}
+      - rm -rf {{.BUILDX_LOCAL_CACHE_NEW}}
+      - docker buildx build --builder {{.BUILDX_BUILDER}} --platform linux/amd64 --load
+          --cache-from=type=local,src={{.BUILDX_LOCAL_CACHE}}
+          --cache-to=type=local,dest={{.BUILDX_LOCAL_CACHE_NEW}},mode=max
+          -t {{.IMAGE}}:{{.GIT_HASH}} -t {{.IMAGE}}:latest .
+      - rm -rf {{.BUILDX_LOCAL_CACHE}} && mv {{.BUILDX_LOCAL_CACHE_NEW}} {{.BUILDX_LOCAL_CACHE}}
+
+  docker:release:
+    desc: Build frontend (host), then build + push linux/amd64 image
+    cmds:
+      - task: frontend:build
+      - mkdir -p {{.BUILDX_LOCAL_CACHE}}
+      - rm -rf {{.BUILDX_LOCAL_CACHE_NEW}}
+      - docker buildx build --builder {{.BUILDX_BUILDER}} --platform linux/amd64 --push
+          --cache-from=type=local,src={{.BUILDX_LOCAL_CACHE}}
+          --cache-to=type=local,dest={{.BUILDX_LOCAL_CACHE_NEW}},mode=max
+          -t {{.IMAGE}}:{{.GIT_HASH}} -t {{.IMAGE}}:latest .
+      - rm -rf {{.BUILDX_LOCAL_CACHE}} && mv {{.BUILDX_LOCAL_CACHE_NEW}} {{.BUILDX_LOCAL_CACHE}}
+
+  docker:k8s-secret:
+    desc: Create/refresh dockerhub-creds pull secret in the cluster from local Docker credentials
+    cmd: |
+      kubectl create secret generic dockerhub-creds \
+        --from-file=.dockerconfigjson=$HOME/.docker/config.json \
+        --type=kubernetes.io/dockerconfigjson \
+        --namespace={{.NAMESPACE}} \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+  # ── Helm / Kubernetes ────────────────────────────────────────────────────────
+
+  deploy:
+    desc: Install or upgrade the Helm release, pinned to current git hash
+    cmd: helm upgrade --install {{.RELEASE}} {{.CHART}} --namespace {{.NAMESPACE}} --create-namespace --set web.image.tag={{.GIT_HASH}}
+
+  ship:
+    desc: Build + push Docker image, then deploy to the cluster
+    cmds:
+      - task: docker:release
+      - task: deploy
+
+  uninstall:
+    desc: Uninstall the Helm release (keeps the namespace and PVC)
+    cmd: helm uninstall {{.RELEASE}} --namespace {{.NAMESPACE}}
+
+  lint:
+    desc: Lint the Helm chart
+    cmd: helm lint {{.CHART}}
+
+  template:
+    desc: Render Helm templates locally without deploying
+    cmd: helm template {{.RELEASE}} {{.CHART}} --namespace {{.NAMESPACE}}
+
+  status:
+    desc: Show Helm release status
+    cmd: helm status {{.RELEASE}} --namespace {{.NAMESPACE}}
+
+  diff:
+    desc: Show diff between deployed and local chart (requires helm-diff plugin)
+    cmd: helm diff upgrade {{.RELEASE}} {{.CHART}} --namespace {{.NAMESPACE}}
+
+  history:
+    desc: Show Helm release history
+    cmd: helm history {{.RELEASE}} --namespace {{.NAMESPACE}}
+
+  rollback:
+    desc: Rollback to previous revision
+    cmd: helm rollback {{.RELEASE}} --namespace {{.NAMESPACE}}

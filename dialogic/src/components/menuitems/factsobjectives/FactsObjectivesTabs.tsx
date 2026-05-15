@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import StaticTabs from '../../common/StaticTabs';
@@ -6,18 +6,17 @@ import FactsMenu from './FactsMenu';
 import QuestLineMenu from '../objectives/QuestLinesMenu';
 import './facts.css'
 
-interface CharEditorTabsProps {
+interface FactsObjectivesTabsProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
-    visible: boolean
 }
 
-const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handlers, visible }) => {
+const CharEditorTabs: React.FC<FactsObjectivesTabsProps> = ({ game, onSetGame, handlers }) => {
     const createFactsTab = () => {
         return {
             header: "Facts",
-            content: <FactsMenu visible={visible} game={game} onSetGame={onSetGame} handlers={handlers} />,
+            content: <FactsMenu game={game} onSetGame={onSetGame} handlers={handlers} />,
             disabled: false
         }
     }

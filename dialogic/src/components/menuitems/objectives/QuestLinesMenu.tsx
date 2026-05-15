@@ -17,7 +17,7 @@ interface QuestLineMenuProps {
     handlers: IUpds;
 }
 
-const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame, handlers: IUpds }) => {
+const QuestLineMenu: React.FC<QuestLineMenuProps> = ({ game, onSetGame }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
 
     const questlines = game.objectives

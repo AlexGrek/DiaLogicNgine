@@ -25,22 +25,16 @@ interface PropsEditMenuProps {
     onSetProps: (props: Prop[]) => void;
     handlers?: IUpds;
     creatable?: boolean
-    visible?: boolean
 }
 
-const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers, creatable, visible }) => {
+const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers, creatable }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
-    const [creatingNew, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
     const [createTypeChange, setCreateTypeChange] = useState<string>("none");
     const [createMenuOpen, setCreateMenuOpen] = useState<boolean>(false);
     useEffect(() => {
         setEditingIndex(editingIndex);
     }, [editingIndex, props]);
-
-    if (visible !== undefined && visible === false) {
-        return <div />
-    }
 
     const canCreate = creatable !== undefined ? creatable : true;
 
@@ -125,7 +119,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                 <InputGroup.Button onClick={createProp} disabled={createTypeChange === "none" || !isValidJsIdentifier(createName)}><PlusIcon /></InputGroup.Button>
             </InputGroup>
 
-            <RadioTileGroup defaultValue="blank" inline aria-label="Create new prop type" onChange={(val, ev) => setCreateTypeChange(val.toString())}>
+            <RadioTileGroup defaultValue="blank" inline aria-label="Create new prop type" onChange={(val) => setCreateTypeChange(val.toString())}>
                 <RadioTile
                     icon={<NumbersIcon></NumbersIcon>}
                     label="Number"

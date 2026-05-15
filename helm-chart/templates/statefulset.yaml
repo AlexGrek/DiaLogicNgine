@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dialogic-web
+spec:
+  serviceName: dialogic-web
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dialogic-web
+  template:
+    metadata:
+      labels:
+        app: dialogic-web
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-creds
+      containers:
+        - name: web
+          image: "{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.web.service.port }}
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: {{ .Values.web.service.port }}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 20
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: {{ .Values.web.service.port }}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: {{ .Values.web.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          env:
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: {{ .Values.web.service.port | quote }}
+            - name: STATIC_DIR
+              value: /app/static
+            {{- if and .Values.web.offloadmq.url .Values.web.offloadmq.apiKey }}
+            - name: OFFLOADMQ_URL
+              value: {{ .Values.web.offloadmq.url | quote }}
+            - name: OFFLOADMQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dialogic-secret
+                  key: offloadmq-api-key
+            {{- end }}
+          resources:
+{{ toYaml .Values.web.resources | indent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.web.storage.size }}
+        storageClassName: {{ if .Values.web.storage.storageClass }}{{ .Values.web.storage.storageClass | quote }}{{ else }}null{{ end }}

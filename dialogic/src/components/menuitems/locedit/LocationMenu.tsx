@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
-import { IUpds } from '../../../App';
 import Loc from '../../../game/Loc';
 import LocationPreview from './LocationPreview';
-import { Button, Notification } from 'rsuite';
+import { Button } from 'rsuite';
 import './loc.css'
 import LocEditor from './LocEditor';
 import { emptyImageList } from '../../../game/ImageList';
@@ -13,19 +12,13 @@ interface LocationMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
-    visible: boolean
 }
 
-const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame, handlers, visible }) => {
+const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
-    const [creatingNew, setCreatingNew] = useState<boolean>(false);
-    useEffect(() => {
+    React.useEffect(() => {
         setEditingIndex(editingIndex);
     }, [game]);
-
-    if (!visible) {
-        return <div/>
-    }
 
     const edit = (i: number) => {
         setEditingIndex(i)

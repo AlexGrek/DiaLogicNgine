@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Container,
   Content,
@@ -7,20 +7,20 @@ import {
   Header,
   Sidebar,
 } from "rsuite";
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useOutletContext,
+  useParams,
+} from "react-router-dom";
 import "./App.css";
 
 import SidePanel from "./components/SidePanel";
 import Dialog, { DialogWindow } from "./game/Dialog";
-import {
-  GameDescription,
-  createDefaultGame,
-} from "./game/GameDescription";
-
-import {
-  Notification,
-  NotificationType,
-  NotifyCallback,
-} from "./UiNotifications";
+import { GameDescription, createDefaultGame } from "./game/GameDescription";
+import { Notification, NotificationType, NotifyCallback } from "./UiNotifications";
 import DialogEditor from "./components/DialogEditor";
 import SaveLoadMenu from "./components/menuitems/SaveLoadMenu";
 import CharEditorTabs from "./components/menuitems/charedit/CharEditorTabs";
@@ -41,7 +41,7 @@ import PointAncClick from "./components/menuitems/pointandclick/PointAncClick";
 import { PointAndClick } from "./game/PointAndClick";
 
 export interface CopiedObject {
-  value: any;
+  value: unknown;
   typename: string;
 }
 
@@ -66,45 +66,145 @@ export interface IUpds {
   createProp: (prop: Prop) => void;
   createSituation: (situation: string) => void;
   notify: NotifyCallback;
-  copy: (obj: any, typename: string) => void;
+  copy: (obj: unknown, typename: string) => void;
   paste: () => CopiedObject | undefined;
   handleGameUpdate: (game: GameDescription) => void;
 }
 
-export default function App() {
+export type AppOutletContext = {
+  game: GameDescription;
+  updates: IUpds;
+  setGame: React.Dispatch<React.SetStateAction<GameDescription>>;
+  handleNotify: NotifyCallback;
+  setActiveDialog: (id: string) => void;
+};
+
+// ---- Route components ----
+
+function DialogRoute() {
+  const { dialogId } = useParams<{ dialogId: string }>();
+  const { game, updates, setActiveDialog } = useOutletContext<AppOutletContext>();
+
+  useEffect(() => {
+    if (dialogId) setActiveDialog(dialogId);
+  }, [dialogId, setActiveDialog]);
+
+  const dialog = useMemo(
+    () => game.dialogs.find((d) => d.name === dialogId),
+    [game.dialogs, dialogId]
+  );
+
+  return <DialogEditor game={game} handlers={updates} dialog={dialog} />;
+}
+
+function PlayerRoute() {
+  const { game, updates } = useOutletContext<AppOutletContext>();
+  return <Player game={game} handlers={updates} />;
+}
+
+function SaveLoadRoute() {
+  const { game, setGame, handleNotify } = useOutletContext<AppOutletContext>();
+  return (
+    <SaveLoadMenu
+      onNotify={handleNotify}
+      onSetGame={setGame}
+      currentGame={game}
+    />
+  );
+}
+
+function ConfigRoute() {
+  const { game, updates, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <ConfigurationMenu handlers={updates} onSetGame={setGame} game={game} />
+  );
+}
+
+function LocsRoute() {
+  const { game, updates, setGame } = useOutletContext<AppOutletContext>();
+  return <LocationMenu onSetGame={setGame} game={game} handlers={updates} />;
+}
+
+function CharsRoute() {
+  const { game, updates, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <CharEditorTabs onSetGame={setGame} game={game} handlers={updates} />
+  );
+}
+
+function ScriptsRoute() {
+  const { game, updates, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <ScriptEditMenu onSetGame={setGame} game={game} handlers={updates} />
+  );
+}
+
+function FactsRoute() {
+  const { game, updates, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <FactsObjectivesTabs onSetGame={setGame} game={game} handlers={updates} />
+  );
+}
+
+function ItemsRoute() {
+  const { game, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <ItemsMenu
+      items={game.items}
+      onSetItems={(items: Item[]) =>
+        setGame((prev) => ({ ...prev, items }))
+      }
+      game={game}
+    />
+  );
+}
+
+function UiRoute() {
+  const { game, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <UiElementsMenu
+      ui={game.uiElements}
+      onSetUi={(items: GameUiElementDescr) =>
+        setGame((prev) => ({ ...prev, uiElements: items }))
+      }
+      game={game}
+    />
+  );
+}
+
+function PacRoute() {
+  const { game, setGame } = useOutletContext<AppOutletContext>();
+  return (
+    <PointAncClick
+      items={game.pacWidgets}
+      onSetItems={(items: PointAndClick[]) =>
+        setGame((prev) => ({ ...prev, pacWidgets: items }))
+      }
+      game={game}
+    />
+  );
+}
+
+// ---- Layout ----
+
+function AppLayout() {
   const [activeDialog, setActiveDialog] = useState("1");
-  const [menu, setMenu] = useState("dialog");
   const [game, setGame] = useState<GameDescription>(createDefaultGame);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [copied, setCopied] = useState<CopiedObject | undefined>(undefined);
 
-  // ==== Handlers ====
-  const handleChangeDialog = useCallback((newDialog: string) => {
-    setActiveDialog(newDialog);
-    setMenu("dialog");
-  }, []);
-
-  const handleMenuSwitch = useCallback((newMenu: string) => {
-    setMenu(newMenu);
-  }, []);
-
   const handlePaste = useCallback(() => copied, [copied]);
 
-  const handleCopy = useCallback((obj: any, typename: string) => {
+  const handleCopy = useCallback((obj: unknown, typename: string) => {
     setCopied({ value: lodash.cloneDeep(obj), typename });
   }, []);
 
-  const handleDialogEdit = useCallback(
-    (dialog: Dialog) => {
-      setGame((prev) => ({
-        ...prev,
-        dialogs: prev.dialogs.map((d) =>
-          d.name === dialog.name ? dialog : d
-        ),
-      }));
-    },
-    []
-  );
+  const handleDialogEdit = useCallback((dialog: Dialog) => {
+    setGame((prev) => ({
+      ...prev,
+      dialogs: prev.dialogs.map((d) => (d.name === dialog.name ? dialog : d)),
+    }));
+  }, []);
 
   const handleDialogApplyChange = useCallback(
     (func: DialogWindowListUpdater, dialog_uid: string | null) => {
@@ -113,9 +213,7 @@ export default function App() {
         return {
           ...prev,
           dialogs: prev.dialogs.map((d) =>
-            d.name === uid
-              ? { ...d, windows: func(d.windows) }
-              : d
+            d.name === uid ? { ...d, windows: func(d.windows) } : d
           ),
         };
       });
@@ -150,16 +248,12 @@ export default function App() {
   }, []);
 
   const createSituation = useCallback((s: string) => {
-    setGame((prev) => ({
-      ...prev,
-      situations: [...prev.situations, s],
-    }));
+    setGame((prev) => ({ ...prev, situations: [...prev.situations, s] }));
   }, []);
 
   const handleNotify = useCallback(
     (type: NotificationType, text: string, header?: string | null) => {
-      const notif = new Notification(type, text, header);
-      setNotifications((prev) => [...prev, notif]);
+      setNotifications((prev) => [...prev, new Notification(type, text, header)]);
     },
     []
   );
@@ -199,107 +293,12 @@ export default function App() {
     ]
   );
 
-  const chosenDialog = useMemo(
-    () => game.dialogs.find((d) => d.name === activeDialog),
-    [game, activeDialog]
+  const outletContext: AppOutletContext = useMemo(
+    () => ({ game, updates, setGame, handleNotify, setActiveDialog }),
+    [game, updates, handleNotify]
   );
 
   const lastNotification = notifications[notifications.length - 1];
-
-  // ==== Content renderer ====
-  const renderContent = useCallback(() => (
-    <>
-      <div style={{ display: menu === "dialog" ? "block" : "none" }}>
-        <DialogEditor
-          visible={menu === "dialog"}
-          game={game}
-          handlers={updates}
-          dialog={chosenDialog}
-        />
-      </div>
-      <div style={{ display: menu === "player" ? "block" : "none" }}>
-        <Player visible={menu === "player"} game={game} handlers={updates} />
-      </div>
-      <div style={{ display: menu === "saveload" ? "block" : "none" }}>
-        <SaveLoadMenu
-          visible={menu === "saveload"}
-          onNotify={handleNotify}
-          onSetGame={setGame}
-          currentGame={game}
-        />
-      </div>
-      <div style={{ display: menu === "config" ? "block" : "none" }}>
-        <ConfigurationMenu
-          visible={menu === "config"}
-          handlers={updates}
-          onSetGame={setGame}
-          game={game}
-        />
-      </div>
-      <div style={{ display: menu === "locs" ? "block" : "none" }}>
-        <LocationMenu
-          visible={menu === "locs"}
-          onSetGame={setGame}
-          game={game}
-          handlers={updates}
-        />
-      </div>
-      <div style={{ display: menu === "chars" ? "block" : "none" }}>
-        <CharEditorTabs
-          visible={menu === "chars"}
-          onSetGame={setGame}
-          game={game}
-          handlers={updates}
-        />
-      </div>
-      <div style={{ display: menu === "scripts" ? "block" : "none" }}>
-        <ScriptEditMenu
-          visible={menu === "scripts"}
-          onSetGame={setGame}
-          game={game}
-          handlers={updates}
-        />
-      </div>
-      <div style={{ display: menu === "facts" ? "block" : "none" }}>
-        <FactsObjectivesTabs
-          visible={menu === "facts"}
-          onSetGame={setGame}
-          game={game}
-          handlers={updates}
-        />
-      </div>
-      <div style={{ display: menu === "items" ? "block" : "none" }}>
-        <ItemsMenu
-          visible={menu === "items"}
-          items={game.items}
-          onSetItems={(items: Item[]) =>
-            setGame((prev) => ({ ...prev, items }))
-          }
-          game={game}
-        />
-      </div>
-      <div style={{ display: menu === "ui" ? "block" : "none" }}>
-        <UiElementsMenu
-          visible={menu === "ui"}
-          ui={game.uiElements}
-          onSetUi={(items: GameUiElementDescr) =>
-            setGame((prev) => ({ ...prev, uiElements: items }))
-          }
-          game={game}
-        />
-      </div>
-      <div style={{ display: menu === "pac" ? "block" : "none" }}>
-        <PointAncClick
-          visible={menu === "pac"}
-          items={game.pacWidgets}
-          onSetItems={(items: PointAndClick[]) =>
-            setGame((prev) => ({ ...prev, pacWidgets: items }))
-          }
-          game={game}
-        />
-      </div>
-    </>
-  ), [menu, game, updates, chosenDialog, handleNotify]);
 
   return (
     <CustomProvider theme="dark">
@@ -310,19 +309,38 @@ export default function App() {
         </Header>
         <Container className="root-section">
           <Sidebar className="app-main-sidebar">
-            <SidePanel
-              game={game}
-              activeMenu={menu}
-              activeDialog={activeDialog}
-              onDialogChange={handleChangeDialog}
-              onMenuSwitch={handleMenuSwitch}
-              handlers={updates}
-            />
+            <SidePanel game={game} handlers={updates} />
           </Sidebar>
-          <Content className="content-container">{renderContent()}</Content>
+          <Content className="content-container">
+            <Outlet context={outletContext} />
+          </Content>
         </Container>
         <Footer>Footer</Footer>
       </Container>
     </CustomProvider>
+  );
+}
+
+// ---- App (router) ----
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<AppLayout />}>
+        <Route index element={<Navigate to="/dialog" replace />} />
+        <Route path="dialog" element={<DialogRoute />} />
+        <Route path="dialog/:dialogId" element={<DialogRoute />} />
+        <Route path="player" element={<PlayerRoute />} />
+        <Route path="saveload" element={<SaveLoadRoute />} />
+        <Route path="config" element={<ConfigRoute />} />
+        <Route path="locs" element={<LocsRoute />} />
+        <Route path="chars" element={<CharsRoute />} />
+        <Route path="scripts" element={<ScriptsRoute />} />
+        <Route path="facts" element={<FactsRoute />} />
+        <Route path="items" element={<ItemsRoute />} />
+        <Route path="ui" element={<UiRoute />} />
+        <Route path="pac" element={<PacRoute />} />
+      </Route>
+    </Routes>
   );
 }

@@ -14,7 +14,7 @@ interface QuestGeneratorProps {
     onCreateQuest: (q: Quest) => void
 }
 
-const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, game, onCreateQuest }) => {
+const QuestGenerator: React.FC<QuestGeneratorProps> = ({ questline, onCreateQuest }) => {
     const [questName, setQuestName] = useState<string>('')
     const [questId, setQuestId] = useState<string>('')
     const [questIdChanged, setQuestIdChanged] = useState<boolean>(false)

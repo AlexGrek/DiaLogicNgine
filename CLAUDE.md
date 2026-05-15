@@ -48,6 +48,8 @@ Notable types:
 
 ### `exec/` — Execution engine
 
+**→ Use the `game_engine` skill when working with these files.**
+
 `GameExecManager` orchestrates game execution, delegating to sub-processors:
 - `EventsProcessor` — fires game events
 - `DiscussionProcessor` — character discussion topics
@@ -64,6 +66,8 @@ Notable types:
 
 ### `components/` — React UI
 
+**→ Use the `frontend` skill when working with components, routing, or the IUpds state interface.**
+
 **Editor components** (`components/menuitems/`):
 - `DialogEditor` — main dialog graph editor
 - `charedit/` — character + role editor
@@ -76,6 +80,8 @@ Notable types:
 - `configuration/` — game config & general info
 
 **Player components** (`components/player/`): `Player.tsx` → `PlayerCore.tsx` → view components (`DialogWindowView`, `LocationView`, `CharDialogView`, `PacView`, etc.)
+
+→ **For player rendering architecture**, see the `game_engine` skill (it covers `Player.tsx`, `PlayerCore.tsx`, and the `GameExecManager` → `RenderView` flow).
 
 ### State management pattern
 

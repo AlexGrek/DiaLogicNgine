@@ -16,16 +16,11 @@ interface ItemsMenuProps {
     game: GameDescription;
     items: Item[]
     onSetItems: (items: Item[]) => void
-    visible: boolean
 }
 
-const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, visible }) => {
+const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<Item | null>(null);
-
-    if (!visible) {
-        return <div/>
-    }
 
     const setEditing = (index: number, object?: Item) => {
         setEditingIndex(index)

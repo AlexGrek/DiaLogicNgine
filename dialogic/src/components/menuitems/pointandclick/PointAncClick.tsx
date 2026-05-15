@@ -12,16 +12,11 @@ interface PacMenuProps {
     game: GameDescription;
     items: PointAndClick[]
     onSetItems: (items: PointAndClick[]) => void
-    visible: boolean
 }
 
-const PointAncClick: React.FC<PacMenuProps> = ({ game, items, onSetItems, visible }) => {
+const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<PointAndClick | null>(null);
-
-    if (!visible) {
-        return <div />
-    }
 
     const setEditingByIndex = (index: number) => {
         if (index >= items.length || index < 0) {

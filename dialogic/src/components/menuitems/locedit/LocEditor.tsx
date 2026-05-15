@@ -3,7 +3,7 @@ import Loc, { getLocEventHostName } from '../../../game/Loc';
 import { Button, CheckPicker, Checkbox, Col, Divider, Drawer, Grid, IconButton, Input, Panel, PanelGroup, Row } from 'rsuite';
 import ImagePicker from '../../common/ImagePicker';
 import LinksEditorPanel from '../../LinksEditorPanel';
-import { DialogLink, DialogWindow } from '../../../game/Dialog';
+import { DialogLink } from '../../../game/Dialog';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import TextListEditor from '../../common/text_list/TextListEditor';
@@ -216,7 +216,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                             {renderCodeEditButton("onEntryScript")}
                                         </Panel>
                                         <Panel header="Events">
-                                            <Checkbox checked={location.eventHosts !== null} onChange={(v, checked) => {
+                                            <Checkbox checked={location.eventHosts !== null} onChange={(_, checked) => {
                                                 if (!checked) {
                                                     setlocation({ ...location, eventHosts: null })
                                                 } else {

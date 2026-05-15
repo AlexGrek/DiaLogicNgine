@@ -12,10 +12,9 @@ interface ScriptEditMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
     handlers: IUpds;
-    visible: boolean
 }
 
-const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handlers, visible }) => {
+const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
 
     useEffect(() => {
@@ -30,7 +29,7 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
     const createPropsEditorTab = () => {
         return {
             header: "Props",
-            content: <PropsEditMenu visible={visible} game={game} props={game.props} onSetProps={onSetGameProps} handlers={handlers}></PropsEditMenu>
+            content: <PropsEditMenu game={game} props={game.props} onSetProps={onSetGameProps} handlers={handlers}></PropsEditMenu>
         }
     }
 
@@ -44,7 +43,7 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
     const createEventEditorTab = () => {
         return {
             header: "Events",
-            content: <EventsEditorTab visible={visible} game={game} handlers={handlers} onSetGame={onSetGame}/>
+            content: <EventsEditorTab game={game} handlers={handlers} onSetGame={onSetGame}/>
         }
     }
 

@@ -43,23 +43,6 @@ const StaticTabs: React.FC<StaticTabsProps> = ({ tabs, keepOpen }) => {
         }
     }
 
-    const _renderContentAllTabs = () => {
-        if (tabs.length === 0) {
-            return <div><p><mark>ERROR: no tabs to render</mark></p></div>
-        }
-        if (openTabIndex < 0 || openTabIndex > tabs.length - 1) {
-            return <div><p><mark>ERROR: cannot open tab {openTabIndex.toString()}</mark></p></div>
-        }
-        return tabs.map((tab, index) => {
-            const visible = index === openTabIndex
-            if (tab.content) {
-                return <div key={index} style={{ display: visible ? "block" : "none" }}>{tabs[openTabIndex].content}</div>
-            } else {
-                return <div key={index} style={{ display: visible ? "block" : "none" }}></div>
-            }
-        })
-    }
-
     return (
         <div className='static-tabs'>
             <Nav appearance='subtle' activeKey={openTabIndex.toString()} onSelect={changeTab}>

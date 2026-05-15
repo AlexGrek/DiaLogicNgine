@@ -47,7 +47,7 @@ export default class AppGameRuntime extends React.Component<AppGameRuntimeProps,
 
   public render() {
     return <CustomProvider theme="dark">
-      <Player game={this.state.game} visible={true}></Player>
+      <Player game={this.state.game}></Player>
     </CustomProvider>
   }
 }

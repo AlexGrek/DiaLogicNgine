@@ -25,21 +25,15 @@ interface UiElementsMenuProps {
     game: GameDescription;
     ui: GameUiElementDescr
     onSetUi: (items: GameUiElementDescr) => void
-    visible: boolean
 }
 
 type CodeEditMenu = "visibleIf" | "value"
 
-const UiElementsMenu: React.FC<UiElementsMenuProps> = ({ game, ui, onSetUi, visible }) => {
+const UiElementsMenu: React.FC<UiElementsMenuProps> = ({ game, ui, onSetUi }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingMeter] = useState<GameUiElementMeter | null>(null);
-    // enable code editor props
     const [codeEditMenu, setCodeEditMenu] = useState<CodeEditMenu>("visibleIf");
     const [codeEditorOpen, setCodeEditorOpen] = useState<boolean>(false);
-
-    if (!visible) {
-        return <div />
-    }
 
     const setEditing = (index: number, object?: GameUiElementMeter) => {
         setEditingIndex(index)

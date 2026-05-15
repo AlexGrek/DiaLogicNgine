@@ -1,0 +1,36 @@
+web:
+  image:
+    repository: grekodocker/dialogic-bundle
+    tag: latest  # overridden at deploy time via --set web.image.tag=<git-hash>
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  storage:
+    size: 5Gi
+    storageClass: "local-path"
+
+  # Optional OffloadMQ integration for AI image generation.
+  # Leave both empty to disable (backend returns 503 for /api/v1/imggen/* routes).
+  offloadmq:
+    url: ""
+    apiKey: ""
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  host: "dialogic.alexgr.space"
+  tls:
+    secretName: dialogic-tls

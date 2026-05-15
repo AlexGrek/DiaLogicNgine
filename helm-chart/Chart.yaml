@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dialogic
+description: Helm chart for DiaLogicNgine — React editor frontend + FastAPI backend
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
