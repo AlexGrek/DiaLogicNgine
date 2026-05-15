@@ -39,6 +39,7 @@ import GameUiElementDescr from "./game/GameUiElementDescr";
 import UiElementsMenu from "./components/menuitems/uielements/UiElementsMenu";
 import PointAncClick from "./components/menuitems/pointandclick/PointAncClick";
 import { PointAndClick } from "./game/PointAndClick";
+import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
 
 export interface CopiedObject {
   value: unknown;
@@ -192,6 +193,8 @@ function AppLayout() {
   const [game, setGame] = useState<GameDescription>(createDefaultGame);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [copied, setCopied] = useState<CopiedObject | undefined>(undefined);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [appSettings, setAppSettings] = useState<AppSettings>(loadSettings);
 
   const handlePaste = useCallback(() => copied, [copied]);
 
@@ -304,9 +307,18 @@ function AppLayout() {
     <CustomProvider theme="dark">
       <Container className="root-container">
         <Header className="app-header-container">
-          <p className="app-header-text">🇺🇦 DiaLogic Ngine</p>
+          <div className="app-header-left">
+            <p className="app-header-text">🇺🇦 DiaLogic Ngine</p>
+            <SettingsButton onClick={() => setSettingsOpen(true)} />
+          </div>
           <NotificationBar notification={lastNotification} />
         </Header>
+        <SettingsPanel
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          settings={appSettings}
+          onSettingsChange={setAppSettings}
+        />
         <Container className="root-section">
           <Sidebar className="app-main-sidebar">
             <SidePanel game={game} handlers={updates} />

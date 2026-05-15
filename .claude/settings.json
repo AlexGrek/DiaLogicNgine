@@ -17,7 +17,10 @@
       "Bash(npx vite *)",
       "Bash(xargs cat)",
       "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/frontend)",
-      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/game_engine)"
+      "Bash(mkdir -p /Users/vedmedik/dev/DiaLogicNgine/.claude/skills/game_engine)",
+      "Skill(frontend)",
+      "Skill(frontend:*)",
+      "Bash(npx eslint *)"
     ],
     "additionalDirectories": [
       "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"

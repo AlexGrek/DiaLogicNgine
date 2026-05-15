@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import Dialog, { DialogWindow, createDialog } from "../game/Dialog";
 import PushMessageIcon from "@rsuite/icons/PushMessage";
+import CreativeIcon from "@rsuite/icons/Creative";
 import { IconButton, Panel, Placeholder } from "rsuite";
 import WindowEditor from "./WindowEditor";
 import CreateWindowButton from "./CreateWindowButton";
@@ -9,6 +10,7 @@ import DialogWindowEditDrawer from "./DialogWindowEditDrawer";
 import { GameDescription } from "../game/GameDescription";
 import "./dialog.css";
 import ChainEditor from "./chain/ChainEditor";
+import AiGenerateModal from "./ai/AiGenerateDrawer";
 
 export interface DialogHandlers {
     createDialogWindowHandler: (window: DialogWindow) => void;
@@ -33,6 +35,7 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
     undefined
   );
   const [chainOpen, setChainOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const itemRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +114,13 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
         >
           Chain
         </IconButton>
+        <IconButton
+          icon={<CreativeIcon />}
+          placement="left"
+          onClick={() => setAiOpen(true)}
+        >
+          AI generate
+        </IconButton>
       </div>
       <div className="window-editor-windows-container">
         {renderWindows(dialog.windows, dialog)}
@@ -122,6 +132,12 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
         dialogName={dialog?.name}
         onSetVisible={setChainOpen}
         onApply={addMultipleDialogWindowsHandler}
+      />
+      <AiGenerateModal
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        onApply={addMultipleDialogWindowsHandler}
+        existingUids={new Set(dialog.windows.map((w) => w.uid))}
       />
       {editingWindow && dialog && (
         <DialogWindowEditDrawer
