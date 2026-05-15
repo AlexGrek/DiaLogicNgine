@@ -15,8 +15,8 @@ interface PacViewProps {
     transitionOut: boolean
 }
 
-const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
-    const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
+const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view, transitionOut }) => {
+    const [, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
         if (state.shortHistory.length > 0) {
@@ -32,22 +32,6 @@ const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view, transi
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
     }, [view])
-
-    const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (transitionOut) {
-            return transitionOutClass(base, index, maxindex)
-        }
-        if (!inTransitionIn)
-            return base
-
-        // we are in transition in, so...
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-in-${inumber}`
-        }
-        return `${base} transition-in${indexString}`
-    }
 
     const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
         if (!transitionOut) {

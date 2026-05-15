@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
 import "./player.css"
@@ -13,11 +13,11 @@ interface LocationViewProps {
 }
 
 const LocationView: React.FC<LocationViewProps> = ({ game, state, location, onStateUpd }) => {
-    const getActualLinkText = (state: State, link: DialogLink) => {
+    const getActualLinkText = (_state: State, link: DialogLink) => {
         return link.text  // TODO: add processing logic
     }
 
-    const getActualWindowText = (state: State, loc: Loc) => {
+    const getActualWindowText = (_state: State, loc: Loc) => {
         return loc.displayName  // TODO: add text processing logic
     }
 

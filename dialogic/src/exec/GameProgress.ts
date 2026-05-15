@@ -1,4 +1,3 @@
-import { GameDescription } from "../game/GameDescription"
 import { QuestPath, TaskPath } from "../game/Objectives"
 
 // export interface ProgressUpdate {

@@ -49,7 +49,7 @@ export class GameExecManager {
         return tryGetLocationById(this.game, state.position)
     }
 
-    pacZoneApply(zone: PointAndClickZone, view: PacRenderView): State {
+    pacZoneApply(_zone: PointAndClickZone, _view: PacRenderView): State {
         throw new Error('Method not implemented.');
     }
 

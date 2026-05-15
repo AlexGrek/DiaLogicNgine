@@ -4,3 +4,9 @@
 backend/storage
 backend/.venv
 backend/.env
+
+# Docker Buildx cache
+.buildx/
+.buildkit/
+/buildx-cache/
+.buildx-cache/

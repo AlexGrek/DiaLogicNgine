@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State, createInitialState } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';

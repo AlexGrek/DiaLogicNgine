@@ -7,11 +7,11 @@ export interface TabData {
     contentRenderer: () => ReactNode
 }
 
-interface TabsUiMenuWidgetProps<T> {
+interface TabsUiMenuWidgetProps {
     data: TabData[],
 }
 
-const TabsUiMenuWidget: React.FC<TabsUiMenuWidgetProps<any>> = ({ data }) => {
+const TabsUiMenuWidget: React.FC<TabsUiMenuWidgetProps> = ({ data }) => {
     const [chosenItemIndex, setChosenItemIndex] = useState<number>(0)
 
     useEffect(() => {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { CheckPicker, Col, Grid, IconButton, Row } from 'rsuite';
 import { GameDescription } from '../../../game/GameDescription';
-import { Item, createEmptyItem } from '../../../game/Items';
 import StringListEditor from '../../common/StringListEditor';
 import './eventeditor.css';
 import { IUpds } from '../../../App';

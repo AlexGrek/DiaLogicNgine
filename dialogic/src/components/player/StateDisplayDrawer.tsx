@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { State } from '../../exec/GameState';
 import { Drawer, Input } from 'rsuite';
 import { toYaml } from '../../Trace';

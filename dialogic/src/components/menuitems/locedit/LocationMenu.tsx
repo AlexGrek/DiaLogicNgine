@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
+import { IUpds } from '../../../App';
 import Loc from '../../../game/Loc';
 import LocationPreview from './LocationPreview';
 import { Button } from 'rsuite';
@@ -14,8 +15,9 @@ interface LocationMenuProps {
     handlers: IUpds;
 }
 
-const LocationMenu: React.FC<LocationMenuProps> = ({ game, onSetGame }) => {
+const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const [, setCreatingNew] = useState<boolean>(false);
     React.useEffect(() => {
         setEditingIndex(editingIndex);
     }, [game]);

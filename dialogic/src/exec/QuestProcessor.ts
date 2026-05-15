@@ -61,13 +61,6 @@ export default class QuestProcessor {
         this.exec = exec
     }
 
-    private isQuestLineCompleted(state: State, questline: QuestLine) {
-        // check all quests completed or failed
-        return questline.quests.every((q) => {
-            const status = this.getQuestStatus(state, q.path)
-            return status === "completed" || status === "failed"
-        })
-    }
 
     getTaskStatus(state: State, task: Task): ObjectiveStatus {
         if (contains(state.progress.failedTasks, task.path)) {
@@ -116,7 +109,7 @@ export default class QuestProcessor {
         const found = getQuestTask(this.exec.game, taskId)
         if (!found)
             return
-        const [qline, q, tsk] = found
+        const [, q, tsk] = found
 
         if (q.ordered || tsk.critical) {
             // fail the whole quest
@@ -137,7 +130,7 @@ export default class QuestProcessor {
         const found = getQuestTask(this.exec.game, taskId)
         if (!found)
             return
-        const [qline, q, tsk] = found
+        const [, q, tsk] = found
 
         // task passed - so quest may be completed
         const indexOfTask = q.tasks.findIndex((task) => task.uid = tsk.uid)
@@ -166,7 +159,7 @@ export default class QuestProcessor {
         const found = getQuestTask(this.exec.game, taskId)
         if (!found)
             return
-        const [qline, q, tsk] = found
+        const [, q] = found
 
         // try to open quest and questline
         if (this.getQuestStatus(state, q.path) === "untouched") {

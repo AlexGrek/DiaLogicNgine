@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
-import { Button } from 'rsuite';
 import StaticTabs from '../../common/StaticTabs';
 import PropsEditMenu from './PropsEditMenu';
 import Prop from '../../../game/Prop';
-import lodash from 'lodash';
 import EventsEditorTab from '../eventedit/EventsEditorTab';
 
 interface ScriptEditMenuProps {

@@ -7,7 +7,6 @@ import DialogVariants from './DialogVariants';
 import SpecialDialogVariants from './SpecialDialogVariants';
 import "./player.css";
 import DiscussionTopicPicker from './DiscussionTopicPicker';
-import { trace } from '../../Trace';
 
 interface CharDialogViewProps {
     game: GameExecManager

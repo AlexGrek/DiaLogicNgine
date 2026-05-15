@@ -15,7 +15,7 @@ interface PlayerProps {
 }
 
 const Player: React.FC<PlayerProps> = ({ game }) => {
-    const [gamedscr, setGame] = useState<GameDescription>(game);
+    const [, setGame] = useState<GameDescription>(game);
     const [gameExecutor, setGameExecutor] = useState<GameExecManager>(new GameExecManager(game));
     const [gameState, setGameState] = useState<State>(createInitialState(game))
     const [stateEditorOpen, setStateEditorOpen] = useState<boolean>(false)

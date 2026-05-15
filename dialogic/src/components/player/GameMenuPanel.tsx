@@ -3,7 +3,7 @@ import Markdown from 'react-markdown';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
-import { CharInfoRenderView, QuestRenderView, RenderView } from '../../exec/RenderView';
+import { CharInfoRenderView, RenderView } from '../../exec/RenderView';
 import Fact, { createEmptyFact, getFact } from '../../game/Fact';
 import { GameDescription } from '../../game/GameDescription';
 import LeftTabUiMenuWidget, { DataGroups } from './LeftTabUiMenuWidget';
@@ -25,7 +25,7 @@ interface GameMenuPanelProps {
     savesManager: SavesManager
 }
 
-const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpenClose, game, executor, onStateChange, savesManager }) => {
+const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose, game, executor, onStateChange, savesManager }) => {
     const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
     const [selectedWidgetPrev, setSelectedWidgetPrev] = useState<string | null>(null);
 

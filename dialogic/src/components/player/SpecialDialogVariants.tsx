@@ -1,8 +1,6 @@
 import React from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
-import { RenderLink } from '../../exec/RenderView';
-import { DialogLink } from '../../game/Dialog';
 import "./player.css";
 
 export interface SpecialDialogVariant {
@@ -23,7 +21,7 @@ interface SpecialDialogVariantsProps {
     text?: string
 }
 
-const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ game, text, state, onClick, links, transitionOut, inTransitionIn }) => {
+const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, links, transitionOut, inTransitionIn }) => {
 
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
         if (transitionOut) {

@@ -13,7 +13,7 @@ interface SaveLoadJsonDrawerProps {
 }
 
 const SaveLoadJsonDrawer: React.FC<SaveLoadJsonDrawerProps> = ({ gameInput, visible, onClose, onJsonLoad }) => {
-  const [game, setGame] = useState<GameDescription>(gameInput);
+  const [, setGame] = useState<GameDescription>(gameInput);
   const [text, setText] = useState<string>("");
   const txtInput = useRef<any>(null);
 

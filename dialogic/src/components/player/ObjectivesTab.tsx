@@ -7,7 +7,6 @@ import TabsUiMenuWidget from './TabsUiMenuWidget';
 import { trace } from '../../Trace';
 import { groupByProperty } from '../../Utils';
 import { QuestRenderView, TaskRenderView } from '../../exec/RenderView';
-import Markdown from 'react-markdown';
 import './objectivestab.css'
 import { ObjectiveStatus } from '../../exec/QuestProcessor';
 

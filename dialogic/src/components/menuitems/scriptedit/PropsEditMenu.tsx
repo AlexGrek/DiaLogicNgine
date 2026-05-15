@@ -29,6 +29,7 @@ interface PropsEditMenuProps {
 
 const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, handlers, creatable }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const [, setCreatingNew] = useState<boolean>(false);
     const [createName, setCreateName] = useState<string>("")
     const [createTypeChange, setCreateTypeChange] = useState<string>("none");
     const [createMenuOpen, setCreateMenuOpen] = useState<boolean>(false);
