@@ -21,6 +21,7 @@ export class HudScene extends Phaser.Scene {
     private menuButtons: PhaserButton[] = [];
     private active = false;
     private busy = false;
+    private pendingView: RenderView | null = null;
     private lastWidget: RenderWidget | null = null;
     private resizeHandler!: (gameSize: Phaser.Structs.Size) => void;
 
@@ -66,6 +67,7 @@ export class HudScene extends Phaser.Scene {
 
     private handleHide = () => {
         this.active = false;
+        this.pendingView = null;
         this.root.setVisible(false);
         this.menuBar.setVisible(false);
     };
@@ -106,11 +108,20 @@ export class HudScene extends Phaser.Scene {
 
     private onRender = async (view: RenderView) => {
         if (!this.active) return;
-        if (this.busy) return;
+        if (this.busy) {
+            this.pendingView = view;
+            return;
+        }
         this.busy = true;
         try {
             await this.renderWidget(view.uiWidgetView);
             this.lastWidget = view.uiWidgetView;
+            while (this.pendingView && this.active) {
+                const next = this.pendingView;
+                this.pendingView = null;
+                await this.renderWidget(next.uiWidgetView);
+                this.lastWidget = next.uiWidgetView;
+            }
         } finally {
             this.busy = false;
         }
@@ -251,24 +262,26 @@ export class HudScene extends Phaser.Scene {
         const routePad = 14;
         const routeMaxW = 220;
         const visibleRoutes = view.routes;
-        const totalW = visibleRoutes.length * routeMaxW + (visibleRoutes.length - 1) * routePad;
-        let rx = (width - totalW) / 2;
-        for (let i = 0; i < visibleRoutes.length; i++) {
-            const r = visibleRoutes[i];
-            const btn = createButton(this, rx, 0, r.name, () => {
-                this.bridge.onRouteClick(r);
-            }, {
-                paddingX: 16,
-                paddingY: 14,
-                fontSize: 16,
-                bg: 0x162033,
-                minWidth: routeMaxW,
-                maxWidth: routeMaxW,
-                align: 'center',
-            }, r.disabled);
-            routesContainer.add(btn.container);
-            this.tweens.add({ targets: btn.container, y: { from: -16, to: 0 }, alpha: { from: 0, to: 1 }, duration: 240, delay: 60 + i * 50 });
-            rx += routeMaxW + routePad;
+        if (visibleRoutes.length > 0) {
+            const totalW = visibleRoutes.length * routeMaxW + (visibleRoutes.length - 1) * routePad;
+            let rx = (width - totalW) / 2;
+            for (let i = 0; i < visibleRoutes.length; i++) {
+                const r = visibleRoutes[i];
+                const btn = createButton(this, rx, 0, r.name, () => {
+                    this.bridge.onRouteClick(r);
+                }, {
+                    paddingX: 16,
+                    paddingY: 14,
+                    fontSize: 16,
+                    bg: 0x162033,
+                    minWidth: routeMaxW,
+                    maxWidth: routeMaxW,
+                    align: 'center',
+                }, r.disabled);
+                routesContainer.add(btn.container);
+                this.tweens.add({ targets: btn.container, y: { from: -16, to: 0 }, alpha: { from: 0, to: 1 }, duration: 240, delay: 60 + i * 50 });
+                rx += routeMaxW + routePad;
+            }
         }
         this.root.add(routesContainer);
 

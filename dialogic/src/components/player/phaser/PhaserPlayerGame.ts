@@ -26,6 +26,11 @@ export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge
             height: initialH,
             autoRound: true,
         },
+        input: {
+            mouse: { target: undefined, preventDefaultWheel: false },
+            touch: { target: undefined },
+            windowEvents: false,
+        },
         dom: { createContainer: false },
         fps: { target: 60 },
         render: {
@@ -37,6 +42,22 @@ export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge
     };
 
     const game = new Phaser.Game(config);
+
+    const ensureCanvasStyle = () => {
+        const canvas = game.canvas;
+        if (!canvas) return;
+        canvas.style.position = 'absolute';
+        canvas.style.left = '0';
+        canvas.style.top = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.display = 'block';
+        canvas.style.touchAction = 'none';
+        canvas.style.zIndex = '1';
+        canvas.style.pointerEvents = 'auto';
+        canvas.style.outline = 'none';
+    };
+    ensureCanvasStyle();
 
     let destroyed = false;
     const pendingTimeouts = new Set<number>();
@@ -89,7 +110,9 @@ export function createPhaserPlayerGame(parent: HTMLElement, bridge: PlayerBridge
             pendingTimeouts.clear();
             try {
                 game.destroy(true, false);
-            } catch { /* noop */ }
+            } catch (e) {
+                console.error('Phaser game destroy failed', e);
+            }
         },
     };
 }

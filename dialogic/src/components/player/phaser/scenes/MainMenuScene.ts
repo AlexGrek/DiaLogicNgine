@@ -9,6 +9,7 @@ export class MainMenuScene extends Phaser.Scene {
     private root!: Phaser.GameObjects.Container;
     private visible = true;
     private buttons: PhaserButton[] = [];
+    private buildToken = 0;
 
     constructor() {
         super(MAIN_MENU_SCENE);
@@ -31,6 +32,7 @@ export class MainMenuScene extends Phaser.Scene {
     private handleShow = () => {
         if (this.visible) return;
         this.visible = true;
+        this.buildToken++;
         this.root.setVisible(true);
         this.build();
     };
@@ -38,8 +40,10 @@ export class MainMenuScene extends Phaser.Scene {
     private handleHide = () => {
         if (!this.visible) return;
         this.visible = false;
+        const token = ++this.buildToken;
         const objs = this.root.list;
         fadeOut(this, objs as Phaser.GameObjects.GameObject[], 200, () => {
+            if (token !== this.buildToken) return;
             this.root.removeAll(true);
             this.root.setVisible(false);
         });

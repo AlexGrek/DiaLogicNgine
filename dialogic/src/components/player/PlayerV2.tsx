@@ -58,6 +58,7 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
             const clickData = { actor: null, text: prevText, answer: link.text, step: stateRef.current.stepCount };
             try {
                 const next = exec.dialogVariantApply(stateRef.current, link.link, clickData);
+                stateRef.current = next;
                 setState(next);
             } catch (e) {
                 console.error('onLinkClick failed', e);
@@ -66,6 +67,7 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
         onRouteClick: (route: LocRouteRenderView) => {
             try {
                 const next = exec.locRouteApply(stateRef.current, route);
+                stateRef.current = next;
                 setState(next);
             } catch (e) {
                 console.error('onRouteClick failed', e);
@@ -74,6 +76,7 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
         onDiscuss: (topicType: DiscussionTopicType, value: string, charUid: string) => {
             try {
                 const next = exec.discuss(stateRef.current, topicType, value, charUid);
+                stateRef.current = next;
                 setState(next);
             } catch (e) {
                 console.error('onDiscuss failed', e);

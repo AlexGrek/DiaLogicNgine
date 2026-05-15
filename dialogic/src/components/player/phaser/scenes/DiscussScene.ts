@@ -17,6 +17,7 @@ export class DiscussScene extends Phaser.Scene {
     private active = false;
     private view: CharDialogRenderView | null = null;
     private selectedCategory: DiscussionTopicType = 'fact';
+    private buildToken = 0;
 
     constructor() {
         super(DISCUSS_SCENE);
@@ -48,7 +49,9 @@ export class DiscussScene extends Phaser.Scene {
     private handleClose = () => {
         if (!this.active) return;
         this.active = false;
+        const token = ++this.buildToken;
         fadeOut(this, this.root.list as Phaser.GameObjects.GameObject[], 180, () => {
+            if (token !== this.buildToken) return;
             this.root.removeAll(true);
             this.root.setVisible(false);
         });
@@ -109,6 +112,7 @@ export class DiscussScene extends Phaser.Scene {
 
     private build() {
         if (!this.view) return;
+        this.buildToken++;
         this.root.removeAll(true);
         const { width, height } = this.scale.gameSize;
 
@@ -175,7 +179,9 @@ export class DiscussScene extends Phaser.Scene {
             let iy = listY + 12;
             const itemX = panelX + 24 + 12;
             const itemW = panelW - 48 - 24;
-            current.items.forEach((it, idx) => {
+            for (let idx = 0; idx < current.items.length; idx++) {
+                if (iy > listY + listH - 20) break;
+                const it = current.items[idx];
                 const charUid = this.view!.char.uid;
                 const btn = createButton(this, itemX, iy, it.name, () => {
                     this.bridge.events.emit(BridgeEvents.CLOSE_DISCUSS);
@@ -193,8 +199,7 @@ export class DiscussScene extends Phaser.Scene {
                     duration: 220, delay: 80 + idx * 30,
                 });
                 iy += btn.height + 6;
-                if (iy > listY + listH - 20) return;
-            });
+            }
         }
 
         fadeIn(this, [overlay, panel, title, cancelBtn.container], 200);

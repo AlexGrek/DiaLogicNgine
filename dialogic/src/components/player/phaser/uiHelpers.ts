@@ -176,9 +176,22 @@ export function loadImageAsync(scene: Phaser.Scene, key: string, url: string): P
             resolve(true);
             return;
         }
+        let settled = false;
+        const onComplete = () => {
+            if (settled) return;
+            settled = true;
+            scene.load.off(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
+            resolve(scene.textures.exists(key));
+        };
+        const onError = () => {
+            if (settled) return;
+            settled = true;
+            scene.load.off(Phaser.Loader.Events.COMPLETE, onComplete);
+            resolve(false);
+        };
+        scene.load.once(Phaser.Loader.Events.COMPLETE, onComplete);
+        scene.load.once(Phaser.Loader.Events.FILE_LOAD_ERROR, onError);
         scene.load.image(key, url);
-        scene.load.once(Phaser.Loader.Events.COMPLETE, () => resolve(true));
-        scene.load.once(Phaser.Loader.Events.FILE_LOAD_ERROR, () => resolve(false));
         scene.load.start();
     });
 }

@@ -14,6 +14,7 @@ export class JournalScene extends Phaser.Scene {
     private active = false;
     private currentTab: Tab = 'objectives';
     private selectedItem: string | null = null;
+    private buildId = 0;
 
     constructor() {
         super(JOURNAL_SCENE);
@@ -44,7 +45,9 @@ export class JournalScene extends Phaser.Scene {
     private handleClose = () => {
         if (!this.active) return;
         this.active = false;
+        const token = ++this.buildId;
         fadeOut(this, this.root.list as Phaser.GameObjects.GameObject[], 200, () => {
+            if (token !== this.buildId) return;
             this.root.removeAll(true);
             this.root.setVisible(false);
         });
@@ -55,6 +58,7 @@ export class JournalScene extends Phaser.Scene {
     };
 
     private build() {
+        this.buildId++;
         this.root.removeAll(true);
         const { width, height } = this.scale.gameSize;
 
@@ -228,7 +232,9 @@ export class JournalScene extends Phaser.Scene {
             });
             this.root.add(noTasks);
         } else {
-            selected.quest.tasks.forEach(task => {
+            for (let ti = 0; ti < selected.quest.tasks.length; ti++) {
+                if (dy > leftY + contentH - 20) break;
+                const task = selected.quest.tasks[ti];
                 const icon = task.status === 'completed' ? '✔' : task.status === 'failed' ? '✖' : '◦';
                 const color = task.status === 'completed' ? '#9ff09f'
                     : task.status === 'failed' ? '#ff9090'
@@ -239,8 +245,7 @@ export class JournalScene extends Phaser.Scene {
                 });
                 this.root.add(t);
                 dy += t.height + 6;
-                if (dy > leftY + contentH - 20) return;
-            });
+            }
         }
     }
 
@@ -300,6 +305,7 @@ export class JournalScene extends Phaser.Scene {
     }
 
     private async renderPeople(leftX: number, leftY: number, leftW: number, _contentH: number, rightX: number, rightW: number) {
+        const buildId = this.buildId;
         const state = this.bridge.getState();
         const exec = this.bridge.getExec();
 
@@ -337,6 +343,7 @@ export class JournalScene extends Phaser.Scene {
         if (avatarUrl) {
             const key = imageKeyFor(avatarUrl);
             const ok = await loadImageAsync(this, key, avatarUrl);
+            if (buildId !== this.buildId) return;
             if (ok && this.active && this.currentTab === 'people') {
                 const img = this.add.image(rightX + 12, dy, key);
                 img.setOrigin(0, 0);
