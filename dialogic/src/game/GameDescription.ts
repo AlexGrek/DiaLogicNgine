@@ -11,6 +11,12 @@ import Loc from "./Loc";
 import QuestLine from "./Objectives";
 import { PointAndClick, PointAndClickZone } from "./PointAndClick";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
+import {
+    DEFAULT_MENU_FONT_ID,
+    DEFAULT_RESPONSES_FONT_ID,
+    DEFAULT_TEXT_FONT_ID,
+    type FontId,
+} from "../lib/fonts";
 
 export const ENGINE_VERSION = "0.14"
 
@@ -21,6 +27,9 @@ export interface VisualsConfiguration {
     dialogTextAlignment: DialogTextAlignment
     responseAlignment: ResponseAlignment
     shortHistoryVisible: boolean
+    menuFontId: FontId
+    textFontId: FontId
+    responsesFontId: FontId
 }
 
 export function createDefaultVisuals(): VisualsConfiguration {
@@ -28,6 +37,9 @@ export function createDefaultVisuals(): VisualsConfiguration {
         dialogTextAlignment: "right",
         responseAlignment: "column",
         shortHistoryVisible: true,
+        menuFontId: DEFAULT_MENU_FONT_ID,
+        textFontId: DEFAULT_TEXT_FONT_ID,
+        responsesFontId: DEFAULT_RESPONSES_FONT_ID,
     }
 }
 

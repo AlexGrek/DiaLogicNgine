@@ -111,6 +111,7 @@
 .player-core-uiwidget-container {
     height: 100%;
     width: 100%;
+    min-height: 0;
     transition: opacity .2s;
     opacity: 1;
 }
@@ -127,8 +128,9 @@
     height: 100%;
     display: grid;
     grid-template-columns: 5fr 4fr;
-    grid-template-rows: 4fr 3fr;
-    font-family: PalanquinRegular, sans-serif;
+    grid-template-rows: 1fr;
+    min-height: 0;
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
 }
 
 .dialog-window-view--text-right {
@@ -149,17 +151,38 @@
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.78) 100%);
 }
 
-.dialog-window-view--no-short-history {
-    grid-template-rows: 1fr;
+.dialog-content-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
-.dialog-window-view--no-short-history.dialog-window-view--text-right .dialog-controls,
-.dialog-window-view--no-short-history.dialog-window-view--text-left .dialog-controls {
+.dialog-window-view--text-right .dialog-content-column {
+    grid-column: 2;
     grid-row: 1;
 }
 
-.dialog-window-view--no-short-history.dialog-window-view--text-full .dialog-controls {
+.dialog-window-view--text-left .dialog-content-column {
+    grid-column: 1;
     grid-row: 1;
+}
+
+.dialog-window-view--text-full .dialog-content-column {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: end;
+    width: 100%;
+    max-height: 100%;
+}
+
+.dialog-window-view--no-short-history .dialog-content-column {
+    justify-content: flex-end;
 }
 
 .dialog-control-pad {
@@ -200,12 +223,12 @@
 .dialog-text {
     width: 100%;
     font-size: 22px;
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
     background-color: #04040446;
-    overflow: hidden;
     position: relative;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
-    /* font-family: 'M PLUS 1p', sans-serif; */
+    flex-shrink: 0;
 }
 
 .dialog-window-view--text-right .dialog-text {
@@ -301,6 +324,7 @@
 
 .dialog-variants {
     font-size: 20px;
+    font-family: var(--player-font-responses, "PalanquinRegular", sans-serif);
     max-width: 100%;
     margin: 15pt 0 15pt 15pt;
     display: flex;
@@ -338,6 +362,7 @@
 .dialog-responses {
     display: flex;
     font-size: 20px;
+    font-family: var(--player-font-responses, "PalanquinRegular", sans-serif);
     max-width: 100%;
     margin: 15pt 0 15pt 15pt;
     padding-left: 5pt;
@@ -472,54 +497,33 @@
 .dialog-short-history {
     position: relative;
     scroll-behavior: smooth;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     opacity: .6;
-}
-
-.dialog-window-view--text-right .dialog-short-history {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.dialog-window-view--text-left .dialog-short-history {
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.dialog-window-view--text-full .dialog-short-history {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: start;
-    max-height: 42%;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0 10pt;
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
+    flex: 1 1 0;
+    min-height: 0;
 }
 
 .dialog-controls {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
+    justify-content: flex-start;
+    overflow: visible;
     box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 100%;
 }
 
 .dialog-window-view--text-right .dialog-controls {
-    grid-column: 2;
-    grid-row: 2;
     padding-right: 10pt;
 }
 
 .dialog-window-view--text-left .dialog-controls {
-    grid-column: 1;
-    grid-row: 2;
     padding-left: 10pt;
 }
 
 .dialog-window-view--text-full .dialog-controls {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: end;
     width: 100%;
     padding: 10pt;
 }
@@ -553,6 +557,12 @@
     max-width: 100%;
     padding: 0 10pt 10pt;
     box-sizing: border-box;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.dialog-window-view--text-full .dialog-content-column {
+    z-index: 2;
 }
 
 .dialog-widget-special-links.transition-out {
@@ -761,7 +771,7 @@
     text-align: center;
     font-size: larger;
     font-weight: lighter;
-    font-family: 'Involve';
+    font-family: var(--player-font-menu, "Involve", sans-serif);
     margin-bottom: 8pt;
 }
 
@@ -865,7 +875,7 @@
 .items-descr-header {
     font-size: large;
     background-color: #1f1f1f58;
-    font-family: 'Involve', sans-serif;
+    font-family: var(--player-font-menu, "Involve", sans-serif);
     overflow: hidden;
     border: 1px solid grey;
     margin: 2pt;
@@ -931,7 +941,7 @@
 }
 
 .main-menu-title {
-    font-family: Inter, system-ui, sans-serif;
+    font-family: var(--player-font-menu, "Involve", sans-serif);
     font-size: clamp(28px, 5vw, 64px);
     font-weight: bold;
     color: #f5f7fb;
@@ -941,7 +951,7 @@
 }
 
 .main-menu-subtitle {
-    font-family: Inter, system-ui, sans-serif;
+    font-family: var(--player-font-menu, "Involve", sans-serif);
     font-size: clamp(13px, 1.6vw, 18px);
     color: #b8c2d6;
     max-width: min(700px, 80vw);
@@ -963,7 +973,7 @@
     padding: 12px 22px;
     border-radius: 4px;
     border: 1px solid transparent;
-    font-family: Inter, system-ui, sans-serif;
+    font-family: var(--player-font-menu, "Involve", sans-serif);
     font-size: clamp(14px, 1.5vw, 20px);
     cursor: pointer;
     transition: background-color 0.15s, transform 0.1s;
@@ -1001,7 +1011,7 @@
 }
 
 .main-menu-footer {
-    font-family: Inter, system-ui, sans-serif;
+    font-family: var(--player-font-menu, "Involve", sans-serif);
     font-size: 11px;
     color: #6c7894;
     margin-top: 8px;

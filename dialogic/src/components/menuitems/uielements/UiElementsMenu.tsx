@@ -8,6 +8,8 @@ import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 import GameUiElementDescr, { GameUiElementMeter, MeterProgressBar, initGameUiElementMeter, initMeterProgressBar } from '../../../game/GameUiElementDescr';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../../common/CodeSampleButton';
+import FontPicker from '../../common/FontPicker';
+import { isFontId, type FontId } from '../../../lib/fonts';
 import MeterProgressBarEditor from './MeterProgressBarEditor';
 
 const CODE_EDITOR_UI: PopupCodeEditorUi = {
@@ -94,6 +96,19 @@ const UiElementsMenu: React.FC<UiElementsMenuProps> = ({ game, ui, onSetUi }) =>
             setEditingMeter({ ...editingObject, layout: { ...editingObject.layout, opacity: updVal } })
         }
 
+        const setFontId = (fontId: FontId) => {
+            setEditingMeter({ ...editingObject, fontId })
+        }
+
+        const clearFontId = () => {
+            const next = lodash.omit(editingObject, 'fontId') as GameUiElementMeter
+            setEditingMeter(next)
+        }
+
+        const meterFontId = editingObject.fontId && isFontId(editingObject.fontId)
+            ? editingObject.fontId
+            : undefined
+
         const renderCodeEditor = (menu: CodeEditMenu) => {
             const code = editingObject[menu]
             return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}/>
@@ -113,6 +128,14 @@ const UiElementsMenu: React.FC<UiElementsMenuProps> = ({ game, ui, onSetUi }) =>
             <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display meter name'></Input>
             <h3>Layout</h3>
             <InputNumber step={0.1} value={it.layout.opacity} onChange={(val) => setOpacity(val)} placeholder='meter opacity'></InputNumber>
+            <FontPicker
+                optional
+                value={meterFontId}
+                onChange={setFontId}
+                onClear={clearFontId}
+            >
+                Font
+            </FontPicker>
             <h3>Behavior</h3>
             {renderCodeEditButton("value")}
             {renderCodeEditButton("visibleIf")}

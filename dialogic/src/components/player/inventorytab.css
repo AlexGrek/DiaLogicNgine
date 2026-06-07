@@ -139,5 +139,5 @@
     justify-content: center;
     height: 100%;
     opacity: 0.5;
-    font-family: 'Involve', sans-serif;
+    font-family: var(--player-font-menu, "Involve", sans-serif);
 }

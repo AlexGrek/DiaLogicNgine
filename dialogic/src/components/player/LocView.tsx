@@ -80,16 +80,18 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
             <div className={transitionInOutClass('dialog-widget-special-links')}>
                 {locButtons()}
             </div>
-            <div className='dialog-controls'>
-                <div key={step << 1} className={transitionOutClass('dialog-text')}>
-                    {/* <p className='dialog-prev-text' key={state.stepCount}>
+            <div className="dialog-content-column">
+                <div className='dialog-controls'>
+                    <div key={step << 1} className={transitionOutClass('dialog-text')}>
+                        {/* <p className='dialog-prev-text' key={state.stepCount}>
                             {prevText}
                         </p> */}
-                    <p className='dialog-current-text' key={step << 1}>
-                        {state.fatalError ? state.fatalError.message : text}
-                    </p>
+                        <p className='dialog-current-text' key={step << 1}>
+                            {state.fatalError ? state.fatalError.message : text}
+                        </p>
+                    </div>
+                    <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} responseAlignment={visuals.responseAlignment} />
                 </div>
-                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} responseAlignment={visuals.responseAlignment} />
             </div>
         </div>
     );

@@ -1,3 +1,5 @@
+import type { FontId } from '../lib/fonts';
+
 export interface MeterLayout {
     opacity: number
 }
@@ -23,6 +25,7 @@ export interface GameUiElementMeter {
     uid: string
     name: string
     progressBar: MeterProgressBar | null;
+    fontId?: FontId
 }
 
 export function initGameUiElementMeter(name: string, uid: string): GameUiElementMeter {

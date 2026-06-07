@@ -8,6 +8,7 @@ import { GameDescription } from '../../game/GameDescription';
 import MainMenuView from './MainMenuView';
 import PlayerCore from './PlayerCore';
 import StateDisplayDrawer from './StateDisplayDrawer';
+import { playerVisualsCssVars, resolveVisuals } from './visualsClasses';
 import "./player.css";
 
 interface PlayerProps {
@@ -39,8 +40,11 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
         setStarted(false);
     }
 
+    const visuals = resolveVisuals(game.visuals);
+    const visualsStyle = playerVisualsCssVars(visuals);
+
     return (
-        <div className='player-window'>
+        <div className='player-window' style={visualsStyle}>
             <div className='player-top-panel'>
                 <ButtonGroup className='player-controls'>
                     <Button name='restart' onClick={handleRestart}>Restart</Button>

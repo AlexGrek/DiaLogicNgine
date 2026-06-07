@@ -142,44 +142,46 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
 
     return (
         <div className={transitionOutClass(windowViewClass)} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
-            {visuals.shortHistoryVisible && (
-                <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                    {renderShortHistory()}
-                </div>
-            )}
-            <div className='dialog-controls'>
-                {renderAvatar()}
-                <div key={step << 1} className={transitionOutClass('dialog-text')}>
-                    {state.fatalError ? (
-                        <p className='dialog-current-text' key={step << 1}>
-                            {state.fatalError.message}
-                        </p>
-                    ) : (
-                        <TypewriterDialogText
-                            fullText={text}
-                            displayText={displayText}
-                            reserveLayout={typewriterEnabled}
+            <div className="dialog-content-column">
+                {visuals.shortHistoryVisible && (
+                    <div className="dialog-short-history" id="dialog-short-history-scrollable">
+                        {renderShortHistory()}
+                    </div>
+                )}
+                <div className='dialog-controls'>
+                    {renderAvatar()}
+                    <div key={step << 1} className={transitionOutClass('dialog-text')}>
+                        {state.fatalError ? (
+                            <p className='dialog-current-text' key={step << 1}>
+                                {state.fatalError.message}
+                            </p>
+                        ) : (
+                            <TypewriterDialogText
+                                fullText={text}
+                                displayText={displayText}
+                                reserveLayout={typewriterEnabled}
+                            />
+                        )}
+                    </div>
+                    {showChoices && (
+                        <DialogVariants
+                            game={game}
+                            state={state}
+                            links={view.links}
+                            step={step}
+                            onStateUpd={onStateUpd}
+                            transitionOut={transitionOut}
+                            inTransitionIn={inTransitionIn}
+                            text={text}
+                            responseAlignment={visuals.responseAlignment}
+                            interactive={isComplete}
                         />
                     )}
+                    {clickToContinue && !state.fatalError &&
+                        <div className={`dialog-continue-hint${isComplete ? '' : ' dialog-continue-hint--pending'}`} data-testid="dialog-continue-hint">
+                            <span className='dialog-continue-chevron'>﹀</span>
+                        </div>}
                 </div>
-                {showChoices && (
-                    <DialogVariants
-                        game={game}
-                        state={state}
-                        links={view.links}
-                        step={step}
-                        onStateUpd={onStateUpd}
-                        transitionOut={transitionOut}
-                        inTransitionIn={inTransitionIn}
-                        text={text}
-                        responseAlignment={visuals.responseAlignment}
-                        interactive={isComplete}
-                    />
-                )}
-                {clickToContinue && !state.fatalError &&
-                    <div className={`dialog-continue-hint${isComplete ? '' : ' dialog-continue-hint--pending'}`} data-testid="dialog-continue-hint">
-                        <span className='dialog-continue-chevron'>﹀</span>
-                    </div>}
             </div>
         </div>
     );

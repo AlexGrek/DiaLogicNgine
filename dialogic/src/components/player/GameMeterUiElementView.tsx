@@ -1,6 +1,7 @@
 import React from 'react';
 import { UiElementMeterRenderView } from '../../exec/GameUiElementsProcessor';
 import { MeterProgressBar } from '../../game/GameUiElementDescr';
+import { isFontId, resolveFontCss } from '../../lib/fonts';
 import ProgressBar from './MicroProgressBar';
 
 interface GameMeterUiElementViewProps {
@@ -21,8 +22,17 @@ const GameMeterUiElementView: React.FC<GameMeterUiElementViewProps> = ({ meter }
         return meter.currentValue
     }
 
+    const meterFont = meter.description.fontId && isFontId(meter.description.fontId)
+        ? resolveFontCss(meter.description.fontId)
+        : undefined
+
+    const meterStyle: React.CSSProperties = {
+        opacity: meter.description.layout.opacity,
+        ...(meterFont ? { fontFamily: meterFont } : {}),
+    }
+
     return (
-        <div className='game-ui-element-meter'>
+        <div className='game-ui-element-meter' style={meterStyle}>
             {meter.description.progressBar && renderProgressBar(meter.description.progressBar)}
             {meter.description.progressBar == null ? renderPlainTextValue() : null}
         </div>

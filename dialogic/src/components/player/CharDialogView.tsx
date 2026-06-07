@@ -149,7 +149,8 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
             <div className={transitionInOutClass('dialog-widget-special-links')}>
 
             </div>
-            {!discuss && <div className='dialog-controls'>
+            {!discuss && <div className="dialog-content-column">
+                <div className='dialog-controls'>
                 <div key={step << 1} className={transitionOutClass('dialog-text')}>
                     {state.fatalError ? (
                         <p className='dialog-current-text' key={step << 1}>
@@ -173,9 +174,12 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
                     <div className={`dialog-continue-hint${isComplete ? '' : ' dialog-continue-hint--pending'}`} data-testid="char-dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>
                     </div>}
+                </div>
             </div>}
-            {discuss && <div className='dialog-controls'>
-                <DiscussionTopicPicker localization={localmanager.current}  game={game} state={state} view={view} onCancel={handleCancelSpecialUi} onTopicSelected={handleDiscussion}/>
+            {discuss && <div className="dialog-content-column">
+                <div className='dialog-controls'>
+                    <DiscussionTopicPicker localization={localmanager.current}  game={game} state={state} view={view} onCancel={handleCancelSpecialUi} onTopicSelected={handleDiscussion}/>
+                </div>
             </div>}
         </div>
     );

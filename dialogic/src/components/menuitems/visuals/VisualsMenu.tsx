@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, ButtonGroup, Panel, Stack } from 'rsuite';
+import FontPicker from '../../common/FontPicker';
 import {
     DialogTextAlignment,
     GameDescription,
@@ -33,9 +34,32 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
     };
 
     return (
-        <div>
+        <div style={{ marginLeft: 8, marginRight: 8 }}>
             <h3 className="center-header">Visuals</h3>
             <Stack wrap alignItems="stretch" spacing={16}>
+                <Panel bordered header="Typography" style={{ minWidth: '24em' }}>
+                    <p>Fonts used in the player UI and dialog.</p>
+                    <Stack direction="column" spacing={12}>
+                        <FontPicker
+                            value={visuals.menuFontId}
+                            onChange={(menuFontId) => updateVisuals({ menuFontId })}
+                        >
+                            Menu font
+                        </FontPicker>
+                        <FontPicker
+                            value={visuals.textFontId}
+                            onChange={(textFontId) => updateVisuals({ textFontId })}
+                        >
+                            Text font
+                        </FontPicker>
+                        <FontPicker
+                            value={visuals.responsesFontId}
+                            onChange={(responsesFontId) => updateVisuals({ responsesFontId })}
+                        >
+                            Responses font
+                        </FontPicker>
+                    </Stack>
+                </Panel>
                 <Panel bordered header="Dialog text placement" style={{ minWidth: '24em' }}>
                     <p>Where the dialog text panel appears in the player.</p>
                     <ButtonGroup>

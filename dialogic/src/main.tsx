@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css';
+import './picker-fonts.css';
 import 'rsuite/dist/rsuite.min.css';
 import App from './App'
 
