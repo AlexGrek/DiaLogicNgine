@@ -42,6 +42,13 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         setTimeout(() => setInTransitionIn(false), 250)
     }, [view, state.shortHistory.length, visuals.shortHistoryVisible])
 
+    useEffect(() => {
+        if (!typewriterEnabled || !isComplete) return
+        setInTransitionIn(true)
+        const t = setTimeout(() => setInTransitionIn(false), 250)
+        return () => clearTimeout(t)
+    }, [isComplete, typewriterEnabled])
+
     const text = view.text
 
     const typewriterEnabled = playerSettings.letterByLetter && !state.fatalError
