@@ -1,4 +1,5 @@
 import * as React from 'react';
+import lodash from 'lodash';
 import Dialog, { DialogWindow, renameDialogWindow } from '../game/Dialog';
 import MoreIcon from '@rsuite/icons/More';
 import { Dropdown } from 'rsuite';
@@ -46,6 +47,20 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
 
   copyRenameClick = () => {
     this.setState({copyRenameOpen: true})
+  }
+
+  duplicateClick = () => {
+    const uid = this.props.window.uid;
+    const existingUids = new Set(this.props.dialog.windows.map(w => w.uid));
+    let newUid = `${uid}_copy`;
+    let counter = 2;
+    while (existingUids.has(newUid)) {
+      newUid = `${uid}_copy_${counter}`;
+      counter++;
+    }
+    const duplicate = lodash.cloneDeep(this.props.window);
+    duplicate.uid = newUid;
+    this.props.handlers.handleDialogApplyChange(list => [...list, duplicate], null);
   }
 
   closeAll = () => {
@@ -108,6 +123,22 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
       return (
         <ChangeTextDialog validator={validator} text_prompt="UID must be unique" text_initial={uid} header={textOf} onConfirm={renameEvent} onClose={closeAllbinded}></ChangeTextDialog>)
     }
+
+    if (this.state.copyRenameOpen) {
+      const uid = this.props.window.uid;
+      const textOf = "Copy window with new UID";
+      const wrong_names = this.props.dialog.windows.map(w => w.uid);
+      const validator = (s: string) => s.length >= 1 && !wrong_names.includes(s);
+      const copyRenameEvent = (newUid: string) => {
+        closeAllbinded()
+        const duplicate = lodash.cloneDeep(this.props.window);
+        duplicate.uid = newUid;
+        this.props.handlers.handleDialogApplyChange(list => [...list, duplicate], null);
+      }
+      return (
+        <ChangeTextDialog validator={validator} text_prompt="UID must be unique" text_initial={`${uid}_copy`} header={textOf} onConfirm={copyRenameEvent} onClose={closeAllbinded}></ChangeTextDialog>)
+    }
+
     return "";
   }
 
@@ -123,9 +154,9 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
       <Dropdown noCaret title={<span><MoreIcon/></span>}>
         <Dropdown.Item onClick={(e) => { e.stopPropagation(); this.demoClick() }}>Demo from here</Dropdown.Item>
         <Dropdown.Separator />
-        <Dropdown.Item>Duplicate</Dropdown.Item>
+        <Dropdown.Item onClick={(e) => { e.stopPropagation(); this.duplicateClick() }}>Duplicate</Dropdown.Item>
         <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.renameClick()}}>Rename</Dropdown.Item>
-        <Dropdown.Item>Copy and rename</Dropdown.Item>
+        <Dropdown.Item onClick={(e) => { e.stopPropagation(); this.copyRenameClick() }}>Copy and rename</Dropdown.Item>
         <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.deleteClick()}}>Delete</Dropdown.Item>
       </Dropdown>
     </div>
