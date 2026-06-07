@@ -11,7 +11,6 @@ Flow
 2. GET  /imggen/status/{project}/.. — poll; on completion download file → save to project → delete bucket
 """
 
-import io
 import mimetypes
 import os
 import time
@@ -21,18 +20,21 @@ from typing import Literal
 import httpx
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
-from PIL import Image
 from pydantic import BaseModel, Field
+
+from app.image_storage import image_dir, safe_path, save_image
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
 OFFLOADMQ_URL = os.getenv("OFFLOADMQ_URL", "").rstrip("/")
 OFFLOADMQ_API_KEY = os.getenv("OFFLOADMQ_API_KEY", "")
 
-STORAGE_ROOT = Path(__file__).parent.parent.parent.parent / "storage"
-THUMB_MAX_PX = 256
-
 router = APIRouter(prefix="/imggen", tags=["imggen"])
+
+DEFAULT_THUMBNAIL_PROMPT = (
+    "game UI thumbnail, square crop, clear focal subject, vibrant colors, clean composition"
+)
+DEFAULT_THUMBNAIL_SIZE = 512
 
 
 # ---------------------------------------------------------------------------
@@ -46,41 +48,6 @@ def _headers() -> dict:
 def _check_config() -> None:
     if not OFFLOADMQ_URL or not OFFLOADMQ_API_KEY:
         raise HTTPException(status_code=503, detail="OffloadMQ not configured (missing .env)")
-
-
-def _image_dir(project_name: str) -> Path:
-    return (STORAGE_ROOT / "projects" / project_name / "images").resolve()
-
-
-def _thumb_dir(project_name: str) -> Path:
-    return (STORAGE_ROOT / "projects" / project_name / "image_thumbs").resolve()
-
-
-def _safe_path(base: Path, filename: str) -> Path:
-    target = (base / filename).resolve()
-    if not target.is_relative_to(base):
-        raise HTTPException(status_code=400, detail="Invalid file path")
-    return target
-
-
-def _save_image(contents: bytes, filename: str, project_name: str) -> None:
-    img_dir = _image_dir(project_name)
-    thumb_dir = _thumb_dir(project_name)
-    img_dir.mkdir(parents=True, exist_ok=True)
-    thumb_dir.mkdir(parents=True, exist_ok=True)
-
-    dest = img_dir / filename
-    dest.write_bytes(contents)
-
-    thumb_dest = thumb_dir / filename
-    with Image.open(io.BytesIO(contents)) as img:
-        img = img.convert("RGBA") if img.mode in ("P", "RGBA") else img.convert("RGB")
-        img.thumbnail((THUMB_MAX_PX, THUMB_MAX_PX), Image.LANCZOS)
-        fmt = Image.registered_extensions().get(thumb_dest.suffix.lower(), "PNG")
-        save_fmt = fmt if fmt in ("JPEG", "PNG", "WEBP", "BMP", "GIF", "TIFF") else "PNG"
-        if save_fmt == "JPEG" and img.mode == "RGBA":
-            img = img.convert("RGB")
-        img.save(thumb_dest, format=save_fmt)
 
 
 # ---------------------------------------------------------------------------
@@ -157,7 +124,7 @@ async def generate(req: GenerateRequest) -> TaskRef:
             if not input_filename:
                 raise HTTPException(status_code=400, detail="img2img requires valid input_image")
 
-            input_path = _safe_path(_image_dir(req.project_name), input_filename)
+            input_path = safe_path(image_dir(req.project_name), input_filename)
             if not input_path.exists():
                 raise HTTPException(status_code=404, detail=f"Input image not found: {input_filename}")
 
@@ -291,7 +258,7 @@ async def poll_status(project_name: str, cap: str, task_id: str, output_bucket: 
         saved_filename = f"generated_{int(time.time() * 1000)}{ext}"
 
         try:
-            _save_image(contents, saved_filename, project_name)
+            save_image(contents, saved_filename, project_name)
         except Exception as e:
             return {"status": "failed", "error": f"Failed to save image: {e}"}
 
@@ -302,3 +269,38 @@ async def poll_status(project_name: str, cap: str, task_id: str, output_bucket: 
         )
 
     return {"status": "completed", "filename": saved_filename}
+
+
+# ---------------------------------------------------------------------------
+# Generate a thumbnail from an existing project image via img2img
+# ---------------------------------------------------------------------------
+
+class ThumbnailFromImageRequest(BaseModel):
+    project_name: str
+    source_image: str
+    model: str
+    prompt: str | None = None
+    width: int = DEFAULT_THUMBNAIL_SIZE
+    height: int = DEFAULT_THUMBNAIL_SIZE
+    seed: int | None = None
+
+
+@router.post("/thumbnail-from-image")
+async def thumbnail_from_image(req: ThumbnailFromImageRequest) -> TaskRef:
+    """Submit img2img preset for generating a thumbnail from an existing server image."""
+    source_filename = Path(req.source_image).name
+    source_path = safe_path(image_dir(req.project_name), source_filename)
+    if not source_path.exists():
+        raise HTTPException(status_code=404, detail=f"Source image not found: {source_filename}")
+
+    generate_req = GenerateRequest(
+        project_name=req.project_name,
+        model=req.model,
+        prompt=req.prompt or DEFAULT_THUMBNAIL_PROMPT,
+        workflow="img2img",
+        input_image=source_filename,
+        width=req.width,
+        height=req.height,
+        seed=req.seed,
+    )
+    return await generate(generate_req)

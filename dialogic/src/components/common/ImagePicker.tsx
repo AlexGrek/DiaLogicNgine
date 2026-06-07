@@ -4,7 +4,8 @@ import { generateImageUrl } from '../../Utils';
 import ImagePickerModal from './ImagePickerModal';
 import './ImagePicker.css'
 
-const isServerImage = (v: string) => !v.startsWith('game_assets/') && !v.startsWith('/') && !v.startsWith('http')
+// eslint-disable-next-line react-refresh/only-export-components
+export const isServerImage = (v: string) => !v.startsWith('game_assets/') && !v.startsWith('/') && !v.startsWith('http')
 
 interface ImagePickerProps {
     extensions?: string[];
@@ -12,6 +13,8 @@ interface ImagePickerProps {
     onChange: (val: string | null) => void;
     children?: ReactNode;
     projectName?: string;
+    /** When set, enables AI thumbnail generation from this server image filename. */
+    sourceImage?: string;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -23,6 +26,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
     onChange,
     children,
     projectName = 'default',
+    sourceImage,
 }) => {
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -47,6 +51,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
                 onChange={onChange}
                 extensions={extensions}
                 projectName={projectName}
+                sourceImage={sourceImage}
             />
         </div>
     );

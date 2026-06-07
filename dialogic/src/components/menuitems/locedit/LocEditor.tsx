@@ -188,7 +188,14 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                 <div className='location-params'>
                                     <p>UID (has to be unique)</p>
                                     <Input value={location.uid} readOnly={loc.uid !== ""} onChange={uidNameChange}></Input>
-                                    <ImagePicker value={location.thumbnail} onChange={thumbChange} projectName={game.general.name}>Thumbnail image</ImagePicker>
+                                    <ImagePicker
+                                        value={location.thumbnail}
+                                        onChange={thumbChange}
+                                        projectName={game.general.name}
+                                        sourceImage={location.backgrounds.main || undefined}
+                                    >
+                                        Thumbnail image
+                                    </ImagePicker>
 
                                     <Divider>Routes</Divider>
                                     <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>

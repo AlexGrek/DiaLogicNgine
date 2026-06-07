@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button, Input, InputNumber, Modal, SelectPicker, Toggle } from 'rsuite';
 import { useServerImages } from './useServerImages';
-import { IMAGES } from './ImagePicker';
+import { IMAGES, isServerImage } from './ImagePicker';
 
 interface ImagePickerModalProps {
     open: boolean;
@@ -11,9 +11,11 @@ interface ImagePickerModalProps {
     onChange: (val: string | null) => void;
     extensions?: string[];
     projectName?: string;
+    /** Server image filename to use as img2img source for thumbnail generation. */
+    sourceImage?: string;
 }
 
-type Source = 'server' | 'local' | 'other' | 'generate';
+type Source = 'server' | 'local' | 'other' | 'generate' | 'fromSource';
 
 type GenStatus = 'idle' | 'submitting' | 'polling' | 'done' | 'error';
 
@@ -46,6 +48,9 @@ interface GenState {
     avgTime: number | null;   // seconds, from server
     pollStart: number | null; // Date.now() when polling began
 }
+
+const DEFAULT_THUMBNAIL_PROMPT =
+    'game UI thumbnail, square crop, clear focal subject, vibrant colors, clean composition';
 
 const DEFAULT_GEN: GenState = {
     status: 'idle',
@@ -84,7 +89,10 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     onChange,
     extensions,
     projectName = 'default',
+    sourceImage,
 }) => {
+    const effectiveSourceImage =
+        sourceImage && isServerImage(sourceImage) ? sourceImage : undefined;
     const [source, setSource] = useState<Source>('server');
     const [localFiles, setLocalFiles] = useState<string[]>([]);
     const [selected, setSelected] = useState<string | null>(value ?? null);
@@ -166,9 +174,9 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             .catch(() => setOtherImages([]));
     }, [source, otherProject]);
 
-    // Load models when switching to generate tab
+    // Load models when switching to generate or fromSource tab
     useEffect(() => {
-        if (source !== 'generate') return;
+        if (source !== 'generate' && source !== 'fromSource') return;
         if (gen.modelsLoaded) return;
         fetch('/api/v1/imggen/models')
             .then(r => r.json())
@@ -217,16 +225,40 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     }, [gen.status, gen.taskCap, gen.taskId, gen.outputBucket, projectName]);
 
     const handleGenerate = async () => {
-        if (!gen.model || !gen.prompt.trim()) return;
+        await submitGeneration('full');
+    };
+
+    const handleGenerateFromSource = async () => {
+        if (!effectiveSourceImage) return;
+        await submitGeneration('thumbnail');
+    };
+
+    const submitGeneration = async (mode: 'full' | 'thumbnail') => {
+        const prompt = mode === 'thumbnail'
+            ? (gen.prompt.trim() || DEFAULT_THUMBNAIL_PROMPT)
+            : gen.prompt;
+        if (!gen.model || !prompt.trim()) return;
+        if (mode === 'full' && gen.workflow === 'img2img' && !gen.inputImage) return;
+
         setGen(g => ({ ...g, status: 'submitting', error: null, resultFilename: null }));
         try {
-            const r = await fetch('/api/v1/imggen/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            const url = mode === 'thumbnail'
+                ? '/api/v1/imggen/thumbnail-from-image'
+                : '/api/v1/imggen/generate';
+            const body = mode === 'thumbnail'
+                ? {
                     project_name: projectName,
                     model: gen.model,
-                    prompt: gen.prompt,
+                    prompt,
+                    source_image: effectiveSourceImage,
+                    width: gen.width,
+                    height: gen.height,
+                    seed: gen.seed.trim() ? Number(gen.seed) : null,
+                }
+                : {
+                    project_name: projectName,
+                    model: gen.model,
+                    prompt,
                     negative_prompt: gen.negativePrompt || null,
                     override_negative: gen.overrideNegative,
                     workflow: gen.workflow,
@@ -244,7 +276,12 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         px: gen.dataPreparationPx.trim() ? Number(gen.dataPreparationPx) : null,
                         mp: gen.dataPreparationMp.trim() ? Number(gen.dataPreparationMp) : null,
                     },
-                }),
+                };
+
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
             });
             if (!r.ok) throw new Error(await r.text());
             const data = await r.json();
@@ -280,7 +317,11 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             await deleteImage(gen.resultFilename);
         }
         setGen(g => ({ ...g, resultFilename: null, error: null }));
-        await handleGenerate();
+        if (source === 'fromSource') {
+            await handleGenerateFromSource();
+        } else {
+            await handleGenerate();
+        }
     };
 
     const handleDeleteServerImage = async (filename: string) => {
@@ -364,6 +405,76 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     const imggenInputFullUrl = gen.inputImage
         ? `/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.inputImage)}`
         : null;
+    const sourceImageFullUrl = effectiveSourceImage
+        ? `/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(effectiveSourceImage)}`
+        : null;
+
+    const renderGenerationResult = () => (
+        <div className="imggen-result">
+            {gen.status === 'idle' && (
+                <div className="imggen-placeholder">Result will appear here</div>
+            )}
+            {genBusy && (
+                <div className="imggen-placeholder">
+                    {gen.status === 'submitting' ? 'Submitting task…' : 'Generating image…'}
+                </div>
+            )}
+            {gen.status === 'polling' && gen.avgTime && (
+                <div className="imggen-progress-wrap">
+                    <div
+                        className="imggen-progress-bar"
+                        style={{ width: `${progress}%` }}
+                    />
+                    <span className="imggen-progress-label">
+                        ~{Math.round(gen.avgTime)}s
+                    </span>
+                </div>
+            )}
+            {gen.status === 'error' && (
+                <div className="imggen-error">{gen.error}</div>
+            )}
+            {gen.status === 'done' && gen.resultFilename && (
+                <>
+                    <img
+                        className="imggen-preview"
+                        src={`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename)}`}
+                        alt="Generated"
+                        onClick={() => setFullscreenSrc(`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename!)}`)}
+                    />
+                    <div className="imggen-result-actions">
+                        <Button
+                            appearance="primary"
+                            size="sm"
+                            onClick={handleSelectGenerated}
+                        >
+                            Select
+                        </Button>
+                        <Button
+                            appearance="default"
+                            size="sm"
+                            onClick={() => setFullscreenSrc(`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename!)}`)}
+                        >
+                            Preview
+                        </Button>
+                        <Button
+                            appearance="default"
+                            size="sm"
+                            onClick={handleRegenerate}
+                        >
+                            Regenerate
+                        </Button>
+                        <Button
+                            appearance="subtle"
+                            size="sm"
+                            onClick={handleDeleteGenerated}
+                        >
+                            Delete
+                        </Button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
 
     const buildDataPreparation = (): Record<string, string> | null => {
         if (!gen.dataPreparationEnabled) return null;
@@ -439,9 +550,25 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         >
                             AI Generate
                         </div>
+                        {effectiveSourceImage && (
+                            <div
+                                className={`image-picker-modal-source${source === 'fromSource' ? ' active' : ''}`}
+                                onClick={() => {
+                                    setSource('fromSource');
+                                    setGen(g => ({
+                                        ...g,
+                                        prompt: g.prompt || DEFAULT_THUMBNAIL_PROMPT,
+                                        width: g.width === 1024 && g.height === 1024 ? 512 : g.width,
+                                        height: g.width === 1024 && g.height === 1024 ? 512 : g.height,
+                                    }));
+                                }}
+                            >
+                                From source image
+                            </div>
+                        )}
                     </div>
 
-                    {source !== 'generate' ? (
+                    {source !== 'generate' && source !== 'fromSource' ? (
                         <div className="image-picker-modal-grid">
                             {currentItems.map(filename => {
                                 const storedVal = getStoredValue(filename);
@@ -461,6 +588,86 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                             {currentItems.length === 0 && (
                                 <div className="image-picker-modal-empty">No images found</div>
                             )}
+                        </div>
+                    ) : source === 'fromSource' ? (
+                        <div className="imggen-panel">
+                            <div className="imggen-form">
+                                <div className="imggen-field">
+                                    <label>Source image</label>
+                                    {effectiveSourceImage && sourceImageFullUrl && (
+                                        <button
+                                            type="button"
+                                            className="imggen-input-preview"
+                                            title={effectiveSourceImage}
+                                            onClick={() => setFullscreenSrc(sourceImageFullUrl)}
+                                        >
+                                            <img src={thumbUrl(effectiveSourceImage)} alt={effectiveSourceImage} />
+                                            <span>{effectiveSourceImage}</span>
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="imggen-field">
+                                    <label>Model</label>
+                                    <SelectPicker
+                                        data={gen.models.map(m => ({ label: m.replace('imggen.', ''), value: m }))}
+                                        value={gen.model}
+                                        onChange={v => setGen(g => ({ ...g, model: v ?? '' }))}
+                                        cleanable={false}
+                                        searchable={false}
+                                        placeholder={gen.modelsLoaded ? 'No available models' : 'Loading models…'}
+                                        block
+                                    />
+                                </div>
+                                <div className="imggen-field">
+                                    <label>Prompt</label>
+                                    <Input
+                                        as="textarea"
+                                        rows={3}
+                                        value={gen.prompt || DEFAULT_THUMBNAIL_PROMPT}
+                                        onChange={v => setGen(g => ({ ...g, prompt: v }))}
+                                        placeholder={DEFAULT_THUMBNAIL_PROMPT}
+                                    />
+                                </div>
+                                <div className="imggen-field">
+                                    <label>Seed (optional)</label>
+                                    <Input
+                                        value={gen.seed}
+                                        onChange={v => setGen(g => ({ ...g, seed: v }))}
+                                        placeholder="empty = random"
+                                    />
+                                </div>
+                                <div className="imggen-size-row">
+                                    <div className="imggen-field">
+                                        <label>Width</label>
+                                        <InputNumber
+                                            value={gen.width}
+                                            min={256}
+                                            max={1024}
+                                            step={64}
+                                            onChange={v => setGen(g => ({ ...g, width: Number(v) }))}
+                                        />
+                                    </div>
+                                    <div className="imggen-field">
+                                        <label>Height</label>
+                                        <InputNumber
+                                            value={gen.height}
+                                            min={256}
+                                            max={1024}
+                                            step={64}
+                                            onChange={v => setGen(g => ({ ...g, height: Number(v) }))}
+                                        />
+                                    </div>
+                                </div>
+                                <Button
+                                    appearance="primary"
+                                    loading={genBusy}
+                                    disabled={!gen.model || !effectiveSourceImage || genBusy}
+                                    onClick={handleGenerateFromSource}
+                                >
+                                    {gen.status === 'polling' ? 'Generating…' : 'Generate thumbnail'}
+                                </Button>
+                            </div>
+                            {renderGenerationResult()}
                         </div>
                     ) : (
                         <div className="imggen-panel">
@@ -720,70 +927,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                     {gen.status === 'polling' ? 'Generating…' : 'Generate'}
                                 </Button>
                             </div>
-                            <div className="imggen-result">
-                                {gen.status === 'idle' && (
-                                    <div className="imggen-placeholder">Result will appear here</div>
-                                )}
-                                {genBusy && (
-                                    <div className="imggen-placeholder">
-                                        {gen.status === 'submitting' ? 'Submitting task…' : 'Generating image…'}
-                                    </div>
-                                )}
-                                {gen.status === 'polling' && gen.avgTime && (
-                                    <div className="imggen-progress-wrap">
-                                        <div
-                                            className="imggen-progress-bar"
-                                            style={{ width: `${progress}%` }}
-                                        />
-                                        <span className="imggen-progress-label">
-                                            ~{Math.round(gen.avgTime)}s
-                                        </span>
-                                    </div>
-                                )}
-                                {gen.status === 'error' && (
-                                    <div className="imggen-error">{gen.error}</div>
-                                )}
-                                {gen.status === 'done' && gen.resultFilename && (
-                                    <>
-                                        <img
-                                            className="imggen-preview"
-                                            src={`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename)}`}
-                                            alt="Generated"
-                                            onClick={() => setFullscreenSrc(`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename!)}`)}
-                                        />
-                                        <div className="imggen-result-actions">
-                                            <Button
-                                                appearance="primary"
-                                                size="sm"
-                                                onClick={handleSelectGenerated}
-                                            >
-                                                Select
-                                            </Button>
-                                            <Button
-                                                appearance="default"
-                                                size="sm"
-                                                onClick={() => setFullscreenSrc(`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename!)}`)}
-                                            >
-                                                Preview
-                                            </Button>
-                                            <Button
-                                                appearance="default"
-                                                size="sm"
-                                                onClick={handleRegenerate}
-                                            >
-                                                Regenerate
-                                            </Button>
-                                            <Button
-                                                appearance="subtle"
-                                                size="sm"
-                                                onClick={handleDeleteGenerated}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                            {renderGenerationResult()}
                         </div>
                     )}
                 </div>
@@ -808,7 +952,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                     <div className="image-picker-modal-actions">
                         <Button onClick={handleClear} appearance="subtle">Clear</Button>
                         <Button onClick={onClose} appearance="subtle">Cancel</Button>
-                        {source !== 'generate' && selected && selectedFullUrl && (
+                        {source !== 'generate' && source !== 'fromSource' && selected && selectedFullUrl && (
                             <Button appearance="default" onClick={() => setFullscreenSrc(selectedFullUrl)}>
                                 Preview
                             </Button>
@@ -822,7 +966,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                 Delete
                             </Button>
                         )}
-                        {source !== 'generate' && (
+                        {source !== 'generate' && source !== 'fromSource' && (
                             <Button onClick={handleConfirm} appearance="primary">Select</Button>
                         )}
                     </div>
