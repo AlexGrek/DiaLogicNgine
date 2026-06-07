@@ -17,6 +17,8 @@ import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/c
 import CodeSampleButton from '../../common/CodeSampleButton';
 import EventHostsEditor from '../../common/EventHostsEditor';
 import CopyButton from '../../common/copypaste/CopyButton';
+import DemoPlayerModal from '../../DemoPlayerModal';
+import { toYaml } from '../../../Trace';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -46,6 +48,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
     // enable code editor props
     const [codeEditMenu, setCodeEditMenu] = useState<CodeEditMenu>("onEntryScript");
     const [codeEditorOpen, setCodeEditorOpen] = useState<boolean>(false);
+    const [demoOpen, setDemoOpen] = useState<boolean>(false);
 
     useEffect(() => {
         setlocation(loc);
@@ -188,12 +191,24 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
     const locTextParts = [location.text.main, ...location.text.list.map(e => e.text)].filter(Boolean)
     const locContext = [location.displayName, ...locTextParts].filter(Boolean).join('; ')
 
+    const buildDemoPatch = () => toYaml({
+        position: { kind: 'location', location: location.uid },
+        location: location.uid,
+    });
+
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(true)}>
+            <DemoPlayerModal
+                game={game}
+                open={demoOpen}
+                onClose={() => setDemoOpen(false)}
+                initialPatch={buildDemoPatch()}
+            />
             <Drawer.Header>
                 <Drawer.Title>{loc.uid}</Drawer.Title>
                 <Drawer.Actions>
                     <CopyButton handlers={handlers} typename='loc' obj={location} />
+                    <Button onClick={() => setDemoOpen(true)}>Demo</Button>
                     <Button onClick={() => onDelete()} appearance="ghost" color='red'>
                         Delete
                     </Button>

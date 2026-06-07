@@ -6,6 +6,7 @@ import { State, createInitialState } from '../exec/GameState';
 import { GameDescription } from '../game/GameDescription';
 import { objectFromYaml } from '../Trace';
 import PlayerCore from './player/PlayerCore';
+import StateDisplayDrawer from './player/StateDisplayDrawer';
 import { playerVisualsCssVars, resolveVisuals } from './player/visualsClasses';
 import './player/player.css';
 
@@ -21,6 +22,7 @@ const DemoPlayerModal: React.FC<DemoPlayerModalProps> = ({ game, open, onClose, 
     const [patchYaml, setPatchYaml] = useState<string>('');
     const [gameState, setGameState] = useState<State | null>(null);
     const [error, setError] = useState<string>('');
+    const [stateEditorOpen, setStateEditorOpen] = useState<boolean>(false);
     const executorRef = useRef<GameExecManager | null>(null);
 
     useEffect(() => {
@@ -94,6 +96,12 @@ const DemoPlayerModal: React.FC<DemoPlayerModalProps> = ({ game, open, onClose, 
                             state={gameState}
                             onStateUpd={setGameState}
                         />
+                        <StateDisplayDrawer
+                            state={gameState}
+                            open={stateEditorOpen}
+                            onClose={() => setStateEditorOpen(false)}
+                            onStateChange={setGameState}
+                        />
                     </div>
                 )}
             </Modal.Body>
@@ -103,9 +111,11 @@ const DemoPlayerModal: React.FC<DemoPlayerModalProps> = ({ game, open, onClose, 
                         Play
                     </Button>
                 ) : (
-                    <Button onClick={handleBack}>Back to Patch</Button>
+                    <>
+                        <Button onClick={() => setStateEditorOpen(true)}>State</Button>
+                        <Button onClick={handleBack}>Back to Patch</Button>
+                    </>
                 )}
-                <Button onClick={onClose}>Close</Button>
             </Modal.Footer>
         </Modal>
     );
