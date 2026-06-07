@@ -415,12 +415,10 @@ div.text-field-editor {
   transition-duration: 0.25s !important;
 }
 
-/* ─── Apple Liquid Glass: Modals ─────────────────────────────────────────── */
+/* ─── Modals ─────────────────────────────────────────────────────────────── */
 
 .rs-modal-content {
-  background: var(--bg-glass) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  -webkit-backdrop-filter: var(--glass-blur) !important;
+  background: var(--bg-surface) !important;
   border-radius: 18px !important;
   border: 2px solid var(--modal-border) !important;
   box-shadow:
@@ -445,12 +443,10 @@ div.text-field-editor {
   padding-top: 10px !important;
 }
 
-/* ─── Apple Liquid Glass: Drawers ────────────────────────────────────────── */
+/* ─── Drawers ────────────────────────────────────────────────────────────── */
 
 .rs-drawer-content {
-  background: var(--bg-glass) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  -webkit-backdrop-filter: var(--glass-blur) !important;
+  background: var(--bg-surface) !important;
   border-left: 1px solid rgba(255,255,255,0.10) !important;
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.06) inset,

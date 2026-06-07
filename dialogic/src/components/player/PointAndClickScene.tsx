@@ -30,7 +30,10 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                     <div
                         style={{
                             ...styles.backgroundLayer,
-                            backgroundImage: generateImageUrlCss(backgroundImage)
+                            backgroundImage: backgroundImage?.trim()
+                                ? generateImageUrlCss(backgroundImage)
+                                : undefined,
+                            backgroundColor: backgroundImage?.trim() ? undefined : '#2a2a2c',
                         }}
                     />
 

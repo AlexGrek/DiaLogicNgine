@@ -38,6 +38,15 @@ const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, 
         return <PacView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
     }
 
+    if (view.uiWidgetView.widget === 'error') {
+        return (
+            <div className="game-ui-widget-unknown">
+                <h2>Error</h2>
+                <p>{view.uiWidgetView.errorText}</p>
+            </div>
+        );
+    }
+
     return (
         <div className="game-ui-widget-unknown">
             <h2>Unknown UI widget</h2>

@@ -138,7 +138,7 @@ export function createDefaultGame(): GameDescription {
             {
                 uid: "pac_scene",
                 text: {
-                    main: "Point-and-click scene (add a background image in the PAC editor to play this scene).",
+                    main: "Point-and-click scene. Zones are visible as highlighted areas; add a background image in the PAC editor when you are ready.",
                     list: [],
                 },
                 backgrounds: emptyImageList(),
