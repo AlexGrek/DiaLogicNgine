@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import './LeftTabUiMenuWidget.css'
 
 export interface DataGroup<T> {
@@ -18,7 +18,7 @@ interface LeftTabUiMenuWidgetProps<T> {
     onSelected?: (selected: string) => void
 }
 
-const LeftTabUiMenuWidget: React.FC<LeftTabUiMenuWidgetProps<any>> = ({ data, detailsRenderer, onSelected }) => {
+const LeftTabUiMenuWidget = <T,>({ data, detailsRenderer, onSelected }: LeftTabUiMenuWidgetProps<T>) => {
     const [chosenGroupIndex, setChosenGroupIndex] = useState<number | null>(null)
     const [chosenItemIndex, setChosenItemIndex] = useState<number | null>(null)
 
@@ -43,7 +43,7 @@ const LeftTabUiMenuWidget: React.FC<LeftTabUiMenuWidgetProps<any>> = ({ data, de
         }
     }
 
-    const renderGroupItems = (groupIndex: number, items: { label: string; value: string; data: any; }[]) => {
+    const renderGroupItems = (groupIndex: number, items: { label: string; value: string; data: T; }[]) => {
         return items.map((item, idx) => {
             const add = (idx === chosenItemIndex && groupIndex === chosenGroupIndex) ? ' chosen' : ''
             const className = `left-tab-ui-menu-item${add}`

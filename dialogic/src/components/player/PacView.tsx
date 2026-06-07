@@ -31,7 +31,7 @@ const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view, transi
 
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
-    }, [view])
+    }, [view, state.shortHistory.length])
 
     const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
         if (!transitionOut) {

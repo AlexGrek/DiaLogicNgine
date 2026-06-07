@@ -4,18 +4,18 @@ import * as YAML from 'js-yaml';
 
 const TRACE=true
 
-export default function logYaml(obj: any, name?: string) {
+export default function logYaml(obj: unknown, name?: string) {
     const toDump = name ? {name: name, data: obj} : obj
     const yamltext = YAML.dump(toDump)
     console.log(yamltext)
 }
 
-export function toYaml(obj: any) {
+export function toYaml(obj: unknown) {
     const yamltext = YAML.dump(obj)
     return yamltext
 }
 
-export function trace(obj: any) {
+export function trace(obj: unknown) {
     if (TRACE) {
         console.log(obj)
     }
@@ -27,7 +27,7 @@ export function objectFromYaml(text: string, requiredFields?: string[]) {
         throw Error("Expected object, but got not an object")
     if (requiredFields) {
         const notFound = requiredFields.filter(field => {
-            if (!read.hasOwnProperty(field)) {
+            if (!Object.hasOwn(read, field)) {
                 return true
             }
             return false

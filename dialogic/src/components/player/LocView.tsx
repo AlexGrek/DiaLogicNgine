@@ -31,7 +31,7 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
 
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
-    }, [view])
+    }, [view, state.shortHistory.length])
 
     const text = view.text
 

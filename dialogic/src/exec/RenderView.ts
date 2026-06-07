@@ -5,7 +5,7 @@ import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
 import { Quest, QuestPath, getQuest } from "../game/Objectives"
 import { PointAndClick, PointAndClickZone } from "../game/PointAndClick"
-import { TextList, chooseText } from "../game/TextList"
+import { TextList, chooseText, splitTextPages } from "../game/TextList"
 import { GameExecManager } from "./GameExecutor"
 import { State } from "./GameState"
 import { UiElementRenderView } from "./GameUiElementsProcessor"
@@ -58,6 +58,9 @@ export interface DialogRenderView {
     text: string
     links: RenderLink[]
     window: DialogWindow
+    pageIndex: number
+    pageCount: number
+    continueLink: RenderLink | null
 }
 
 export interface PointAndClickZoneRenderView {
@@ -106,6 +109,9 @@ export interface CharDialogRenderView {
     text: string
     dialogOptions: CharDialogOptions
     canHostEvents: boolean
+    pageIndex: number
+    pageCount: number
+    continueLink: RenderLink | null
 }
 
 export interface ErrorView {
@@ -188,6 +194,33 @@ export class RenderViewGenerator {
         return this.getCurrentText(window.text, instate, window.chooseTextScript)
     }
 
+    buildPaging(fullText: string, visibleLinks: RenderLink[], instate: State): {
+        text: string
+        pageIndex: number
+        pageCount: number
+        links: RenderLink[]
+        continueLink: RenderLink | null
+    } {
+        const pages = splitTextPages(fullText)
+        const pageCount = pages.length
+        const requested = instate.dialogPage ?? 0
+        const pageIndex = Math.max(0, Math.min(requested, pageCount - 1))
+        const isLast = pageIndex >= pageCount - 1
+
+        let links: RenderLink[] = []
+        let continueLink: RenderLink | null = null
+        if (isLast) {
+            if (visibleLinks.length === 1 && visibleLinks[0].link.text.trim() === '') {
+                // single link with no text: follow it on "click anywhere"
+                continueLink = visibleLinks[0]
+            } else {
+                links = visibleLinks
+            }
+        }
+        // when not on the last page, links stay empty and the player advances by page
+        return { text: pages[pageIndex], pageIndex, pageCount, links, continueLink }
+    }
+
     public getCurrentWindowActor(instate: State, window: DialogWindow): ActorView | null {
 
         const actor = window.actor
@@ -211,7 +244,6 @@ export class RenderViewGenerator {
 
         // get avatar from character script
         if (character.chooseAvatarScript) {
-            // eslint-disable-next-line
             const { decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseAvatarScript, this.exec, instate)
             avatar = chooseImage(character.avatar, decision)
         }
@@ -224,7 +256,6 @@ export class RenderViewGenerator {
         let name = character.displayName.main
 
         if (character.chooseNameScript) {
-            // eslint-disable-next-line
             const { decision } = evaluateAsAnyProcessor(this.exec.game, character.chooseNameScript, this.exec, instate)
             name = chooseText(character.displayName, decision)
         }
@@ -285,10 +316,14 @@ export class RenderViewGenerator {
         }
         const [dialog, window] = dw
 
+        const fullText = this.getCurrentWindowText(state, window)
+        const visibleLinks = this.getCurrentWindowLinks(state, window)
+        const paging = this.buildPaging(fullText, visibleLinks, state)
+
         const windowData = {
             actor: this.getCurrentWindowActor(state, window),
-            text: this.getCurrentWindowText(state, window),
-            links: this.getCurrentWindowLinks(state, window),
+            text: paging.text,
+            links: paging.links,
             window: window
         }
 
@@ -299,7 +334,10 @@ export class RenderViewGenerator {
         // rendering window
         return {
             widget: "dialog",
-            ...windowData
+            ...windowData,
+            pageIndex: paging.pageIndex,
+            pageCount: paging.pageCount,
+            continueLink: paging.continueLink
         }
     }
 
@@ -321,14 +359,21 @@ export class RenderViewGenerator {
 
         trace(`QuickReply: ${state.quickReplyText}`)
 
+        const fullText = state.quickReplyText || this.getCurrentText(charDialog.text, state, charDialog.chooseTextScript)
+        const visibleLinks = this.getCurrentWindowLinks(state, charDialog)
+        const paging = this.buildPaging(fullText, visibleLinks, state)
+
         // rendering window
         return {
             widget: "char",
             canHostEvents: this.exec.events.canHostEvents(state, charDialog.eventHosts || [], charDialog.canHostEventsScript),
-            text: state.quickReplyText || this.getCurrentText(charDialog.text, state, charDialog.chooseTextScript),
-            links: this.getCurrentWindowLinks(state, charDialog),
+            text: paging.text,
+            links: paging.links,
             char: char,
             dialog: charDialog,
+            pageIndex: paging.pageIndex,
+            pageCount: paging.pageCount,
+            continueLink: paging.continueLink,
             dialogOptions: {
                 canDiscussChars: true,
                 canDiscussFacts: true,

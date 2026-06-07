@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { TextList } from '../../../game/TextList';
-import { Input, InputGroup, Nav } from 'rsuite';
+import { TextList, autoSplitIntoBlocks } from '../../../game/TextList';
+import { Button, Input, InputGroup, Nav } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
 import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
@@ -25,7 +25,7 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
                 }
             }, 100)
         }
-    }, [])
+    }, [focus])
 
     const CREATE_INDEX = -100500
 
@@ -99,6 +99,12 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
             </InputGroup>)
     }
 
+    const canAutoSplit = editingText.trim().length > 120
+
+    const onAutoSplit = () => {
+        onTextChange(autoSplitIntoBlocks(editingText))
+    }
+
     const editor =
         <LlmTextarea className='text-list-text-editor' value={editingText} onChange={onTextChange} rows={singleLine ? 1 : 5} ref={textFieldRef} />
 
@@ -114,6 +120,19 @@ const TextListEditor: React.FC<TextListEditorProps> = ({ textList, onChange, sin
             <div>
                 {editingIndex < 0 ? null : nameEditingPanel(editingName)}
                 {editor}
+                {!singleLine &&
+                    <div style={{ marginTop: 4, marginLeft: 2, marginRight: 2 }}>
+                        <Button
+                            size="xs"
+                            appearance="subtle"
+                            disabled={!canAutoSplit}
+                            onClick={onAutoSplit}
+                            data-testid="text-list-auto-split"
+                            title="Split long text into separate dialog blocks (--- separators)"
+                        >
+                            Auto split
+                        </Button>
+                    </div>}
             </div>
         </div>
     );

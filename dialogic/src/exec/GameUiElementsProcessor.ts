@@ -5,7 +5,7 @@ import { evaluateAsAnyProcessor } from "./Runtime"
 
 export interface UiElementMeterRenderView {
     uiElementType: "meter"
-    currentValue: any
+    currentValue: string | number
     description: GameUiElementMeter
 }
 

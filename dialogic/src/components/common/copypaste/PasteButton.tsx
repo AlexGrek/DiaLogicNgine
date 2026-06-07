@@ -9,7 +9,7 @@ interface PasteButtonProps {
     handlers: IUpds
     customText?: string
     typenames: string[]
-    onPasteClick: (obj: any, typename: string, newUid?: string) => void
+    onPasteClick: (obj: unknown, typename: string, newUid?: string) => void
     requireNewUid?: boolean
 }
 

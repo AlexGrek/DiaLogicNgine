@@ -1,6 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Input, InputGroup, Loader, Modal, Panel, Stack, Tag } from 'rsuite';
+import { Button, Input, InputGroup, Loader, Modal } from 'rsuite';
 import { useNavigate } from 'react-router-dom';
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  FolderOpen,
+  MapPin,
+  MessageSquare,
+  MousePointerClick,
+  Plus,
+  Sparkles,
+  Target,
+  Trash2,
+  Users,
+} from 'lucide-react';
 import { GameDescription, createDefaultGame } from '../../game/GameDescription';
 import {
   ProjectMeta,
@@ -10,6 +24,7 @@ import {
   loadProjectFromServer,
   saveProjectToServer,
 } from '../../api/projectsApi';
+import './HomePage.css';
 
 interface HomePageProps {
   onOpenProject: (game: GameDescription, name: string) => void;
@@ -37,6 +52,14 @@ interface ProjectCardProps {
   onDelete: (name: string) => void;
 }
 
+const FEATURES = [
+  { icon: MessageSquare, label: 'Dialog graphs' },
+  { icon: Users, label: 'Characters' },
+  { icon: MapPin, label: 'Locations' },
+  { icon: Target, label: 'Quests' },
+  { icon: MousePointerClick, label: 'Point & click' },
+] as const;
+
 const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   opening,
@@ -50,72 +73,86 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const lastModified = formatLastModified(project.lastModified);
 
   return (
-    <Panel bordered className="home-project-card" data-testid="project-card">
-      <Stack spacing={12} alignItems="flex-start">
-        {project.mainImageUrl && (
+    <article className="home-project-card" data-testid="project-card">
+      <div className="home-project-card-media">
+        {project.mainImageUrl ? (
           <img
             src={project.mainImageUrl}
             alt={displayName}
             className="home-project-thumb"
           />
+        ) : (
+          <div className="home-project-thumb-placeholder">
+            <FolderOpen size={32} strokeWidth={1.5} />
+          </div>
         )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Stack justifyContent="space-between" alignItems="flex-start">
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <span className="home-project-name">{displayName}</span>
-              {showId && (
-                <span className="home-project-id">{project.name}</span>
-              )}
-              {project.authors && project.authors.length > 0 && (
-                <span className="home-project-authors">
-                  {project.authors.join(', ')}
-                </span>
-              )}
-              {project.description && (
-                <p className="home-project-description">{project.description}</p>
-              )}
-            </div>
-            <Stack spacing={6} alignItems="center" style={{ flexShrink: 0, marginLeft: 8 }}>
-              <Button
-                size="sm"
-                color="red"
-                appearance="subtle"
-                disabled={anyBusy}
-                loading={deleting}
-                onClick={() => onDelete(project.name)}
-                data-testid="delete-project-btn"
-              >
-                Delete
-              </Button>
-              <Button
-                appearance="primary"
-                size="sm"
-                loading={opening}
-                disabled={anyBusy}
-                onClick={() => onOpen(project.name)}
-                data-testid="open-project-btn"
-              >
-                Open
-              </Button>
-            </Stack>
-          </Stack>
-          <Stack spacing={6} style={{ marginTop: 8 }}>
-            {project.dialogCount !== undefined && (
-              <Tag size="sm">{project.dialogCount} dialogs</Tag>
-            )}
-            {project.characterCount !== undefined && (
-              <Tag size="sm">{project.characterCount} chars</Tag>
-            )}
-            {project.locationCount !== undefined && (
-              <Tag size="sm">{project.locationCount} locs</Tag>
-            )}
-            {lastModified && (
-              <span className="home-project-modified">Updated {lastModified}</span>
-            )}
-          </Stack>
+      </div>
+
+      <div className="home-project-card-body">
+        <div>
+          <div className="home-project-name">{displayName}</div>
+          {showId && <span className="home-project-id">{project.name}</span>}
+          {project.authors && project.authors.length > 0 && (
+            <span className="home-project-authors">
+              {project.authors.join(', ')}
+            </span>
+          )}
+          {project.description && (
+            <p className="home-project-description">{project.description}</p>
+          )}
         </div>
-      </Stack>
-    </Panel>
+
+        <div className="home-project-stats">
+          {project.dialogCount !== undefined && (
+            <span className="home-project-stat">
+              <MessageSquare />
+              {project.dialogCount}
+            </span>
+          )}
+          {project.characterCount !== undefined && (
+            <span className="home-project-stat">
+              <Users />
+              {project.characterCount}
+            </span>
+          )}
+          {project.locationCount !== undefined && (
+            <span className="home-project-stat">
+              <MapPin />
+              {project.locationCount}
+            </span>
+          )}
+          {lastModified && (
+            <span className="home-project-modified">Updated {lastModified}</span>
+          )}
+        </div>
+
+        <div className="home-project-actions">
+          <Button
+            size="sm"
+            color="red"
+            appearance="subtle"
+            disabled={anyBusy}
+            loading={deleting}
+            onClick={() => onDelete(project.name)}
+            data-testid="delete-project-btn"
+          >
+            <Trash2 size={14} style={{ marginRight: 4 }} />
+            Delete
+          </Button>
+          <Button
+            appearance="primary"
+            size="sm"
+            loading={opening}
+            disabled={anyBusy}
+            onClick={() => onOpen(project.name)}
+            data-testid="open-project-btn"
+          >
+            <BookOpen size={14} style={{ marginRight: 4 }} />
+            Open
+          </Button>
+        </div>
+      </div>
+    </article>
   );
 };
 
@@ -193,89 +230,123 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
   const anyBusy = openingName !== null || deletingName !== null;
 
   return (
-    <div className="home-page">
-      <div className="home-hero">
-        <p className="home-title">🇺🇦 DiaLogic Ngine</p>
-        <p className="home-subtitle">Visual novel &amp; dialogue game editor</p>
-      </div>
+    <div className="home-page" data-testid="home-page">
+      <div className="home-orb home-orb--1" aria-hidden />
+      <div className="home-orb home-orb--2" aria-hidden />
+      <div className="home-orb home-orb--3" aria-hidden />
 
-      <div className="home-content">
-        <Panel bordered className="home-create-panel">
-          <p className="home-section-label">New project</p>
-          <InputGroup>
-            <Input
-              placeholder="Project name"
-              value={newName}
-              onChange={setNewName}
-              onPressEnter={handleCreate}
-              disabled={creating}
-              data-testid="new-project-input"
-            />
-            <InputGroup.Button
-              appearance="primary"
-              disabled={!newName.trim() || creating}
-              onClick={handleCreate}
-              data-testid="create-project-btn"
-            >
-              {creating ? <Loader size="xs" /> : 'Create'}
-            </InputGroup.Button>
-          </InputGroup>
-        </Panel>
-
-        <div className="home-projects">
-          <Stack
-            justifyContent="space-between"
-            alignItems="center"
-            style={{ marginLeft: 8, marginRight: 8, marginBottom: 4 }}
-          >
-            <p className="home-section-label" style={{ margin: 0 }}>
-              Saved projects
-              {loadingList && <Loader size="xs" style={{ marginLeft: 8 }} />}
-            </p>
-            {totalPages > 1 && (
-              <Stack spacing={8} alignItems="center">
-                <Button
-                  size="xs"
-                  appearance="subtle"
-                  disabled={page <= 1 || loadingList}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  ←
-                </Button>
-                <span style={{ fontSize: '0.85em', color: '#888' }}>
-                  {page} / {totalPages}
-                </span>
-                <Button
-                  size="xs"
-                  appearance="subtle"
-                  disabled={page >= totalPages || loadingList}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  →
-                </Button>
-              </Stack>
-            )}
-          </Stack>
-
-          {!loadingList && projects.length === 0 && (
-            <Panel bordered className="home-empty">
-              <p>No projects yet — create one above.</p>
-            </Panel>
-          )}
-
-          <Stack direction="column" spacing={8}>
-            {projects.map((proj) => (
-              <ProjectCard
-                key={proj.name}
-                project={proj}
-                opening={openingName === proj.name}
-                anyBusy={anyBusy}
-                deleting={deletingName === proj.name}
-                onOpen={handleOpen}
-                onDelete={setConfirmDelete}
-              />
+      <div className="home-inner">
+        <header className="home-hero">
+          <div className="home-badge">
+            <Sparkles size={12} />
+            Visual novel engine
+          </div>
+          <h1 className="home-title">🇺🇦 DiaLogic Ngine</h1>
+          <p className="home-subtitle">
+            Design branching stories, characters, and worlds — then play them instantly.
+          </p>
+          <div className="home-features">
+            {FEATURES.map(({ icon: Icon, label }) => (
+              <span key={label} className="home-feature">
+                <Icon />
+                {label}
+              </span>
             ))}
-          </Stack>
+          </div>
+        </header>
+
+        <div className="home-content">
+          <section className="home-glass home-create-panel">
+            <div className="home-create-header">
+              <div className="home-create-icon">
+                <Plus size={20} />
+              </div>
+              <div>
+                <p className="home-section-label">New project</p>
+                <p className="home-section-title">Start from scratch</p>
+              </div>
+            </div>
+            <InputGroup className="home-create-input">
+              <Input
+                placeholder="Give your story a name…"
+                value={newName}
+                onChange={setNewName}
+                onPressEnter={handleCreate}
+                disabled={creating}
+                data-testid="new-project-input"
+              />
+              <InputGroup.Button
+                appearance="primary"
+                disabled={!newName.trim() || creating}
+                onClick={handleCreate}
+                data-testid="create-project-btn"
+              >
+                {creating ? <Loader size="xs" /> : 'Create'}
+              </InputGroup.Button>
+            </InputGroup>
+          </section>
+
+          <section className="home-projects">
+            <div className="home-projects-header">
+              <div className="home-projects-title">
+                <h2>Saved projects</h2>
+                {!loadingList && total > 0 && (
+                  <span className="home-project-count">{total}</span>
+                )}
+                {loadingList && <Loader size="xs" />}
+              </div>
+              {totalPages > 1 && (
+                <div className="home-pagination">
+                  <button
+                    type="button"
+                    className="home-pagination-btn"
+                    disabled={page <= 1 || loadingList}
+                    onClick={() => setPage((p) => p - 1)}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="home-pagination-label">
+                    {page} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="home-pagination-btn"
+                    disabled={page >= totalPages || loadingList}
+                    onClick={() => setPage((p) => p + 1)}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="home-project-grid">
+              {!loadingList && projects.length === 0 && (
+                <div className="home-empty">
+                  <div className="home-empty-icon">
+                    <FolderOpen size={24} />
+                  </div>
+                  <p>
+                    No projects yet — <strong>create one above</strong> to get started.
+                  </p>
+                </div>
+              )}
+
+              {projects.map((proj) => (
+                <ProjectCard
+                  key={proj.name}
+                  project={proj}
+                  opening={openingName === proj.name}
+                  anyBusy={anyBusy}
+                  deleting={deletingName === proj.name}
+                  onOpen={handleOpen}
+                  onDelete={setConfirmDelete}
+                />
+              ))}
+            </div>
+          </section>
         </div>
       </div>
 

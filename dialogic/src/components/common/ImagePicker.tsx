@@ -14,6 +14,7 @@ interface ImagePickerProps {
     projectName?: string;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const IMAGES = ["jpeg", "jpg", "png", "bmp", "webp", "gif", "svg", "tiff"]
 
 const ImagePicker: React.FC<ImagePickerProps> = ({

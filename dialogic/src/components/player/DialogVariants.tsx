@@ -46,7 +46,8 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
         return `${base} transition-out${indexString}`
     }
 
-    const click = (link: DialogLink, textOfLink: string) => {
+    const click = (link: DialogLink, textOfLink: string, ev: React.MouseEvent) => {
+        ev.stopPropagation()
         const clickData = { actor: null, text: text || '', answer: textOfLink, step: step } // TODO: add actor
         onStateUpd(game.dialogVariantApply(state, link, clickData))
     }
@@ -55,7 +56,7 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
         return links.map((link, i) => {
             const textOfLink = link.text
             return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled} className='dialog-button' onClick={() => click(link.link, textOfLink)}>{textOfLink}</button>
+                <button disabled={link.disabled} className='dialog-button' onClick={(ev) => click(link.link, textOfLink, ev)}>{textOfLink}</button>
             </div>)
         })
     }

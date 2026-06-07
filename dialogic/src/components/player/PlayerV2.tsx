@@ -82,8 +82,21 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
                 console.error('onDiscuss failed', e);
             }
         },
+        onAdvancePage: () => {
+            const widget = viewRef.current?.uiWidgetView;
+            let blockText = '';
+            if (widget && (widget.widget === 'dialog' || widget.widget === 'char')) {
+                blockText = widget.text || '';
+            }
+            try {
+                const next = exec.advanceDialogPage(stateRef.current, blockText);
+                stateRef.current = next;
+                setState(next);
+            } catch (e) {
+                console.error('onAdvancePage failed', e);
+            }
+        },
         events: eventsRef.current,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }), [exec, game]);
 
     useEffect(() => {
@@ -103,7 +116,6 @@ const PlayerV2: React.FC<PlayerV2Props> = ({ game }) => {
             h.destroy();
             phaserHandleRef.current = null;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bridge]);
 
     useEffect(() => {

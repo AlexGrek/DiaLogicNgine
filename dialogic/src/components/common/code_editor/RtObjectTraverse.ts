@@ -2,10 +2,10 @@ import { GameExecManager } from "../../../exec/GameExecutor";
 import { RuntimeRt, createRtObject } from "../../../exec/Runtime";
 import { GameDescription } from "../../../game/GameDescription";
 
-function traverseObjectProperties(obj: Record<string, any>) {
+function traverseObjectProperties(obj: Record<string, unknown>) {
     const list = []
-    for (let key in obj) {
-        if (obj.hasOwnProperty(key)) {
+    for (const key in obj) {
+        if (Object.hasOwn(obj, key)) {
             list.push(key)
         }
     }
@@ -17,14 +17,14 @@ export function traverseRt(rt: RuntimeRt) {
     let all = traverseObjectProperties(rt.props).map(s => `props.${s}`)
 
     // add chars
-    for (let ch in rt.ch) {
+    for (const ch in rt.ch) {
         const inChar = traverseObjectProperties(rt.ch[ch]).map(s => `ch.${ch}.${s}`)
         all = all.concat(inChar)
     }
 
     // add objectives
-    for (let ql in rt.objectives) {
-        if (rt.objectives.hasOwnProperty(ql) && !ql.startsWith('_')) {
+    for (const ql in rt.objectives) {
+        if (Object.hasOwn(rt.objectives, ql) && !ql.startsWith('_')) {
             // add questline funcs and props
             const qlAction = `objectives.${ql}`
             const actions = ["open", "close"]
@@ -33,8 +33,8 @@ export function traverseRt(rt: RuntimeRt) {
             all.push(...readableProps.map(rp => `${qlAction}.${rp}`))
 
             // add each quest
-            for (let q in rt.objectives[ql]) {
-                if (rt.objectives[ql].hasOwnProperty(q) && !q.startsWith('_')) {
+            for (const q in rt.objectives[ql]) {
+                if (Object.hasOwn(rt.objectives[ql], q) && !q.startsWith('_')) {
                     // add quest funcs and props
                     const qAction = `objectives.${ql}.${q}`
                     const actions = ["fail", "complete", "open"]
@@ -43,8 +43,8 @@ export function traverseRt(rt: RuntimeRt) {
                     all.push(...readableProps.map(rp => `${qAction}.${rp}`))
 
                     // add each task
-                    for (let task in rt.objectives[ql][q]) {
-                        if (rt.objectives[ql][q].hasOwnProperty(task) && !task.startsWith('_')) {
+                    for (const task in rt.objectives[ql][q]) {
+                        if (Object.hasOwn(rt.objectives[ql][q], task) && !task.startsWith('_')) {
                             // add task funcs and props
                             const taskAction = `objectives.${ql}.${q}.${task}`
                             const actions = ["fail", "complete", "open"]

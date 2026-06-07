@@ -34,7 +34,7 @@ interface DialogWindowEditDrawerProps {
     dialog: Dialog;
     open: boolean;
     handlers: IUpds;
-    onClose: Function;
+    onClose: () => void;
     game: GameDescription;
     dialogHandlers: DialogHandlers;
 }

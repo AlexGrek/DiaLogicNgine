@@ -241,6 +241,31 @@
     margin: 0 6pt;
 }
 
+.dialog-continue-hint {
+    width: 100%;
+    text-align: center;
+    margin: 6pt 0 2pt 0;
+    pointer-events: none;
+}
+
+.dialog-continue-chevron {
+    display: inline-block;
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.6);
+    animation: dialog-continue-bounce 1.2s ease-in-out infinite;
+}
+
+@keyframes dialog-continue-bounce {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translateY(4px);
+        opacity: 0.9;
+    }
+}
+
 .dialog-variants button {
     background-color: transparent;
     color: rgba(255, 255, 255, 0.85);

@@ -18,7 +18,7 @@ import { IUpds } from '../App';
 import { ChevronDown, ChevronRight, Plus, SquareDashedMousePointer } from 'lucide-react';
 import './side-panel.css';
 
-export interface ISidePanelProps {
+interface ISidePanelProps {
   game: GameDescription;
   handlers: IUpds;
 }
@@ -183,4 +183,5 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
   );
 };
 
-export default React.memo(SidePanel);
+const MemoizedSidePanel = React.memo(SidePanel);
+export default MemoizedSidePanel;

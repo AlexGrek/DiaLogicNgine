@@ -6,7 +6,7 @@ interface ConfirmationDialogProps {
     text_initial: string,
     header: string,
     onConfirm: (changedText: string) => void,
-    onClose: Function,
+    onClose: () => void,
     validator: (newText: string) => boolean,
     placeholder?: string
 }
@@ -21,12 +21,12 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({validator, text_
         setText(text_initial);
     }, [text_initial]);
 
-    const handleCancel = (_e: any) => {
+    const handleCancel = () => {
         setOpen(false);
         onClose();
     }
 
-    const handleConfirm = (_e: any) => {
+    const handleConfirm = () => {
         setOpen(false);
         onConfirm(text);
     }

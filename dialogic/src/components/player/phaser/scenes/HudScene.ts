@@ -234,6 +234,8 @@ export class HudScene extends Phaser.Scene {
         const links = this.renderLinks(view.links, innerX, cursorY, innerW);
         links.forEach(c => this.root.add(c));
 
+        this.addAdvanceZone(view.pageIndex < view.pageCount - 1, view.continueLink);
+
         fadeIn(this, panelBg, 200);
         this.tweens.add({ targets: panelBg, scaleY: { from: 0.98, to: 1 }, duration: 250, ease: 'Cubic.easeOut' });
         text.setAlpha(0);
@@ -375,9 +377,38 @@ export class HudScene extends Phaser.Scene {
         const links = this.renderLinks(view.links, innerX, cursorY, innerW);
         links.forEach(c => this.root.add(c));
 
+        this.addAdvanceZone(view.pageIndex < view.pageCount - 1, view.continueLink);
+
         fadeIn(this, panelBg, 200);
         text.setAlpha(0);
         this.tweens.add({ targets: text, alpha: 1, y: { from: text.y + 8, to: text.y }, duration: 300, ease: 'Cubic.easeOut', delay: 80 });
+    }
+
+    private addAdvanceZone(canAdvance: boolean, continueLink: RenderLink | null) {
+        if (!canAdvance && !continueLink) return;
+        const { width, height } = this.scale.gameSize;
+        // transparent full-screen catcher so clicking anywhere advances the text;
+        // it is added on top, but link buttons are never present in this case
+        // (the render layer leaves links empty while paging / on continue links).
+        const zone = this.add.rectangle(0, 0, width, height, 0x000000, 0.001).setOrigin(0, 0);
+        zone.setInteractive({ useHandCursor: true });
+        zone.on('pointerdown', () => {
+            if (continueLink) {
+                this.bridge.onLinkClick(continueLink);
+            } else {
+                this.bridge.onAdvancePage();
+            }
+        });
+        this.root.add(zone);
+
+        const hint = this.add.text(width / 2, height - 18, '▼ click to continue', {
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '14px',
+            color: '#9fb3d1',
+        }).setOrigin(0.5, 1);
+        this.root.add(hint);
+        hint.setAlpha(0);
+        this.tweens.add({ targets: hint, alpha: { from: 0, to: 0.85 }, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
 
     private renderPac(view: PacRenderView) {

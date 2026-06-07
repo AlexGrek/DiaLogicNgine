@@ -4,8 +4,8 @@ import { Button, Modal } from 'rsuite';
 interface ConfirmationDialogProps {
     text: string,
     header: string,
-    onConfirm: Function,
-    onClose: Function
+    onConfirm: () => void,
+    onClose: () => void
 }
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ text, header, onConfirm, onClose }) => {
@@ -15,12 +15,12 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ text, header, o
         setOpen(true);
     }, []);
 
-    const handleCancel = (_e: any) => {
+    const handleCancel = () => {
         setOpen(false);
         onClose();
     }
 
-    const handleConfirm = (_e: any) => {
+    const handleConfirm = () => {
         setOpen(false);
         onConfirm();
     }

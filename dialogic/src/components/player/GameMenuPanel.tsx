@@ -45,7 +45,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
                 setSelectedWidget(null)
             }, 250)
         }
-    }, [open]);
+    }, [open, selectedWidget]);
 
     // Open a specific widget on external request (e.g. clicking a notification toast).
     // Declared after the [open] effect so it wins when the menu opens and that

@@ -19,7 +19,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [, setCreatingNew] = useState<boolean>(false);
     React.useEffect(() => {
-        setEditingIndex(editingIndex);
+        setEditingIndex(-1);
     }, [game]);
 
     const edit = (i: number) => {
@@ -56,7 +56,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
     const editor = (index: number) => {
         const loc = game.locs[index]
         const editThisLoc = (update: Loc) => {
-            let updatedLocArray = game.locs
+            const updatedLocArray = game.locs
             if (update.uid === '') {
                 // remove this location
                 updatedLocArray.splice(index, 1)

@@ -18,7 +18,7 @@ interface DialogWindowPickerProps {
 }
 
 const DialogWindowPicker: React.FC<DialogWindowPickerProps> = ({ dialogs, onValueChange, chosen, handlers }) => {
-    var uid = null
+    let uid = null
     if (chosen) {
         const dialogName = chosen[0]
         const windowName = chosen[1]

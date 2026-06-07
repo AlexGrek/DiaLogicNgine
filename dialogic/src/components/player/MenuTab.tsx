@@ -11,7 +11,7 @@ interface MenuTabProps {
     localmanager: LocalizationManager
     manager: SavesManager
     onStateChange: (newState: State) => void
-    onCloseMenu: Function
+    onCloseMenu: () => void
 }
 
 type OpenMenu = "load" | "save" | "about"| "newgame" | null

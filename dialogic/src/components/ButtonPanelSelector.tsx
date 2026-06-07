@@ -23,6 +23,6 @@ function ButtonPanelSelector<T>(props: ButtonPanelSelectorProps<T>) {
         }
     })}</ButtonGroup>
     );
-};
+}
 
 export default ButtonPanelSelector;

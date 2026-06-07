@@ -29,7 +29,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ quest, game, onSetQuest }) =>
             textFieldRef.current.focus()
         }
         // setEditingItem(-1)
-    }, [quest]);
+    }, [quest, q.uid]);
 
     const handleTaskEdit = (t: Task) => {
         const tasks = [...q.tasks]
@@ -85,7 +85,7 @@ const QuestEditor: React.FC<QuestEditorProps> = ({ quest, game, onSetQuest }) =>
     }
 
     const getItemClass = (i: number) => {
-        let className = 'objectives-editing-task'
+        const className = 'objectives-editing-task'
         if (i === itemMovingDownIndex) {
             return "objectives-moving-down " + className
         }

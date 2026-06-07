@@ -39,7 +39,7 @@ const CharMenu: React.FC<CharMenuProps> = ({ game, onSetGame, handlers }) => {
         updateCharacterList(copy)
     }
 
-    const charPasted = (obj: any, typename: string, newUid?: string) => {
+    const charPasted = (obj: unknown, typename: string, newUid?: string) => {
         if (newUid === undefined || typename !== 'char') {
             return
         }

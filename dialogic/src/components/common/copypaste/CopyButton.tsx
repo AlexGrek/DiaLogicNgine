@@ -9,7 +9,7 @@ interface CopyButtonProps {
     handlers: IUpds
     customText?: string
     typename: string
-    obj: any
+    obj: unknown
     buttonStyle?: CopyButtonStyle
 }
 

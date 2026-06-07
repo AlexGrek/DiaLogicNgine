@@ -84,6 +84,7 @@ tasks:
   ship:
     desc: Build + push Docker image, then deploy to the cluster
     cmds:
+      - task: frontend:install
       - task: docker:release
       - task: deploy
 

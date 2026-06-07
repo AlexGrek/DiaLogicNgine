@@ -4,7 +4,7 @@ import screenfull from 'screenfull';
 import { UiElementMeterRenderView } from '../../exec/GameUiElementsProcessor';
 
 interface InGameControlPadProps {
-    onFullscreen: Function;
+    onFullscreen: () => void;
     uiElements: UiElementMeterRenderView[]
 }
 

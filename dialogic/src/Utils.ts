@@ -4,7 +4,7 @@ export function isValidIdentifier(str: string): boolean {
     return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(str);
 }
 
-function allEnumValuesOf(type: any) {
+function allEnumValuesOf(type: Record<string, string | number>) {
     return Object.keys(type).filter((item) => {
         return isNaN(Number(item));
     });
@@ -15,7 +15,7 @@ export interface KeyValuePair<K, V> {
     value: V;
 }
 
-export function stringEnumEntries<T extends Object>(type: T) {
+export function stringEnumEntries<T extends Record<string, string | number>>(type: T) {
     const arr = Object.keys(type).map((name) => {
         return {
             name,
@@ -31,7 +31,7 @@ function asColor(color: Color): Color {
     return color;
 }
 
-function removeByIndex<T>(array: T[], index: Number) {
+function removeByIndex<T>(array: T[], index: number) {
     return array.filter((_, i) => i !== index);
 }
 
@@ -85,9 +85,9 @@ export function prependToCode(prependValue: string, oldCode?: string | null) {
     }
 }
 
-export function createTypeAssertionFunction<T>(properties: (keyof T)[]): (obj: any) => obj is T {
-    return function (obj: any): obj is T {
-        return properties.every(prop => prop in obj);
+export function createTypeAssertionFunction<T>(properties: (keyof T)[]): (obj: unknown) => obj is T {
+    return function (obj: unknown): obj is T {
+        return properties.every(prop => prop in (obj as object));
     };
 }
 
@@ -141,7 +141,7 @@ export function trimArray<T>(arr: T[], maxLength: number): T[] {
 }
 
 export class LocalStorage {
-    static set(key: string, value: any): void {
+    static set(key: string, value: unknown): void {
         try {
             const serializedValue = JSON.stringify(value);
             localStorage.setItem(key, serializedValue);
@@ -216,18 +216,20 @@ export function partition<T>(array: T[], predicate: (value: T) => boolean): [T[]
     return [trueArray, falseArray];
 }
 
-export function deepEqual<T extends Record<string | number, any>>(obj1: T, obj2: T): boolean {
+export function deepEqual(obj1: unknown, obj2: unknown): boolean {
     if (obj1 === obj2) return true;
     if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) return false;
 
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
+    const record1 = obj1 as Record<string, unknown>;
+    const record2 = obj2 as Record<string, unknown>;
+    const keys1 = Object.keys(record1);
+    const keys2 = Object.keys(record2);
 
     if (keys1.length !== keys2.length) return false;
 
     for (const key of keys1) {
-        if (!Object.prototype.hasOwnProperty.call(obj2, key)) return false;
-        if (!deepEqual(obj1[key as keyof T], obj2[key as keyof T])) return false;
+        if (!Object.prototype.hasOwnProperty.call(record2, key)) return false;
+        if (!deepEqual(record1[key], record2[key])) return false;
     }
 
     return true;

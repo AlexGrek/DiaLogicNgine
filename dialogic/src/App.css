@@ -360,122 +360,15 @@ div.text-field-editor {
   animation-duration: 0.22s !important;
 }
 
-/* Home page */
-
-.home-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  background-color: var(--bg-base);
-  background-image:
-    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(90,200,250,0.07) 0%, transparent 70%);
-  padding: 0 16px 40px;
-}
-
-.home-hero {
-  text-align: center;
-  padding: 60px 20px 40px;
-}
-
-.home-title {
-  font-family: 'HeaderFont', sans-serif;
-  font-size: 36pt;
-  margin: 0 0 8px;
-  text-shadow: 1px 1px 16px rgba(0,0,0,0.8);
-}
-
-.home-subtitle {
-  font-size: 13pt;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.home-content {
-  width: 100%;
-  max-width: 680px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.home-new-btn {
-  width: 100%;
-}
+/* Shared section label (home + save/load) */
 
 .home-section-label {
-  font-size: 11pt;
-  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
   margin: 0 0 4px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.home-projects {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.home-project-card {
-  width: 100%;
-}
-
-.home-project-name {
-  font-size: 13pt;
-  font-weight: 500;
-}
-
-.home-project-title {
-  display: block;
-  font-size: 10pt;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.home-empty {
-  width: 100%;
-  color: var(--text-subtle);
-  text-align: center;
-}
-
-.home-project-thumb {
-  width: 80px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.home-project-id {
-  display: block;
-  font-size: 10pt;
-  color: var(--text-subtle);
-  margin-top: 1px;
-}
-
-.home-project-authors {
-  display: block;
-  font-size: 10pt;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.home-project-description {
-  font-size: 10pt;
-  color: var(--text-muted);
-  margin: 4px 0 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 360px;
-}
-
-.home-project-modified {
-  font-size: 9pt;
-  color: var(--text-subtle);
-  white-space: nowrap;
-  align-self: center;
+  letter-spacing: 0.08em;
 }
 
 /* Save/Load page */

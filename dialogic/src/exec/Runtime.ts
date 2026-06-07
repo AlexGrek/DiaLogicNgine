@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- dynamic runtime objects for user script evaluation */
 import lodash, { isBoolean, isNumber, isString } from "lodash";
 import { roleByUid } from "../game/Character";
 import { GameDescription } from "../game/GameDescription";
@@ -175,9 +176,9 @@ export class RuntimeItemsManager {
     }
 
     public add(itemUid: string) {
-        let item = getItemByIdOrNull(this._context.game.items, itemUid);
+        const item = getItemByIdOrNull(this._context.game.items, itemUid);
         if (item != null) {
-            let index = this.getIndexByItemId(this.state.carriedItems, itemUid);
+            const index = this.getIndexByItemId(this.state.carriedItems, itemUid);
             if (item.stackable && index >= 0) {
                 // just increase number
                 this.state.carriedItems[index].quantity += 1

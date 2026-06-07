@@ -43,7 +43,7 @@ export type UiObjectId = DialogWindowId | LocationID | CharDialogID
 
 export interface FatalError {
     message: string
-    exception?: any
+    exception?: unknown
 }
 
 export interface HistoryRecord {
@@ -65,7 +65,7 @@ export interface State {
     positionHistory: UiObjectId[]
     location: string | null
     charDialog: string | null
-    props: { [key: string]: any }
+    props: { [key: string]: string | number | boolean }
     fatalError?: FatalError | null
     shortHistory: HistoryRecord[]
     gameVersion: string
@@ -80,6 +80,7 @@ export interface State {
     situation?: string
     carriedItems: CarriedItem[]
     happenedEvents: string[]
+    dialogPage: number
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -102,7 +103,8 @@ export function createInitialState(game: GameDescription): State {
         progress: createInitialGameProgress(),
         notifications: [],
         carriedItems: [],
-        happenedEvents: []
+        happenedEvents: [],
+        dialogPage: 0
     }
 }
 

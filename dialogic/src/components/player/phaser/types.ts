@@ -15,6 +15,7 @@ export interface PlayerBridge {
     onLinkClick: (link: RenderLink) => void;
     onRouteClick: (route: LocRouteRenderView) => void;
     onDiscuss: (topicType: DiscussionTopicType, value: string, charUid: string) => void;
+    onAdvancePage: () => void;
 
     events: Phaser.Events.EventEmitter;
 }

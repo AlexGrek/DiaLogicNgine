@@ -14,7 +14,7 @@ export default class EventsProcessor {
         this.exec = exec
     }
 
-    canHostEvents(state: State, eventHosts: any[], canHostEventsScript: string | undefined) {
+    canHostEvents(state: State, eventHosts: string[], canHostEventsScript: string | undefined) {
         if (eventHosts == null || eventHosts.length == 0) {
             return false
         }
@@ -29,7 +29,7 @@ export default class EventsProcessor {
         if (event.link == null) {
             return oldState
         }
-        let target = event.link
+        const target = event.link
         return this.exec.followLink(oldState, createImmediateDialogLink(target));
     }
 
@@ -75,7 +75,7 @@ export default class EventsProcessor {
             if (!loc) {
                 throw new Error(`Location ${loc} not found`)
             }
-            const locEventHosts = getLocEventHosts(loc).filter(item => item != null)
+            const locEventHosts = getLocEventHosts(loc).filter((item): item is string => item != null)
             if (this.canHostEvents(oldState, locEventHosts, loc.canHostEventsScript)) {
                 // can host events
                 return this.processPossibleEvents(oldState, locEventHosts)

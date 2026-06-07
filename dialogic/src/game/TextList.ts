@@ -14,7 +14,28 @@ export function emptyTextList(): TextList {
     return {main: "", list: []}
 }
 
-export function chooseText(list: TextList, i: any): string {
+export function splitTextPages(text: string): string[] {
+    const parts = (text ?? "").split(/^[ \t]*---[ \t]*$/m).map(s => s.trim())
+    const nonEmpty = parts.filter(p => p.length > 0)
+    return nonEmpty.length > 0 ? nonEmpty : [text ?? ""]
+}
+
+export function autoSplitIntoBlocks(text: string, sentencesPerBlock = 2): string {
+    // split into sentences keeping their terminal punctuation
+    const sentences = (text.match(/[^.!?]+[.!?]+(?:["')\]]+)?\s*|[^.!?]+$/g) ?? [])
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+    if (sentences.length <= 1) {
+        return text
+    }
+    const blocks: string[] = []
+    for (let i = 0; i < sentences.length; i += sentencesPerBlock) {
+        blocks.push(sentences.slice(i, i + sentencesPerBlock).join(' '))
+    }
+    return blocks.join('\n---\n')
+}
+
+export function chooseText(list: TextList, i: unknown): string {
     // Valid values:
     // null | undefined | -1 - to pick main text
     // integer from 0 to list.length-1 - to pick alt text by index

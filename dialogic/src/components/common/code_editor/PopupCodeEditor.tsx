@@ -14,6 +14,7 @@ export interface PopupCodeEditorUi {
     header: string;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_ARGS = {
     "state": "state object, can be modified",
     "state.position": "UiObjectId, current position",
@@ -123,7 +124,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
             setCode(ui.functionTemplates[name])
         }
         return Object.entries(ui.functionTemplates).map(example => {
-            const [name, _code] = example
+            const [name] = example
             return <button className="load-example-btn-code" onClick={() => applyCodeTemplate(name)} key={name}>{name}</button>
         })
     }

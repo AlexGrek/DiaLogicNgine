@@ -8,19 +8,19 @@ import copy from 'copy-to-clipboard';
 interface SaveLoadJsonDrawerProps {
   gameInput: GameDescription;
   visible: boolean;
-  onClose: Function;
+  onClose: () => void;
   onJsonLoad: (json: string) => void;
 }
 
 const SaveLoadJsonDrawer: React.FC<SaveLoadJsonDrawerProps> = ({ gameInput, visible, onClose, onJsonLoad }) => {
   const [, setGame] = useState<GameDescription>(gameInput);
   const [text, setText] = useState<string>("");
-  const txtInput = useRef<any>(null);
+  const txtInput = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setGame(gameInput);
     if (visible) {
-      let text = beautify(gameInput, null, 2, 200)
+      const text = beautify(gameInput, null, 2, 200)
       console.warn(`Result of transcoding ${gameInput} into json:`)
       console.warn(text)
       setText(text)

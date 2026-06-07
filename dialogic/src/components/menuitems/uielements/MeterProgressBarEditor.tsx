@@ -8,10 +8,10 @@ interface MeterProgressBarProps {
 }
 
 const MeterProgressBarEditor: React.FC<MeterProgressBarProps> = ({ progressBar, onChange }) => {
-    const handleInputChange = (name: string) => (value: any) => {
+    const handleInputChange = (name: string) => (value: string | number | null) => {
         onChange({
             ...progressBar,
-            [name]: parseFloat(value) // Ensure numeric values
+            [name]: parseFloat(value != null ? String(value) : '') // Ensure numeric values
         });
     };
 

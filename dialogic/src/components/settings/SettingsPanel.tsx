@@ -22,12 +22,14 @@ export interface AppSettings {
   compactSidebar: boolean;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_SETTINGS: AppSettings = {
   compactSidebar: false,
 };
 
 const STORAGE_KEY = 'dialogicngine_app_settings';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function loadSettings(): AppSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -38,6 +40,7 @@ export function loadSettings(): AppSettings {
   return { ...DEFAULT_SETTINGS };
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function saveSettings(s: AppSettings): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }

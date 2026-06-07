@@ -38,7 +38,7 @@ export default class AppGameRuntime extends React.Component<AppGameRuntimeProps,
     super(props);
 
 
-    let game = createDefaultGame()
+    const game = createDefaultGame()
 
     this.state = {
       game: game

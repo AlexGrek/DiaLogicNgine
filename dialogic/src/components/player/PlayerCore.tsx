@@ -46,6 +46,8 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         setInTransitionState(true)
         // transition away should be completed
         setTimeout(() => setInTransitionState(false), 200)
+    // Only re-render view when game state changes; background/currentView are read for transition logic.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state])
 
     const onFullScreen = () => { }

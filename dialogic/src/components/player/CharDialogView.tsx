@@ -50,6 +50,24 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
 
     const text = view.text
 
+    const canAdvance = view.pageIndex < view.pageCount - 1
+    const canContinue = view.continueLink != null
+    const clickToContinue = canAdvance || canContinue
+    const showOptions = !clickToContinue
+
+    const handleAreaClick = () => {
+        if (state.fatalError) {
+            return
+        }
+        if (canAdvance) {
+            onStateUpd(game.advanceDialogPage(state, text))
+        } else if (view.continueLink) {
+            const link = view.continueLink
+            const clickData = { actor: null, text: text, answer: link.text, step: step }
+            onStateUpd(game.dialogVariantApply(state, link.link, clickData))
+        }
+    }
+
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
         if (inTransitionOut) {
             return transitionOutClass(base, index, maxindex)
@@ -106,7 +124,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }
 
     return (
-        <div className={transitionOutClass("dialog-window-view")}>
+        <div className={transitionOutClass("dialog-window-view")} onClick={clickToContinue ? handleAreaClick : undefined} style={clickToContinue ? { cursor: 'pointer' } : undefined} data-testid="char-dialog-view">
             <div className={transitionInOutClass('dialog-widget-special-links')}>
 
             </div>
@@ -116,8 +134,12 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
                         {state.fatalError ? state.fatalError.message : text}
                     </p>
                 </div>
-                <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} />
-                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} />
+                {showOptions && <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} />}
+                {showOptions && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} text={text} />}
+                {clickToContinue && !state.fatalError &&
+                    <div className='dialog-continue-hint' data-testid="char-dialog-continue-hint">
+                        <span className='dialog-continue-chevron'>﹀</span>
+                    </div>}
             </div>}
             {discuss && <div className='dialog-controls'>
                 <DiscussionTopicPicker localization={localmanager.current}  game={game} state={state} view={view} onCancel={handleCancelSpecialUi} onTopicSelected={handleDiscussion}/>

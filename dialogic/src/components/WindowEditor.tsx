@@ -11,7 +11,7 @@ export interface IWindowEditorProps {
   window: DialogWindow;
   dialog: Dialog;
   handlers: IUpds;
-  onWindowChosen: Function;
+  onWindowChosen: () => void;
   game: GameDescription;
 }
 
@@ -86,7 +86,7 @@ export default class WindowEditor extends React.Component<IWindowEditorProps, IW
       <div className='window-widget-footer' onClick={() => this.props.onWindowChosen()}>
         <ul className='window-widget-links-list'>
           {this.props.window.links.map((el, i) => {
-            var direction = ![LinkType.Push, LinkType.Jump, LinkType.ResetJump].includes(el.mainDirection.type) ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
+            let direction = ![LinkType.Push, LinkType.Jump, LinkType.ResetJump].includes(el.mainDirection.type) ? el.mainDirection.direction : (el.mainDirection.qualifiedDirection ? `${el.mainDirection.qualifiedDirection.dialog}.${el.mainDirection.qualifiedDirection.window}` : "?")
             if (el.mainDirection.type == LinkType.QuickReply) {
               direction = `"${el.mainDirection.replyText || ""}"`
             }

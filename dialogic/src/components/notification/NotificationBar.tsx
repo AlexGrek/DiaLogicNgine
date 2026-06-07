@@ -12,7 +12,7 @@ interface NotificationBarProps {
 const NotificationBar: React.FC<NotificationBarProps> = ({ notification }) => {
     const [notificationCounter, setNotificationCounter] = useState<number>(0);
     useEffect(() => {
-        setNotificationCounter(notificationCounter + 1)
+        setNotificationCounter(n => n + 1)
     }, [notification]);
 
     const genHeader = (type: NotificationType) => {

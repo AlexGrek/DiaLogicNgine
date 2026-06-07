@@ -45,12 +45,12 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ char, window_uid, l
         setEditingIndex(links.length);
     }
 
-    const onPaste = (link: any, typename: string) => {
+    const onPaste = (obj: unknown, typename: string) => {
         if (typename !== 'link') {
             console.error(`Pasted not link, but ${typename}`)
             return
         }
-        const newLinks = [...links, link as DialogLink]
+        const newLinks = [...links, obj as DialogLink]
         onChange(newLinks);
         setEditingIndex(links.length);
     }
@@ -66,7 +66,7 @@ const LinksEditorPanel: React.FC<LinksEditorPanelProps> = ({ char, window_uid, l
         onChange(newLinkList);
     }
 
-    const onLinkRemove = (index: Number) => {
+    const onLinkRemove = (index: number) => {
         const newLinkList = removeByIndex(links, index);
         onChange(newLinkList);
     }

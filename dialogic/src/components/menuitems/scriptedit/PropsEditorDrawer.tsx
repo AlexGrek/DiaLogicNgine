@@ -19,8 +19,8 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
     const [listOfVariantsAsString, setListOfVariantsAsString] = useState<string>("")
     useEffect(() => {
         setProp(value);
-        if (prop.datatype === "variant") {
-            setListOfVariantsAsString(prop.variants.join(","))
+        if (value.datatype === "variant") {
+            setListOfVariantsAsString(value.variants.join(","))
         }
     }, [value]);
 

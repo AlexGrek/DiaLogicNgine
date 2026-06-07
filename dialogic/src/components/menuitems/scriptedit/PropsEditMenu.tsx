@@ -82,7 +82,7 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
         }
     }
 
-    const onPaste = (obj: any, typename: string, newUid?: string) => {
+    const onPaste = (obj: unknown, typename: string, newUid?: string) => {
         const p = obj as Prop
         if (typename !== 'prop') {
             return

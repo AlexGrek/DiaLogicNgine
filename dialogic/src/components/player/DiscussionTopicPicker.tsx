@@ -68,7 +68,7 @@ const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, loc
 
     const getLocs = () => {
         return state.knownPlaces.map((id) => {
-            let loc = getLoc(game.game, id)
+            const loc = getLoc(game.game, id)
             if (!loc) {
                 return {
                     name: `No location found <${id}>`,

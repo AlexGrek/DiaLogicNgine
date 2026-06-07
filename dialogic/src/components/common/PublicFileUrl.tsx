@@ -8,6 +8,7 @@ interface PublicFileUrlProps {
     requestUrl?: string
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const IMAGES = ["jpeg", "jpg", "png", "bmp", "webp", "gif", "svg", "tiff"]
 
 const PublicFileUrl: React.FC<PublicFileUrlProps> = ({ extensions, value, onChange, requestUrl }) => {

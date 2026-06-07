@@ -14,10 +14,10 @@ interface CodeSampleButtonProps {
 const CodeSampleButton: React.FC<CodeSampleButtonProps> = ({ name, code, onClick }) => {
 
     const shortenCode = (code: string) => {
-        var firstNindex = -1
-        var cropIndex = code.length
-        var linei = 0;
-        for (var i = 0; i < code.length; i++) {
+        let firstNindex = -1
+        let cropIndex = code.length
+        let linei = 0;
+        for (let i = 0; i < code.length; i++) {
             linei++;
             if (code[i] === "\n") {
                 linei = 0;

@@ -10,7 +10,7 @@ import { GameDescription } from '../../../game/GameDescription';
 
 export interface MagicOperation {
     name: string
-    parameters: { [key: string]: any }
+    parameters: { [key: string]: string | number | boolean }
     descr: string
     validator?: (op: MagicOperation) => string | null
     onApply: (op: MagicOperation) => string | null
@@ -35,7 +35,7 @@ const Magic: React.FC<MagicProps> = ({ operations }) => {
     }
 
     const items = operations.map((op, i) => {
-        const icon = op.parameters.length > 0 ? <ArrowDownIcon /> : <ArrowRightIcon />
+        const icon = Object.keys(op.parameters).length > 0 ? <ArrowDownIcon /> : <ArrowRightIcon />
         return <Dropdown.Item key={i} icon={icon} onSelect={() => chooseOp(op)}>{op.name}</Dropdown.Item>
     })
 
@@ -61,10 +61,10 @@ const Magic: React.FC<MagicProps> = ({ operations }) => {
 
     const generateParameters = (op: MagicOperation) => {
         const items = []
-        for (let key in op.parameters) {
-            if (op.parameters.hasOwnProperty(key)) {
+        for (const key in op.parameters) {
+            if (Object.hasOwn(op.parameters, key)) {
                 const value = op.parameters[key];
-                var editor: ReactNode = null
+                let editor: ReactNode = null
                 if (lodash.isString(value)) {
                     const validateAsUid = key.endsWith("id")
                     const canBeEmpty = key.includes("empty")

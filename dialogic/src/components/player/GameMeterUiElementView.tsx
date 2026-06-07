@@ -9,8 +9,12 @@ interface GameMeterUiElementViewProps {
   
 
 const GameMeterUiElementView: React.FC<GameMeterUiElementViewProps> = ({ meter }) => {
+    const currentNumber = typeof meter.currentValue === 'number'
+        ? meter.currentValue
+        : parseFloat(String(meter.currentValue))
+
     const renderProgressBar = (bar: MeterProgressBar) => {
-        return <ProgressBar min={bar.min} max={bar.max} current={meter.currentValue}></ProgressBar>
+        return <ProgressBar min={bar.min} max={bar.max} current={currentNumber}></ProgressBar>
     }
 
     const renderPlainTextValue = () => {

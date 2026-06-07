@@ -69,7 +69,7 @@ interface LinkEditorProps {
     onLinkChange: (link: DialogLink, index: number) => void;
     onLinkRemove: (index: number) => void;
 
-    onEditingDone: Function;
+    onEditingDone: () => void;
     // need to be able to do anything
     dialog: Dialog | null;
     window: DialogWindow | null;
@@ -96,13 +96,13 @@ const TooltipText: { [key: string]: string } = {
 const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLinkChange, game, handlers, window,
     onEditingDone, onLinkRemove, dialogHandlers }) => {
 
-    const txtInput = useRef<any>(null);
+    const txtInput = useRef<HTMLInputElement>(null);
     const [codeEditorOpen, setCodeEditorOpen] = useState<boolean>(false);
     const [codeEditorMenu, setCodeEditorMenu] = useState<CodeEditMenu>("actionCode");
 
     useEffect(() => {
         if (txtInput.current) {
-            setTimeout(() => txtInput.current.focus(), 300);
+            setTimeout(() => txtInput.current?.focus(), 300);
         }
     }, [])
 
@@ -132,8 +132,8 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
     }
 
     const editCode = (menu: CodeEditMenu, update: string) => {
-        var linkUpdate = link;
-        var updateOrUndef: string | undefined = update
+        let linkUpdate = link;
+        let updateOrUndef: string | undefined = update
         if (update == "") {
             updateOrUndef = undefined
         }
@@ -158,7 +158,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
     const editType = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, type: LinkType) => {
         const linkDirUpdate = { ...linkdir, type: type };
 
-        var linkUpdate = lodash.cloneDeep(link)
+        const linkUpdate = lodash.cloneDeep(link)
         if (isMain) {
             linkUpdate.mainDirection = linkDirUpdate
         } else {
@@ -171,7 +171,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
     const editLocalDirection = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, str: string) => {
         const linkDirUpdate = { ...linkdir, direction: str };
 
-        var linkUpdate = lodash.cloneDeep(link)
+        const linkUpdate = lodash.cloneDeep(link)
         if (isMain) {
             linkUpdate.mainDirection = linkDirUpdate
         } else {
@@ -184,7 +184,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
     const editReply = (linkdir: DialogLinkDirection, isMain: boolean, aindex: number, str: string) => {
         const linkDirUpdate: DialogLinkDirection = { ...linkdir, replyText: str };
 
-        var linkUpdate = lodash.cloneDeep(link)
+        const linkUpdate = lodash.cloneDeep(link)
         if (isMain) {
             linkUpdate.mainDirection = linkDirUpdate
         } else {
@@ -199,7 +199,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
             const id = createDialogWindowId(d, w);
             const linkDirUpdate = { ...linkdir, qualifiedDirection: id }
 
-            var linkUpdate = lodash.cloneDeep(link)
+            const linkUpdate = lodash.cloneDeep(link)
             if (isMain) {
                 linkUpdate.mainDirection = linkDirUpdate
             } else {
@@ -297,7 +297,7 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
         },
         descr: 'Link will be invisible after user clicks it once, creates prop and script',
         onApply: function (op: MagicOperation): string | null {
-            const prop = op.parameters["property_uid"]
+            const prop = String(op.parameters["property_uid"])
             handlers.createProp(createBoolProp(prop, false))
             const isVisible = `return !props.${prop};`
             const action = `props.${prop} = true;`
@@ -317,9 +317,9 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
     const filteredTooltips = Object.fromEntries(Object.entries(tooltips));
 
     const renderCodeEditor = (menu: CodeEditMenu) => {
-        var code: string | undefined = ""
-        var onSaveClose = editCode
-        var ui = CODE_EDITOR_UI_ACTION
+        let code: string | undefined = ""
+        const onSaveClose = editCode
+        let ui = CODE_EDITOR_UI_ACTION
         switch (menu) {
             case "actionCode":
                 code = link.actionCode

@@ -24,9 +24,9 @@ const StringMapEditor: React.FC<StringMapEditorProps> = ({ onChange, value, canB
 
     useEffect(() => {
         const items = []
-        for (let key in value) {
-            if (value.hasOwnProperty(key)) {
-                let item = value[key];
+        for (const key in value) {
+            if (Object.hasOwn(value, key)) {
+                const item = value[key];
                 items.push({ key: key, value: item.toString() })
             }
         }

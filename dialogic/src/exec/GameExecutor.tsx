@@ -54,7 +54,7 @@ export class GameExecManager {
     }
 
     private goToLocalLink(directionName: string, prevState: State) {
-        var newState = lodash.cloneDeep(prevState)
+        const newState = lodash.cloneDeep(prevState)
         if (newState.position.kind === "window") {
             newState.position.window = directionName
         }
@@ -62,14 +62,14 @@ export class GameExecManager {
     }
 
     private pushLink(direction: DialogWindowId, prevState: State) {
-        var newState = lodash.cloneDeep(prevState)
+        const newState = lodash.cloneDeep(prevState)
         newState.positionStack.push(prevState.position)
         newState.position = direction
         return newState
     }
 
     private jumpLink(direction: DialogWindowId, prevState: State, reset?: boolean) {
-        var newState = lodash.cloneDeep(prevState)
+        const newState = lodash.cloneDeep(prevState)
         if (reset) {
             newState.positionStack = []
         }
@@ -77,7 +77,7 @@ export class GameExecManager {
         return newState
     }
 
-    getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined, contextVars?: any) {
+    getBoolDecisionWithDefault(instate: State, defaultVal: boolean, script: string | undefined, contextVars?: unknown) {
         if (script !== undefined && script !== '') {
             const { decision } = evaluateAsBoolProcessor(this.game, script, this, instate, contextVars)
             return decision
@@ -110,7 +110,7 @@ export class GameExecManager {
     }
 
     private returnLink(prevState: State) {
-        var newState = lodash.cloneDeep(prevState)
+        const newState = lodash.cloneDeep(prevState)
         const currentPosition = prevState.position
         if (currentPosition.kind === 'chardialog' || prevState.charDialog === null) {
             // if we are in char dialog - we have get back to current location or prev dialog
@@ -159,8 +159,8 @@ export class GameExecManager {
     }
 
     private popLink(prevState: State) {
-        var newState = lodash.cloneDeep(prevState)
-        var prevPosition = newState.positionStack.pop()
+        const newState = lodash.cloneDeep(prevState)
+        const prevPosition = newState.positionStack.pop()
         if (prevPosition) {
             newState.position = prevPosition
             return newState
@@ -183,7 +183,7 @@ export class GameExecManager {
 
     private goToLocation(prevState: State, direction?: string | Loc) {
         // remove all the stack
-        var newState = lodash.cloneDeep(prevState)
+        const newState = lodash.cloneDeep(prevState)
         if (!direction) {
             console.error("Direction is not defined for a location")
             return prevState
@@ -301,8 +301,8 @@ export class GameExecManager {
     }
 
     followLink(prevState: State, link: DialogLink): State {
-        var newState = this.withUpdatedStep(prevState)
-        var directionFromLink = link.mainDirection
+        let newState = this.withUpdatedStep(prevState)
+        let directionFromLink = link.mainDirection
         if (link.isAlternativeLink && link.alternativeDirections.length > 0 && link.useAlternativeWhen) {
             const { state, decision } = evaluateAsBoolProcessor(this.game, link.useAlternativeWhen, this, newState)
             newState = state
@@ -357,7 +357,7 @@ export class GameExecManager {
             return prevState
         }
 
-        var newState = lodash.cloneDeep(prevState)
+        let newState = lodash.cloneDeep(prevState)
 
         const directionUid = direction
         const directionObject = lodash.isString(direction) ? getChar(this.game, direction) : direction
@@ -394,7 +394,7 @@ export class GameExecManager {
 
     private withUpdatedHistory(state: State, clickData: HistoryRecord): State {
         // also changes step value
-        var s = lodash.cloneDeep(state)
+        const s = lodash.cloneDeep(state)
         if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
             s.shortHistory.shift() // remove latest entry
         }
@@ -404,9 +404,24 @@ export class GameExecManager {
 
     private withUpdatedStep(state: State): State {
         // also clears quickReply as it was for the previous step
-        var s = lodash.cloneDeep(state)
+        const s = lodash.cloneDeep(state)
         s.stepCount = s.stepCount + 1
         s.quickReplyText = null
+        s.dialogPage = 0
+        return s
+    }
+
+    advanceDialogPage(prevState: State, blockText: string): State {
+        // advance to the next "---" text block of the current window without
+        // following any link; record the block we are leaving in short history
+        const s = lodash.cloneDeep(prevState)
+        const record: HistoryRecord = { actor: null, text: blockText, answer: '', step: s.stepCount }
+        if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
+            s.shortHistory.shift()
+        }
+        s.shortHistory.push(record)
+        s.stepCount = s.stepCount + 1
+        s.dialogPage = (s.dialogPage ?? 0) + 1
         return s
     }
 
@@ -484,7 +499,7 @@ export class GameExecManager {
         return evaluateAsStateProcessor(this.game, window.entryScript, this, state, { usedItem: itemUid })
     }
 
-    stateError(state: State, message: string, exception?: any) {
+    stateError(state: State, message: string, exception?: unknown) {
         const newState = lodash.cloneDeep(state)
         newState.fatalError = { message: message, exception: exception }
         return newState

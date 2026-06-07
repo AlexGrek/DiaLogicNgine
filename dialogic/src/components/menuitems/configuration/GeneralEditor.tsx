@@ -29,7 +29,7 @@ const GeneralEditor: React.FC<GeneralEditorProps> = ({ value, onClose, onChange,
     }
 
     const renderStrPropEditor = (prop: keyof GeneralGameInfo) => {
-        var input;
+        let input;
         if (TEXTAREA_FOR.includes(prop)) {
             input = <Input as="textarea" rows={3} value={general[prop].toString()} onChange={setStrProp(prop)} />
         } else {

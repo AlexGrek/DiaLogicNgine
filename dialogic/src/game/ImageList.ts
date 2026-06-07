@@ -14,7 +14,7 @@ export function emptyImageList(): ImageList {
     return {list: []}
 }
 
-export function chooseImage(list: ImageList, i: any): string | undefined {
+export function chooseImage(list: ImageList, i: unknown): string | undefined {
     // Valid values:
     // null | undefined | -1 - to pick main text
     // integer from 0 to list.length-1 - to pick alt text by index

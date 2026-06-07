@@ -6,16 +6,16 @@ export interface GameList {
 }
 
 export class SaveLoadManager {
-    private readLs(key: string, initial: any) {
+    private readLs<T>(key: string, initial: T): T {
         if (LocalStorage.has(key)) {
-            return LocalStorage.get(key)
+            return LocalStorage.get<T>(key) as T
         }
         else {
             return initial
         }
     }
 
-    private saveLs(key: string, data: any) {
+    private saveLs(key: string, data: unknown) {
         LocalStorage.set(key, data)
     }
 
@@ -41,11 +41,11 @@ export class SaveLoadManager {
 
     listGameNames(): string[] {
         const gameList = this.readGameList()
-        return Object.entries(gameList.games).map(([key, _]) => key)
+        return Object.keys(gameList.games)
     }
 
     exists(name: string) {
         const gameList = this.readGameList()
-        return gameList.games.hasOwnProperty(name)
+        return Object.hasOwn(gameList.games, name)
     }
 }

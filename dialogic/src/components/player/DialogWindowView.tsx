@@ -31,11 +31,28 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
 
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
-    }, [view])
+    }, [view, state.shortHistory.length])
 
     const text = view.text
 
     const actor = view.actor
+
+    const canAdvance = view.pageIndex < view.pageCount - 1
+    const canContinue = view.continueLink != null
+    const clickToContinue = canAdvance || canContinue
+
+    const handleAreaClick = () => {
+        if (state.fatalError) {
+            return
+        }
+        if (canAdvance) {
+            onStateUpd(game.advanceDialogPage(state, text))
+        } else if (view.continueLink) {
+            const link = view.continueLink
+            const clickData = { actor: null, text: text, answer: link.text, step: step }
+            onStateUpd(game.dialogVariantApply(state, link.link, clickData))
+        }
+    }
 
     const renderAvatar = () => {
         if (actor === null) {
@@ -96,7 +113,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
     }
 
     return (
-        <div className={transitionOutClass("dialog-window-view")}>
+        <div className={transitionOutClass("dialog-window-view")} onClick={clickToContinue ? handleAreaClick : undefined} style={clickToContinue ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
             <div className="dialog-short-history" id="dialog-short-history-scrollable">
                 {renderShortHistory()}
             </div>
@@ -110,7 +127,11 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
                         {state.fatalError ? state.fatalError.message : text}
                     </p>
                 </div>
-                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} />
+                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} text={text} />
+                {clickToContinue && !state.fatalError &&
+                    <div className='dialog-continue-hint' data-testid="dialog-continue-hint">
+                        <span className='dialog-continue-chevron'>﹀</span>
+                    </div>}
             </div>
         </div>
     );

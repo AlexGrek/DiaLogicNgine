@@ -7,7 +7,7 @@ import { initGameUiElementDescr } from "./GameUiElementDescr";
 export default interface Patch {
     from(): string;
     to(): string;
-    apply(obj: any): GameDescription
+    apply(obj: unknown): GameDescription
 }
 
 export class PatchFrom04To05 implements Patch {
@@ -17,11 +17,12 @@ export class PatchFrom04To05 implements Patch {
     to(): string {
         return "0.5"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log("Patching 0.4 to 0.5")
-        obj["config"] = createDefaultConfig()
-        return obj as GameDescription
+        const data = obj as Record<string, unknown>
+        data["config"] = createDefaultConfig()
+        return data as unknown as GameDescription
     }
 }
 
@@ -32,11 +33,12 @@ export class PatchFrom05To06 implements Patch {
     to(): string {
         return "0.6"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log("Patching 0.5 to 0.6")
-        obj["objectives"] = []
-        return obj as GameDescription
+        const data = obj as Record<string, unknown>
+        data["objectives"] = []
+        return data as unknown as GameDescription
     }
 }
 
@@ -47,11 +49,12 @@ export class PatchFrom06To07 implements Patch {
     to(): string {
         return "0.7"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
-        obj["translations"] = createTranslations()
-        return obj as GameDescription
+        const data = obj as Record<string, unknown>
+        data["translations"] = createTranslations()
+        return data as unknown as GameDescription
     }
 }
 
@@ -62,11 +65,12 @@ export class PatchFrom07To08 implements Patch {
     to(): string {
         return "0.8"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
-        obj["situations"] = []
-        return obj as GameDescription
+        const data = obj as Record<string, unknown>
+        data["situations"] = []
+        return data as unknown as GameDescription
     }
 }
 
@@ -77,10 +81,10 @@ export class PatchFrom08To09 implements Patch {
     to(): string {
         return "0.9"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
-        const objData: GameDescription = obj
+        const objData = obj as GameDescription
         for (const loc of objData.locs) {
             loc["discussable"] = true
         }
@@ -91,7 +95,7 @@ export class PatchFrom08To09 implements Patch {
             fact["discussable"] = true
         }
 
-        return objData as GameDescription
+        return objData
     }
 }
 
@@ -102,15 +106,15 @@ export class PatchFrom09To010 implements Patch {
     to(): string {
         return "0.10"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
-        const objData: GameDescription = obj
+        const objData = obj as GameDescription
         for (const char of objData.items) {
             char["stackable"] = false
         }
         objData.uiElements = initGameUiElementDescr()
-        return objData as GameDescription
+        return objData
     }
 }
 
@@ -121,14 +125,14 @@ export class PatchFrom10To011 implements Patch {
     to(): string {
         return "0.11"
     }
-    apply(obj: any): GameDescription {
+    apply(obj: unknown): GameDescription {
         // do the patch work
         console.log(`Patching ${this.from()} to ${this.to()}`)
-        const objData: GameDescription = obj
+        const objData = obj as GameDescription
         if (!objData.pacWidgets) {
             objData.pacWidgets = []
         }
-        return objData as GameDescription
+        return objData
     }
 }
 
@@ -143,15 +147,15 @@ const PATCHES = [
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {
-    const parsed: any = JSON.parse(json)
+    const parsed: unknown = JSON.parse(json)
     // at least we can parse it
-    const version = parsed["engineVersion"]
+    const version = (parsed as Record<string, unknown>)["engineVersion"]
     if (version === undefined || version === null || !lodash.isString(version)) {
         throw Error("Cannot read property 'engineVersion' of json data, this is not a game")
     }
     const result: GameDescription = version === currentEngine
         ? parsed as GameDescription
-        : patchGame(parsed, version, currentEngine);
+        : patchGame(parsed as GameDescription, version, currentEngine);
 
     if (!result.general?.name) {
         result.general = { ...result.general, name: uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: '-', length: 2 }) };
@@ -160,7 +164,7 @@ export function loadJsonStringAndPatch(json: string, currentEngine: string) {
     return result;
 }
 
-function patchGame(parsed: any, version: string, currentEngine: string): GameDescription {
+function patchGame(parsed: GameDescription, version: string, currentEngine: string): GameDescription {
     const patch = PATCHES.filter(p => p.from() === version)
     if (patch.length < 1) {
         throw Error("Cannot find patch for version " + version)
