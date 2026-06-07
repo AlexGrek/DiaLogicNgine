@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Edit2, PlusCircle, Trash2Icon } from "lucide-react";
-import { Button, ButtonGroup, Drawer, Input, InputNumber, Panel } from "rsuite";
+import { Button, ButtonGroup, Drawer, Input, InputNumber, Message, Panel } from "rsuite";
 import { PointAndClick, PointAndClickZone } from "../../../game/PointAndClick";
+import ImagePicker from "../../common/ImagePicker";
+import { generateImageUrl } from "../../../Utils";
 
 type EditorMode = 'add' | 'edit';
 
@@ -15,10 +17,12 @@ interface DragState {
 }
 
 interface PointAndClickEditorProps {
-    value: PointAndClick, onChange: (it: PointAndClick) => void
+    value: PointAndClick
+    onChange: (it: PointAndClick) => void
+    projectName: string
 }
 
-const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChange }) => {
+const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChange, projectName }) => {
     const [mode, setMode] = useState<EditorMode>('edit');
     const [selectedZone, setSelectedZone] = useState<PointAndClickZone | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -39,6 +43,8 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
     });
 
     const scene = value
+    const hasBackground = Boolean(scene.background?.trim())
+    const backgroundCss = hasBackground ? `url(${generateImageUrl(scene.background, projectName)})` : 'none'
 
     const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +58,7 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
     };
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        if (!hasBackground) return;
         if (mode === 'add') {
             const pos = getRelativePosition(e);
             setIsDrawing(true);
@@ -217,6 +224,20 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
                         </Button>
                     </div>
                 </div>
+                {!hasBackground && (
+                    <Message type="warning" showIcon style={{ marginTop: '12px' }}>
+                        A background image is required before this scene can be saved or used in the player.
+                    </Message>
+                )}
+                <div style={{ marginTop: '12px', maxWidth: '420px' }}>
+                    <ImagePicker
+                        value={scene.background || undefined}
+                        onChange={(val) => handleSetScene({ ...value, background: val || '' })}
+                        projectName={projectName}
+                    >
+                        Background image (required)
+                    </ImagePicker>
+                </div>
             </Panel>
 
             <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a1a', padding: '20px' }}>
@@ -232,13 +253,30 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
                             left: 0,
                             width: '100%',
                             height: '100%',
-                            backgroundImage: scene.background ? `url(${scene.background})` : 'none',
+                            backgroundImage: backgroundCss,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
-                            cursor: mode === 'add' ? 'crosshair' : 'default',
-                            border: '2px solid #333',
+                            cursor: !hasBackground ? 'not-allowed' : (mode === 'add' ? 'crosshair' : 'default'),
+                            border: hasBackground ? '2px solid #333' : '2px dashed #faad14',
                         }}
                     >
+                        {!hasBackground && (
+                            <div style={{
+                                position: 'absolute',
+                                inset: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                                color: '#faad14',
+                                fontSize: '16px',
+                                textAlign: 'center',
+                                padding: '20px',
+                                pointerEvents: 'none',
+                            }}>
+                                Select a background image above to start placing zones
+                            </div>
+                        )}
                         {scene.zones.map(zone => (
                             <div
                                 key={zone.id}
@@ -363,12 +401,13 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>Image URL</label>
-                                <Input
-                                    value={selectedZone.image || ''}
-                                    onChange={(value) => updateSelectedZone({ image: value || undefined })}
-                                    placeholder="Optional zone image"
-                                />
+                                <ImagePicker
+                                    value={selectedZone.image}
+                                    onChange={(val) => updateSelectedZone({ image: val || undefined })}
+                                    projectName={projectName}
+                                >
+                                    Zone image (optional)
+                                </ImagePicker>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>

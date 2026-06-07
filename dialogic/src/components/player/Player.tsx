@@ -48,7 +48,7 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
                     <Button name='goto'>Go to</Button>
                 </ButtonGroup>
             </div>
-            <div className="player-main" style={{ position: 'relative' }}>
+            <div className="player-main">
                 <PlayerCore game={gameExecutor} state={gameState} onStateUpd={handleStateChange} />
                 {!started && (
                     <MainMenuView

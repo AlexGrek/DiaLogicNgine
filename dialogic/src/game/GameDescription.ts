@@ -124,6 +124,7 @@ export function createDefaultGame(): GameDescription {
 
     const demoPac: PointAndClick = {
         id: "demoPointAndClick",
+        background: '',
         zones: demoPointAndClickZones,
         eventHosts: []
     }

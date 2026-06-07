@@ -18,7 +18,7 @@ export interface PointAndClickZone {
 
 export interface PointAndClick {
   id: string;
-  background?: string;
+  background: string;
   zones: PointAndClickZone[];
 
   // events
@@ -29,7 +29,7 @@ export interface PointAndClick {
 export function createEmptyPac(uid: string): PointAndClick {
   return {
     id: uid,
-    background: undefined,
+    background: '',
     zones: [],
     eventHosts: [],
     canHostEventsScript: undefined

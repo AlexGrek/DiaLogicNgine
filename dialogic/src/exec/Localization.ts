@@ -23,6 +23,7 @@ export function createTranslations(): Translations {
     return {
         "Discuss...": "",
         "Facts": "",
+        "Knowledge": "",
         "Inventory": "",
         "Menu": "",
         "Journal": "",

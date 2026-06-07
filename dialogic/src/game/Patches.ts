@@ -161,6 +161,14 @@ export function loadJsonStringAndPatch(json: string, currentEngine: string) {
         result.general = { ...result.general, name: uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: '-', length: 2 }) };
     }
 
+    if (result.pacWidgets) {
+        for (const pac of result.pacWidgets) {
+            if (pac.background === undefined || pac.background === null) {
+                pac.background = ''
+            }
+        }
+    }
+
     return result;
 }
 

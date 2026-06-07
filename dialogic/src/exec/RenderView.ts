@@ -279,6 +279,9 @@ export class RenderViewGenerator {
                     if (!pac) {
                         throw `Widget PointAndClick ${JSON.stringify(widget)} was not found`
                     }
+                    if (!pac.background?.trim()) {
+                        throw `Point-and-click scene "${pac.id}" requires a background image`
+                    }
                     const visibleZones = pac.zones.filter((zone) => {
                         if (zone.isVisibleIfScript) {
                             const { decision } = evaluateAsBoolProcessor(this.exec.game, zone.isVisibleIfScript, this.exec, state)

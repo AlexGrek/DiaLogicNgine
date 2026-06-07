@@ -7,6 +7,7 @@ import './PointAndClick.css';
 import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 import { createEmptyPac, PointAndClick } from '../../../game/PointAndClick';
 import PointAndClickEditor from './PointAndClickEditor';
+import { generateImageUrl } from '../../../Utils';
 
 interface PacMenuProps {
     game: GameDescription;
@@ -14,7 +15,7 @@ interface PacMenuProps {
     onSetItems: (items: PointAndClick[]) => void
 }
 
-const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
+const PointAncClick: React.FC<PacMenuProps> = ({ game, items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<PointAndClick | null>(null);
 
@@ -54,13 +55,23 @@ const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
 
     const renderItems = () => {
         return items.map((it, i) => {
+            const thumbSrc = it.background?.trim()
+                ? generateImageUrl(it.background, game.general.name)
+                : undefined
             return <div className='item-item' key={i} onClick={() => setEditingByIndex(i)}>
+                {thumbSrc
+                    ? <img className='item-thumb' alt="" src={thumbSrc} />
+                    : <div className='item-name' style={{ color: '#faad14', fontSize: '11px', padding: '8px' }}>No background</div>}
                 <div className='item-header'><p className='item-uid'>{it.id}</p></div>
             </div>
         })
     }
 
     const saveEdited = () => {
+        if (!editingObject?.background?.trim()) {
+            alert('Point-and-click scenes require a background image.');
+            return;
+        }
         // save updates into index
         const copied = lodash.cloneDeep(items)
         if (editingObject !== null)
@@ -68,6 +79,8 @@ const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
         setEditingByIndex(-1)
         onSetItems(copied)
     }
+
+    const canSave = Boolean(editingObject?.background?.trim())
 
     return (
         <div>
@@ -82,13 +95,17 @@ const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
                     <h2>Edit item</h2>
                     <div>
                         <ConfirmDeleteButton onConfirm={() => deleteItem(editingIndex)} objectDescr={`item`}></ConfirmDeleteButton>
-                        <Button onClick={() => saveEdited()} appearance="primary">
+                        <Button onClick={() => saveEdited()} appearance="primary" disabled={!canSave}>
                             Save
                         </Button>
                     </div>
                 </div>
                 <div>
-                    <PointAndClickEditor value={editingObject} onChange={setEditingObject} />
+                    <PointAndClickEditor
+                        value={editingObject}
+                        onChange={setEditingObject}
+                        projectName={game.general.name}
+                    />
                 </div>
             </Panel>}
         </div>

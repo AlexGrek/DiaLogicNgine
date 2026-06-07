@@ -48,7 +48,9 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
                 setSelectedWidget(null)
             }, 250)
         }
-    }, [open, selectedWidget]);
+    // Only reset widget selection when the menu opens/closes, not when the user picks a tab.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     // Open a specific widget on external request (e.g. clicking a notification toast).
     // Declared after the [open] effect so it wins when the menu opens and that
@@ -149,10 +151,10 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
 
 
 
-    const renderWidgetButton = (name: string) => {
+    const renderWidgetButton = (name: string, label?: string) => {
         const classBaseName = 'game-menu-sub-button'
         const className = selectedWidget === name ? `${classBaseName} open` : classBaseName
-        return <button className={className} onClick={() => handleWidgetClick(name)}>{localmanager.current.local(name)}</button>
+        return <button className={className} onClick={() => handleWidgetClick(name)}>{localmanager.current.local(label ?? name)}</button>
     }
 
     return (
@@ -177,7 +179,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
                 <div className={getClass('game-menu-screen')}>
                     <div className={getClass('game-menu-button-group')}>
                         {renderWidgetButton("Inventory")}
-                        {renderWidgetButton("Facts")}
+                        {renderWidgetButton("Facts", "Knowledge")}
                         {renderWidgetButton("Journal")}
                         {renderWidgetButton("Menu")}
                     </div>
