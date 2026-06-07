@@ -146,7 +146,7 @@
 
 .player-core-ingame-menu {
     position: absolute;
-    z-index: 9;
+    z-index: 20;
     bottom: 0;
     width: 100%;
     height: 100%;
