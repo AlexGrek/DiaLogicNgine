@@ -18,11 +18,15 @@ interface DialogVariantsProps {
     text?: string
     responseAlignment: ResponseAlignment
     nested?: boolean
+    interactive?: boolean
 }
 
-const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, transitionOut, step, inTransitionIn, responseAlignment, nested }) => {
+const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, transitionOut, step, inTransitionIn, responseAlignment, nested, interactive = true }) => {
 
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
+        if (!interactive) {
+            return base
+        }
         if (transitionOut) {
             return transitionOutClass(base, index, maxindex)
         }
@@ -60,14 +64,15 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
         return links.map((link, i) => {
             const textOfLink = link.text
             return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled} className='dialog-button' onClick={(ev) => click(link.link, textOfLink, ev)}>{textOfLink}</button>
+                <button disabled={link.disabled || !interactive} className='dialog-button' onClick={interactive ? (ev) => click(link.link, textOfLink, ev) : undefined}>{textOfLink}</button>
             </div>)
         })
     }
 
-    const variantsClass = nested
-        ? 'dialog-variants dialog-variants--nested'
-        : dialogVariantsClass(responseAlignment);
+    const variantsClass = [
+        nested ? 'dialog-variants dialog-variants--nested' : dialogVariantsClass(responseAlignment),
+        !interactive ? 'dialog-variants--pending' : '',
+    ].filter(Boolean).join(' ');
 
     return (
         <div className={variantsClass}>

@@ -3,7 +3,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { LocRouteRenderView, LocationRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
-import { dialogTextClass, resolveVisuals } from './visualsClasses';
+import { dialogWindowViewClass, resolveVisuals } from './visualsClasses';
 import "./player.css";
 import LocButton from './LocButton';
 
@@ -76,12 +76,12 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
     }
 
     return (
-        <div className={transitionOutClass("dialog-window-view")}>
+        <div className={transitionOutClass(dialogWindowViewClass(visuals.dialogTextAlignment))}>
             <div className={transitionInOutClass('dialog-widget-special-links')}>
                 {locButtons()}
             </div>
             <div className='dialog-controls'>
-                <div key={step << 1} className={transitionOutClass(dialogTextClass(visuals.dialogTextAlignment))}>
+                <div key={step << 1} className={transitionOutClass('dialog-text')}>
                     {/* <p className='dialog-prev-text' key={state.stepCount}>
                             {prevText}
                         </p> */}

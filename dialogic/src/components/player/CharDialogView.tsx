@@ -9,7 +9,8 @@ import "./player.css";
 import DiscussionTopicPicker from './DiscussionTopicPicker';
 import { PlayerSettings } from './PlayerSettings';
 import { useTypewriterText } from './useTypewriterText';
-import { dialogResponsesClass, dialogTextClass, resolveVisuals } from './visualsClasses';
+import TypewriterDialogText from './TypewriterDialogText';
+import { dialogResponsesClass, dialogWindowViewClass, resolveVisuals } from './visualsClasses';
 
 interface CharDialogViewProps {
     game: GameExecManager
@@ -55,10 +56,12 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
 
     const text = view.text
 
+    const typewriterEnabled = playerSettings.letterByLetter && !state.fatalError
+
     const typewriterKey = `${step}-${view.pageIndex}-${text}`
     const { displayText, isComplete, skip } = useTypewriterText(
         text,
-        playerSettings.letterByLetter && !state.fatalError,
+        typewriterEnabled,
         playerSettings.letterByLetterSpeedMs,
         typewriterKey,
     )
@@ -66,7 +69,7 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     const canAdvance = view.pageIndex < view.pageCount - 1
     const canContinue = view.continueLink != null
     const clickToContinue = canAdvance || canContinue
-    const showOptions = !clickToContinue && isComplete
+    const showOptions = !clickToContinue && !state.fatalError
     const isClickable = !state.fatalError && !discuss && (!isComplete || clickToContinue)
 
     const handleAreaClick = () => {
@@ -142,24 +145,32 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }
 
     return (
-        <div className={transitionOutClass("dialog-window-view")} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="char-dialog-view">
+        <div className={transitionOutClass(dialogWindowViewClass(visuals.dialogTextAlignment))} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="char-dialog-view">
             <div className={transitionInOutClass('dialog-widget-special-links')}>
 
             </div>
             {!discuss && <div className='dialog-controls'>
-                <div key={step << 1} className={transitionOutClass(dialogTextClass(visuals.dialogTextAlignment))}>
-                    <p className='dialog-current-text' key={step << 1}>
-                        {state.fatalError ? state.fatalError.message : displayText}
-                    </p>
+                <div key={step << 1} className={transitionOutClass('dialog-text')}>
+                    {state.fatalError ? (
+                        <p className='dialog-current-text' key={step << 1}>
+                            {state.fatalError.message}
+                        </p>
+                    ) : (
+                        <TypewriterDialogText
+                            fullText={text}
+                            displayText={displayText}
+                            reserveLayout={typewriterEnabled}
+                        />
+                    )}
                 </div>
                 {showOptions && (
                     <div className={dialogResponsesClass(visuals.responseAlignment)}>
-                        <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} responseAlignment={visuals.responseAlignment} nested />
-                        <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} text={text} responseAlignment={visuals.responseAlignment} nested />
+                        <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} responseAlignment={visuals.responseAlignment} nested interactive={isComplete} />
+                        <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} text={text} responseAlignment={visuals.responseAlignment} nested interactive={isComplete} />
                     </div>
                 )}
-                {clickToContinue && isComplete && !state.fatalError &&
-                    <div className='dialog-continue-hint' data-testid="char-dialog-continue-hint">
+                {clickToContinue && !state.fatalError &&
+                    <div className={`dialog-continue-hint${isComplete ? '' : ' dialog-continue-hint--pending'}`} data-testid="char-dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>
                     </div>}
             </div>}

@@ -15,8 +15,8 @@ interface VisualsMenuProps {
 
 const TEXT_ALIGNMENTS: { value: DialogTextAlignment; label: string }[] = [
     { value: 'left', label: 'Left' },
-    { value: 'center', label: 'Center' },
     { value: 'right', label: 'Right' },
+    { value: 'full', label: 'Full' },
 ];
 
 const RESPONSE_ALIGNMENTS: { value: ResponseAlignment; label: string }[] = [
@@ -36,8 +36,8 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         <div>
             <h3 className="center-header">Visuals</h3>
             <Stack wrap alignItems="stretch" spacing={16}>
-                <Panel bordered header="Dialog text alignment" style={{ minWidth: '24em' }}>
-                    <p>How dialog text is aligned in the player.</p>
+                <Panel bordered header="Dialog text placement" style={{ minWidth: '24em' }}>
+                    <p>Where the dialog text panel appears in the player.</p>
                     <ButtonGroup>
                         {TEXT_ALIGNMENTS.map(({ value, label }) => (
                             <Button

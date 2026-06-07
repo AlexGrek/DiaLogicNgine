@@ -12,9 +12,9 @@ import QuestLine from "./Objectives";
 import { PointAndClick, PointAndClickZone } from "./PointAndClick";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION = "0.13"
+export const ENGINE_VERSION = "0.14"
 
-export type DialogTextAlignment = "left" | "center" | "right"
+export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
 
 export interface VisualsConfiguration {

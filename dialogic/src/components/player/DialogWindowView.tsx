@@ -6,7 +6,8 @@ import { DialogRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
 import { PlayerSettings } from './PlayerSettings';
 import { useTypewriterText } from './useTypewriterText';
-import { dialogTextClass, resolveVisuals } from './visualsClasses';
+import TypewriterDialogText from './TypewriterDialogText';
+import { dialogWindowViewClass, resolveVisuals } from './visualsClasses';
 import "./player.css";
 
 interface DialogWindowViewProps {
@@ -40,10 +41,12 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
 
     const text = view.text
 
+    const typewriterEnabled = playerSettings.letterByLetter && !state.fatalError
+
     const typewriterKey = `${step}-${view.pageIndex}-${text}`
     const { displayText, isComplete, skip } = useTypewriterText(
         text,
-        playerSettings.letterByLetter && !state.fatalError,
+        typewriterEnabled,
         playerSettings.letterByLetterSpeedMs,
         typewriterKey,
     )
@@ -130,9 +133,12 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1, index))
     }
 
-    const windowViewClass = visuals.shortHistoryVisible
-        ? 'dialog-window-view'
-        : 'dialog-window-view dialog-window-view--no-short-history'
+    const windowViewClass = dialogWindowViewClass(
+        visuals.dialogTextAlignment,
+        visuals.shortHistoryVisible ? [] : ['dialog-window-view--no-short-history'],
+    )
+
+    const showChoices = !clickToContinue && view.links.length > 0 && !state.fatalError
 
     return (
         <div className={transitionOutClass(windowViewClass)} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
@@ -143,17 +149,35 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
             )}
             <div className='dialog-controls'>
                 {renderAvatar()}
-                <div key={step << 1} className={transitionOutClass(dialogTextClass(visuals.dialogTextAlignment))}>
-                    {/* <p className='dialog-prev-text' key={state.stepCount}>
-                            {prevText}
-                        </p> */}
-                    <p className='dialog-current-text' key={step << 1}>
-                        {state.fatalError ? state.fatalError.message : displayText}
-                    </p>
+                <div key={step << 1} className={transitionOutClass('dialog-text')}>
+                    {state.fatalError ? (
+                        <p className='dialog-current-text' key={step << 1}>
+                            {state.fatalError.message}
+                        </p>
+                    ) : (
+                        <TypewriterDialogText
+                            fullText={text}
+                            displayText={displayText}
+                            reserveLayout={typewriterEnabled}
+                        />
+                    )}
                 </div>
-                {isComplete && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} text={text} responseAlignment={visuals.responseAlignment} />}
-                {clickToContinue && isComplete && !state.fatalError &&
-                    <div className='dialog-continue-hint' data-testid="dialog-continue-hint">
+                {showChoices && (
+                    <DialogVariants
+                        game={game}
+                        state={state}
+                        links={view.links}
+                        step={step}
+                        onStateUpd={onStateUpd}
+                        transitionOut={transitionOut}
+                        inTransitionIn={inTransitionIn}
+                        text={text}
+                        responseAlignment={visuals.responseAlignment}
+                        interactive={isComplete}
+                    />
+                )}
+                {clickToContinue && !state.fatalError &&
+                    <div className={`dialog-continue-hint${isComplete ? '' : ' dialog-continue-hint--pending'}`} data-testid="dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>
                     </div>}
             </div>

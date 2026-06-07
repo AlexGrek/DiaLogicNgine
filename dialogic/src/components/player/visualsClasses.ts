@@ -5,12 +5,27 @@ import {
     createDefaultVisuals,
 } from '../../game/GameDescription';
 
-export function resolveVisuals(visuals: VisualsConfiguration | undefined): VisualsConfiguration {
-    return { ...createDefaultVisuals(), ...visuals };
+function normalizeDialogTextAlignment(value: unknown): DialogTextAlignment {
+    if (value === 'left' || value === 'right' || value === 'full') {
+        return value;
+    }
+    if (value === 'center') {
+        return 'full';
+    }
+    return 'right';
 }
 
-export function dialogTextClass(alignment: DialogTextAlignment): string {
-    return `dialog-text dialog-text--align-${alignment}`;
+export function resolveVisuals(visuals: VisualsConfiguration | undefined): VisualsConfiguration {
+    const merged = { ...createDefaultVisuals(), ...visuals };
+    merged.dialogTextAlignment = normalizeDialogTextAlignment(merged.dialogTextAlignment);
+    return merged;
+}
+
+export function dialogWindowViewClass(
+    alignment: DialogTextAlignment,
+    modifiers: string[] = [],
+): string {
+    return ['dialog-window-view', `dialog-window-view--text-${alignment}`, ...modifiers].join(' ');
 }
 
 export function dialogVariantsClass(alignment: ResponseAlignment): string {
