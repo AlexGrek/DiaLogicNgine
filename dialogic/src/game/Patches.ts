@@ -1,6 +1,6 @@
 import lodash from "lodash";
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
-import { GameDescription, createDefaultConfig, createDefaultVisuals } from "./GameDescription";
+import { GameDescription, createDefaultConfig, createDefaultDevConfig, createDefaultVisuals } from "./GameDescription";
 import { createTranslations } from "../exec/Localization";
 import { initGameUiElementDescr } from "./GameUiElementDescr";
 
@@ -215,6 +215,55 @@ export class PatchFrom15To016 implements Patch {
     }
 }
 
+export class PatchFrom16To017 implements Patch {
+    from(): string {
+        return "0.16"
+    }
+    to(): string {
+        return "0.17"
+    }
+    apply(obj: unknown): GameDescription {
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData = obj as GameDescription
+        objData.visuals = { ...createDefaultVisuals(), ...objData.visuals }
+        return objData
+    }
+}
+
+export class PatchFrom17To018 implements Patch {
+    from(): string {
+        return "0.17"
+    }
+    to(): string {
+        return "0.18"
+    }
+    apply(obj: unknown): GameDescription {
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData = obj as GameDescription
+        if (!objData.hooks) {
+            objData.hooks = []
+        }
+        return objData
+    }
+}
+
+export class PatchFrom18To019 implements Patch {
+    from(): string {
+        return "0.18"
+    }
+    to(): string {
+        return "0.19"
+    }
+    apply(obj: unknown): GameDescription {
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData = obj as GameDescription
+        if (!objData.dev) {
+            objData.dev = createDefaultDevConfig()
+        }
+        return objData
+    }
+}
+
 const PATCHES = [
     new PatchFrom04To05(),
     new PatchFrom05To06(),
@@ -228,6 +277,9 @@ const PATCHES = [
     new PatchFrom13To014(),
     new PatchFrom14To015(),
     new PatchFrom15To016(),
+    new PatchFrom16To017(),
+    new PatchFrom17To018(),
+    new PatchFrom18To019(),
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {
@@ -257,6 +309,14 @@ export function loadJsonStringAndPatch(json: string, currentEngine: string) {
         result.visuals = createDefaultVisuals()
     } else {
         result.visuals = { ...createDefaultVisuals(), ...result.visuals }
+    }
+
+    if (!result.hooks) {
+        result.hooks = []
+    }
+
+    if (!result.dev) {
+        result.dev = createDefaultDevConfig()
     }
 
     return result;

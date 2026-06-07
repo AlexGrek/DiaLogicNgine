@@ -36,12 +36,46 @@
     margin: 2pt;
 }
 
-.loc-route {
-    background-color: rgba(200,180,160,0.1);
-    border-radius: 4pt;
-    margin: 2pt;
-    padding: 6px;
+.loc-routes-add {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.loc-routes-list {
     display: flex;
     flex-direction: column;
+    gap: 4px;
+}
+
+.loc-route-row {
+    display: flex;
     align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    background-color: rgba(200, 180, 160, 0.08);
+    border: 1px solid rgba(200, 180, 160, 0.15);
+    border-radius: 6px;
+}
+
+.loc-route-name {
+    flex: 1;
+    font-size: 13px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.loc-route-bidir-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.12);
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
 }

@@ -15,6 +15,10 @@ interface ImagePickerModalProps {
     projectName?: string;
     /** Server image filename to use as img2img source for thumbnail generation. */
     sourceImage?: string;
+    /** Open directly on this source tab. */
+    initialSource?: Source;
+    /** Pre-fill the AI generate prompt with this value. */
+    initialPrompt?: string;
 }
 
 type Source = 'server' | 'local' | 'other' | 'generate' | 'fromSource';
@@ -92,6 +96,8 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     extensions,
     projectName,
     sourceImage,
+    initialSource,
+    initialPrompt,
 }) => {
     const contextProject = useProjectImages();
     const storageProject = resolveImageProject(projectName ?? contextProject);
@@ -147,6 +153,8 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     useEffect(() => {
         if (!open) return;
         setSelected(value ?? null);
+        if (initialSource) setSource(initialSource);
+        if (initialPrompt) setGen(g => ({ ...g, prompt: initialPrompt }));
         fetchImages();
         fetch('game_assets/list.json')
             .then(r => r.json())
@@ -240,51 +248,57 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     };
 
     const submitGeneration = async (mode: 'full' | 'thumbnail') => {
-        const prompt = mode === 'thumbnail'
-            ? (gen.prompt.trim() || DEFAULT_THUMBNAIL_PROMPT)
-            : gen.prompt;
-        if (!gen.model || !prompt.trim()) return;
-        if (mode === 'full' && gen.workflow === 'img2img' && !gen.inputImage) return;
+        if (mode === 'full') {
+            if (!gen.model || !gen.prompt.trim()) return;
+            if (gen.workflow === 'img2img' && !gen.inputImage) return;
+        }
 
         setGen(g => ({ ...g, status: 'submitting', error: null, resultFilename: null }));
         try {
-            const url = mode === 'thumbnail'
-                ? '/api/v1/imggen/thumbnail-from-image'
-                : '/api/v1/imggen/generate';
-            const body = mode === 'thumbnail'
-                ? {
-                    project_name: storageProject,
-                    model: gen.model,
-                    prompt,
-                    source_image: effectiveSourceImage,
-                    width: gen.width,
-                    height: gen.height,
-                    seed: gen.seed.trim() ? Number(gen.seed) : null,
-                }
-                : {
-                    project_name: storageProject,
-                    model: gen.model,
-                    prompt,
-                    negative_prompt: gen.negativePrompt || null,
-                    override_negative: gen.overrideNegative,
-                    workflow: gen.workflow,
-                    input_image: gen.workflow === 'img2img' ? gen.inputImage : null,
-                    data_preparation: buildDataPreparation(),
-                    width: gen.width,
-                    height: gen.height,
-                    seed: gen.seed.trim() ? Number(gen.seed) : null,
-                    comfy_params: parseComfyParams(),
-                    rescale: {
-                        enabled: gen.dataPreparationEnabled,
-                        mode: gen.dataPreparationMode,
-                        width: gen.dataPreparationWidth,
-                        height: gen.dataPreparationHeight,
-                        px: gen.dataPreparationPx.trim() ? Number(gen.dataPreparationPx) : null,
-                        mp: gen.dataPreparationMp.trim() ? Number(gen.dataPreparationMp) : null,
-                    },
-                };
+            if (mode === 'thumbnail') {
+                const r = await fetch(
+                    `/api/v1/projects/${encodeURIComponent(storageProject)}/images/resize`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            source_image: effectiveSourceImage,
+                            width: gen.width,
+                            height: gen.height,
+                            mode: 'crop',
+                        }),
+                    }
+                );
+                if (!r.ok) throw new Error(await r.text());
+                const data = await r.json();
+                setGen(g => ({ ...g, status: 'done', resultFilename: data.filename ?? null }));
+                return;
+            }
 
-            const r = await fetch(url, {
+            const body = {
+                project_name: storageProject,
+                model: gen.model,
+                prompt: gen.prompt,
+                negative_prompt: gen.negativePrompt || null,
+                override_negative: gen.overrideNegative,
+                workflow: gen.workflow,
+                input_image: gen.workflow === 'img2img' ? gen.inputImage : null,
+                data_preparation: buildDataPreparation(),
+                width: gen.width,
+                height: gen.height,
+                seed: gen.seed.trim() ? Number(gen.seed) : null,
+                comfy_params: parseComfyParams(),
+                rescale: {
+                    enabled: gen.dataPreparationEnabled,
+                    mode: gen.dataPreparationMode,
+                    width: gen.dataPreparationWidth,
+                    height: gen.dataPreparationHeight,
+                    px: gen.dataPreparationPx.trim() ? Number(gen.dataPreparationPx) : null,
+                    mp: gen.dataPreparationMp.trim() ? Number(gen.dataPreparationMp) : null,
+                },
+            };
+
+            const r = await fetch('/api/v1/imggen/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),

@@ -14,21 +14,22 @@ export const MAX_LETTER_SPEED_MS = 80
 
 const STORAGE_KEY = 'dialogicngine_player_settings'
 
-export function loadPlayerSettings(): PlayerSettings {
+export function loadPlayerSettings(gameDefaults?: Partial<PlayerSettings>): PlayerSettings {
+    const base: PlayerSettings = { ...DEFAULT_PLAYER_SETTINGS, ...gameDefaults }
     try {
         const raw = localStorage.getItem(STORAGE_KEY)
         if (raw) {
             const parsed = JSON.parse(raw) as Partial<PlayerSettings>
             return {
-                ...DEFAULT_PLAYER_SETTINGS,
+                ...base,
                 ...parsed,
-                letterByLetterSpeedMs: clampSpeed(parsed.letterByLetterSpeedMs ?? DEFAULT_PLAYER_SETTINGS.letterByLetterSpeedMs),
+                letterByLetterSpeedMs: clampSpeed(parsed.letterByLetterSpeedMs ?? base.letterByLetterSpeedMs),
             }
         }
     } catch {
         // ignore corrupt storage
     }
-    return { ...DEFAULT_PLAYER_SETTINGS }
+    return base
 }
 
 export function savePlayerSettings(settings: PlayerSettings): void {

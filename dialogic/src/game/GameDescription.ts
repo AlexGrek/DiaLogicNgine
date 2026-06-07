@@ -17,8 +17,9 @@ import {
     DEFAULT_TEXT_FONT_ID,
     type FontId,
 } from "../lib/fonts";
+import { HookScript } from "./HookScript";
 
-export const ENGINE_VERSION = "0.16"
+export const ENGINE_VERSION = "0.19"
 
 export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
@@ -43,6 +44,8 @@ export interface VisualsConfiguration {
     notificationBackgroundOpacity: number
     notificationBorderRadius: number
     notificationBorderOpacity: number
+    typewriterEnabled: boolean
+    typewriterSpeedMs: number
 }
 
 export function createDefaultVisuals(): VisualsConfiguration {
@@ -57,6 +60,8 @@ export function createDefaultVisuals(): VisualsConfiguration {
         notificationBackgroundOpacity: DEFAULT_NOTIFICATION_BACKGROUND_OPACITY,
         notificationBorderRadius: DEFAULT_NOTIFICATION_BORDER_RADIUS,
         notificationBorderOpacity: DEFAULT_NOTIFICATION_BORDER_OPACITY,
+        typewriterEnabled: true,
+        typewriterSpeedMs: 30,
     }
 }
 
@@ -73,6 +78,16 @@ export function createDefaultConfig() {
         assetsPath: ''
     }
 
+}
+
+export interface DevConfig {
+    basicPromptSuffix: string
+}
+
+export function createDefaultDevConfig(): DevConfig {
+    return {
+        basicPromptSuffix: '',
+    }
 }
 
 export interface GeneralGameInfo {
@@ -111,6 +126,8 @@ export interface GameDescription {
     uiElements: GameUiElementDescr
     pacWidgets: PointAndClick[]
     visuals: VisualsConfiguration
+    hooks: HookScript[]
+    dev: DevConfig
 }
 
 export function createDefaultGame(): GameDescription {
@@ -504,6 +521,8 @@ export function createDefaultGame(): GameDescription {
         },
         pacWidgets: [examplePac],
         visuals: createDefaultVisuals(),
+        hooks: [],
+        dev: createDefaultDevConfig(),
     };
 
     return game;

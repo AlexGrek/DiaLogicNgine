@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button, ButtonGroup, InputNumber, Nav, Slider, Toggle } from 'rsuite';
+import { Button, ButtonGroup, InputNumber, Slider, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
+import PillLikeTabs, { PillTab } from '../../common/PillLikeTabs';
 import {
     DialogTextAlignment,
     GameDescription,
@@ -27,8 +28,6 @@ const RESPONSE_ALIGNMENTS: { value: ResponseAlignment; label: string }[] = [
     { value: 'flexible', label: 'Flexible' },
 ];
 
-type TabKey = 'typography' | 'dialog' | 'notifications';
-
 const parseNum = (value: number | string | null): number | null => {
     if (value === null) return null;
     const n = typeof value === 'number' ? value : Number(value);
@@ -36,7 +35,6 @@ const parseNum = (value: number | string | null): number | null => {
 };
 
 const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
-    const [activeTab, setActiveTab] = React.useState<TabKey>('typography');
     const visuals = resolveVisuals(game.visuals);
 
     const updateVisuals = (patch: Partial<VisualsConfiguration>) => {
@@ -47,17 +45,18 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         value: number,
         max: number,
         onChange: (n: number) => void,
+        min = 0,
     ) => (
         <div className="visuals-opacity-control">
             <Slider
-                min={0}
+                min={min}
                 max={max}
                 step={1}
                 value={value}
                 onChange={(v) => { const n = parseNum(v); if (n !== null) onChange(n); }}
             />
             <InputNumber
-                min={0}
+                min={min}
                 max={max}
                 step={1}
                 value={value}
@@ -66,134 +65,153 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         </div>
     );
 
+    const typographyTab = (
+        <div className="visuals-properties">
+            <div>
+                <p className="editor-label">Menu font</p>
+                <p className="visuals-property-hint">Font used for in-game menus and HUD chrome.</p>
+                <FontPicker
+                    value={visuals.menuFontId}
+                    onChange={(menuFontId) => updateVisuals({ menuFontId })}
+                />
+            </div>
+            <div>
+                <p className="editor-label">Text font</p>
+                <p className="visuals-property-hint">Font used for dialog and narrative text.</p>
+                <FontPicker
+                    value={visuals.textFontId}
+                    onChange={(textFontId) => updateVisuals({ textFontId })}
+                />
+            </div>
+            <div>
+                <p className="editor-label">Responses font</p>
+                <p className="visuals-property-hint">Font used for choice / response buttons.</p>
+                <FontPicker
+                    value={visuals.responsesFontId}
+                    onChange={(responsesFontId) => updateVisuals({ responsesFontId })}
+                />
+            </div>
+        </div>
+    );
+
+    const dialogTab = (
+        <div className="visuals-properties">
+            <div>
+                <p className="editor-label">Dialog text placement</p>
+                <p className="visuals-property-hint">Where the dialog text panel appears in the player.</p>
+                <ButtonGroup>
+                    {TEXT_ALIGNMENTS.map(({ value, label }) => (
+                        <Button
+                            key={value}
+                            active={visuals.dialogTextAlignment === value}
+                            onClick={() => updateVisuals({ dialogTextAlignment: value })}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </ButtonGroup>
+            </div>
+            <div>
+                <p className="editor-label">Response alignment</p>
+                <p className="visuals-property-hint">How choice buttons are laid out in the player.</p>
+                <ButtonGroup>
+                    {RESPONSE_ALIGNMENTS.map(({ value, label }) => (
+                        <Button
+                            key={value}
+                            active={visuals.responseAlignment === value}
+                            onClick={() => updateVisuals({ responseAlignment: value })}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </ButtonGroup>
+            </div>
+            <div>
+                <p className="editor-label">Text background opacity</p>
+                <p className="visuals-property-hint">Transparency of the dialog text panel (0 = fully transparent).</p>
+                {sliderNumber(
+                    visuals.dialogTextBackgroundOpacity,
+                    100,
+                    (n) => updateVisuals({ dialogTextBackgroundOpacity: n }),
+                )}
+            </div>
+            <div>
+                <p className="editor-label">Short history</p>
+                <p className="visuals-property-hint">Show recent dialog exchanges above the current line.</p>
+                <Toggle
+                    checked={visuals.shortHistoryVisible}
+                    checkedChildren="Enabled"
+                    unCheckedChildren="Disabled"
+                    onChange={(shortHistoryVisible) => updateVisuals({ shortHistoryVisible })}
+                />
+            </div>
+            <div>
+                <p className="editor-label">Typewriter effect</p>
+                <p className="visuals-property-hint">Reveal dialog text character by character. Players can override this in the in-game settings.</p>
+                <Toggle
+                    checked={visuals.typewriterEnabled}
+                    checkedChildren="Enabled"
+                    unCheckedChildren="Disabled"
+                    onChange={(typewriterEnabled) => updateVisuals({ typewriterEnabled })}
+                />
+            </div>
+            {visuals.typewriterEnabled && (
+                <div>
+                    <p className="editor-label">Typewriter speed</p>
+                    <p className="visuals-property-hint">Milliseconds between characters — lower is faster (10–80 ms).</p>
+                    {sliderNumber(
+                        visuals.typewriterSpeedMs,
+                        80,
+                        (n) => updateVisuals({ typewriterSpeedMs: n }),
+                        10,
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
+    const notificationsTab = (
+        <div className="visuals-properties">
+            <div>
+                <p className="editor-label">Background opacity</p>
+                <p className="visuals-property-hint">Transparency of the notification toast background (0 = fully transparent).</p>
+                {sliderNumber(
+                    visuals.notificationBackgroundOpacity,
+                    100,
+                    (n) => updateVisuals({ notificationBackgroundOpacity: n }),
+                )}
+            </div>
+            <div>
+                <p className="editor-label">Border radius</p>
+                <p className="visuals-property-hint">Corner rounding of notification toasts in pixels (0 = square).</p>
+                {sliderNumber(
+                    visuals.notificationBorderRadius,
+                    50,
+                    (n) => updateVisuals({ notificationBorderRadius: n }),
+                )}
+            </div>
+            <div>
+                <p className="editor-label">Border opacity</p>
+                <p className="visuals-property-hint">Visibility of the notification toast border (0 = no border).</p>
+                {sliderNumber(
+                    visuals.notificationBorderOpacity,
+                    100,
+                    (n) => updateVisuals({ notificationBorderOpacity: n }),
+                )}
+            </div>
+        </div>
+    );
+
+    const tabs: PillTab[] = [
+        { header: 'Typography', content: typographyTab },
+        { header: 'Dialog', content: dialogTab },
+        { header: 'Notifications', content: notificationsTab },
+    ];
+
     return (
         <div className="visuals-menu">
             <h3 className="center-header">Visuals</h3>
-            <Nav
-                appearance="tabs"
-                activeKey={activeTab}
-                onSelect={(key) => setActiveTab(key as TabKey)}
-                style={{ marginBottom: 16 }}
-            >
-                <Nav.Item eventKey="typography">Typography</Nav.Item>
-                <Nav.Item eventKey="dialog">Dialog</Nav.Item>
-                <Nav.Item eventKey="notifications">Notifications</Nav.Item>
-            </Nav>
-
-            {activeTab === 'typography' && (
-                <div className="visuals-properties">
-                    <div>
-                        <p className="editor-label">Menu font</p>
-                        <p className="visuals-property-hint">Font used for in-game menus and HUD chrome.</p>
-                        <FontPicker
-                            value={visuals.menuFontId}
-                            onChange={(menuFontId) => updateVisuals({ menuFontId })}
-                        />
-                    </div>
-                    <div>
-                        <p className="editor-label">Text font</p>
-                        <p className="visuals-property-hint">Font used for dialog and narrative text.</p>
-                        <FontPicker
-                            value={visuals.textFontId}
-                            onChange={(textFontId) => updateVisuals({ textFontId })}
-                        />
-                    </div>
-                    <div>
-                        <p className="editor-label">Responses font</p>
-                        <p className="visuals-property-hint">Font used for choice / response buttons.</p>
-                        <FontPicker
-                            value={visuals.responsesFontId}
-                            onChange={(responsesFontId) => updateVisuals({ responsesFontId })}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'dialog' && (
-                <div className="visuals-properties">
-                    <div>
-                        <p className="editor-label">Dialog text placement</p>
-                        <p className="visuals-property-hint">Where the dialog text panel appears in the player.</p>
-                        <ButtonGroup>
-                            {TEXT_ALIGNMENTS.map(({ value, label }) => (
-                                <Button
-                                    key={value}
-                                    active={visuals.dialogTextAlignment === value}
-                                    onClick={() => updateVisuals({ dialogTextAlignment: value })}
-                                >
-                                    {label}
-                                </Button>
-                            ))}
-                        </ButtonGroup>
-                    </div>
-                    <div>
-                        <p className="editor-label">Response alignment</p>
-                        <p className="visuals-property-hint">How choice buttons are laid out in the player.</p>
-                        <ButtonGroup>
-                            {RESPONSE_ALIGNMENTS.map(({ value, label }) => (
-                                <Button
-                                    key={value}
-                                    active={visuals.responseAlignment === value}
-                                    onClick={() => updateVisuals({ responseAlignment: value })}
-                                >
-                                    {label}
-                                </Button>
-                            ))}
-                        </ButtonGroup>
-                    </div>
-                    <div>
-                        <p className="editor-label">Text background opacity</p>
-                        <p className="visuals-property-hint">Transparency of the dialog text panel (0 = fully transparent).</p>
-                        {sliderNumber(
-                            visuals.dialogTextBackgroundOpacity,
-                            100,
-                            (n) => updateVisuals({ dialogTextBackgroundOpacity: n }),
-                        )}
-                    </div>
-                    <div>
-                        <p className="editor-label">Short history</p>
-                        <p className="visuals-property-hint">Show recent dialog exchanges above the current line.</p>
-                        <Toggle
-                            checked={visuals.shortHistoryVisible}
-                            checkedChildren="Enabled"
-                            unCheckedChildren="Disabled"
-                            onChange={(shortHistoryVisible) => updateVisuals({ shortHistoryVisible })}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'notifications' && (
-                <div className="visuals-properties">
-                    <div>
-                        <p className="editor-label">Background opacity</p>
-                        <p className="visuals-property-hint">Transparency of the notification toast background (0 = fully transparent).</p>
-                        {sliderNumber(
-                            visuals.notificationBackgroundOpacity,
-                            100,
-                            (n) => updateVisuals({ notificationBackgroundOpacity: n }),
-                        )}
-                    </div>
-                    <div>
-                        <p className="editor-label">Border radius</p>
-                        <p className="visuals-property-hint">Corner rounding of notification toasts in pixels (0 = square).</p>
-                        {sliderNumber(
-                            visuals.notificationBorderRadius,
-                            50,
-                            (n) => updateVisuals({ notificationBorderRadius: n }),
-                        )}
-                    </div>
-                    <div>
-                        <p className="editor-label">Border opacity</p>
-                        <p className="visuals-property-hint">Visibility of the notification toast border (0 = no border).</p>
-                        {sliderNumber(
-                            visuals.notificationBorderOpacity,
-                            100,
-                            (n) => updateVisuals({ notificationBorderOpacity: n }),
-                        )}
-                    </div>
-                </div>
-            )}
+            <PillLikeTabs tabs={tabs} />
         </div>
     );
 };

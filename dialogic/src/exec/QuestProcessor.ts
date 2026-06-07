@@ -1,4 +1,14 @@
 import { trace } from "../Trace";
+import {
+    HOOK_PREFIX_QUEST_COMPLETED,
+    HOOK_PREFIX_QUEST_FAILED,
+    HOOK_PREFIX_QUEST_OPENED,
+    HOOK_PREFIX_QUESTLINE_CLOSED,
+    HOOK_PREFIX_QUESTLINE_OPENED,
+    HOOK_PREFIX_TASK_COMPLETED,
+    HOOK_PREFIX_TASK_FAILED,
+    HOOK_PREFIX_TASK_OPENED,
+} from "../game/HookScript";
 import QuestLine, { Quest, QuestPath, Task, getQuest, getQuestTask } from "../game/Objectives";
 import { GameExecManager } from "./GameExecutor";
 import { GameProgress } from "./GameProgress";
@@ -105,6 +115,7 @@ export default class QuestProcessor {
         removeIfExist(state.progress.openTasks, taskId)
         const stateUpdate = this.exec.modifyStateScript(state, task.onFail)
         safeStateUpdate(state, stateUpdate)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_TASK_FAILED + task.path.join("::"), state))
 
         const found = getQuestTask(this.exec.game, taskId)
         if (!found)
@@ -126,6 +137,7 @@ export default class QuestProcessor {
         removeIfExist(state.progress.openTasks, taskId)
         const stateUpdate = this.exec.modifyStateScript(state, task.onComplete)
         safeStateUpdate(state, stateUpdate)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_TASK_COMPLETED + task.path.join("::"), state))
 
         const found = getQuestTask(this.exec.game, taskId)
         if (!found)
@@ -155,6 +167,7 @@ export default class QuestProcessor {
         trace(`Open task: ${task.path.toString()}`)
         const taskId = task.path
         addIfNotExist(state.progress.openTasks, taskId)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_TASK_OPENED + task.path.join("::"), state))
 
         const found = getQuestTask(this.exec.game, taskId)
         if (!found)
@@ -176,6 +189,7 @@ export default class QuestProcessor {
 
         const update = this.exec.modifyStateScript(state, quest.onFail)
         safeStateUpdate(state, update)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_QUEST_FAILED + quest.path.join("::"), state))
 
         // TODO: close quest line
 
@@ -201,6 +215,7 @@ export default class QuestProcessor {
 
         const update = this.exec.modifyStateScript(state, quest.onOpen)
         safeStateUpdate(state, update)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_QUEST_OPENED + quest.path.join("::"), state))
 
         // try to open questline
         if (this.getQuestLineStatus(state, qline) === "untouched") {
@@ -227,10 +242,11 @@ export default class QuestProcessor {
 
         const update = this.exec.modifyStateScript(state, quest.onComplete)
         safeStateUpdate(state, update)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_QUEST_COMPLETED + quest.path.join("::"), state))
 
         // TODO: close quest line
 
-        state.notifications.push(createInGameNotification("questfailed", quest.name))
+        state.notifications.push(createInGameNotification("questcompleted", quest.name))
     }
 
     openQuestLine(state: State, qline: QuestLine) {
@@ -239,20 +255,19 @@ export default class QuestProcessor {
             return
         }
         state.progress.openQuestLines.push(qline.uid)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_QUESTLINE_OPENED + qline.uid, state))
         state.notifications.push(createInGameNotification("questlineopen", qline.name))
     }
 
     closeQuestLine(state: State, qline: QuestLine) {
-        trace(`Open quest line: ${qline.name}`)
+        trace(`Close quest line: ${qline.name}`)
         if (this.getQuestLineStatus(state, qline) === "completed") {
             return
         }
 
         state.progress.closedQuestLines.push(qline.uid)
-         // remove quest line from opened
-         state.progress.openQuestLines = state.progress.openQuestLines.filter(q => q != qline.uid)
-
-
+        state.progress.openQuestLines = state.progress.openQuestLines.filter(q => q != qline.uid)
+        safeStateUpdate(state, this.exec.hooks.fire(HOOK_PREFIX_QUESTLINE_CLOSED + qline.uid, state))
         state.notifications.push(createInGameNotification("questlineclose", qline.name))
     }
 }

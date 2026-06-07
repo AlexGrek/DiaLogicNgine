@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createDialogWindowId } from '../../../exec/GameState';
-import { GameDescription, GeneralGameInfo } from '../../../game/GameDescription';
+import { GameDescription, GeneralGameInfo, createDefaultDevConfig } from '../../../game/GameDescription';
 import DialogWindowPicker from '../../common/DialogWindowPicker';
-import { Button, ButtonGroup, Panel, PanelGroup, Stack } from 'rsuite';
+import { Button, ButtonGroup, Input, Panel, PanelGroup, Stack } from 'rsuite';
 import ImagePicker from '../../common/ImagePicker';
 import lodash from 'lodash';
 import './configuration.css'
@@ -47,10 +47,10 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
     }
 
     return (
-        <div>
+        <div style={{ maxWidth: '90em', margin: '0 auto', padding: '0 8px' }}>
             <h3 className='center-header'>Game configuration menu</h3>
             <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"} />
-            <Stack wrap={true} alignItems='stretch'>
+            <Stack wrap={true} alignItems='stretch' justifyContent='center'>
                 <Panel style={{ minWidth: '30em', maxWidth: '40em' }}
                     bordered
                     header={
@@ -83,6 +83,18 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
                         <div>
                             <StringMapEditor onChange={(transl) => onSetGame({ ...game, translations: transl })} value={game.translations} />
                         </div>
+                    </Panel>
+                    <Panel header="Developer / AI">
+                        <p style={{ fontSize: 12, color: '#aaa', marginBottom: 6 }}>
+                            Basic prompt suffix — appended to quick AI prompts across the editor.
+                        </p>
+                        <Input
+                            as="textarea"
+                            rows={3}
+                            value={game.dev?.basicPromptSuffix ?? ''}
+                            onChange={(val) => onSetGame({ ...game, dev: { ...(game.dev ?? createDefaultDevConfig()), basicPromptSuffix: val } })}
+                            placeholder="e.g. fantasy RPG style, pixel art, vibrant colors"
+                        />
                     </Panel>
                 </PanelGroup>
             </Stack>

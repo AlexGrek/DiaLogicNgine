@@ -31,11 +31,6 @@ OFFLOADMQ_API_KEY = os.getenv("OFFLOADMQ_API_KEY", "")
 
 router = APIRouter(prefix="/imggen", tags=["imggen"])
 
-DEFAULT_THUMBNAIL_PROMPT = (
-    "game UI thumbnail, square crop, clear focal subject, vibrant colors, clean composition"
-)
-DEFAULT_THUMBNAIL_SIZE = 512
-
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -270,37 +265,3 @@ async def poll_status(project_name: str, cap: str, task_id: str, output_bucket: 
 
     return {"status": "completed", "filename": saved_filename}
 
-
-# ---------------------------------------------------------------------------
-# Generate a thumbnail from an existing project image via img2img
-# ---------------------------------------------------------------------------
-
-class ThumbnailFromImageRequest(BaseModel):
-    project_name: str
-    source_image: str
-    model: str
-    prompt: str | None = None
-    width: int = DEFAULT_THUMBNAIL_SIZE
-    height: int = DEFAULT_THUMBNAIL_SIZE
-    seed: int | None = None
-
-
-@router.post("/thumbnail-from-image")
-async def thumbnail_from_image(req: ThumbnailFromImageRequest) -> TaskRef:
-    """Submit img2img preset for generating a thumbnail from an existing server image."""
-    source_filename = Path(req.source_image).name
-    source_path = safe_path(image_dir(req.project_name), source_filename)
-    if not source_path.exists():
-        raise HTTPException(status_code=404, detail=f"Source image not found: {source_filename}")
-
-    generate_req = GenerateRequest(
-        project_name=req.project_name,
-        model=req.model,
-        prompt=req.prompt or DEFAULT_THUMBNAIL_PROMPT,
-        workflow="img2img",
-        input_image=source_filename,
-        width=req.width,
-        height=req.height,
-        seed=req.seed,
-    )
-    return await generate(generate_req)

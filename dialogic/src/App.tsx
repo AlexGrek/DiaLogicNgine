@@ -155,7 +155,7 @@ function FactsRoute() {
 }
 
 function ItemsRoute() {
-  const { game, setGame } = useOutletContext<AppOutletContext>();
+  const { game, setGame, updates } = useOutletContext<AppOutletContext>();
   return (
     <ItemsMenu
       items={game.items}
@@ -163,6 +163,7 @@ function ItemsRoute() {
         setGame((prev) => ({ ...prev, items }))
       }
       game={game}
+      handlers={updates}
     />
   );
 }

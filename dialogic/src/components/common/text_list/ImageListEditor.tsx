@@ -15,9 +15,11 @@ interface ImageListEditorProps {
     imageList: ImageList;
     onChange: (t: ImageList) => void;
     projectName?: string;
+    quickAiPrompt?: string;
+    basicPromptSuffix?: string;
 }
 
-const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName }) => {
+const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName, quickAiPrompt, basicPromptSuffix }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const contextProject = useProjectImages();
     const storageProject = resolveImageProject(projectName ?? contextProject);
@@ -95,7 +97,13 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, 
     }
 
     const editor =
-        <ServerImageSelect value={editingText === "" ? undefined : editingText} onChange={onTextChange} projectName={storageProject} />
+        <ServerImageSelect
+            value={editingText === "" ? undefined : editingText}
+            onChange={onTextChange}
+            projectName={storageProject}
+            quickAiPrompt={quickAiPrompt}
+            basicPromptSuffix={basicPromptSuffix}
+        />
 
     const displayImage = (uri: string) => {
         const src = isServerImage(uri)

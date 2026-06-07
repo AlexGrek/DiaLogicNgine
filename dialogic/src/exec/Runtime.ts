@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- dynamic runtime objects for user script evaluation */
 import lodash, { isBoolean, isNumber, isString } from "lodash";
 import { roleByUid } from "../game/Character";
-import { GameDescription } from "../game/GameDescription";
+import { GameDescription, GeneralGameInfo } from "../game/GameDescription";
 import QuestLine, { Quest, Task } from "../game/Objectives";
 import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
@@ -375,6 +375,8 @@ export class RuntimeRt {
     contextManager: GameExecManager
     situation: string | undefined
     contextVars: any
+    /** Game general info (name, version, description, authors, extras). Read-only — mutations have no effect on game state. */
+    general: Readonly<GeneralGameInfo>
 
     constructor(props: any, chars: any, facts: any, game: GameDescription, contextManager: GameExecManager, state?: State) {
         this.contextManager = contextManager
@@ -384,6 +386,7 @@ export class RuntimeRt {
         this.history = new RuntimeHistoryAccessManager(contextManager, this)
         this.objectives = addRuntimeObjectives(game, this)
         this.items = new RuntimeItemsManager(contextManager)
+        this.general = Object.freeze({ ...game.general, extras: Object.freeze({ ...game.general.extras }) })
         if (state)
             this.setState(state)
     }

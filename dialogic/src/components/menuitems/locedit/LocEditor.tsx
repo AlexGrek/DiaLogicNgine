@@ -9,13 +9,14 @@ import { IUpds } from '../../../App';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import { TextList } from '../../../game/TextList';
 import { generateUidFromName, isValidJsIdentifier } from '../../../Utils';
-import VerifyRoundIcon from '@rsuite/icons/VerifyRound';
+import { ArrowLeftRight, X } from 'lucide-react';
 import './loc.css'
 import lodash from 'lodash';
 import ImageListEditor from '../../common/text_list/ImageListEditor';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../../common/CodeSampleButton';
 import EventHostsEditor from '../../common/EventHostsEditor';
+import CopyButton from '../../common/copypaste/CopyButton';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -123,11 +124,31 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                 deleteRoute(route)
                 return <Divider key={i} />
             }
-            return <div className='loc-route' key={i}>
-                <p>{loc.displayName}</p>
-                {bidirectional ? <VerifyRoundIcon color='green' style={{ fontSize: '3em' }} /> : <IconButton color='green' icon={<VerifyRoundIcon />} onClick={() => { addRouteFromTo(route, location.uid) }}></IconButton>}
-                <Button color='red' appearance="link" onClick={() => deleteRoute(route)}>Remove</Button>
-            </div>
+            return (
+                <div className='loc-route-row' key={i}>
+                    <span className='loc-route-name'>{loc.displayName}</span>
+                    {bidirectional
+                        ? <span className='loc-route-bidir-badge' title="Bidirectional route">
+                            <ArrowLeftRight size={12} /> Both ways
+                          </span>
+                        : <IconButton
+                            size="xs"
+                            appearance="subtle"
+                            title="Add reverse route (make bidirectional)"
+                            icon={<ArrowLeftRight size={13} />}
+                            onClick={() => addRouteFromTo(route, location.uid)}
+                          />
+                    }
+                    <IconButton
+                        size="xs"
+                        appearance="subtle"
+                        color="red"
+                        title="Remove route"
+                        icon={<X size={13} />}
+                        onClick={() => deleteRoute(route)}
+                    />
+                </div>
+            )
         })
     }
 
@@ -164,11 +185,15 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
         }
     }
 
+    const locTextParts = [location.text.main, ...location.text.list.map(e => e.text)].filter(Boolean)
+    const locContext = [location.displayName, ...locTextParts].filter(Boolean).join('; ')
+
     return (
         <Drawer size="full" placement="bottom" open={open} onClose={() => onCloseHandler(true)}>
             <Drawer.Header>
                 <Drawer.Title>{loc.uid}</Drawer.Title>
                 <Drawer.Actions>
+                    <CopyButton handlers={handlers} typename='loc' obj={location} />
                     <Button onClick={() => onDelete()} appearance="ghost" color='red'>
                         Delete
                     </Button>
@@ -192,14 +217,20 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                         value={location.thumbnail}
                                         onChange={thumbChange}
                                         sourceImage={location.backgrounds.main || undefined}
+                                        quickAiPrompt={locContext ? `${locContext}, location thumbnail` : 'location thumbnail'}
+                                        basicPromptSuffix={game.dev?.basicPromptSuffix}
                                     >
                                         Thumbnail image
                                     </ImagePicker>
 
                                     <Divider>Routes</Divider>
-                                    <CheckPicker value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Add" data={findAvailableRoutesFor(location.uid)}></CheckPicker>
-                                    <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1 || loc.uid === ""}>Make routes</Button>
-                                    {renderRoutes()}
+                                    <div className='loc-routes-add'>
+                                        <CheckPicker style={{ flex: 1 }} value={checkedNewRoutes} onChange={setCheckedNewRoutes} label="Select locations" data={findAvailableRoutesFor(location.uid)} />
+                                        <Button onClick={() => makeRoutes()} disabled={checkedNewRoutes.length < 1 || loc.uid === ""}>Add</Button>
+                                    </div>
+                                    <div className='loc-routes-list'>
+                                        {renderRoutes()}
+                                    </div>
                                 </div>
                             </Col>
                             <Col xs={12}>
@@ -212,7 +243,12 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                         </Panel>
 
                                         <Panel header="Background">
-                                            <ImageListEditor imageList={location.backgrounds} onChange={(val) => setlocation({ ...location, backgrounds: val })} />
+                                            <ImageListEditor
+                                                imageList={location.backgrounds}
+                                                onChange={(val) => setlocation({ ...location, backgrounds: val })}
+                                                quickAiPrompt={locContext ? `${locContext}, location background scene, wide angle` : 'location background scene, wide angle'}
+                                                basicPromptSuffix={game.dev?.basicPromptSuffix}
+                                            />
                                         </Panel>
                                         <Panel header="Scripting">
                                             {renderCodeEditButton("isAccessibleScript")}

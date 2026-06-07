@@ -46,7 +46,13 @@ export const DEFAULT_ARGS = {
     "rt.history.eventHappened()": "rt.history.eventHappened(name) => boolean: has the named event happened",
     "rt.history.thisEventHappened()": "rt.history.thisEventHappened(context) => boolean: has the current event already happened",
     "context": "context variables passed into the script (may be empty)",
-    "context.usedItem": "uid of the item used from the inventory in the current dialog window (set when the player presses 'Use' on an item; available in the window entry script)"
+    "context.usedItem": "uid of the item used from the inventory in the current dialog window (set when the player presses 'Use' on an item; available in the window entry script)",
+    "rt.general": "game general info — read-only; set in Game Configuration → General",
+    "rt.general.name": "game name (read-only string)",
+    "rt.general.version": "game version string (read-only)",
+    "rt.general.description": "game description (read-only)",
+    "rt.general.authors": "array of author names (read-only)",
+    "rt.general.extras": "additional info key→value map from Game Configuration (read-only)",
 }
 
 interface PopupCodeEditorProps {
@@ -78,6 +84,14 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                 }
                 args = mergeDicts(args, toMerge)
             })
+        }
+
+        if (game && game.general?.extras) {
+            const extrasEntries: { [key: string]: string } = {}
+            for (const [key, val] of Object.entries(game.general.extras)) {
+                extrasEntries[`rt.general.extras.${key}`] = `Additional info: ${key} = ${val}`
+            }
+            args = mergeDicts(args, extrasEntries)
         }
 
         const rtData = rt()

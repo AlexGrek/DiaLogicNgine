@@ -1,10 +1,11 @@
 import React from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
-import StaticTabs from '../../common/StaticTabs';
+import PillLikeTabs from '../../common/PillLikeTabs';
 import PropsEditMenu from './PropsEditMenu';
 import Prop from '../../../game/Prop';
 import EventsEditorTab from '../eventedit/EventsEditorTab';
+import HooksEditorTab from './HooksEditorTab';
 
 interface ScriptEditMenuProps {
     game: GameDescription;
@@ -32,6 +33,13 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
         }
     }
 
+    const createHooksEditorTab = () => {
+        return {
+            header: "Hooks",
+            content: <HooksEditorTab game={game} onSetGame={onSetGame} />
+        }
+    }
+
     const createEventEditorTab = () => {
         return {
             header: "Events",
@@ -40,7 +48,7 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
     }
 
     return (
-        <StaticTabs tabs={[createPropsEditorTab(), createScriptsEditorTab(), createEventEditorTab()]}></StaticTabs>
+        <PillLikeTabs tabs={[createPropsEditorTab(), createScriptsEditorTab(), createEventEditorTab(), createHooksEditorTab()]} />
     );
 };
 

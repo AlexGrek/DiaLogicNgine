@@ -1,10 +1,13 @@
 import mimetypes
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from app.image_storage import (
     ALLOWED_MIME_PREFIXES,
+    THUMB_MAX_PX,
     ensure_thumbnail,
     image_dir,
     make_thumbnail,
@@ -59,6 +62,39 @@ async def serve_image(project_name: str, filename: str):
 async def serve_thumbnail(project_name: str, filename: str):
     path = ensure_thumbnail(project_name, filename)
     return FileResponse(path)
+
+
+class ResizeImageRequest(BaseModel):
+    source_image: str
+    width: int = THUMB_MAX_PX
+    height: int = THUMB_MAX_PX
+    mode: Literal["preserve", "crop", "shrink"] = "crop"
+
+
+@router.post("/projects/{project_name}/images/resize")
+async def resize_image(project_name: str, req: ResizeImageRequest):
+    """Resize/crop an existing project image and save the result as a new image (no AI)."""
+    from pathlib import Path
+    source_filename = Path(req.source_image).name
+    src_path = safe_path(image_dir(project_name), source_filename)
+    if not src_path.exists():
+        raise HTTPException(status_code=404, detail=f"Source image not found: {source_filename}")
+
+    stem = Path(source_filename).stem
+    suffix = Path(source_filename).suffix or ".png"
+    out_filename = f"resized_{req.width}x{req.height}_{stem}{suffix}"
+
+    contents = src_path.read_bytes()
+    img_dest = safe_path(image_dir(project_name), out_filename)
+    img_dest.parent.mkdir(parents=True, exist_ok=True)
+    make_thumbnail(contents, img_dest, req.width, req.height, req.mode)
+
+    saved = img_dest.read_bytes()
+    thumb_dest = safe_path(thumb_dir(project_name), out_filename)
+    thumb_dest.parent.mkdir(parents=True, exist_ok=True)
+    make_thumbnail(saved, thumb_dest, THUMB_MAX_PX, THUMB_MAX_PX, "preserve")
+
+    return {"project": project_name, "filename": out_filename, "width": req.width, "height": req.height, "mode": req.mode}
 
 
 @router.delete("/projects/{project_name}/images/{filename}")

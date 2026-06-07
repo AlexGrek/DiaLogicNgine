@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
 import Loc from '../../../game/Loc';
 import LocationPreview from './LocationPreview';
-import { Button } from 'rsuite';
+import { Button, Stack } from 'rsuite';
 import './loc.css'
 import LocEditor from './LocEditor';
 import { emptyImageList } from '../../../game/ImageList';
 import Note from '../../userguide/Note';
+import PasteButton from '../../common/copypaste/PasteButton';
+import lodash from 'lodash';
 
 interface LocationMenuProps {
     game: GameDescription;
@@ -17,14 +19,28 @@ interface LocationMenuProps {
 
 const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
-    const [, setCreatingNew] = useState<boolean>(false);
+    const skipResetRef = useRef(false);
     React.useEffect(() => {
+        if (skipResetRef.current) {
+            skipResetRef.current = false;
+            return;
+        }
         setEditingIndex(-1);
     }, [game]);
 
     const edit = (i: number) => {
         setEditingIndex(i)
-        setCreatingNew(false)
+    }
+
+    const onPaste = (obj: unknown, typename: string, newUid?: string) => {
+        if (typename !== 'loc' || newUid === undefined) return
+        const pasted = lodash.cloneDeep(obj as Loc)
+        pasted.uid = newUid
+        pasted.routes = []
+        skipResetRef.current = true
+        const updated = [...game.locs, pasted]
+        setEditingIndex(updated.length - 1)
+        handlers.handleLocChange(updated)
     }
 
     const createNew = () => {
@@ -33,7 +49,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
             uid: "",
             goto: [],
             links: [],
-            text: { 
+            text: {
                 main: "",
                 list: []
             },
@@ -42,7 +58,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
             eventHosts: [],
             discussable: true
         }
-        setCreatingNew(true)
+        skipResetRef.current = true
         setEditingIndex(game.locs.length)
         handlers.handleLocChange([...game.locs, newEmptyLoc])
     }
@@ -63,7 +79,7 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
             } else {
                 updatedLocArray[index] = update
             }
-            
+
             handlers.handleLocChange(updatedLocArray)
         }
         return <LocEditor game={game} handlers={handlers} loc={loc} open={editingIndex >= 0} onUpdateLocation={editThisLoc} onClose={() => setEditingIndex(-1)}></LocEditor>
@@ -72,13 +88,16 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
     return (
         <div>
             <Note text='Create locations that can contain paths to other locations and NPCs' />
-          {editingIndex >= 0 ? editor(editingIndex) : null}
-          <div className="locItems">
-            {locItems(game.locs)}
-            <div className="locItemsPlus">
-                <Button onClick={() => createNew()}>+</Button>
+            {editingIndex >= 0 ? editor(editingIndex) : null}
+            <div className="locItems">
+                {locItems(game.locs)}
+                <div className="locItemsPlus">
+                    <Stack spacing={8}>
+                        <Button onClick={() => createNew()}>+</Button>
+                        <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['loc']} />
+                    </Stack>
+                </div>
             </div>
-          </div>
         </div>
     );
 };

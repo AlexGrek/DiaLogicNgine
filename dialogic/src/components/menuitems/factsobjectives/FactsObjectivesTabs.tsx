@@ -1,7 +1,7 @@
 import React from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
-import StaticTabs from '../../common/StaticTabs';
+import PillLikeTabs from '../../common/PillLikeTabs';
 import FactsMenu from './FactsMenu';
 import QuestLineMenu from '../objectives/QuestLinesMenu';
 import './facts.css'
@@ -38,7 +38,7 @@ const CharEditorTabs: React.FC<FactsObjectivesTabsProps> = ({ game, onSetGame, h
     }
 
     return (
-        <StaticTabs keepOpen={true} tabs={[createFactsTab(), createObjectivesTab(), createLoreTab()]} />
+        <PillLikeTabs tabs={[createFactsTab(), createObjectivesTab(), createLoreTab()]} />
     );
 };
 

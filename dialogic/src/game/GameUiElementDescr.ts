@@ -26,6 +26,8 @@ export interface GameUiElementMeter {
     name: string
     progressBar: MeterProgressBar | null;
     fontId?: FontId
+    iconId?: string
+    color?: string
 }
 
 export function initGameUiElementMeter(name: string, uid: string): GameUiElementMeter {

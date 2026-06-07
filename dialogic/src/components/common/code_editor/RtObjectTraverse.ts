@@ -67,5 +67,17 @@ export function createRtDoc(game: GameDescription): { [key: string]: string } {
     variables.forEach((el) => {
         initial[el] = "custom property"
     })
+
+    // General info — read-only entries derived from game.general
+    const g = game.general
+    initial["rt.general.name"]        = `game name: "${g.name}"`
+    initial["rt.general.version"]     = `game version: "${g.version}"`
+    initial["rt.general.description"] = `game description (read-only)`
+    initial["rt.general.authors"]     = `authors: ${g.authors.join(", ")} (read-only array)`
+    initial["rt.general.extras"]      = `additional info map (read-only)`
+    for (const [key, val] of Object.entries(g.extras ?? {})) {
+        initial[`rt.general.extras.${key}`] = `additional info — ${key}: ${val}`
+    }
+
     return initial
 }

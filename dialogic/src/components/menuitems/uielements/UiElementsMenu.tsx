@@ -9,6 +9,7 @@ import GameUiElementDescr, { GameUiElementMeter, MeterProgressBar, initGameUiEle
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import CodeSampleButton from '../../common/CodeSampleButton';
 import FontPicker from '../../common/FontPicker';
+import IconPicker from '../../common/IconPicker';
 import { isFontId, type FontId } from '../../../lib/fonts';
 import MeterProgressBarEditor from './MeterProgressBarEditor';
 
@@ -109,6 +110,24 @@ const UiElementsMenu: React.FC<UiElementsMenuProps> = ({ game, ui, onSetUi }) =>
             ? editingObject.fontId
             : undefined
 
+        const setIconId = (iconId: string) => {
+            setEditingMeter({ ...editingObject, iconId })
+        }
+
+        const clearIconId = () => {
+            const next = lodash.omit(editingObject, 'iconId') as GameUiElementMeter
+            setEditingMeter(next)
+        }
+
+        const setColor = (color: string) => {
+            setEditingMeter({ ...editingObject, color: color || undefined })
+        }
+
+        const clearColor = () => {
+            const next = lodash.omit(editingObject, 'color') as GameUiElementMeter
+            setEditingMeter(next)
+        }
+
         const renderCodeEditor = (menu: CodeEditMenu) => {
             const code = editingObject[menu]
             return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}/>
@@ -136,6 +155,25 @@ const UiElementsMenu: React.FC<UiElementsMenuProps> = ({ game, ui, onSetUi }) =>
             >
                 Font
             </FontPicker>
+            <IconPicker
+                optional
+                value={editingObject.iconId}
+                onChange={setIconId}
+                onClear={clearIconId}
+            >
+                Icon
+            </IconPicker>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                <p className="editor-label" style={{ margin: 0 }}>Color</p>
+                <input
+                    type="color"
+                    value={editingObject.color ?? '#ffffff'}
+                    onChange={(e) => setColor(e.target.value)}
+                />
+                {editingObject.color && (
+                    <Button size="xs" appearance="subtle" onClick={clearColor}>Clear</Button>
+                )}
+            </div>
             <h3>Behavior</h3>
             {renderCodeEditButton("value")}
             {renderCodeEditButton("visibleIf")}

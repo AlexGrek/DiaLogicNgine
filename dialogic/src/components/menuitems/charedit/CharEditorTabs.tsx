@@ -1,7 +1,7 @@
 import React from 'react';
 import { GameDescription } from '../../../game/GameDescription';
 import { IUpds } from '../../../App';
-import StaticTabs from '../../common/StaticTabs';
+import PillLikeTabs from '../../common/PillLikeTabs';
 import CharMenu from './CharMenu';
 import RolesMenu from './RolesMenu';
 
@@ -37,7 +37,7 @@ const CharEditorTabs: React.FC<CharEditorTabsProps> = ({ game, onSetGame, handle
     }
 
     return (
-        <StaticTabs keepOpen={true} tabs={[createCharsEditorTab(), createRolesEditorTab(), createTraitsEditorTab()]}/>
+        <PillLikeTabs tabs={[createCharsEditorTab(), createRolesEditorTab(), createTraitsEditorTab()]}/>
     );
 };
 

@@ -13,14 +13,18 @@ import StringMapEditor from '../../common/StringMapEditor';
 import './ItemsMenu.css';
 import ItemsPicker from './ItemsPicker';
 import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
+import { IUpds } from '../../../App';
+import CopyButton from '../../common/copypaste/CopyButton';
+import PasteButton from '../../common/copypaste/PasteButton';
 
 interface ItemsMenuProps {
     game: GameDescription;
     items: Item[]
     onSetItems: (items: Item[]) => void
+    handlers?: IUpds
 }
 
-const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
+const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<Item | null>(null);
     const storageProject = resolveImageProject(useProjectImages());
@@ -49,6 +53,15 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
         const itemsUpd = lodash.cloneDeep(items)
         itemsUpd.splice(index, 1)
         onSetItems(itemsUpd)
+    }
+
+    const onPaste = (obj: unknown, typename: string, newUid?: string) => {
+        if (typename !== 'item' || newUid === undefined) return
+        const pasted = lodash.cloneDeep(obj as Item)
+        pasted.uid = newUid
+        const updated = [...items, pasted]
+        onSetItems(updated)
+        setEditing(updated.length - 1, pasted)
     }
 
     const renderDrawerContents = () => {
@@ -88,15 +101,26 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             setEditingObject({ ...it, tags: [...it.tags, ...tags] })
         }
 
+        const basicPromptSuffix = game.dev?.basicPromptSuffix ?? '';
+        const itemContext = [it.name, it.description].filter(Boolean).join('; ')
+        const itemAiPrompt = itemContext ? `${itemContext}, inventory item` : 'inventory item';
+
         return <div className='items-drawer-contents'>
             <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display item name'></Input>
             <Input value={it.description} onChange={(val) => updateItem("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
             <Divider>Images</Divider>
-            <ImagePicker value={it.image} onChange={val => setImage("image", val || undefined)}>Image</ImagePicker>
+            <ImagePicker
+                value={it.image}
+                onChange={val => setImage("image", val || undefined)}
+                quickAiPrompt={itemAiPrompt}
+                basicPromptSuffix={basicPromptSuffix}
+            >Image</ImagePicker>
             <ImagePicker
                 value={it.thumbnail}
                 onChange={val => setImage("thumbnail", val || undefined)}
                 sourceImage={it.image}
+                quickAiPrompt={itemContext ? `${itemContext}, inventory item thumbnail, square` : 'inventory item thumbnail, square'}
+                basicPromptSuffix={basicPromptSuffix}
             >
                 Thumbnail
             </ImagePicker>
@@ -137,7 +161,10 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
     return (
         <div>
             <div className='items-create-panel'>
-                <CreateWithUid objectName={'item'} onCreate={createItem}/>
+                <Stack spacing={8}>
+                    <CreateWithUid objectName={'item'} onCreate={createItem}/>
+                    {handlers && <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['item']} />}
+                </Stack>
             </div>
             <Stack wrap className='items-container'>
                 {renderItems()}
@@ -146,6 +173,7 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
                 <Drawer.Header>
                     <Drawer.Title>Edit item</Drawer.Title>
                     <Drawer.Actions>
+                        {handlers && editingObject && <CopyButton handlers={handlers} typename='item' obj={editingObject} />}
                         <ConfirmDeleteButton onConfirm={() => deleteItem(editingIndex)} objectDescr={`item`}></ConfirmDeleteButton>
                         <Button onClick={() => saveEdited()} appearance="primary">
                             Save

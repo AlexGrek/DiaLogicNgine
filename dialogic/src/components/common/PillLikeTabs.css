@@ -1,0 +1,36 @@
+.pill-tabs-nav {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    margin-bottom: 16px;
+}
+
+.pill-tabs-nav .rs-nav {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 9999px;
+    padding: 3px;
+    display: inline-flex;
+    gap: 2px;
+}
+
+.pill-tabs-nav .rs-nav-bar,
+.pill-tabs-nav .rs-nav::before,
+.pill-tabs-nav .rs-nav::after {
+    display: none;
+}
+
+.pill-tabs-nav .rs-nav-item::after {
+    display: none !important;
+}
+
+.pill-tabs-nav .rs-nav-item {
+    border-radius: 9999px !important;
+    padding: 4px 16px;
+    font-size: 13px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pill-tabs-nav .rs-nav-item.rs-nav-item-active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+}

@@ -93,6 +93,10 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
         return <ConfirmDeleteButtonSmall onConfirm={() => onDelete(char.uid)} />
     }
 
+    const charNameParts = [ch.displayName.main, ...ch.displayName.list.map(e => e.text)].filter(Boolean)
+    const charDescParts = [ch.description.main, ...ch.description.list.map(e => e.text)].filter(Boolean)
+    const charContext = [...charNameParts, ...charDescParts].join('; ')
+
     return (
         <div className='char-editing-main-container' onBlur={save}>
             <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"}/>
@@ -109,7 +113,12 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })} />
                 </Panel>
                 <Panel header="Avatar Image">
-                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value })} />
+                    <ImageListEditor
+                        imageList={ch.avatar}
+                        onChange={value => forceUpdate({ ...ch, avatar: value })}
+                        quickAiPrompt={charContext ? `${charContext}, character portrait, face` : 'character portrait, face'}
+                        basicPromptSuffix={game.dev?.basicPromptSuffix}
+                    />
                 </Panel>
                 <Panel header="Roles">
                     <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />

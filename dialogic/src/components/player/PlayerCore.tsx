@@ -3,7 +3,9 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { InGameNotificationType, State } from '../../exec/GameState';
 import { RenderView } from '../../exec/RenderView';
 import { styleWithImage } from '../UiUtils';
+import { generateImageUrl } from '../../Utils';
 import { resolveImageProject } from '../common/projectImages';
+import { getListForPrealoading } from '../../exec/Preloader';
 import { useProjectImages } from '../common/ProjectImagesContext';
 import GameMenuPanel from './GameMenuPanel';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
@@ -12,6 +14,7 @@ import SavesManager from '../../savegame/LocalStorageSavesManager';
 import GameUiElementsView from './GameUiElementsView';
 import GameNotificationsView from './GameNotificationsView';
 import { PlayerSettings, loadPlayerSettings, savePlayerSettings } from './PlayerSettings';
+import { resolveVisuals } from './visualsClasses';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -27,7 +30,13 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
     const [widgetRequest, setWidgetRequest] = React.useState<{ name: string } | null>(null);
-    const [playerSettings, setPlayerSettings] = React.useState<PlayerSettings>(() => loadPlayerSettings());
+    const [playerSettings, setPlayerSettings] = React.useState<PlayerSettings>(() => {
+        const visuals = resolveVisuals(game.game.visuals);
+        return loadPlayerSettings({
+            letterByLetter: visuals.typewriterEnabled,
+            letterByLetterSpeedMs: visuals.typewriterSpeedMs,
+        });
+    });
     const storageProject = resolveImageProject(useProjectImages());
 
     const savesManager = useRef<SavesManager>(new SavesManager(game.game.general.name))
@@ -52,6 +61,15 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         // transition away should be completed
         setTimeout(() => setInTransitionState(false), 200)
     // Only re-render view when game state changes; background/currentView are read for transition logic.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state])
+
+    useEffect(() => {
+        getListForPrealoading(game.game, state).forEach(uri => {
+            const img = new Image()
+            img.src = generateImageUrl(uri, storageProject)
+        })
+    // storageProject is stable per session; game.game changes only on full reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state])
 

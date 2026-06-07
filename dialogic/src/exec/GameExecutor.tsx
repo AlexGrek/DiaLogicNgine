@@ -12,6 +12,7 @@ import EventsProcessor from "./EventsProcessor";
 import DiscussionProcessor from "./DiscussionProcessor";
 import QuestProcessor from "./QuestProcessor";
 import GameUiElementsProcessor from "./GameUiElementsProcessor";
+import HooksProcessor from "./HooksProcessor";
 import { PointAndClickZone } from "../game/PointAndClick";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
@@ -21,6 +22,7 @@ export class GameExecManager {
     events: EventsProcessor
     quests: QuestProcessor
     uiEls: GameUiElementsProcessor
+    hooks: HooksProcessor
 
     constructor(game: GameDescription) {
         this.game = game
@@ -28,6 +30,7 @@ export class GameExecManager {
         this.events = new EventsProcessor(this)
         this.quests = new QuestProcessor(this)
         this.uiEls = new GameUiElementsProcessor(this)
+        this.hooks = new HooksProcessor(this)
     }
 
     getCurrentDialogWindow(state: State): Readonly<[Dialog, DialogWindow]> | null {
@@ -434,7 +437,8 @@ export class GameExecManager {
 
     modifyStateScript(instate: State, script?: string): State {
         if (script) {
-            return evaluateAsStateProcessor(this.game, script, this, instate)
+            const after = evaluateAsStateProcessor(this.game, script, this, instate)
+            return this.hooks.fireForStateTransition(instate, after)
         }
         return instate
     }
@@ -452,7 +456,8 @@ export class GameExecManager {
         // execute code if needed BEFORE link is followed
         let modifiedState = state
         if (link.actionCode) {
-            modifiedState = evaluateAsStateProcessor(this.game, link.actionCode, this, modifiedState)
+            const after = evaluateAsStateProcessor(this.game, link.actionCode, this, modifiedState)
+            modifiedState = this.hooks.fireForStateTransition(modifiedState, after)
         }
         modifiedState = this.withUpdatedHistory(this.followLink(modifiedState, link), clickData)
         return modifiedState;
@@ -496,7 +501,8 @@ export class GameExecManager {
         if (dw === null) return state
         const [, window] = dw
         if (!window.entryScript) return state
-        return evaluateAsStateProcessor(this.game, window.entryScript, this, state, { usedItem: itemUid })
+        const after = evaluateAsStateProcessor(this.game, window.entryScript, this, state, { usedItem: itemUid })
+        return this.hooks.fireForStateTransition(state, after)
     }
 
     stateError(state: State, message: string, exception?: unknown) {
