@@ -12,15 +12,17 @@ Flow
 """
 
 import io
+import mimetypes
 import os
 import time
 from pathlib import Path
+from typing import Literal
 
 import httpx
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from PIL import Image
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
@@ -52,6 +54,13 @@ def _image_dir(project_name: str) -> Path:
 
 def _thumb_dir(project_name: str) -> Path:
     return (STORAGE_ROOT / "projects" / project_name / "image_thumbs").resolve()
+
+
+def _safe_path(base: Path, filename: str) -> Path:
+    target = (base / filename).resolve()
+    if not target.is_relative_to(base):
+        raise HTTPException(status_code=400, detail="Invalid file path")
+    return target
 
 
 def _save_image(contents: bytes, filename: str, project_name: str) -> None:
@@ -101,8 +110,17 @@ class GenerateRequest(BaseModel):
     project_name: str
     model: str          # e.g. "imggen.flux-dev"
     prompt: str
+    negative_prompt: str | None = None
+    override_negative: bool = False
+    workflow: Literal["txt2img", "img2img"] = "txt2img"
+    input_image: str | None = None
+    data_preparation: dict[str, str] | None = None
     width: int = 1024
     height: int = 1024
+    seed: int | None = None
+    comfy_params: dict[str, object] | None = None
+    # UI snapshot for prompt editing parity with oai; currently unused on backend.
+    rescale: dict[str, object] | None = Field(default=None)
 
 
 class TaskRef(BaseModel):
@@ -113,8 +131,12 @@ class TaskRef(BaseModel):
 
 @router.post("/generate")
 async def generate(req: GenerateRequest) -> TaskRef:
-    """Create an output bucket, submit a txt2img task, return task reference."""
+    """Create required buckets, submit txt2img/img2img task, return task reference."""
     _check_config()
+    if not req.model.startswith("imggen."):
+        raise HTTPException(status_code=400, detail="Model must start with imggen.")
+    if req.workflow == "img2img" and not req.input_image:
+        raise HTTPException(status_code=400, detail="img2img requires input_image")
 
     async with httpx.AsyncClient(timeout=15) as client:
         # Create output bucket
@@ -127,20 +149,71 @@ async def generate(req: GenerateRequest) -> TaskRef:
             raise HTTPException(status_code=bucket_r.status_code, detail=bucket_r.text)
         output_bucket = bucket_r.json()["bucket_uid"]
 
-        # Submit task — outputBucket is camelCase per the tasks API
+        input_bucket: str | None = None
+        input_filename: str | None = None
+
+        if req.workflow == "img2img":
+            input_filename = Path(req.input_image).name if req.input_image else None
+            if not input_filename:
+                raise HTTPException(status_code=400, detail="img2img requires valid input_image")
+
+            input_path = _safe_path(_image_dir(req.project_name), input_filename)
+            if not input_path.exists():
+                raise HTTPException(status_code=404, detail=f"Input image not found: {input_filename}")
+
+            input_bucket_r = await client.post(
+                f"{OFFLOADMQ_URL}/api/storage/bucket/create?rm_after_task=true",
+                headers=_headers(),
+                json={},
+            )
+            if input_bucket_r.status_code not in (200, 201):
+                raise HTTPException(status_code=input_bucket_r.status_code, detail=input_bucket_r.text)
+            input_bucket = input_bucket_r.json()["bucket_uid"]
+
+            mime = mimetypes.guess_type(input_filename)[0] or "application/octet-stream"
+            files = {
+                "file": (input_filename, input_path.read_bytes(), mime),
+            }
+            upload_r = await client.post(
+                f"{OFFLOADMQ_URL}/api/storage/bucket/{input_bucket}/upload",
+                headers=_headers(),
+                files=files,
+            )
+            if upload_r.status_code not in (200, 201):
+                raise HTTPException(status_code=upload_r.status_code, detail=upload_r.text)
+
+        payload: dict = {
+            "workflow": req.workflow,
+            "prompt": req.prompt,
+            "resolution": {"width": req.width, "height": req.height},
+        }
+        if req.override_negative and (req.negative_prompt or "").strip():
+            payload["secondary_prompts"] = {"negative": req.negative_prompt.strip()}
+        if req.seed is not None:
+            payload["seed"] = req.seed
+        if input_filename:
+            payload["input_image"] = input_filename
+        if req.comfy_params:
+            payload.update(req.comfy_params)
+
+        # Submit task — include both legacy and newer field naming variants.
+        submit_body: dict = {
+            "apiKey": OFFLOADMQ_API_KEY,
+            "capability": req.model,
+            "urgent": False,
+            "outputBucket": output_bucket,
+            "output_bucket": output_bucket,
+            "payload": payload,
+        }
+        if input_bucket:
+            submit_body["file_bucket"] = [input_bucket]
+            submit_body["fileBucket"] = [input_bucket]
+        if req.data_preparation:
+            submit_body["dataPreparation"] = req.data_preparation
+
         submit_r = await client.post(
             f"{OFFLOADMQ_URL}/api/task/submit",
-            json={
-                "apiKey": OFFLOADMQ_API_KEY,
-                "capability": req.model,
-                "urgent": False,
-                "outputBucket": output_bucket,
-                "payload": {
-                    "workflow": "txt2img",
-                    "prompt": req.prompt,
-                    "resolution": {"width": req.width, "height": req.height},
-                },
-            },
+            json=submit_body,
         )
     if submit_r.status_code not in (200, 201, 202):
         raise HTTPException(status_code=submit_r.status_code, detail=submit_r.text)

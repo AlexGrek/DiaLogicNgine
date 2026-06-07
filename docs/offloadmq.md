@@ -27,7 +27,7 @@ Calls `POST {OFFLOADMQ_URL}/api/capabilities/online` and filters results to name
 
 ### `POST /generate`
 
-Submits a txt2img task. Returns a task reference used for polling.
+Submits a `txt2img` or `img2img` task. Returns a task reference used for polling.
 
 **Request body:**
 ```json
@@ -35,15 +35,37 @@ Submits a txt2img task. Returns a task reference used for polling.
   "project_name": "my-project",
   "model": "imggen.flux-krea",
   "prompt": "a forest at night",
+  "workflow": "txt2img",
   "width": 1024,
-  "height": 1024
+  "height": 1024,
+  "negative_prompt": null,
+  "override_negative": false,
+  "seed": null,
+  "input_image": null,
+  "data_preparation": null,
+  "comfy_params": null,
+  "rescale": null
 }
 ```
 
+`img2img` requires:
+
+- `workflow: "img2img"`
+- `input_image`: existing filename from `storage/projects/{project}/images/`
+
+Optional fields:
+
+- `negative_prompt` + `override_negative: true` → sent as `payload.secondary_prompts.negative`
+- `seed` → sent as `payload.seed`
+- `data_preparation` → sent as OffloadMQ `dataPreparation`
+- `comfy_params` → merged into payload as raw key/value passthrough (for extra Comfy/offload params)
+- `rescale` → accepted as UI state snapshot (for parity), not used by backend routing logic
+
 **Flow:**
 1. Creates an OffloadMQ output bucket (`POST /api/storage/bucket/create`) — gets back `bucket_uid`.
-2. Submits the task (`POST /api/task/submit`) with `capability`, `outputBucket`, and a `txt2img` payload.
-3. Returns task reference to the frontend.
+2. For `img2img`: creates a temporary input bucket (`?rm_after_task=true`) and uploads `input_image`.
+3. Submits the task (`POST /api/task/submit`) with `capability`, output bucket, payload, and optional input bucket + `dataPreparation`.
+4. Returns task reference to the frontend.
 
 **Response:**
 ```json
@@ -81,7 +103,9 @@ Polls task status. The frontend calls this every 3 seconds until done or failed.
 ## OffloadMQ API conventions
 
 - Auth: `X-API-Key` header for storage endpoints; `apiKey` in JSON body for task endpoints.
-- Task submit uses camelCase: `outputBucket`, `apiKey`.
+- Task submit accepts both camelCase/snake_case in this backend for compatibility:
+  - `outputBucket` and `output_bucket`
+  - `fileBucket` and `file_bucket`
 - Poll response uses camelCase: `typicalRuntimeSeconds`, `createdAt`, `stage`.
 - Storage bucket and file UIDs come from the task output: `output.images[0].bucket_uid` / `output.images[0].file_uid`.
 
@@ -105,4 +129,11 @@ The progress bar uses an exponential easing curve (`1 - e^(-2.5 * elapsed/avgMs)
 
 No code changes needed — models are discovered dynamically from the OffloadMQ `/api/capabilities/online` endpoint. Any capability whose name starts with `imggen.` appears in the model picker automatically.
 
-The task payload `workflow: "txt2img"` and `resolution: { width, height }` are fixed for now. If a new model requires a different payload shape, extend `GenerateRequest` and the submit body in `offloadmq.py`.
+The base payload uses:
+
+- `workflow`
+- `prompt`
+- `resolution: { width, height }`
+- optional `secondary_prompts`, `seed`, `input_image`
+
+For model-specific extras, pass them through `comfy_params` (object) from the frontend; keys are merged into the final payload.

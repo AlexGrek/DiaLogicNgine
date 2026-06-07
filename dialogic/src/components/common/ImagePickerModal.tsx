@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Button, Input, InputNumber, Modal, SelectPicker } from 'rsuite';
+import { Button, Input, InputNumber, Modal, SelectPicker, Toggle } from 'rsuite';
 import { useServerImages } from './useServerImages';
 import { IMAGES } from './ImagePicker';
 
@@ -23,6 +23,19 @@ interface GenState {
     modelsLoaded: boolean;
     model: string;
     prompt: string;
+    negativePrompt: string;
+    overrideNegative: boolean;
+    workflow: 'txt2img' | 'img2img';
+    inputImage: string;
+    seed: string;
+    dataPreparationEnabled: boolean;
+    dataPreparationMode: 'exact' | 'max';
+    dataPreparationWidth: number;
+    dataPreparationHeight: number;
+    dataPreparationPx: string;
+    dataPreparationMp: string;
+    comfyParamsEnabled: boolean;
+    comfyParamsJson: string;
     width: number;
     height: number;
     taskCap: string;
@@ -40,6 +53,19 @@ const DEFAULT_GEN: GenState = {
     modelsLoaded: false,
     model: '',
     prompt: '',
+    negativePrompt: '',
+    overrideNegative: false,
+    workflow: 'txt2img',
+    inputImage: '',
+    seed: '',
+    dataPreparationEnabled: false,
+    dataPreparationMode: 'exact',
+    dataPreparationWidth: 768,
+    dataPreparationHeight: 768,
+    dataPreparationPx: '',
+    dataPreparationMp: '',
+    comfyParamsEnabled: false,
+    comfyParamsJson: '',
     width: 1024,
     height: 1024,
     taskCap: '',
@@ -70,6 +96,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     const [progress, setProgress] = useState(0);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const rafRef = useRef<number | null>(null);
+    const imggenInputFileRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!fullscreenSrc) return;
@@ -200,8 +227,23 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                     project_name: projectName,
                     model: gen.model,
                     prompt: gen.prompt,
+                    negative_prompt: gen.negativePrompt || null,
+                    override_negative: gen.overrideNegative,
+                    workflow: gen.workflow,
+                    input_image: gen.workflow === 'img2img' ? gen.inputImage : null,
+                    data_preparation: buildDataPreparation(),
                     width: gen.width,
                     height: gen.height,
+                    seed: gen.seed.trim() ? Number(gen.seed) : null,
+                    comfy_params: parseComfyParams(),
+                    rescale: {
+                        enabled: gen.dataPreparationEnabled,
+                        mode: gen.dataPreparationMode,
+                        width: gen.dataPreparationWidth,
+                        height: gen.dataPreparationHeight,
+                        px: gen.dataPreparationPx.trim() ? Number(gen.dataPreparationPx) : null,
+                        mp: gen.dataPreparationMp.trim() ? Number(gen.dataPreparationMp) : null,
+                    },
                 }),
             });
             if (!r.ok) throw new Error(await r.text());
@@ -304,11 +346,47 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         e.target.value = '';
     };
 
+    const handleImggenInputUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        await uploadFile(file, (name) => {
+            fetchImages();
+            setGen(g => ({ ...g, inputImage: name }));
+        });
+        e.target.value = '';
+    };
+
     const selectedLabel = selected
         ? (selected.startsWith('game_assets/') ? selected.slice('game_assets/'.length) : selected)
         : 'No image selected';
 
     const genBusy = gen.status === 'submitting' || gen.status === 'polling';
+    const imggenInputFullUrl = gen.inputImage
+        ? `/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.inputImage)}`
+        : null;
+
+    const buildDataPreparation = (): Record<string, string> | null => {
+        if (!gen.dataPreparationEnabled) return null;
+        if (gen.dataPreparationMode === 'max') {
+            const parts: string[] = [];
+            if (gen.dataPreparationPx.trim()) parts.push(`px=${gen.dataPreparationPx.trim()}`);
+            if (gen.dataPreparationMp.trim()) parts.push(`mp=${gen.dataPreparationMp.trim()}`);
+            if (!parts.length) return null;
+            return { '*': `scale/max[${parts.join(',')}]` };
+        }
+        return { '*': `scale/${gen.dataPreparationWidth}x${gen.dataPreparationHeight}` };
+    };
+
+    const parseComfyParams = (): Record<string, unknown> | null => {
+        if (!gen.comfyParamsEnabled) return null;
+        const raw = gen.comfyParamsJson.trim();
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            throw new Error('Comfy params JSON must be an object');
+        }
+        return parsed as Record<string, unknown>;
+    };
 
     return (
     <>
@@ -409,6 +487,109 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                         placeholder="Describe the image…"
                                     />
                                 </div>
+                                <div className="imggen-mode-row">
+                                    <Button
+                                        appearance={gen.workflow === 'txt2img' ? 'primary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setGen(g => ({ ...g, workflow: 'txt2img' }))}
+                                    >
+                                        txt2img
+                                    </Button>
+                                    <Button
+                                        appearance={gen.workflow === 'img2img' ? 'primary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setGen(g => ({ ...g, workflow: 'img2img' }))}
+                                    >
+                                        img2img
+                                    </Button>
+                                </div>
+                                {gen.workflow === 'img2img' && (
+                                    <div className="imggen-field imggen-input-section">
+                                        <label>Input image</label>
+                                        <div className="imggen-input-actions">
+                                            <Button
+                                                size="sm"
+                                                loading={uploading}
+                                                onClick={() => imggenInputFileRef.current?.click()}
+                                            >
+                                                Upload
+                                            </Button>
+                                            {gen.inputImage && (
+                                                <Button
+                                                    size="sm"
+                                                    appearance="subtle"
+                                                    onClick={() => setGen(g => ({ ...g, inputImage: '' }))}
+                                                >
+                                                    Clear
+                                                </Button>
+                                            )}
+                                            <input
+                                                ref={imggenInputFileRef}
+                                                type="file"
+                                                accept={exts.map(e => `.${e}`).join(',')}
+                                                style={{ display: 'none' }}
+                                                onChange={handleImggenInputUpload}
+                                            />
+                                        </div>
+                                        {gen.inputImage && imggenInputFullUrl && (
+                                            <button
+                                                type="button"
+                                                className="imggen-input-preview"
+                                                title={gen.inputImage}
+                                                onClick={() => setFullscreenSrc(imggenInputFullUrl)}
+                                            >
+                                                <img src={thumbUrl(gen.inputImage)} alt={gen.inputImage} />
+                                                <span>{gen.inputImage}</span>
+                                            </button>
+                                        )}
+                                        <div className="imggen-input-grid">
+                                            {images.map(filename => {
+                                                const isActive = gen.inputImage === filename;
+                                                return (
+                                                    <button
+                                                        key={filename}
+                                                        type="button"
+                                                        className={`imggen-input-item${isActive ? ' selected' : ''}`}
+                                                        title={filename}
+                                                        onClick={() => setGen(g => ({ ...g, inputImage: filename }))}
+                                                    >
+                                                        <img src={thumbUrl(filename)} alt={filename} />
+                                                    </button>
+                                                );
+                                            })}
+                                            {images.length === 0 && (
+                                                <div className="imggen-input-empty">No uploads yet</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="imggen-field">
+                                    <label>Seed (optional)</label>
+                                    <Input
+                                        value={gen.seed}
+                                        onChange={v => setGen(g => ({ ...g, seed: v }))}
+                                        placeholder="empty = random"
+                                    />
+                                </div>
+                                <div className="imggen-field">
+                                    <label>Negative prompt</label>
+                                    <div className="imggen-toggle-row">
+                                        <Toggle
+                                            checked={gen.overrideNegative}
+                                            onChange={checked => setGen(g => ({ ...g, overrideNegative: checked }))}
+                                        />
+                                        <span>{gen.overrideNegative ? 'Override enabled' : 'Use model default'}</span>
+                                    </div>
+                                    {gen.overrideNegative && (
+                                        <Input
+                                            as="textarea"
+                                            rows={2}
+                                            value={gen.negativePrompt}
+                                            onChange={v => setGen(g => ({ ...g, negativePrompt: v }))}
+                                            placeholder="e.g. blurry, low quality"
+                                        />
+                                    )}
+                                </div>
                                 <div className="imggen-size-row">
                                     <div className="imggen-field">
                                         <label>Width</label>
@@ -431,10 +612,109 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                         />
                                     </div>
                                 </div>
+                                <details className="imggen-advanced">
+                                    <summary>Offload rescale (disabled by default)</summary>
+                                    <div className="imggen-advanced-body">
+                                        <div className="imggen-toggle-row">
+                                            <Toggle
+                                                checked={gen.dataPreparationEnabled}
+                                                onChange={checked => setGen(g => ({ ...g, dataPreparationEnabled: checked }))}
+                                            />
+                                            <span>Enable dataPreparation</span>
+                                        </div>
+                                        {gen.dataPreparationEnabled && (
+                                            <>
+                                                <div className="imggen-mode-row">
+                                                    <Button
+                                                        appearance={gen.dataPreparationMode === 'exact' ? 'primary' : 'ghost'}
+                                                        size="xs"
+                                                        onClick={() => setGen(g => ({ ...g, dataPreparationMode: 'exact' }))}
+                                                    >
+                                                        exact
+                                                    </Button>
+                                                    <Button
+                                                        appearance={gen.dataPreparationMode === 'max' ? 'primary' : 'ghost'}
+                                                        size="xs"
+                                                        onClick={() => setGen(g => ({ ...g, dataPreparationMode: 'max' }))}
+                                                    >
+                                                        max
+                                                    </Button>
+                                                </div>
+                                                {gen.dataPreparationMode === 'exact' ? (
+                                                    <div className="imggen-size-row">
+                                                        <div className="imggen-field">
+                                                            <label>Prep width</label>
+                                                            <InputNumber
+                                                                value={gen.dataPreparationWidth}
+                                                                min={64}
+                                                                max={4096}
+                                                                step={64}
+                                                                onChange={v => setGen(g => ({ ...g, dataPreparationWidth: Number(v) }))}
+                                                            />
+                                                        </div>
+                                                        <div className="imggen-field">
+                                                            <label>Prep height</label>
+                                                            <InputNumber
+                                                                value={gen.dataPreparationHeight}
+                                                                min={64}
+                                                                max={4096}
+                                                                step={64}
+                                                                onChange={v => setGen(g => ({ ...g, dataPreparationHeight: Number(v) }))}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="imggen-size-row">
+                                                        <div className="imggen-field">
+                                                            <label>Max px</label>
+                                                            <Input
+                                                                value={gen.dataPreparationPx}
+                                                                onChange={v => setGen(g => ({ ...g, dataPreparationPx: v }))}
+                                                            />
+                                                        </div>
+                                                        <div className="imggen-field">
+                                                            <label>Max mp</label>
+                                                            <Input
+                                                                value={gen.dataPreparationMp}
+                                                                onChange={v => setGen(g => ({ ...g, dataPreparationMp: v }))}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </details>
+                                <details className="imggen-advanced">
+                                    <summary>Comfy params (optional JSON passthrough)</summary>
+                                    <div className="imggen-advanced-body">
+                                        <div className="imggen-toggle-row">
+                                            <Toggle
+                                                checked={gen.comfyParamsEnabled}
+                                                onChange={checked => setGen(g => ({ ...g, comfyParamsEnabled: checked }))}
+                                            />
+                                            <span>Enable extra payload params</span>
+                                        </div>
+                                        {gen.comfyParamsEnabled && (
+                                            <Input
+                                                as="textarea"
+                                                rows={3}
+                                                value={gen.comfyParamsJson}
+                                                onChange={v => setGen(g => ({ ...g, comfyParamsJson: v }))}
+                                                placeholder='{"cfg_scale": 3.5, "steps": 28}'
+                                            />
+                                        )}
+                                    </div>
+                                </details>
                                 <Button
                                     appearance="primary"
                                     loading={genBusy}
-                                    disabled={!gen.model || !gen.prompt.trim() || genBusy}
+                                    disabled={
+                                        !gen.model ||
+                                        !gen.prompt.trim() ||
+                                        genBusy ||
+                                        (gen.workflow === 'img2img' && !gen.inputImage)
+                                    }
                                     onClick={handleGenerate}
                                 >
                                     {gen.status === 'polling' ? 'Generating…' : 'Generate'}
