@@ -57,7 +57,7 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
                     />
                 )}
             </div>
-            <StateDisplayDrawer state={gameState} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen} />
+            <StateDisplayDrawer state={gameState} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen} onStateChange={handleStateChange} />
         </div>
     );
 };

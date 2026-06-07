@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { State } from '../../exec/GameState';
-import { Drawer, Input } from 'rsuite';
-import { toYaml } from '../../Trace';
+import { Button, Drawer } from 'rsuite';
+import StateYamlEditor from './StateYamlEditor';
 
 interface StateDisplayDrawerProps {
     state: State;
@@ -10,17 +10,23 @@ interface StateDisplayDrawerProps {
     onStateChange?: (state: State) => void
 }
 
-const StateDisplayDrawer: React.FC<StateDisplayDrawerProps> = ({ state, onClose, open }) => {
-    // const [, set] = useState<GameState>(state);
-    useEffect(() => {
-        // set(state);
-    }, [state]);
+const StateDisplayDrawer: React.FC<StateDisplayDrawerProps> = ({ state, onClose, open, onStateChange }) => {
+    const handleStateChange = (next: State) => {
+        onStateChange?.(next);
+    };
 
     return (
         <Drawer open={open} onClose={onClose}>
+            <Drawer.Header>
+                <Drawer.Title>State</Drawer.Title>
+                <Drawer.Actions>
+                    <Button onClick={onClose}>Close</Button>
+                </Drawer.Actions>
+            </Drawer.Header>
             <Drawer.Body className='state-display-body'>
-                <p>State</p>
-                {open && <Input name='stateasyaml' style={{height: '100%', fontFamily: 'monospace'}} as='textarea' readOnly value={toYaml(state)} />}
+                {onStateChange && (
+                    <StateYamlEditor state={state} active={open} onStateChange={handleStateChange} />
+                )}
             </Drawer.Body>
         </Drawer>
     );
