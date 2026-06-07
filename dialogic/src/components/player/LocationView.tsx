@@ -4,6 +4,7 @@ import { HistoryRecord, State } from '../../exec/GameState';
 import "./player.css"
 import Loc from '../../game/Loc';
 import { DialogLink } from '../../game/Dialog';
+import LinkButtonContent from './LinkButtonContent';
 
 interface LocationViewProps {
     game: GameExecManager;
@@ -32,7 +33,7 @@ const LocationView: React.FC<LocationViewProps> = ({ game, state, location, onSt
 
         return location.links.map(link => {
             const textOfLink = getActualLinkText(state, link)
-            return (<div key={link.text}><button onClick={() => click(link, textOfLink)}>{textOfLink}</button></div>)
+            return (<div key={link.text}><button onClick={() => click(link, textOfLink)}><LinkButtonContent link={link} text={textOfLink} /></button></div>)
         })
     }
 

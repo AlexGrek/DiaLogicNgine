@@ -22,6 +22,8 @@ export enum LinkType {
     QuickReply = "reply", Return = "return"
 }
 
+export type LinkIconPlacement = "before" | "after"
+
 export interface DialogLinkDirection {
     direction?: string;
     qualifiedDirection?: DialogWindowId;
@@ -40,6 +42,12 @@ export interface DialogLink {
     isAlternativeLink?: boolean;
     useAlternativeWhen?: string;
     changeLocationInBg?: string
+    iconId?: string
+    iconPlacement?: LinkIconPlacement
+}
+
+export function resolveLinkIconPlacement(link: DialogLink): LinkIconPlacement {
+    return link.iconPlacement === "after" ? "after" : "before"
 }
 
 export function createDialogLink(): DialogLink {

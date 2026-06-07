@@ -152,15 +152,15 @@
 }
 
 .dialog-content-column {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
     height: 100%;
     min-height: 0;
     max-height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
+    align-content: end;
 }
 
 .dialog-window-view--text-right .dialog-content-column {
@@ -182,7 +182,7 @@
 }
 
 .dialog-window-view--no-short-history .dialog-content-column {
-    justify-content: flex-end;
+    grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .dialog-control-pad {
@@ -397,6 +397,23 @@
     margin: 0 6pt;
 }
 
+.dialog-link-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dialog-link-icon {
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.link-short-view-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 4px;
+}
+
 .dialog-variants--pending {
     visibility: hidden;
     pointer-events: none;
@@ -448,6 +465,8 @@
     transition-duration: .2s;
     transform-style: preserve-3d;
     transform-origin: top center;
+    display: inline-flex;
+    align-items: center;
 }
 
 @keyframes dialog-variants-appear {
@@ -495,23 +514,24 @@
 
 
 .dialog-short-history {
+    grid-row: 1;
     position: relative;
     scroll-behavior: smooth;
     overflow-y: auto;
     overflow-x: hidden;
     opacity: .6;
     font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-    flex: 1 1 0;
     min-height: 0;
+    align-self: end;
 }
 
 .dialog-controls {
+    grid-row: 2;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: flex-end;
     overflow: visible;
     box-sizing: border-box;
-    flex: 0 0 auto;
     width: 100%;
 }
 

@@ -9,15 +9,23 @@ interface IconPickerProps {
     value?: string;
     onChange: (iconId: string) => void;
     children?: ReactNode;
+    /** When true, icon is optional — shows inherit default and a Clear button. */
+    optional?: boolean;
+    onClear?: () => void;
 }
 
 const IconPicker: React.FC<IconPickerProps> = ({
-    value = '',
+    value,
     onChange,
     children,
+    optional = false,
+    onClear,
 }) => {
     const [modalOpen, setModalOpen] = useState(false);
-    const label = value ? (findIconDef(value)?.def.label ?? value) : 'No icon selected';
+    const hasValue = Boolean(value);
+    const label = hasValue && value
+        ? (findIconDef(value)?.def.label ?? value)
+        : 'No icon';
 
     return (
         <div className="picker-container" data-testid="icon-picker">
@@ -25,15 +33,18 @@ const IconPicker: React.FC<IconPickerProps> = ({
             <div className="picker-select-row">
                 <span className="picker-value-label" title={label}>{label}</span>
                 <Button size="sm" onClick={() => setModalOpen(true)}>Browse…</Button>
+                {optional && hasValue && onClear && (
+                    <Button size="sm" appearance="subtle" onClick={onClear}>Clear</Button>
+                )}
             </div>
-            {value && (
+            {hasValue && value && (
                 <div className="picker-preview-icon">
                     <IconSvg iconId={value} size={40} />
                 </div>
             )}
             <IconPickerModal
                 open={modalOpen}
-                currentIconId={value}
+                currentIconId={value ?? ''}
                 onSelect={onChange}
                 onClose={() => setModalOpen(false)}
             />

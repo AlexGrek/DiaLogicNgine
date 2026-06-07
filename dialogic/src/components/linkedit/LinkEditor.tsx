@@ -3,11 +3,11 @@ import TrashIcon from '@rsuite/icons/Trash';
 import 'animate.css';
 import lodash from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, ButtonToolbar, Checkbox, Divider, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Toggle, Tooltip, Whisper } from 'rsuite';
+import { Button, ButtonGroup, ButtonToolbar, Checkbox, Divider, IconButton, Input, InputPicker, Panel, PanelGroup, Stack, Toggle, Tooltip, Whisper } from 'rsuite';
 import { IUpds } from '../../App';
 import { genRandomAlphanumericString, prependToCode, stringEnumEntries } from '../../Utils';
 import { createDialogWindowId } from '../../exec/GameState';
-import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LinkType, createWindow } from '../../game/Dialog';
+import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LinkIconPlacement, LinkType, createWindow } from '../../game/Dialog';
 import { GameDescription } from '../../game/GameDescription';
 import { createBoolProp } from '../../game/Prop';
 import ButtonPanelSelector from '../ButtonPanelSelector';
@@ -17,6 +17,7 @@ import CodeSampleButton from '../common/CodeSampleButton';
 import DialogWindowPicker from '../common/DialogWindowPicker';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../common/code_editor/PopupCodeEditor';
 import CopyButton from '../common/copypaste/CopyButton';
+import IconPicker from '../common/IconPicker';
 import Magic, { MagicOperation } from '../common/magic/Magic';
 import LocationPicker from './LocationPicker';
 import CharPicker from './CharPicker';
@@ -365,6 +366,20 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
         onLinkChange({ ...link, changeLocationInBg: value || undefined}, index)
     }
 
+    const setIconId = (iconId: string) => {
+        onLinkChange({ ...link, iconId }, index)
+    }
+
+    const clearIconId = () => {
+        const next = lodash.omit(link, 'iconId', 'iconPlacement') as DialogLink
+        onLinkChange(next, index)
+    }
+
+    const setIconPlacement = (iconPlacement: LinkIconPlacement) => {
+        onLinkChange({ ...link, iconPlacement }, index)
+    }
+
+    const iconPlacement = link.iconPlacement === 'after' ? 'after' : 'before'
 
     return (
         <div className="link-editor-body animate__animated animate__fadeInRight animate__faster">
@@ -380,6 +395,33 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
             <Divider></Divider>
             <p>Text:</p>
             <Input onChange={editText} ref={txtInput} placeholder="Answer text" value={link.text}></Input>
+            <IconPicker
+                optional
+                value={link.iconId}
+                onChange={setIconId}
+                onClear={clearIconId}
+            >
+                Icon
+            </IconPicker>
+            {link.iconId && (
+                <>
+                    <p className="editor-label">Icon placement</p>
+                    <ButtonGroup>
+                        <Button
+                            active={iconPlacement === 'before'}
+                            onClick={() => setIconPlacement('before')}
+                        >
+                            Before text
+                        </Button>
+                        <Button
+                            active={iconPlacement === 'after'}
+                            onClick={() => setIconPlacement('after')}
+                        >
+                            After text
+                        </Button>
+                    </ButtonGroup>
+                </>
+            )}
             <PanelGroup accordion>
                 <Panel className='direction-editor-panel' header="Direction" defaultExpanded>
                     {linkEditorDirection(true, 0)}

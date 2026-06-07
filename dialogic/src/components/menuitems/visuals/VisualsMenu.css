@@ -1,0 +1,17 @@
+.visuals-menu {
+    margin: 0 auto;
+    padding: 0 8px;
+    max-width: 36em;
+}
+
+.visuals-properties {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.visuals-property-hint {
+    font-size: smaller;
+    opacity: 0.65;
+    margin: 2px 0 6px;
+}

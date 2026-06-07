@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, ButtonGroup, Panel, Stack } from 'rsuite';
+import { Button, ButtonGroup, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
 import {
     DialogTextAlignment,
@@ -8,6 +8,7 @@ import {
     VisualsConfiguration,
 } from '../../../game/GameDescription';
 import { resolveVisuals } from '../../player/visualsClasses';
+import './VisualsMenu.css';
 
 interface VisualsMenuProps {
     game: GameDescription;
@@ -34,34 +35,36 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
     };
 
     return (
-        <div style={{ marginLeft: 8, marginRight: 8 }}>
+        <div className="visuals-menu">
             <h3 className="center-header">Visuals</h3>
-            <Stack wrap alignItems="stretch" spacing={16}>
-                <Panel bordered header="Typography" style={{ minWidth: '24em' }}>
-                    <p>Fonts used in the player UI and dialog.</p>
-                    <Stack direction="column" spacing={12}>
-                        <FontPicker
-                            value={visuals.menuFontId}
-                            onChange={(menuFontId) => updateVisuals({ menuFontId })}
-                        >
-                            Menu font
-                        </FontPicker>
-                        <FontPicker
-                            value={visuals.textFontId}
-                            onChange={(textFontId) => updateVisuals({ textFontId })}
-                        >
-                            Text font
-                        </FontPicker>
-                        <FontPicker
-                            value={visuals.responsesFontId}
-                            onChange={(responsesFontId) => updateVisuals({ responsesFontId })}
-                        >
-                            Responses font
-                        </FontPicker>
-                    </Stack>
-                </Panel>
-                <Panel bordered header="Dialog text placement" style={{ minWidth: '24em' }}>
-                    <p>Where the dialog text panel appears in the player.</p>
+            <div className="visuals-properties">
+                <div>
+                    <p className="editor-label">Menu font</p>
+                    <p className="visuals-property-hint">Font used for in-game menus and HUD chrome.</p>
+                    <FontPicker
+                        value={visuals.menuFontId}
+                        onChange={(menuFontId) => updateVisuals({ menuFontId })}
+                    />
+                </div>
+                <div>
+                    <p className="editor-label">Text font</p>
+                    <p className="visuals-property-hint">Font used for dialog and narrative text.</p>
+                    <FontPicker
+                        value={visuals.textFontId}
+                        onChange={(textFontId) => updateVisuals({ textFontId })}
+                    />
+                </div>
+                <div>
+                    <p className="editor-label">Responses font</p>
+                    <p className="visuals-property-hint">Font used for choice / response buttons.</p>
+                    <FontPicker
+                        value={visuals.responsesFontId}
+                        onChange={(responsesFontId) => updateVisuals({ responsesFontId })}
+                    />
+                </div>
+                <div>
+                    <p className="editor-label">Dialog text placement</p>
+                    <p className="visuals-property-hint">Where the dialog text panel appears in the player.</p>
                     <ButtonGroup>
                         {TEXT_ALIGNMENTS.map(({ value, label }) => (
                             <Button
@@ -73,9 +76,10 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
                             </Button>
                         ))}
                     </ButtonGroup>
-                </Panel>
-                <Panel bordered header="Response alignment" style={{ minWidth: '24em' }}>
-                    <p>How choice buttons are laid out in the player.</p>
+                </div>
+                <div>
+                    <p className="editor-label">Response alignment</p>
+                    <p className="visuals-property-hint">How choice buttons are laid out in the player.</p>
                     <ButtonGroup>
                         {RESPONSE_ALIGNMENTS.map(({ value, label }) => (
                             <Button
@@ -87,25 +91,18 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
                             </Button>
                         ))}
                     </ButtonGroup>
-                </Panel>
-                <Panel bordered header="Short history" style={{ minWidth: '24em' }}>
-                    <p>Show recent dialog exchanges above the current line in the player.</p>
-                    <ButtonGroup>
-                        <Button
-                            active={visuals.shortHistoryVisible}
-                            onClick={() => updateVisuals({ shortHistoryVisible: true })}
-                        >
-                            Enabled
-                        </Button>
-                        <Button
-                            active={!visuals.shortHistoryVisible}
-                            onClick={() => updateVisuals({ shortHistoryVisible: false })}
-                        >
-                            Disabled
-                        </Button>
-                    </ButtonGroup>
-                </Panel>
-            </Stack>
+                </div>
+                <div>
+                    <p className="editor-label">Short history</p>
+                    <p className="visuals-property-hint">Show recent dialog exchanges above the current line.</p>
+                    <Toggle
+                        checked={visuals.shortHistoryVisible}
+                        checkedChildren="Enabled"
+                        unCheckedChildren="Disabled"
+                        onChange={(shortHistoryVisible) => updateVisuals({ shortHistoryVisible })}
+                    />
+                </div>
+            </div>
         </div>
     );
 };

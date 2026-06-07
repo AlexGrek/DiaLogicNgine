@@ -5,6 +5,7 @@ import { RenderLink } from '../../exec/RenderView';
 import { DialogLink } from '../../game/Dialog';
 import { ResponseAlignment } from '../../game/GameDescription';
 import { dialogVariantsClass } from './visualsClasses';
+import LinkButtonContent from './LinkButtonContent';
 import "./player.css";
 
 interface DialogVariantsProps {
@@ -64,7 +65,9 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
         return links.map((link, i) => {
             const textOfLink = link.text
             return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled || !interactive} className='dialog-button' onClick={interactive ? (ev) => click(link.link, textOfLink, ev) : undefined}>{textOfLink}</button>
+                <button disabled={link.disabled || !interactive} className='dialog-button' onClick={interactive ? (ev) => click(link.link, textOfLink, ev) : undefined}>
+                    <LinkButtonContent link={link.link} text={textOfLink} />
+                </button>
             </div>)
         })
     }

@@ -18,7 +18,7 @@ import {
     type FontId,
 } from "../lib/fonts";
 
-export const ENGINE_VERSION = "0.14"
+export const ENGINE_VERSION = "0.15"
 
 export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"

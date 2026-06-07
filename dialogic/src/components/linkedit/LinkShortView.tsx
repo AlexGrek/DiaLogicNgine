@@ -1,8 +1,9 @@
 import React from 'react';
 import 'animate.css';
-import { DialogLink, LinkType } from '../../game/Dialog';
+import { DialogLink, LinkType, resolveLinkIconPlacement } from '../../game/Dialog';
 import LinkTypeTag from '../LinkTypeTag';
 import { Tag } from 'rsuite';
+import IconSvg from '../common/IconSvg';
 
 interface LinkShortViewProps {
     index: number;
@@ -42,6 +43,9 @@ const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick,
             const tag = <Tag color="orange">hidden</Tag>
             tags.push(tag)
         }
+        if (link.iconId) {
+            tags.push(<Tag key="icon" color="violet">icon</Tag>)
+        }
         return tags
     }
 
@@ -53,7 +57,16 @@ const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick,
     }
     return (
         <div className={classes} onClick={noninteractive ? undefined : clickHandler}>
-            <p className='link-short-view-text'>{link.text}<span className='link-tags'>     {linkTags()}</span></p>
+            <p className='link-short-view-text'>
+                {link.iconId && resolveLinkIconPlacement(link) === 'before' && (
+                    <IconSvg iconId={link.iconId} className="link-short-view-icon" size={14} />
+                )}
+                {link.text}
+                {link.iconId && resolveLinkIconPlacement(link) === 'after' && (
+                    <IconSvg iconId={link.iconId} className="link-short-view-icon" size={14} />
+                )}
+                <span className='link-tags'>     {linkTags()}</span>
+            </p>
             <p className='link-short-view-target'><LinkTypeTag value={link.mainDirection.type} />{(!RETURN_LINK_TYPES.includes(link.mainDirection.type) || link.mainDirection.type == LinkType.QuickReply) && linkDirection}</p>
         </div>
 
