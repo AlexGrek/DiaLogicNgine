@@ -4,7 +4,7 @@
     height: 100%;
     flex-direction: row;
     justify-items: stretch;
-    background-color: rgba(0, 0, 0, .4);
+    background-color: rgba(0, 0, 0, var(--menu-panel-bg-alpha, 0.4));
     flex-grow: 1;
 }
 
@@ -34,7 +34,7 @@
     justify-content: center;
     height: 100%;
     padding: 3em;
-    background-color: rgba(0, 0, 0, .7);
+    background-color: rgba(0, 0, 0, calc(var(--menu-panel-bg-alpha, 0.4) * 1.6));
 }
 
 .game-menu-tab-menu button {
@@ -155,7 +155,7 @@
     padding: 8pt;
     gap: 12pt;
     width: 30em;
-    background-color: rgba(0, 0, 0, .3);
+    background-color: rgba(0, 0, 0, calc(var(--menu-panel-bg-alpha, 0.4) * 0.75));
 }
 
 .player-settings-row {
@@ -178,4 +178,43 @@
     font-size: small;
     opacity: 0.75;
     font-family: monospace;
+}
+
+.player-settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6pt;
+}
+
+.player-settings-label {
+    font-size: large;
+    opacity: 0.85;
+}
+
+.player-settings-font-size-row {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.player-settings-font-size-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: inherit;
+    padding: 4pt 10pt;
+    border-radius: 4pt;
+    cursor: pointer;
+    font-size: medium;
+    transition: background-color 0.2s;
+}
+
+.player-settings-font-size-btn:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.player-settings-font-size-btn.active {
+    background-color: rgba(255, 255, 255, 0.28);
+    border-color: rgba(255, 255, 255, 0.6);
+    font-weight: bold;
 }

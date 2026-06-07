@@ -264,6 +264,21 @@ export class PatchFrom18To019 implements Patch {
     }
 }
 
+export class PatchFrom19To020 implements Patch {
+    from(): string {
+        return "0.19"
+    }
+    to(): string {
+        return "0.20"
+    }
+    apply(obj: unknown): GameDescription {
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData = obj as GameDescription
+        objData.visuals = { ...createDefaultVisuals(), ...objData.visuals }
+        return objData
+    }
+}
+
 const PATCHES = [
     new PatchFrom04To05(),
     new PatchFrom05To06(),
@@ -280,6 +295,7 @@ const PATCHES = [
     new PatchFrom16To017(),
     new PatchFrom17To018(),
     new PatchFrom18To019(),
+    new PatchFrom19To020(),
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {

@@ -34,6 +34,8 @@ const HooksEditorTab: React.FC<HooksEditorTabProps> = ({ game, onSetGame }) => {
         if (editingIndex >= 0 && editingIndex < hooks.length) {
             setDraft({ ...hooks[editingIndex] })
         }
+    // hooks identity changes when game updates; intentionally only re-sync on index change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editingIndex])
 
     const openEdit = (i: number) => {

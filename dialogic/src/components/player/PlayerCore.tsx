@@ -14,7 +14,7 @@ import SavesManager from '../../savegame/LocalStorageSavesManager';
 import GameUiElementsView from './GameUiElementsView';
 import GameNotificationsView from './GameNotificationsView';
 import { PlayerSettings, loadPlayerSettings, savePlayerSettings } from './PlayerSettings';
-import { resolveVisuals } from './visualsClasses';
+import { fontSizeOverrideCssVars, resolveVisuals } from './visualsClasses';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -35,6 +35,8 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         return loadPlayerSettings({
             letterByLetter: visuals.typewriterEnabled,
             letterByLetterSpeedMs: visuals.typewriterSpeedMs,
+            textFontSize: visuals.textFontSize,
+            responsesFontSize: visuals.responsesFontSize,
         });
     });
     const storageProject = resolveImageProject(useProjectImages());
@@ -128,8 +130,9 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
 
     if (currentView) {
         const viewToRenderNow = (inTransitionState && prevView) ? prevView : currentView
+        const fontSizeStyle = fontSizeOverrideCssVars(playerSettings.textFontSize, playerSettings.responsesFontSize);
         return (
-            <div className='player-core-container' id='player-core'>
+            <div className='player-core-container' id='player-core' style={fontSizeStyle}>
                 <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground, storageProject)}></div>
                 <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background, storageProject)}></div>
                 <GameNotificationsView state={state} game={game} onNotificationClick={handleNotificationClick} />

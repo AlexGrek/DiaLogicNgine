@@ -31,6 +31,16 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
         trace(`game updated: ${game.general.description}`)
     }, [game]);
 
+    useEffect(() => {
+        const css = game.visuals?.customCss;
+        if (!css) return;
+        const style = document.createElement('style');
+        style.id = 'dialogic-custom-css';
+        style.textContent = css;
+        document.head.appendChild(style);
+        return () => { style.remove(); };
+    }, [game.visuals?.customCss]);
+
     const handleStateChange = (s: State) => {
         setGameState(s)
     }

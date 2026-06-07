@@ -51,6 +51,10 @@ export const DEFAULT_NOTIFICATION_BACKGROUND_OPACITY = 72
 export const DEFAULT_NOTIFICATION_BORDER_RADIUS = 0
 /** 0–100 opacity for the notification toast border (0 = no border). */
 export const DEFAULT_NOTIFICATION_BORDER_OPACITY = 0
+/** 0–100 base opacity for in-game menu panel backgrounds (matches legacy hex 0x54–0x74 ≈ 45). */
+export const DEFAULT_MENU_PANEL_OPACITY = 45
+/** Border radius in px for in-game menu panels (0 = square). */
+export const DEFAULT_MENU_PANEL_BORDER_RADIUS = 14
 
 export interface VisualsConfiguration {
     dialogTextAlignment: DialogTextAlignment
@@ -59,12 +63,17 @@ export interface VisualsConfiguration {
     menuFontId: FontId
     textFontId: FontId
     responsesFontId: FontId
+    textFontSize: FontSizeId
+    responsesFontSize: FontSizeId
     dialogTextBackgroundOpacity: number
     notificationBackgroundOpacity: number
     notificationBorderRadius: number
     notificationBorderOpacity: number
     typewriterEnabled: boolean
     typewriterSpeedMs: number
+    menuPanelOpacity: number
+    menuPanelBorderRadius: number
+    customCss: string
 }
 
 export function createDefaultVisuals(): VisualsConfiguration {
@@ -75,12 +84,17 @@ export function createDefaultVisuals(): VisualsConfiguration {
         menuFontId: DEFAULT_MENU_FONT_ID,
         textFontId: DEFAULT_TEXT_FONT_ID,
         responsesFontId: DEFAULT_RESPONSES_FONT_ID,
+        textFontSize: "normal",
+        responsesFontSize: "normal",
         dialogTextBackgroundOpacity: DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
         notificationBackgroundOpacity: DEFAULT_NOTIFICATION_BACKGROUND_OPACITY,
         notificationBorderRadius: DEFAULT_NOTIFICATION_BORDER_RADIUS,
         notificationBorderOpacity: DEFAULT_NOTIFICATION_BORDER_OPACITY,
         typewriterEnabled: true,
         typewriterSpeedMs: 30,
+        menuPanelOpacity: DEFAULT_MENU_PANEL_OPACITY,
+        menuPanelBorderRadius: DEFAULT_MENU_PANEL_BORDER_RADIUS,
+        customCss: "",
     }
 }
 

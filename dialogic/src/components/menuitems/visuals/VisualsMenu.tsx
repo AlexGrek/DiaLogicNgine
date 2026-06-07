@@ -3,7 +3,10 @@ import { Button, ButtonGroup, InputNumber, Slider, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
 import PillLikeTabs, { PillTab } from '../../common/PillLikeTabs';
 import {
+    DEFAULT_MENU_PANEL_BORDER_RADIUS,
     DialogTextAlignment,
+    FONT_SIZE_LABELS,
+    FontSizeId,
     GameDescription,
     ResponseAlignment,
     VisualsConfiguration,
@@ -65,6 +68,14 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         </div>
     );
 
+    const fontSizeButtons = (value: FontSizeId, onChange: (v: FontSizeId) => void) => (
+        <ButtonGroup>
+            {FONT_SIZE_LABELS.map(({ value: v, label }) => (
+                <Button key={v} active={value === v} onClick={() => onChange(v)}>{label}</Button>
+            ))}
+        </ButtonGroup>
+    );
+
     const typographyTab = (
         <div className="visuals-properties">
             <div>
@@ -84,12 +95,22 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
                 />
             </div>
             <div>
+                <p className="editor-label">Text size (default)</p>
+                <p className="visuals-property-hint">Default size of dialog and narrative text. Players can override this in settings.</p>
+                {fontSizeButtons(visuals.textFontSize, (textFontSize) => updateVisuals({ textFontSize }))}
+            </div>
+            <div>
                 <p className="editor-label">Responses font</p>
                 <p className="visuals-property-hint">Font used for choice / response buttons.</p>
                 <FontPicker
                     value={visuals.responsesFontId}
                     onChange={(responsesFontId) => updateVisuals({ responsesFontId })}
                 />
+            </div>
+            <div>
+                <p className="editor-label">Responses size (default)</p>
+                <p className="visuals-property-hint">Default size of choice / response buttons. Players can override this in settings.</p>
+                {fontSizeButtons(visuals.responsesFontSize, (responsesFontSize) => updateVisuals({ responsesFontSize }))}
             </div>
         </div>
     );
@@ -167,6 +188,24 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
                     )}
                 </div>
             )}
+            <div>
+                <p className="editor-label">Menu panels opacity</p>
+                <p className="visuals-property-hint">Background opacity of in-game menu panels (0 = fully transparent).</p>
+                {sliderNumber(
+                    visuals.menuPanelOpacity,
+                    100,
+                    (n) => updateVisuals({ menuPanelOpacity: n }),
+                )}
+            </div>
+            <div>
+                <p className="editor-label">Menu panels corner radius</p>
+                <p className="visuals-property-hint">Corner rounding of in-game menu panels in pixels (0 = square, default {DEFAULT_MENU_PANEL_BORDER_RADIUS}px).</p>
+                {sliderNumber(
+                    visuals.menuPanelBorderRadius,
+                    50,
+                    (n) => updateVisuals({ menuPanelBorderRadius: n }),
+                )}
+            </div>
         </div>
     );
 
@@ -202,10 +241,28 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         </div>
     );
 
+    const customCssTab = (
+        <div className="visuals-properties">
+            <div>
+                <p className="editor-label">Custom CSS</p>
+                <p className="visuals-property-hint">CSS injected into the player at runtime. Use standard selectors — e.g. <code>.dialog-text</code>, <code>.dialog-variants</code>.</p>
+                <textarea
+                    className="visuals-custom-css-editor"
+                    value={visuals.customCss}
+                    onChange={(e) => updateVisuals({ customCss: e.target.value })}
+                    placeholder="/* e.g. .dialog-text { color: #fff; } */"
+                    spellCheck={false}
+                    data-testid="visuals-custom-css"
+                />
+            </div>
+        </div>
+    );
+
     const tabs: PillTab[] = [
         { header: 'Typography', content: typographyTab },
         { header: 'Dialog', content: dialogTab },
         { header: 'Notifications', content: notificationsTab },
+        { header: 'Custom CSS', content: customCssTab },
     ];
 
     return (

@@ -30,3 +30,17 @@
     width: 5em;
     flex: 0 0 auto;
 }
+
+.visuals-custom-css-editor {
+    width: 100%;
+    min-height: 240px;
+    font-family: monospace;
+    font-size: 13px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+}

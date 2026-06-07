@@ -6,6 +6,8 @@ import ConfirmationDialog from './ConfirmationDialog';
 import { IUpds } from '../App';
 import ChangeTextDialog from './ChangeTextDialog';
 import { GameDescription } from '../game/GameDescription';
+import DemoPlayerModal from './DemoPlayerModal';
+import { toYaml } from '../Trace';
 
 export interface IWindowWidgetContextMenuProps {
   window: DialogWindow;
@@ -18,6 +20,7 @@ export interface IWindowWidgetContextMenuState {
   deleteOpen: boolean;
   renameOpen: boolean;
   copyRenameOpen: boolean;
+  demoOpen: boolean;
 }
 
 export default class WindowWidgetContextMenu extends React.Component<IWindowWidgetContextMenuProps, IWindowWidgetContextMenuState> {
@@ -28,7 +31,8 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
     this.state = {
       deleteOpen: false,
       renameOpen: false,
-      copyRenameOpen: false
+      copyRenameOpen: false,
+      demoOpen: false,
     }
   }
 
@@ -48,8 +52,24 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
     this.setState({
       deleteOpen: false,
       renameOpen: false,
-      copyRenameOpen: false
+      copyRenameOpen: false,
+      demoOpen: false,
     })
+  }
+
+  demoClick = () => {
+    this.setState({ demoOpen: true })
+  }
+
+  buildDemoPatch() {
+    const patch = {
+      position: {
+        kind: 'window',
+        dialog: this.props.dialog.name,
+        window: this.props.window.uid,
+      },
+    };
+    return toYaml(patch);
   }
 
   confirmationMenu() {
@@ -94,12 +114,20 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
   public render() {
     return <div>
       {this.confirmationMenu()}
+      <DemoPlayerModal
+        game={this.props.game}
+        open={this.state.demoOpen}
+        onClose={this.closeAll}
+        initialPatch={this.buildDemoPatch()}
+      />
       <Dropdown noCaret title={<span><MoreIcon/></span>}>
-      <Dropdown.Item>Duplicate</Dropdown.Item>
-      <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.renameClick()}}>Rename</Dropdown.Item>
-      <Dropdown.Item>Copy and rename</Dropdown.Item>
-      <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.deleteClick()}}>Delete</Dropdown.Item>
-    </Dropdown>
+        <Dropdown.Item onClick={(e) => { e.stopPropagation(); this.demoClick() }}>Demo from here</Dropdown.Item>
+        <Dropdown.Separator />
+        <Dropdown.Item>Duplicate</Dropdown.Item>
+        <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.renameClick()}}>Rename</Dropdown.Item>
+        <Dropdown.Item>Copy and rename</Dropdown.Item>
+        <Dropdown.Item onClick={(e) => {e.stopPropagation(); this.deleteClick()}}>Delete</Dropdown.Item>
+      </Dropdown>
     </div>
   }
 }

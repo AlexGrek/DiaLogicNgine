@@ -240,7 +240,7 @@
 
 .dialog-text {
     width: 100%;
-    font-size: 22px;
+    font-size: var(--player-text-font-size, 22px);
     font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
     background-color: var(--player-dialog-text-bg, rgba(4, 4, 4, 0.275));
     position: relative;
@@ -341,7 +341,7 @@
 }
 
 .dialog-variants {
-    font-size: 20px;
+    font-size: var(--player-responses-font-size, 20px);
     font-family: var(--player-font-responses, "PalanquinRegular", sans-serif);
     max-width: 100%;
     margin: 15pt 0 15pt 15pt;
@@ -379,7 +379,7 @@
 
 .dialog-responses {
     display: flex;
-    font-size: 20px;
+    font-size: var(--player-responses-font-size, 20px);
     font-family: var(--player-font-responses, "PalanquinRegular", sans-serif);
     max-width: 100%;
     margin: 15pt 0 15pt 15pt;
@@ -648,7 +648,8 @@
 }
 
 .dialog-history-record-text {
-    font-size: 14pt;
+    font-size: calc(var(--player-text-font-size, 22px) * 0.85);
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
 }
 
 .dialog-window-view--text-right .dialog-history-record-text {
@@ -660,7 +661,8 @@
 }
 
 .dialog-history-record-ans {
-    font-size: 13pt;
+    font-size: calc(var(--player-text-font-size, 22px) * 0.79);
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
     color: rgb(120, 120, 120);
 }
 

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import Dialog, { DialogWindow, createDialog } from "../game/Dialog";
 import PushMessageIcon from "@rsuite/icons/PushMessage";
 import CreativeIcon from "@rsuite/icons/Creative";
+import GraphIcon from "@rsuite/icons/Branch";
 import { Button, Panel, Placeholder } from "rsuite";
 import WindowEditor from "./WindowEditor";
 import CreateWindowButton from "./CreateWindowButton";
@@ -11,6 +12,8 @@ import { GameDescription } from "../game/GameDescription";
 import "./dialog.css";
 import ChainEditor from "./chain/ChainEditor";
 import AiGenerateModal from "./ai/AiGenerateDrawer";
+
+const DialogGraphView = React.lazy(() => import("./DialogGraphView"));
 
 export interface DialogHandlers {
     createDialogWindowHandler: (window: DialogWindow) => void;
@@ -36,6 +39,7 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
   );
   const [chainOpen, setChainOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
 
   const itemRef = useRef<HTMLDivElement>(null);
 
@@ -124,11 +128,31 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
           >
             Generate
           </Button>
+          <Button
+            className="dialog-tool-action"
+            appearance={showGraph ? "primary" : "subtle"}
+            startIcon={<GraphIcon />}
+            onClick={() => setShowGraph((v) => !v)}
+          >
+            Graph
+          </Button>
         </div>
       </div>
-      <div className="window-editor-windows-container">
-        {renderWindows(dialog.windows, dialog)}
-      </div>
+      {showGraph ? (
+        <React.Suspense fallback={<div style={{ padding: 16, color: "#888" }}>Loading graph…</div>}>
+          <DialogGraphView
+            dialog={dialog}
+            onWindowClick={(uid) => {
+              const win = dialog.windows.find((w) => w.uid === uid);
+              if (win) { setShowGraph(false); windowChosenHandler(win); }
+            }}
+          />
+        </React.Suspense>
+      ) : (
+        <div className="window-editor-windows-container">
+          {renderWindows(dialog.windows, dialog)}
+        </div>
+      )}
       <ChainEditor
         game={game}
         dialog={dialog || createDialog("")}

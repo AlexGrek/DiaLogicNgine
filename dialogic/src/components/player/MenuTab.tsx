@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State, createInitialState } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
+import { FONT_SIZE_LABELS, FontSizeId } from '../../game/GameDescription';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
 import { MAX_LETTER_SPEED_MS, MIN_LETTER_SPEED_MS, PlayerSettings } from './PlayerSettings';
 import './MenuTab.css';
@@ -79,6 +80,20 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
         </div>
     }
 
+    const renderFontSizeButtons = (value: FontSizeId, onChange: (v: FontSizeId) => void) => (
+        <div className='player-settings-font-size-row'>
+            {FONT_SIZE_LABELS.map(({ value: v, label }) => (
+                <button
+                    key={v}
+                    className={`player-settings-font-size-btn${value === v ? ' active' : ''}`}
+                    onClick={() => onChange(v)}
+                >
+                    {label}
+                </button>
+            ))}
+        </div>
+    );
+
     const renderSettingsMenuDetails = () => {
         return (
             <div className='game-menu-tab-settings' data-testid="player-settings-panel" style={{ marginLeft: 8, marginRight: 8 }}>
@@ -110,6 +125,18 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
                         </span>
                     </label>
                 )}
+                <div className='player-settings-section'>
+                    <span className='player-settings-label'>{localmanager.local("Text size")}</span>
+                    {renderFontSizeButtons(playerSettings.textFontSize, (textFontSize) =>
+                        onPlayerSettingsChange({ ...playerSettings, textFontSize })
+                    )}
+                </div>
+                <div className='player-settings-section'>
+                    <span className='player-settings-label'>{localmanager.local("Answers size")}</span>
+                    {renderFontSizeButtons(playerSettings.responsesFontSize, (responsesFontSize) =>
+                        onPlayerSettingsChange({ ...playerSettings, responsesFontSize })
+                    )}
+                </div>
             </div>
         )
     }

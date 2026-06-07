@@ -10,16 +10,16 @@
 }
 
 .game-menu-container.closing {
-    background: radial-gradient(circle at 50% 100%, #05050500, rgba(249, 249, 249, 0));
+    background: radial-gradient(circle at 50% 100%, rgba(5, 5, 5, 0), rgba(249, 249, 249, 0));
 }
 
 .game-menu-container.opening {
-    background: radial-gradient(circle at 50% 100%, #05050574, rgba(249, 249, 249, 0));
+    background: radial-gradient(circle at 50% 100%, rgba(5, 5, 5, var(--menu-panel-bg-alpha, 0.45)), rgba(249, 249, 249, 0));
 }
 
 .game-menu-button-group button {
     color: white;
-    background-color: #05050574;
+    background-color: rgba(5, 5, 5, var(--menu-panel-bg-alpha, 0.45));
     border: none;
     transition: background-color .2s ease;
 }
@@ -95,7 +95,7 @@
 .game-menu-widget {
     position: absolute;
     inset: 3% 5%;
-    border-radius: 14px;
+    border-radius: var(--menu-panel-border-radius, 14px);
     border: 1px solid black;
     overflow: hidden;
     transform-style: preserve-3d;
@@ -141,7 +141,7 @@
     width: 100%;
     top: 0;
     height: 100%;
-    background-color: #05050554;
+    background-color: rgba(5, 5, 5, calc(var(--menu-panel-bg-alpha, 0.45) * 0.72));
     font-weight: bolder;
     font-family: monospace;
 }
@@ -171,7 +171,7 @@
 
 .game-menu-button-main-toclose.opening:hover {
     opacity: 1;
-    background-color: #05050554;
+    background-color: rgba(5, 5, 5, calc(var(--menu-panel-bg-alpha, 0.45) * 0.72));
 }
 
 @keyframes menuButtonUp {

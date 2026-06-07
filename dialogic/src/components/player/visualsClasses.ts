@@ -1,11 +1,16 @@
 import type { CSSProperties } from 'react';
 import {
     DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
+    DEFAULT_MENU_PANEL_BORDER_RADIUS,
+    DEFAULT_MENU_PANEL_OPACITY,
     DEFAULT_NOTIFICATION_BACKGROUND_OPACITY,
     DEFAULT_NOTIFICATION_BORDER_OPACITY,
     DEFAULT_NOTIFICATION_BORDER_RADIUS,
     DialogTextAlignment,
+    FontSizeId,
+    RESPONSES_FONT_SIZE_PX,
     ResponseAlignment,
+    TEXT_FONT_SIZE_PX,
     VisualsConfiguration,
     createDefaultVisuals,
 } from '../../game/GameDescription';
@@ -34,6 +39,13 @@ function normalizeFontId(value: unknown, fallback: FontId): FontId {
     return fallback;
 }
 
+function normalizeFontSizeId(value: unknown): FontSizeId {
+    if (value === 'xsmall' || value === 'small' || value === 'normal' || value === 'large' || value === 'huge') {
+        return value;
+    }
+    return 'normal';
+}
+
 function clampInt(value: unknown, min: number, max: number, fallback: number): number {
     if (typeof value !== 'number' || Number.isNaN(value)) {
         return fallback;
@@ -53,6 +65,11 @@ export function resolveVisuals(visuals: VisualsConfiguration | undefined): Visua
     merged.notificationBorderOpacity = clampInt(merged.notificationBorderOpacity, 0, 100, DEFAULT_NOTIFICATION_BORDER_OPACITY);
     merged.typewriterEnabled = Boolean(merged.typewriterEnabled ?? true);
     merged.typewriterSpeedMs = clampInt(merged.typewriterSpeedMs, 10, 80, 30);
+    merged.textFontSize = normalizeFontSizeId(merged.textFontSize);
+    merged.responsesFontSize = normalizeFontSizeId(merged.responsesFontSize);
+    merged.menuPanelOpacity = clampInt(merged.menuPanelOpacity, 0, 100, DEFAULT_MENU_PANEL_OPACITY);
+    merged.menuPanelBorderRadius = clampInt(merged.menuPanelBorderRadius, 0, 50, DEFAULT_MENU_PANEL_BORDER_RADIUS);
+    if (typeof merged.customCss !== 'string') merged.customCss = '';
     return merged;
 }
 
@@ -73,6 +90,20 @@ export function playerVisualsCssVars(visuals: VisualsConfiguration): CSSProperti
         '--player-font-text': FONT_CSS[visuals.textFontId],
         '--player-font-responses': FONT_CSS[visuals.responsesFontId],
         '--player-dialog-text-bg': `rgba(4, 4, 4, ${opacity})`,
+        '--player-text-font-size': `${TEXT_FONT_SIZE_PX[visuals.textFontSize]}px`,
+        '--player-responses-font-size': `${RESPONSES_FONT_SIZE_PX[visuals.responsesFontSize]}px`,
+        '--menu-panel-bg-alpha': `${visuals.menuPanelOpacity / 100}`,
+        '--menu-panel-border-radius': `${visuals.menuPanelBorderRadius}px`,
+    } as CSSProperties;
+}
+
+export function fontSizeOverrideCssVars(
+    textFontSize: FontSizeId,
+    responsesFontSize: FontSizeId,
+): CSSProperties {
+    return {
+        '--player-text-font-size': `${TEXT_FONT_SIZE_PX[textFontSize]}px`,
+        '--player-responses-font-size': `${RESPONSES_FONT_SIZE_PX[responsesFontSize]}px`,
     } as CSSProperties;
 }
 
