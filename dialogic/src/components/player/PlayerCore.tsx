@@ -9,6 +9,7 @@ import InGameControlPad from './InGameControlPad';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
 import GameUiElementsView from './GameUiElementsView';
 import GameNotificationsView from './GameNotificationsView';
+import { PlayerSettings, loadPlayerSettings, savePlayerSettings } from './PlayerSettings';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -24,6 +25,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
     const [widgetRequest, setWidgetRequest] = React.useState<{ name: string } | null>(null);
+    const [playerSettings, setPlayerSettings] = React.useState<PlayerSettings>(() => loadPlayerSettings());
 
     const savesManager = useRef<SavesManager>(new SavesManager(game.game.general.name))
 
@@ -74,6 +76,11 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         setMenuOpen(open)
     }
 
+    const handlePlayerSettingsChange = (next: PlayerSettings) => {
+        setPlayerSettings(next)
+        savePlayerSettings(next)
+    }
+
     // Map a notification type to the menu widget it should open, then open the menu there.
     const handleNotificationClick = (type: InGameNotificationType) => {
         const widget = (type === 'itemadded' || type === 'itemremoved') ? 'Inventory' : 'Journal'
@@ -111,10 +118,10 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         <GameUiElementsView elements={currentView?.uiElements || []}/>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd}/>
+                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd} playerSettings={playerSettings} onPlayerSettingsChange={handlePlayerSettingsChange}/>
                     </div>
                     <div className={gameWidgetClass('player-core-uiwidget-container')}>
-                        <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />
+                        <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} playerSettings={playerSettings} />
                     </div>
                 </div>
             </div>

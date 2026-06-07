@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BridgeEvents, PlayerBridge, resolveImage } from '../types';
 import { createButton, fadeIn, fadeOut, imageKeyFor, loadImageAsync, PhaserButton } from '../uiHelpers';
+import { DialogTypewriter } from '../typewriter';
 import {
     CharDialogRenderView,
     DialogRenderView,
@@ -24,6 +25,8 @@ export class HudScene extends Phaser.Scene {
     private pendingView: RenderView | null = null;
     private lastWidget: RenderWidget | null = null;
     private resizeHandler!: (gameSize: Phaser.Structs.Size) => void;
+    private activeTypewriter: DialogTypewriter | null = null;
+    private interactionZone: Phaser.GameObjects.Rectangle | null = null;
 
     constructor() {
         super(HUD_SCENE);
@@ -128,6 +131,10 @@ export class HudScene extends Phaser.Scene {
     };
 
     private clearRoot() {
+        this.activeTypewriter?.destroy();
+        this.activeTypewriter = null;
+        this.interactionZone?.destroy();
+        this.interactionZone = null;
         this.root.removeAll(true);
     }
 
@@ -221,7 +228,8 @@ export class HudScene extends Phaser.Scene {
             cursorY += 64;
         }
 
-        const text = this.add.text(innerX, cursorY, view.text || '', {
+        const fullText = view.text || '';
+        const text = this.add.text(innerX, cursorY, '', {
             fontFamily: 'Inter, Georgia, serif',
             fontSize: '20px',
             color: '#e8edf5',
@@ -229,12 +237,21 @@ export class HudScene extends Phaser.Scene {
             lineSpacing: 4,
         });
         this.root.add(text);
-        cursorY += text.height + 24;
 
-        const links = this.renderLinks(view.links, innerX, cursorY, innerW);
-        links.forEach(c => this.root.add(c));
+        const canAdvance = view.pageIndex < view.pageCount - 1;
+        const continueLink = view.continueLink;
+        const layoutAfterText = () => {
+            const linksY = cursorY + text.height + 24;
+            const links = this.renderLinks(view.links, innerX, linksY, innerW);
+            links.forEach(c => this.root.add(c));
+            if (!canAdvance && !continueLink) {
+                this.interactionZone?.destroy();
+                this.interactionZone = null;
+            }
+        };
 
-        this.addAdvanceZone(view.pageIndex < view.pageCount - 1, view.continueLink);
+        this.activeTypewriter = new DialogTypewriter(this, text, fullText, layoutAfterText);
+        this.addDialogInteractionZone(canAdvance, continueLink, this.activeTypewriter);
 
         fadeIn(this, panelBg, 200);
         this.tweens.add({ targets: panelBg, scaleY: { from: 0.98, to: 1 }, duration: 250, ease: 'Cubic.easeOut' });
@@ -352,7 +369,8 @@ export class HudScene extends Phaser.Scene {
         this.root.add(nameText);
         cursorY += 78;
 
-        const text = this.add.text(innerX, cursorY, view.text || '', {
+        const fullText = view.text || '';
+        const text = this.add.text(innerX, cursorY, '', {
             fontFamily: 'Inter, Georgia, serif',
             fontSize: '20px',
             color: '#e8edf5',
@@ -360,55 +378,77 @@ export class HudScene extends Phaser.Scene {
             lineSpacing: 4,
         });
         this.root.add(text);
-        cursorY += text.height + 22;
 
+        const canAdvance = view.pageIndex < view.pageCount - 1;
+        const continueLink = view.continueLink;
         const opt = view.dialogOptions;
         const canDiscuss = opt.canDiscussChars || opt.canDiscussFacts || opt.canDiscussItems || opt.canDiscussLocations;
-        if (canDiscuss) {
-            const discussBtn = createButton(this, innerX, cursorY, '» Discuss...', () => {
-                this.bridge.events.emit(BridgeEvents.OPEN_DISCUSS, view);
-            }, {
-                paddingX: 14, paddingY: 8, fontSize: 14, bg: 0x1c2535,
-            });
-            this.root.add(discussBtn.container);
-            cursorY += discussBtn.height + 12;
-        }
+        const textBaseY = cursorY;
 
-        const links = this.renderLinks(view.links, innerX, cursorY, innerW);
-        links.forEach(c => this.root.add(c));
+        const layoutAfterText = () => {
+            let linksY = textBaseY + text.height + 22;
+            if (canDiscuss) {
+                const discussBtn = createButton(this, innerX, linksY, '» Discuss...', () => {
+                    this.bridge.events.emit(BridgeEvents.OPEN_DISCUSS, view);
+                }, {
+                    paddingX: 14, paddingY: 8, fontSize: 14, bg: 0x1c2535,
+                });
+                this.root.add(discussBtn.container);
+                linksY += discussBtn.height + 12;
+            }
+            const links = this.renderLinks(view.links, innerX, linksY, innerW);
+            links.forEach(c => this.root.add(c));
+            if (!canAdvance && !continueLink) {
+                this.interactionZone?.destroy();
+                this.interactionZone = null;
+            }
+        };
 
-        this.addAdvanceZone(view.pageIndex < view.pageCount - 1, view.continueLink);
+        this.activeTypewriter = new DialogTypewriter(this, text, fullText, layoutAfterText);
+        this.addDialogInteractionZone(canAdvance, continueLink, this.activeTypewriter);
 
         fadeIn(this, panelBg, 200);
         text.setAlpha(0);
         this.tweens.add({ targets: text, alpha: 1, y: { from: text.y + 8, to: text.y }, duration: 300, ease: 'Cubic.easeOut', delay: 80 });
     }
 
-    private addAdvanceZone(canAdvance: boolean, continueLink: RenderLink | null) {
-        if (!canAdvance && !continueLink) return;
+    private addDialogInteractionZone(
+        canAdvance: boolean,
+        continueLink: RenderLink | null,
+        typewriter: DialogTypewriter | null,
+    ) {
+        const needsSkip = typewriter != null && !typewriter.isComplete();
+        const needsAdvance = canAdvance || continueLink != null;
+        if (!needsSkip && !needsAdvance) {
+            return;
+        }
         const { width, height } = this.scale.gameSize;
-        // transparent full-screen catcher so clicking anywhere advances the text;
-        // it is added on top, but link buttons are never present in this case
-        // (the render layer leaves links empty while paging / on continue links).
         const zone = this.add.rectangle(0, 0, width, height, 0x000000, 0.001).setOrigin(0, 0);
         zone.setInteractive({ useHandCursor: true });
         zone.on('pointerdown', () => {
+            if (typewriter?.skip()) {
+                return;
+            }
             if (continueLink) {
                 this.bridge.onLinkClick(continueLink);
-            } else {
+            } else if (canAdvance) {
                 this.bridge.onAdvancePage();
             }
         });
         this.root.add(zone);
+        this.interactionZone = zone;
 
-        const hint = this.add.text(width / 2, height - 18, '▼ click to continue', {
-            fontFamily: 'Inter, system-ui, sans-serif',
-            fontSize: '14px',
-            color: '#9fb3d1',
-        }).setOrigin(0.5, 1);
-        this.root.add(hint);
-        hint.setAlpha(0);
-        this.tweens.add({ targets: hint, alpha: { from: 0, to: 0.85 }, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        const showHint = needsAdvance && (typewriter?.isComplete() ?? true);
+        if (showHint) {
+            const hint = this.add.text(width / 2, height - 18, '▼ click to continue', {
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: '14px',
+                color: '#9fb3d1',
+            }).setOrigin(0.5, 1);
+            this.root.add(hint);
+            hint.setAlpha(0);
+            this.tweens.add({ targets: hint, alpha: { from: 0, to: 0.85 }, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+        }
     }
 
     private renderPac(view: PacRenderView) {

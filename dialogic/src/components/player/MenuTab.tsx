@@ -3,6 +3,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State, createInitialState } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
+import { MAX_LETTER_SPEED_MS, MIN_LETTER_SPEED_MS, PlayerSettings } from './PlayerSettings';
 import './MenuTab.css';
 
 interface MenuTabProps {
@@ -12,11 +13,13 @@ interface MenuTabProps {
     manager: SavesManager
     onStateChange: (newState: State) => void
     onCloseMenu: () => void
+    playerSettings: PlayerSettings
+    onPlayerSettingsChange: (s: PlayerSettings) => void
 }
 
-type OpenMenu = "load" | "save" | "about"| "newgame" | null
+type OpenMenu = "load" | "save" | "about"| "newgame" | "settings" | null
 
-const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, onStateChange, manager, onCloseMenu }) => {
+const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, onStateChange, manager, onCloseMenu, playerSettings, onPlayerSettingsChange }) => {
     const [openMenu, setOpenMenu] = useState<OpenMenu>(null)
     const [newSaveName, setNewSaveName] = useState<string>("")
 
@@ -76,6 +79,41 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
         </div>
     }
 
+    const renderSettingsMenuDetails = () => {
+        return (
+            <div className='game-menu-tab-settings' data-testid="player-settings-panel" style={{ marginLeft: 8, marginRight: 8 }}>
+                <label className='player-settings-row'>
+                    <input
+                        type="checkbox"
+                        checked={playerSettings.letterByLetter}
+                        onChange={(ev) => onPlayerSettingsChange({ ...playerSettings, letterByLetter: ev.target.checked })}
+                        data-testid="player-settings-letter-by-letter"
+                    />
+                    <span>{localmanager.local("Letter by letter")}</span>
+                </label>
+                {playerSettings.letterByLetter && (
+                    <label className='player-settings-row player-settings-speed'>
+                        <span>{localmanager.local("Text speed")}</span>
+                        <input
+                            type="range"
+                            min={MIN_LETTER_SPEED_MS}
+                            max={MAX_LETTER_SPEED_MS}
+                            value={playerSettings.letterByLetterSpeedMs}
+                            onChange={(ev) => onPlayerSettingsChange({
+                                ...playerSettings,
+                                letterByLetterSpeedMs: parseInt(ev.target.value, 10),
+                            })}
+                            data-testid="player-settings-speed"
+                        />
+                        <span className='player-settings-speed-label'>
+                            {playerSettings.letterByLetterSpeedMs} ms
+                        </span>
+                    </label>
+                )}
+            </div>
+        )
+    }
+
     const renderMenuDetails = () => {
         switch (openMenu) {
             case "load":
@@ -86,6 +124,8 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
                 return renderAboutMenuDetails()
             case "newgame":
                     return renderNewgameMenuDetails()
+            case "settings":
+                return renderSettingsMenuDetails()
             default:
                 return <div></div>
         }
@@ -103,6 +143,7 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
             <button className={genClassNameForButton("newgame")} onClick={() => setOpenMenu("newgame")}>{localmanager.local("New game")}</button>
             <button className={genClassNameForButton("save")} onClick={() => setOpenMenu("save")}>{localmanager.local("Save")}</button>
             <button className={genClassNameForButton("load")} onClick={() => setOpenMenu("load")}>{localmanager.local("Load")}</button>
+            <button className={genClassNameForButton("settings")} onClick={() => setOpenMenu("settings")}>{localmanager.local("Settings")}</button>
             <button className={genClassNameForButton("about")} onClick={() => setOpenMenu("about")}>{localmanager.local("About")}</button>
         </div>
     }

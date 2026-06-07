@@ -7,6 +7,8 @@ import DialogVariants from './DialogVariants';
 import SpecialDialogVariants from './SpecialDialogVariants';
 import "./player.css";
 import DiscussionTopicPicker from './DiscussionTopicPicker';
+import { PlayerSettings } from './PlayerSettings';
+import { useTypewriterText } from './useTypewriterText';
 
 interface CharDialogViewProps {
     game: GameExecManager
@@ -15,9 +17,10 @@ interface CharDialogViewProps {
     step: number
     onStateUpd: (newState: State) => void
     transitionOut: boolean
+    playerSettings: PlayerSettings
 }
 
-const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
+const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd, view, transitionOut, step, playerSettings }) => {
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
     const [inTransitionOut, setInTransitionOut] = useState<boolean>(false)
     const [discuss, setDiscuss] = useState<boolean>(false)
@@ -50,13 +53,26 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
 
     const text = view.text
 
+    const typewriterKey = `${step}-${view.pageIndex}-${text}`
+    const { displayText, isComplete, skip } = useTypewriterText(
+        text,
+        playerSettings.letterByLetter && !state.fatalError,
+        playerSettings.letterByLetterSpeedMs,
+        typewriterKey,
+    )
+
     const canAdvance = view.pageIndex < view.pageCount - 1
     const canContinue = view.continueLink != null
     const clickToContinue = canAdvance || canContinue
-    const showOptions = !clickToContinue
+    const showOptions = !clickToContinue && isComplete
+    const isClickable = !state.fatalError && !discuss && (!isComplete || clickToContinue)
 
     const handleAreaClick = () => {
         if (state.fatalError) {
+            return
+        }
+        if (!isComplete) {
+            skip()
             return
         }
         if (canAdvance) {
@@ -124,19 +140,19 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }
 
     return (
-        <div className={transitionOutClass("dialog-window-view")} onClick={clickToContinue ? handleAreaClick : undefined} style={clickToContinue ? { cursor: 'pointer' } : undefined} data-testid="char-dialog-view">
+        <div className={transitionOutClass("dialog-window-view")} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="char-dialog-view">
             <div className={transitionInOutClass('dialog-widget-special-links')}>
 
             </div>
             {!discuss && <div className='dialog-controls'>
                 <div key={step << 1} className={transitionOutClass("dialog-text")}>
                     <p className='dialog-current-text' key={step << 1}>
-                        {state.fatalError ? state.fatalError.message : text}
+                        {state.fatalError ? state.fatalError.message : displayText}
                     </p>
                 </div>
                 {showOptions && <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} />}
                 {showOptions && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} text={text} />}
-                {clickToContinue && !state.fatalError &&
+                {clickToContinue && isComplete && !state.fatalError &&
                     <div className='dialog-continue-hint' data-testid="char-dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>
                     </div>}

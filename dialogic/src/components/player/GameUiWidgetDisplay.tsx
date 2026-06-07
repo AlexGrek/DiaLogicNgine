@@ -7,6 +7,7 @@ import CharDialogView from './CharDialogView';
 import DialogWindowView from './DialogWindowView';
 import LocView from './LocView';
 import PacView from './PacView';
+import { PlayerSettings } from './PlayerSettings';
 
 interface GameUiWidgetDisplayProps {
     game: GameExecManager;
@@ -14,13 +15,14 @@ interface GameUiWidgetDisplayProps {
     onStateUpd: (newState: State) => void
     view: RenderView
     transitionOut: boolean
+    playerSettings: PlayerSettings
 }
 
-const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view, transitionOut }) => {
+const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view, transitionOut, playerSettings }) => {
 
     if (view.uiWidgetView.widget === 'dialog') {
         return (
-            <DialogWindowView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
+            <DialogWindowView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} playerSettings={playerSettings} />
         )
     }
 
@@ -29,7 +31,7 @@ const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, 
     }
 
     if (view.uiWidgetView.widget === 'char') {
-        return <CharDialogView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
+        return <CharDialogView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} playerSettings={playerSettings} />
     }
 
     if (view.uiWidgetView.widget === 'pac') {

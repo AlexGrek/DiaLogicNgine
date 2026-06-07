@@ -5,6 +5,11 @@ backend/storage
 backend/.venv
 backend/.env
 
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Docker Buildx cache
 .buildx/
 .buildkit/

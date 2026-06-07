@@ -4,6 +4,8 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { HistoryRecord, State } from '../../exec/GameState';
 import { DialogRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
+import { PlayerSettings } from './PlayerSettings';
+import { useTypewriterText } from './useTypewriterText';
 import "./player.css";
 
 interface DialogWindowViewProps {
@@ -13,9 +15,10 @@ interface DialogWindowViewProps {
     step: number
     onStateUpd: (newState: State) => void
     transitionOut: boolean
+    playerSettings: PlayerSettings
 }
 
-const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
+const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view, transitionOut, step, playerSettings }) => {
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
@@ -35,14 +38,27 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
 
     const text = view.text
 
+    const typewriterKey = `${step}-${view.pageIndex}-${text}`
+    const { displayText, isComplete, skip } = useTypewriterText(
+        text,
+        playerSettings.letterByLetter && !state.fatalError,
+        playerSettings.letterByLetterSpeedMs,
+        typewriterKey,
+    )
+
     const actor = view.actor
 
     const canAdvance = view.pageIndex < view.pageCount - 1
     const canContinue = view.continueLink != null
     const clickToContinue = canAdvance || canContinue
+    const isClickable = !state.fatalError && (!isComplete || clickToContinue)
 
     const handleAreaClick = () => {
         if (state.fatalError) {
+            return
+        }
+        if (!isComplete) {
+            skip()
             return
         }
         if (canAdvance) {
@@ -113,7 +129,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
     }
 
     return (
-        <div className={transitionOutClass("dialog-window-view")} onClick={clickToContinue ? handleAreaClick : undefined} style={clickToContinue ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
+        <div className={transitionOutClass("dialog-window-view")} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
             <div className="dialog-short-history" id="dialog-short-history-scrollable">
                 {renderShortHistory()}
             </div>
@@ -124,11 +140,11 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
                             {prevText}
                         </p> */}
                     <p className='dialog-current-text' key={step << 1}>
-                        {state.fatalError ? state.fatalError.message : text}
+                        {state.fatalError ? state.fatalError.message : displayText}
                     </p>
                 </div>
-                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} text={text} />
-                {clickToContinue && !state.fatalError &&
+                {isComplete && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} text={text} />}
+                {clickToContinue && isComplete && !state.fatalError &&
                     <div className='dialog-continue-hint' data-testid="dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>
                     </div>}
