@@ -44,7 +44,8 @@ const DemoPlayerModal: React.FC<DemoPlayerModalProps> = ({ game, open, onClose, 
                 const patch = objectFromYaml(trimmed);
                 patched = lodash.merge({}, base, patch) as State;
             }
-            setGameState(patched);
+            const withEntry = executorRef.current!.applyEntry(patched);
+            setGameState(withEntry);
             setError('');
             setPhase('play');
         } catch (e) {
