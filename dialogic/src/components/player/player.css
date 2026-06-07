@@ -224,7 +224,7 @@
     width: 100%;
     font-size: 22px;
     font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-    background-color: #04040446;
+    background-color: var(--player-dialog-text-bg, rgba(4, 4, 4, 0.275));
     position: relative;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
@@ -549,7 +549,7 @@
 }
 
 .dialog-widget-special-links {
-    grid-row: 2;
+    grid-row: 1;
     max-width: 70%;
     min-height: 300pt;
     margin-bottom: 30pt;
@@ -558,6 +558,16 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: end;
+}
+
+.dialog-window-view--location .dialog-widget-special-links {
+    grid-column: 1;
+    place-self: end start;
+}
+
+.dialog-window-view--location .dialog-content-column {
+    grid-column: 2;
+    grid-row: 1;
 }
 
 .dialog-window-view--text-right .dialog-widget-special-links {

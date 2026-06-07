@@ -18,10 +18,13 @@ import {
     type FontId,
 } from "../lib/fonts";
 
-export const ENGINE_VERSION = "0.15"
+export const ENGINE_VERSION = "0.16"
 
 export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
+
+/** 0–100 opacity for the dialog text panel background (matches legacy #04040446 ≈ 27). */
+export const DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY = 27
 
 export interface VisualsConfiguration {
     dialogTextAlignment: DialogTextAlignment
@@ -30,6 +33,7 @@ export interface VisualsConfiguration {
     menuFontId: FontId
     textFontId: FontId
     responsesFontId: FontId
+    dialogTextBackgroundOpacity: number
 }
 
 export function createDefaultVisuals(): VisualsConfiguration {
@@ -40,6 +44,7 @@ export function createDefaultVisuals(): VisualsConfiguration {
         menuFontId: DEFAULT_MENU_FONT_ID,
         textFontId: DEFAULT_TEXT_FONT_ID,
         responsesFontId: DEFAULT_RESPONSES_FONT_ID,
+        dialogTextBackgroundOpacity: DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
     }
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, ButtonGroup, Toggle } from 'rsuite';
+import { Button, ButtonGroup, InputNumber, Slider, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
 import {
     DialogTextAlignment,
@@ -91,6 +91,39 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
                             </Button>
                         ))}
                     </ButtonGroup>
+                </div>
+                <div>
+                    <p className="editor-label">Text background opacity</p>
+                    <p className="visuals-property-hint">Transparency of the dialog text panel in the player (0 = fully transparent).</p>
+                    <div className="visuals-opacity-control">
+                        <Slider
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={visuals.dialogTextBackgroundOpacity}
+                            onChange={(value) => {
+                                const n = typeof value === 'number' ? value : Number(value);
+                                if (!Number.isNaN(n)) {
+                                    updateVisuals({ dialogTextBackgroundOpacity: n });
+                                }
+                            }}
+                        />
+                        <InputNumber
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={visuals.dialogTextBackgroundOpacity}
+                            onChange={(value) => {
+                                if (value === null) {
+                                    return;
+                                }
+                                const n = typeof value === 'number' ? value : Number(value);
+                                if (!Number.isNaN(n)) {
+                                    updateVisuals({ dialogTextBackgroundOpacity: n });
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
                 <div>
                     <p className="editor-label">Short history</p>

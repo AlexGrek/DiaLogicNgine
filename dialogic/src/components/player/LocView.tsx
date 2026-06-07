@@ -76,7 +76,7 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
     }
 
     return (
-        <div className={transitionOutClass(dialogWindowViewClass(visuals.dialogTextAlignment))}>
+        <div className={transitionOutClass(dialogWindowViewClass('right', ['dialog-window-view--location']))}>
             <div className={transitionInOutClass('dialog-widget-special-links')}>
                 {locButtons()}
             </div>
