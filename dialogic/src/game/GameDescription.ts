@@ -19,10 +19,29 @@ import {
 } from "../lib/fonts";
 import { HookScript } from "./HookScript";
 
-export const ENGINE_VERSION = "0.19"
+export const ENGINE_VERSION = "0.20"
 
 export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
+export type FontSizeId = "xsmall" | "small" | "normal" | "large" | "huge"
+
+export const FONT_SIZE_LABELS: { value: FontSizeId; label: string }[] = [
+    { value: 'xsmall', label: 'X-Small' },
+    { value: 'small', label: 'Small' },
+    { value: 'normal', label: 'Normal' },
+    { value: 'large', label: 'Large' },
+    { value: 'huge', label: 'Huge' },
+]
+
+/** Dialog/narrative text font sizes in px per size tier. */
+export const TEXT_FONT_SIZE_PX: Record<FontSizeId, number> = {
+    xsmall: 14, small: 17, normal: 22, large: 28, huge: 36,
+}
+
+/** Response/answer button font sizes in px per size tier. */
+export const RESPONSES_FONT_SIZE_PX: Record<FontSizeId, number> = {
+    xsmall: 12, small: 15, normal: 20, large: 24, huge: 30,
+}
 
 /** 0–100 opacity for the dialog text panel background (matches legacy #04040446 ≈ 27). */
 export const DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY = 27

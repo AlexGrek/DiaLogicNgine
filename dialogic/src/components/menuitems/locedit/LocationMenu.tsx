@@ -11,6 +11,8 @@ import Note from '../../userguide/Note';
 import PasteButton from '../../common/copypaste/PasteButton';
 import lodash from 'lodash';
 
+const LocationGraphView = React.lazy(() => import('./LocationGraphView'));
+
 interface LocationMenuProps {
     game: GameDescription;
     onSetGame: (game: GameDescription) => void;
@@ -19,6 +21,7 @@ interface LocationMenuProps {
 
 const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const [showGraph, setShowGraph] = useState(false);
     const skipResetRef = useRef(false);
     React.useEffect(() => {
         if (skipResetRef.current) {
@@ -89,15 +92,36 @@ const LocationMenu: React.FC<LocationMenuProps> = ({ game, handlers }) => {
         <div>
             <Note text='Create locations that can contain paths to other locations and NPCs' />
             {editingIndex >= 0 ? editor(editingIndex) : null}
-            <div className="locItems">
-                {locItems(game.locs)}
-                <div className="locItemsPlus">
-                    <Stack spacing={8}>
-                        <Button onClick={() => createNew()}>+</Button>
-                        <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['loc']} />
-                    </Stack>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '8px 12px 0' }}>
+                <Button
+                    size="xs"
+                    appearance={showGraph ? 'primary' : 'ghost'}
+                    onClick={() => setShowGraph(v => !v)}
+                >
+                    {showGraph ? 'List view' : 'Graph view'}
+                </Button>
             </div>
+            {showGraph ? (
+                <React.Suspense fallback={<div style={{ padding: 16, color: '#888' }}>Loading graph…</div>}>
+                    <LocationGraphView
+                        locs={game.locs}
+                        onLocClick={(uid) => {
+                            const idx = game.locs.findIndex(l => l.uid === uid);
+                            if (idx >= 0) { setShowGraph(false); edit(idx); }
+                        }}
+                    />
+                </React.Suspense>
+            ) : (
+                <div className="locItems">
+                    {locItems(game.locs)}
+                    <div className="locItemsPlus">
+                        <Stack spacing={8}>
+                            <Button onClick={() => createNew()}>+</Button>
+                            <PasteButton requireNewUid onPasteClick={onPaste} handlers={handlers} typenames={['loc']} />
+                        </Stack>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
