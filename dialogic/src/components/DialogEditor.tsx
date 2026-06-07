@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import Dialog, { DialogWindow, createDialog } from "../game/Dialog";
 import PushMessageIcon from "@rsuite/icons/PushMessage";
 import CreativeIcon from "@rsuite/icons/Creative";
-import { IconButton, Panel, Placeholder } from "rsuite";
+import { Button, Panel, Placeholder } from "rsuite";
 import WindowEditor from "./WindowEditor";
 import CreateWindowButton from "./CreateWindowButton";
 import { IUpds } from "../App";
@@ -107,20 +107,22 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
     <div ref={itemRef}>
       <div className="window-editor-tools">
         <CreateWindowButton createHandler={createDialogWindowHandler} />
-        <IconButton
-          icon={<PushMessageIcon />}
-          placement="left"
+        <Button
+          className="dialog-tool-link"
+          appearance="link"
+          startIcon={<PushMessageIcon />}
           onClick={() => setChainOpen(true)}
         >
           Chain
-        </IconButton>
-        <IconButton
-          icon={<CreativeIcon />}
-          placement="left"
+        </Button>
+        <Button
+          className="dialog-tool-link"
+          appearance="link"
+          startIcon={<CreativeIcon />}
           onClick={() => setAiOpen(true)}
         >
-          AI generate
-        </IconButton>
+          Generate
+        </Button>
       </div>
       <div className="window-editor-windows-container">
         {renderWindows(dialog.windows, dialog)}
