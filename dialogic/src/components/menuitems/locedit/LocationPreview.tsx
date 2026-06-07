@@ -1,6 +1,8 @@
 import React from 'react';
 import Loc from '../../../game/Loc';
 import { generateImageUrl } from '../../../Utils';
+import { resolveImageProject } from '../../common/projectImages';
+import { useProjectImages } from '../../common/ProjectImagesContext';
 import './loc.css'
 
 interface LocationPreviewProps {
@@ -10,10 +12,11 @@ interface LocationPreviewProps {
 }
 
 const LocationPreview: React.FC<LocationPreviewProps> = ({ location, index, onClick }) => {
+    const storageProject = resolveImageProject(useProjectImages());
     const style = (background?: string) => {
         if (background) {
             return {
-                backgroundImage: `url("${generateImageUrl(background)}")`
+                backgroundImage: `url("${generateImageUrl(background, storageProject)}")`
             }
         }
         else

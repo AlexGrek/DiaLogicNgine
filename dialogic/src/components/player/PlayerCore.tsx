@@ -3,6 +3,8 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { InGameNotificationType, State } from '../../exec/GameState';
 import { RenderView } from '../../exec/RenderView';
 import { styleWithImage } from '../UiUtils';
+import { resolveImageProject } from '../common/projectImages';
+import { useProjectImages } from '../common/ProjectImagesContext';
 import GameMenuPanel from './GameMenuPanel';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
 import InGameControlPad from './InGameControlPad';
@@ -26,6 +28,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
     const [widgetRequest, setWidgetRequest] = React.useState<{ name: string } | null>(null);
     const [playerSettings, setPlayerSettings] = React.useState<PlayerSettings>(() => loadPlayerSettings());
+    const storageProject = resolveImageProject(useProjectImages());
 
     const savesManager = useRef<SavesManager>(new SavesManager(game.game.general.name))
 
@@ -109,8 +112,8 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         const viewToRenderNow = (inTransitionState && prevView) ? prevView : currentView
         return (
             <div className='player-core-container' id='player-core'>
-                <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
-                <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background)}></div>
+                <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground, storageProject)}></div>
+                <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background, storageProject)}></div>
                 <GameNotificationsView state={state} game={game} onNotificationClick={handleNotificationClick} />
                 <div className='player-core-widget-container' id='player-current-widget-host'>
                     <div className="dialog-control-pad">

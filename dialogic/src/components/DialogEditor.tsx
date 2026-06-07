@@ -107,22 +107,24 @@ const DialogEditor: React.FC<IDialogEditorProps> = ({
     <div ref={itemRef}>
       <div className="window-editor-tools">
         <CreateWindowButton createHandler={createDialogWindowHandler} />
-        <Button
-          className="dialog-tool-link"
-          appearance="link"
-          startIcon={<PushMessageIcon />}
-          onClick={() => setChainOpen(true)}
-        >
-          Chain
-        </Button>
-        <Button
-          className="dialog-tool-link"
-          appearance="link"
-          startIcon={<CreativeIcon />}
-          onClick={() => setAiOpen(true)}
-        >
-          Generate
-        </Button>
+        <div className="window-editor-tools-actions">
+          <Button
+            className="dialog-tool-action"
+            appearance="subtle"
+            startIcon={<PushMessageIcon />}
+            onClick={() => setChainOpen(true)}
+          >
+            Chain
+          </Button>
+          <Button
+            className="dialog-tool-action"
+            appearance="subtle"
+            startIcon={<CreativeIcon />}
+            onClick={() => setAiOpen(true)}
+          >
+            Generate
+          </Button>
+        </div>
       </div>
       <div className="window-editor-windows-container">
         {renderWindows(dialog.windows, dialog)}

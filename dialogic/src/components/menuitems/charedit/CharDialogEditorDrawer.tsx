@@ -137,7 +137,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
                                             <TextListEditor textList={mustBeDialog.text} onChange={textChange}></TextListEditor>
                                         </Panel>
                                         <Panel header="Background">
-                                            <ImageListEditor imageList={mustBeDialog.background} onChange={(val) => setDialog({ ...mustBeDialog, background: val })} projectName={game.general.name} />
+                                            <ImageListEditor imageList={mustBeDialog.background} onChange={(val) => setDialog({ ...mustBeDialog, background: val })} />
                                         </Panel>
                                         <Panel header="Scripting">
                                             {renderCodeEditButton("chooseTextScript")}

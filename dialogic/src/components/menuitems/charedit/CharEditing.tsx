@@ -7,6 +7,8 @@ import { ImageList } from '../../../game/ImageList';
 import CodeSampleButton from '../../common/CodeSampleButton';
 import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/code_editor/PopupCodeEditor';
 import ImageListEditor from '../../common/text_list/ImageListEditor';
+import { resolveImageProject } from '../../common/projectImages';
+import { useProjectImages } from '../../common/ProjectImagesContext';
 import TextListEditor from '../../common/text_list/TextListEditor';
 import PropsEditMenu from '../scriptedit/PropsEditMenu';
 import CharRoleEditing from './CharRoleEditing';
@@ -41,6 +43,7 @@ type CodeEditMenu = "chooseAvatarScript" | "chooseNameScript" | "chooseDescripti
 const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange, onDelete, handlers }) => {
     const [ch, setCh] = useState<Character>(char);
     const [dialogEditorOpen, setDialogEditorOpen] = useState<boolean>(false);
+    const storageProject = resolveImageProject(useProjectImages());
 
     // enable code editor props
     const [codeEditMenu, setCodeEditMenu] = useState<CodeEditMenu>("chooseNameScript");
@@ -83,7 +86,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
             return null
         }
         const uri = img.main
-        return <img alt="background preview" height="128" src={generateImageUrl(uri)}></img>
+        return <img alt="background preview" height="128" src={generateImageUrl(uri, storageProject)}></img>
     }
 
     const renderDeleteButton = () => {
@@ -106,7 +109,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })} />
                 </Panel>
                 <Panel header="Avatar Image">
-                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value })} projectName={game.general.name} />
+                    <ImageListEditor imageList={ch.avatar} onChange={value => forceUpdate({ ...ch, avatar: value })} />
                 </Panel>
                 <Panel header="Roles">
                     <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />

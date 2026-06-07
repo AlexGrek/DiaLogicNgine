@@ -8,6 +8,8 @@ import { PlayerSettings } from './PlayerSettings';
 import { useTypewriterText } from './useTypewriterText';
 import TypewriterDialogText from './TypewriterDialogText';
 import { dialogWindowViewClass, resolveVisuals } from './visualsClasses';
+import { resolveImageProject } from '../common/projectImages';
+import { useProjectImages } from '../common/ProjectImagesContext';
 import "./player.css";
 
 interface DialogWindowViewProps {
@@ -22,6 +24,7 @@ interface DialogWindowViewProps {
 
 const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view, transitionOut, step, playerSettings }) => {
     const visuals = resolveVisuals(game.game.visuals)
+    const storageProject = resolveImageProject(useProjectImages())
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
@@ -81,7 +84,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         } else {
             let image = null;
             if (actor.avatar) {
-                image = <img alt={actor.name} src={generateImageUrl(actor.avatar)}></img>
+                image = <img alt={actor.name} src={generateImageUrl(actor.avatar, storageProject)}></img>
             }
             return <div className='dialog-actor-container'>
                 <p>{image}<span className='dialog-actor-name'>{actor.name}</span></p>

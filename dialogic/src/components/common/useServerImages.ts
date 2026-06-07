@@ -1,16 +1,19 @@
 import { useCallback, useRef, useState } from 'react';
+import { projectImageApiBase } from './projectImages';
 
 export function useServerImages(projectName: string) {
+    const apiBase = projectImageApiBase(projectName);
+
     const [images, setImages] = useState<string[]>([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchImages = useCallback(() => {
-        fetch(`/api/v1/projects/${projectName}/images`)
+        fetch(`${apiBase}/images`)
             .then(r => r.json())
             .then(data => setImages(data.images ?? []))
             .catch(() => setImages([]));
-    }, [projectName]);
+    }, [apiBase]);
 
     const uploadFile = useCallback(async (
         file: File,
@@ -19,25 +22,28 @@ export function useServerImages(projectName: string) {
         setUploading(true);
         const form = new FormData();
         form.append('file', file);
-        await fetch(`/api/v1/projects/${projectName}/images/${encodeURIComponent(file.name)}`, {
+        const r = await fetch(`${apiBase}/images/${encodeURIComponent(file.name)}`, {
             method: 'PUT',
             body: form,
         });
         setUploading(false);
+        if (!r.ok) {
+            throw new Error(await r.text());
+        }
         onSelect(file.name);
-    }, [projectName]);
+    }, [apiBase]);
 
     const thumbUrl = useCallback(
         (filename: string) =>
-            `/api/v1/projects/${projectName}/image_thumbs/${encodeURIComponent(filename)}`,
-        [projectName],
+            `${apiBase}/image_thumbs/${encodeURIComponent(filename)}`,
+        [apiBase],
     );
 
     const deleteImage = useCallback(async (filename: string) => {
-        await fetch(`/api/v1/projects/${projectName}/images/${encodeURIComponent(filename)}`, {
+        await fetch(`${apiBase}/images/${encodeURIComponent(filename)}`, {
             method: 'DELETE',
         });
-    }, [projectName]);
+    }, [apiBase]);
 
     return { images, uploading, fetchImages, uploadFile, deleteImage, thumbUrl, fileInputRef };
 }

@@ -29,7 +29,12 @@ async def upload_image(project_name: str, filename: str, file: UploadFile):
 
     thumb_dest = safe_path(thumb_dir(project_name), filename)
     thumb_dest.parent.mkdir(parents=True, exist_ok=True)
-    make_thumbnail(contents, thumb_dest)
+    try:
+        make_thumbnail(contents, thumb_dest)
+    except Exception:
+        # Image saved; thumbnail is optional (backfilled on first GET).
+        if thumb_dest.exists():
+            thumb_dest.unlink(missing_ok=True)
 
     return {"project": project_name, "file": filename, "size": len(contents)}
 

@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { Button, Input, InputNumber, Modal, SelectPicker, Toggle } from 'rsuite';
 import { useServerImages } from './useServerImages';
 import { IMAGES, isServerImage } from './ImagePicker';
+import { projectImageApiBase, resolveImageProject } from './projectImages';
+import { useProjectImages } from './ProjectImagesContext';
 
 interface ImagePickerModalProps {
     open: boolean;
@@ -88,9 +90,13 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     value,
     onChange,
     extensions,
-    projectName = 'default',
+    projectName,
     sourceImage,
 }) => {
+    const contextProject = useProjectImages();
+    const storageProject = resolveImageProject(projectName ?? contextProject);
+    const apiBase = projectImageApiBase(storageProject);
+
     const effectiveSourceImage =
         sourceImage && isServerImage(sourceImage) ? sourceImage : undefined;
     const [source, setSource] = useState<Source>('server');
@@ -136,7 +142,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     }, [gen.status, gen.avgTime, gen.pollStart]);
 
     const { images, uploading, fetchImages, uploadFile, deleteImage, thumbUrl, fileInputRef } =
-        useServerImages(projectName);
+        useServerImages(storageProject);
 
     useEffect(() => {
         if (!open) return;
@@ -153,7 +159,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                     ? data.projects.map((p: { name: string } | string) =>
                         typeof p === 'string' ? p : p.name)
                     : [];
-                const others = all.filter(p => p !== projectName);
+                const others = all.filter(p => p !== storageProject);
                 setOtherProjects(others);
                 if (others.length > 0 && (otherProject === null || !others.includes(otherProject))) {
                     setOtherProject(others[0]);
@@ -161,7 +167,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             })
             .catch(() => setOtherProjects([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, value, fetchImages, projectName]);
+    }, [open, value, fetchImages, storageProject]);
 
     useEffect(() => {
         if (source !== 'other' || !otherProject) {
@@ -205,7 +211,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         pollRef.current = setInterval(async () => {
             try {
                 const r = await fetch(
-                    `/api/v1/imggen/status/${encodeURIComponent(projectName)}/${encodeURIComponent(taskCap)}/${encodeURIComponent(taskId)}/${encodeURIComponent(outputBucket)}`
+                    `/api/v1/imggen/status/${encodeURIComponent(storageProject)}/${encodeURIComponent(taskCap)}/${encodeURIComponent(taskId)}/${encodeURIComponent(outputBucket)}`
                 );
                 const data = await r.json();
                 if (data.status === 'completed') {
@@ -222,7 +228,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             }
         }, 3000);
         return () => { if (pollRef.current) clearInterval(pollRef.current); };
-    }, [gen.status, gen.taskCap, gen.taskId, gen.outputBucket, projectName]);
+    }, [gen.status, gen.taskCap, gen.taskId, gen.outputBucket, storageProject]);
 
     const handleGenerate = async () => {
         await submitGeneration('full');
@@ -247,7 +253,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                 : '/api/v1/imggen/generate';
             const body = mode === 'thumbnail'
                 ? {
-                    project_name: projectName,
+                    project_name: storageProject,
                     model: gen.model,
                     prompt,
                     source_image: effectiveSourceImage,
@@ -256,7 +262,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                     seed: gen.seed.trim() ? Number(gen.seed) : null,
                 }
                 : {
-                    project_name: projectName,
+                    project_name: storageProject,
                     model: gen.model,
                     prompt,
                     negative_prompt: gen.negativePrompt || null,
@@ -348,7 +354,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     };
 
     const getFullUrl = (filename: string) => {
-        if (source === 'server') return `/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(filename)}`;
+        if (source === 'server') return `${apiBase}/images/${encodeURIComponent(filename)}`;
         if (source === 'local') return `/game_assets/${filename}`;
         return `/api/v1/projects/${encodeURIComponent(otherProject ?? '')}/images/${encodeURIComponent(filename)}`;
     };
@@ -380,20 +386,28 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        await uploadFile(file, (name) => {
-            fetchImages();
-            setSelected(name);
-        });
+        try {
+            await uploadFile(file, (name) => {
+                fetchImages();
+                setSelected(name);
+            });
+        } catch (err) {
+            setGen(g => ({ ...g, status: 'error', error: String(err) }));
+        }
         e.target.value = '';
     };
 
     const handleImggenInputUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        await uploadFile(file, (name) => {
-            fetchImages();
-            setGen(g => ({ ...g, inputImage: name }));
-        });
+        try {
+            await uploadFile(file, (name) => {
+                fetchImages();
+                setGen(g => ({ ...g, inputImage: name }));
+            });
+        } catch (err) {
+            setGen(g => ({ ...g, status: 'error', error: String(err) }));
+        }
         e.target.value = '';
     };
 
@@ -403,10 +417,10 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
 
     const genBusy = gen.status === 'submitting' || gen.status === 'polling';
     const imggenInputFullUrl = gen.inputImage
-        ? `/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.inputImage)}`
+        ? `${apiBase}/images/${encodeURIComponent(gen.inputImage)}`
         : null;
     const sourceImageFullUrl = effectiveSourceImage
-        ? `/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(effectiveSourceImage)}`
+        ? `${apiBase}/images/${encodeURIComponent(effectiveSourceImage)}`
         : null;
 
     const renderGenerationResult = () => (
@@ -437,9 +451,9 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                 <>
                     <img
                         className="imggen-preview"
-                        src={`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename)}`}
+                        src={`${apiBase}/images/${encodeURIComponent(gen.resultFilename)}`}
                         alt="Generated"
-                        onClick={() => setFullscreenSrc(`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename!)}`)}
+                        onClick={() => setFullscreenSrc(`${apiBase}/images/${encodeURIComponent(gen.resultFilename!)}`)}
                     />
                     <div className="imggen-result-actions">
                         <Button
@@ -452,7 +466,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         <Button
                             appearance="default"
                             size="sm"
-                            onClick={() => setFullscreenSrc(`/api/v1/projects/${encodeURIComponent(projectName)}/images/${encodeURIComponent(gen.resultFilename!)}`)}
+                            onClick={() => setFullscreenSrc(`${apiBase}/images/${encodeURIComponent(gen.resultFilename!)}`)}
                         >
                             Preview
                         </Button>

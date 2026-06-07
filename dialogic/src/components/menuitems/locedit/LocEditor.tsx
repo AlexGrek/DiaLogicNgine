@@ -191,7 +191,6 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                     <ImagePicker
                                         value={location.thumbnail}
                                         onChange={thumbChange}
-                                        projectName={game.general.name}
                                         sourceImage={location.backgrounds.main || undefined}
                                     >
                                         Thumbnail image
@@ -213,7 +212,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
                                         </Panel>
 
                                         <Panel header="Background">
-                                            <ImageListEditor imageList={location.backgrounds} onChange={(val) => setlocation({ ...location, backgrounds: val })} projectName={game.general.name} />
+                                            <ImageListEditor imageList={location.backgrounds} onChange={(val) => setlocation({ ...location, backgrounds: val })} />
                                         </Panel>
                                         <Panel header="Scripting">
                                             {renderCodeEditButton("isAccessibleScript")}

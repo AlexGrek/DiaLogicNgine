@@ -8,6 +8,8 @@ import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
 import { createEmptyPac, PointAndClick } from '../../../game/PointAndClick';
 import PointAndClickEditor from './PointAndClickEditor';
 import { generateImageUrl } from '../../../Utils';
+import { resolveImageProject } from '../../common/projectImages';
+import { useProjectImages } from '../../common/ProjectImagesContext';
 
 interface PacMenuProps {
     game: GameDescription;
@@ -15,9 +17,10 @@ interface PacMenuProps {
     onSetItems: (items: PointAndClick[]) => void
 }
 
-const PointAncClick: React.FC<PacMenuProps> = ({ game, items, onSetItems }) => {
+const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<PointAndClick | null>(null);
+    const storageProject = resolveImageProject(useProjectImages());
 
     const setEditingByIndex = (index: number) => {
         if (index >= items.length || index < 0) {
@@ -56,7 +59,7 @@ const PointAncClick: React.FC<PacMenuProps> = ({ game, items, onSetItems }) => {
     const renderItems = () => {
         return items.map((it, i) => {
             const thumbSrc = it.background?.trim()
-                ? generateImageUrl(it.background, game.general.name)
+                ? generateImageUrl(it.background, storageProject)
                 : undefined
             return <div className='item-item' key={i} onClick={() => setEditingByIndex(i)}>
                 {thumbSrc
@@ -104,7 +107,6 @@ const PointAncClick: React.FC<PacMenuProps> = ({ game, items, onSetItems }) => {
                     <PointAndClickEditor
                         value={editingObject}
                         onChange={setEditingObject}
-                        projectName={game.general.name}
                     />
                 </div>
             </Panel>}

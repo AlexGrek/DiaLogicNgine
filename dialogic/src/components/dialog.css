@@ -3,11 +3,20 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
+    width: 100%;
 }
 
 .window-editor-tools > * {
     margin-left: 12pt;
     margin-top: 10pt;
+}
+
+.window-editor-tools-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8pt;
+    margin-left: auto;
 }
 
 .window-editor-tools .rs-btn:not(.rs-btn-link) {
@@ -18,10 +27,11 @@
     line-height: 28px !important;
 }
 
-.window-editor-tools .dialog-tool-link {
-    padding: 0;
-    height: auto;
-    min-height: 0;
-    font-size: 13px;
-    line-height: 1.4;
+.window-editor-tools .dialog-tool-action {
+    color: var(--rs-text-secondary);
+}
+
+.window-editor-tools .dialog-tool-action:hover,
+.window-editor-tools .dialog-tool-action:focus {
+    color: var(--rs-text-primary);
 }

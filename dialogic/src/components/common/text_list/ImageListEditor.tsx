@@ -6,6 +6,8 @@ import TrashIcon from '@rsuite/icons/Trash';
 import lodash from 'lodash';
 import ServerImageSelect from '../ServerImageSelect';
 import { generateImageUrl } from '../../../Utils';
+import { projectImageApiBase, resolveImageProject } from '../projectImages';
+import { useProjectImages } from '../ProjectImagesContext';
 
 const isServerImage = (v: string) => !v.startsWith('game_assets/') && !v.startsWith('/') && !v.startsWith('http')
 
@@ -15,8 +17,10 @@ interface ImageListEditorProps {
     projectName?: string;
 }
 
-const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName = 'default' }) => {
+const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
+    const contextProject = useProjectImages();
+    const storageProject = resolveImageProject(projectName ?? contextProject);
 
     const CREATE_INDEX = -100500
 
@@ -91,12 +95,12 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, 
     }
 
     const editor =
-        <ServerImageSelect value={editingText === "" ? undefined : editingText} onChange={onTextChange} projectName={projectName} />
+        <ServerImageSelect value={editingText === "" ? undefined : editingText} onChange={onTextChange} projectName={storageProject} />
 
     const displayImage = (uri: string) => {
         const src = isServerImage(uri)
-            ? `/api/v1/projects/${projectName}/image_thumbs/${encodeURIComponent(uri)}`
-            : generateImageUrl(uri)
+            ? `${projectImageApiBase(storageProject)}/image_thumbs/${encodeURIComponent(uri)}`
+            : generateImageUrl(uri, storageProject)
         return <div>
             <img alt="image preview" height="128" src={src}/>
         </div>

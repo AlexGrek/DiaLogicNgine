@@ -2,6 +2,8 @@ import lodash from 'lodash';
 import React, { useState } from 'react';
 import { Button, Checkbox, Divider, Drawer, Input, Stack } from 'rsuite';
 import { generateImageUrl, mergeDicts } from '../../../Utils';
+import { resolveImageProject } from '../../common/projectImages';
+import { useProjectImages } from '../../common/ProjectImagesContext';
 import { GameDescription } from '../../../game/GameDescription';
 import { Item, createEmptyItem } from '../../../game/Items';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
@@ -21,6 +23,7 @@ interface ItemsMenuProps {
 const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<Item | null>(null);
+    const storageProject = resolveImageProject(useProjectImages());
 
     const setEditing = (index: number, object?: Item) => {
         setEditingIndex(index)
@@ -89,11 +92,10 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             <Input value={it.name} onChange={(val) => updateItem("name", val)} placeholder='display item name'></Input>
             <Input value={it.description} onChange={(val) => updateItem("description", val)} as="textarea" rows={5} placeholder='item description'></Input>
             <Divider>Images</Divider>
-            <ImagePicker value={it.image} onChange={val => setImage("image", val || undefined)} projectName={game.general.name}>Image</ImagePicker>
+            <ImagePicker value={it.image} onChange={val => setImage("image", val || undefined)}>Image</ImagePicker>
             <ImagePicker
                 value={it.thumbnail}
                 onChange={val => setImage("thumbnail", val || undefined)}
-                projectName={game.general.name}
                 sourceImage={it.image}
             >
                 Thumbnail
@@ -117,7 +119,7 @@ const ItemsMenu: React.FC<ItemsMenuProps> = ({ game, items, onSetItems }) => {
             const img = it.thumbnail ? it.thumbnail : it.image
             return <div className='item-item' key={i} onClick={() => setEditing(i)}>
                 <div className='item-header'><p className='item-uid'>{it.uid}</p></div>
-                {img ? <img className='item-thumb' src={generateImageUrl(img)} /> : null}
+                {img ? <img className='item-thumb' src={generateImageUrl(img, storageProject)} /> : null}
                 <p className='item-name'>{it.name}</p>
             </div>
         })

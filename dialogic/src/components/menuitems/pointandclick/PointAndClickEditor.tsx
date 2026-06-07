@@ -4,6 +4,8 @@ import { Button, ButtonGroup, Drawer, Input, InputNumber, Message, Panel } from 
 import { PointAndClick, PointAndClickZone } from "../../../game/PointAndClick";
 import ImagePicker from "../../common/ImagePicker";
 import { generateImageUrl } from "../../../Utils";
+import { resolveImageProject } from "../../common/projectImages";
+import { useProjectImages } from "../../common/ProjectImagesContext";
 
 type EditorMode = 'add' | 'edit';
 
@@ -19,10 +21,12 @@ interface DragState {
 interface PointAndClickEditorProps {
     value: PointAndClick
     onChange: (it: PointAndClick) => void
-    projectName: string
+    projectName?: string
 }
 
 const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChange, projectName }) => {
+    const contextProject = useProjectImages();
+    const storageProject = resolveImageProject(projectName ?? contextProject);
     const [mode, setMode] = useState<EditorMode>('edit');
     const [selectedZone, setSelectedZone] = useState<PointAndClickZone | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -44,7 +48,7 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
 
     const scene = value
     const hasBackground = Boolean(scene.background?.trim())
-    const backgroundCss = hasBackground ? `url(${generateImageUrl(scene.background, projectName)})` : 'none'
+    const backgroundCss = hasBackground ? `url(${generateImageUrl(scene.background, storageProject)})` : 'none'
 
     const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -233,7 +237,7 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
                     <ImagePicker
                         value={scene.background || undefined}
                         onChange={(val) => handleSetScene({ ...value, background: val || '' })}
-                        projectName={projectName}
+                        projectName={storageProject}
                     >
                         Background image (required)
                     </ImagePicker>
@@ -404,7 +408,7 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
                                 <ImagePicker
                                     value={selectedZone.image}
                                     onChange={(val) => updateSelectedZone({ image: val || undefined })}
-                                    projectName={projectName}
+                                    projectName={storageProject}
                                 >
                                     Zone image (optional)
                                 </ImagePicker>

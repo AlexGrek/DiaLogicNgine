@@ -3,6 +3,8 @@ import { CarriedItem } from '../../exec/GameState';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { getItemByIdOrUnknown } from '../../game/Items';
 import { generateImageUrl } from '../../Utils';
+import { resolveImageProject } from '../common/projectImages';
+import { useProjectImages } from '../common/ProjectImagesContext';
 
 interface InputPickerViewProps {
     items: CarriedItem[];
@@ -12,6 +14,7 @@ interface InputPickerViewProps {
 
 const InputPickerView: React.FC<InputPickerViewProps> = ({ items, onChoose, context }) => {
     const [chosenIndex, setChosenIndex] = useState<number>(-1);
+    const storageProject = resolveImageProject(useProjectImages());
     useEffect(() => {
         setChosenIndex(-1);
     }, [items]);
@@ -20,7 +23,7 @@ const InputPickerView: React.FC<InputPickerViewProps> = ({ items, onChoose, cont
         const realItem = getItemByIdOrUnknown(context.game.items, item.item);
         return <div className='player-items-descr'>
             <div className='items-descr-image'>
-                <img className='items-descr-image-img' alt={item.item} src={generateImageUrl(realItem.image || realItem.thumbnail || "")}></img>
+                <img className='items-descr-image-img' alt={item.item} src={generateImageUrl(realItem.image || realItem.thumbnail || "", storageProject)}></img>
             </div>
             <div className='items-descr-data'>
                 <button className='items-descr-header' onClick={() => onChoose(item, chosenIndex)}>{realItem.name}</button>
@@ -31,7 +34,7 @@ const InputPickerView: React.FC<InputPickerViewProps> = ({ items, onChoose, cont
 
     const renderPickable = (item: CarriedItem, index: number) => {
         const realItem = getItemByIdOrUnknown(context.game.items, item.item);
-        const bgImage = generateImageUrl(realItem.image || realItem.thumbnail || "");
+        const bgImage = generateImageUrl(realItem.image || realItem.thumbnail || "", storageProject);
         return <div className='player-items-picker-item' onClick={() => setChosenIndex(index)} style={{backgroundImage: `url(${bgImage})`}}>
             <div className='player-items-picker-item-header'>
                 <p>{realItem.name}</p>

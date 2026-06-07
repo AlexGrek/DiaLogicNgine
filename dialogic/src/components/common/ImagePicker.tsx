@@ -2,6 +2,8 @@ import React, { ReactNode, useState } from 'react';
 import { Button } from 'rsuite';
 import { generateImageUrl } from '../../Utils';
 import ImagePickerModal from './ImagePickerModal';
+import { projectImageApiBase, resolveImageProject } from './projectImages';
+import { useProjectImages } from './ProjectImagesContext';
 import './ImagePicker.css'
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -25,14 +27,16 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
     value,
     onChange,
     children,
-    projectName = 'default',
+    projectName,
     sourceImage,
 }) => {
     const [modalOpen, setModalOpen] = useState(false);
+    const contextProject = useProjectImages();
+    const storageProject = resolveImageProject(projectName ?? contextProject);
 
     const previewSrc = value && isServerImage(value)
-        ? `/api/v1/projects/${projectName}/image_thumbs/${encodeURIComponent(value)}`
-        : generateImageUrl(value ?? '');
+        ? `${projectImageApiBase(storageProject)}/image_thumbs/${encodeURIComponent(value)}`
+        : generateImageUrl(value ?? '', storageProject);
 
     const valueLabel = value || 'No image selected';
 
@@ -50,7 +54,7 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
                 value={value}
                 onChange={onChange}
                 extensions={extensions}
-                projectName={projectName}
+                projectName={storageProject}
                 sourceImage={sourceImage}
             />
         </div>

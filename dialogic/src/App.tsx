@@ -41,6 +41,7 @@ import VisualsMenu from "./components/menuitems/visuals/VisualsMenu";
 import { PointAndClick } from "./game/PointAndClick";
 import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
 import HomePage from "./components/home/HomePage";
+import { ProjectImagesContext } from "./components/common/ProjectImagesContext";
 
 export interface CopiedObject {
   value: unknown;
@@ -340,7 +341,9 @@ function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProp
           <SidePanel game={game} handlers={updates} />
         </Sidebar>
         <Content className="content-container">
-          <Outlet context={outletContext} />
+          <ProjectImagesContext.Provider value={projectName}>
+            <Outlet context={outletContext} />
+          </ProjectImagesContext.Provider>
         </Content>
       </Container>
     </Container>

@@ -3,6 +3,8 @@ import { CarriedItem, State } from '../../exec/GameState';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { getItemByIdOrUnknown } from '../../game/Items';
 import { generateImageUrl } from '../../Utils';
+import { resolveImageProject } from '../common/projectImages';
+import { useProjectImages } from '../common/ProjectImagesContext';
 import './inventorytab.css';
 
 interface InventoryTabProps {
@@ -13,10 +15,11 @@ interface InventoryTabProps {
 
 const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) => {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const storageProject = resolveImageProject(useProjectImages());
 
     const renderItemCard = (carried: CarriedItem, index: number) => {
         const item = getItemByIdOrUnknown(game.game.items, carried.item);
-        const imgUrl = generateImageUrl(item.thumbnail || item.image || '');
+        const imgUrl = generateImageUrl(item.thumbnail || item.image || '', storageProject);
         const isSelected = index === selectedIndex;
         return (
             <div
@@ -46,7 +49,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) =
         }
         const carried = state.carriedItems[selectedIndex];
         const item = getItemByIdOrUnknown(game.game.items, carried.item);
-        const imgUrl = generateImageUrl(item.image || item.thumbnail || '');
+        const imgUrl = generateImageUrl(item.image || item.thumbnail || '', storageProject);
         const statsKeys = Object.keys(item.stats);
         return (
             <div className='inventory-detail' data-testid='inventory-detail'>

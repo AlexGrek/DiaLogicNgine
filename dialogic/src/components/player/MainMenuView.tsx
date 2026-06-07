@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { GameDescription } from '../../game/GameDescription';
+import { resolveImageProject } from '../common/projectImages';
+import { useProjectImages } from '../common/ProjectImagesContext';
 import { styleWithImage } from '../UiUtils';
 
 interface MainMenuViewProps {
@@ -10,6 +12,7 @@ interface MainMenuViewProps {
 
 const MainMenuView: React.FC<MainMenuViewProps> = ({ game, onStart, onExit }) => {
     const [visible, setVisible] = useState(false);
+    const storageProject = resolveImageProject(useProjectImages());
 
     useEffect(() => {
         const id = setTimeout(() => setVisible(true), 10);
@@ -17,7 +20,7 @@ const MainMenuView: React.FC<MainMenuViewProps> = ({ game, onStart, onExit }) =>
     }, []);
 
     const bgStyle = game.startMenu.menuBackground
-        ? styleWithImage(game.startMenu.menuBackground)
+        ? styleWithImage(game.startMenu.menuBackground, storageProject)
         : {};
 
     return (

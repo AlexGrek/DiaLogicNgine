@@ -4,17 +4,17 @@ import { GameDescription } from "../game/GameDescription"
 import { generateImageUrl } from "../Utils"
 
 
-export const styleWithImage = (background?: string | null) => {
+export const styleWithImage = (background?: string | null, projectName = 'default') => {
     if (background) {
         return {
-            backgroundImage: `url("${generateImageUrl(background)}")`
+            backgroundImage: `url("${generateImageUrl(background, projectName)}")`
         }
     }
     else
         return {}
 }
 
-export const avatarImageUrl = (game: GameDescription, characterOrUid: string | Character, image: string | number | undefined): string | null => {
+export const avatarImageUrl = (game: GameDescription, characterOrUid: string | Character, image: string | number | undefined, projectName = 'default'): string | null => {
     let character: Character;
     if (lodash.isString(characterOrUid)) {
         const charFound = game.chars.find(item => item.uid === characterOrUid)
@@ -30,7 +30,7 @@ export const avatarImageUrl = (game: GameDescription, characterOrUid: string | C
     if (image === undefined) {
         if (character) {
             if (character.avatar.main) {
-                return generateImageUrl(character.avatar.main);
+                return generateImageUrl(character.avatar.main, projectName);
             }
             return null;
         }
@@ -63,5 +63,5 @@ export const avatarImageUrl = (game: GameDescription, characterOrUid: string | C
         return null
     }
     
-    return generateImageUrl(imageUri)
+    return generateImageUrl(imageUri, projectName)
 }

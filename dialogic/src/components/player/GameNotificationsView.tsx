@@ -4,6 +4,8 @@ import { InGameNotificationType, State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { getItemByIdOrUnknown } from '../../game/Items';
 import { generateImageUrl } from '../../Utils';
+import { resolveImageProject } from '../common/projectImages';
+import { useProjectImages } from '../common/ProjectImagesContext';
 import './gamenotifications.css';
 
 interface GameNotificationsViewProps {
@@ -38,6 +40,7 @@ const LABEL_KEYS: Record<InGameNotificationType, string> = {
 
 const GameNotificationsView: React.FC<GameNotificationsViewProps> = ({ state, game, onNotificationClick }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const storageProject = resolveImageProject(useProjectImages());
     const seenRef = useRef<number>(state.notifications.length);
     const idRef = useRef<number>(0);
     const timersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
@@ -99,7 +102,7 @@ const GameNotificationsView: React.FC<GameNotificationsViewProps> = ({ state, ga
     const renderToast = (t: Toast) => {
         const isItem = t.type === 'itemadded' || t.type === 'itemremoved';
         const item = t.item ? getItemByIdOrUnknown(game.game.items, t.item) : null;
-        const img = item ? generateImageUrl(item.thumbnail || item.image || '') : '';
+        const img = item ? generateImageUrl(item.thumbnail || item.image || '', storageProject) : '';
         const label = localmanager.current.local(LABEL_KEYS[t.type] ?? t.type);
         return (
             <div

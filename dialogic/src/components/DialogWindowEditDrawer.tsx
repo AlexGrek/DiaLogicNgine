@@ -215,7 +215,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                                     <TextListEditor focus textList={windowState.text} onChange={onTextChange}></TextListEditor>
                                 </Panel>
                                 <Panel header="Background image">
-                                    <ImageListEditor imageList={windowState.backgrounds} onChange={onBackgroundChange} projectName={game.general.name} />
+                                    <ImageListEditor imageList={windowState.backgrounds} onChange={onBackgroundChange} />
                                 </Panel>
                                 <Panel header="Scripting">
                                     <div className='window-editor-code-editors-stack'>
