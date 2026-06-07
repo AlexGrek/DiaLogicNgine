@@ -3,6 +3,8 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { RenderLink } from '../../exec/RenderView';
 import { DialogLink } from '../../game/Dialog';
+import { ResponseAlignment } from '../../game/GameDescription';
+import { dialogVariantsClass } from './visualsClasses';
 import "./player.css";
 
 interface DialogVariantsProps {
@@ -14,9 +16,11 @@ interface DialogVariantsProps {
     transitionOut: boolean
     inTransitionIn: boolean
     text?: string
+    responseAlignment: ResponseAlignment
+    nested?: boolean
 }
 
-const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, transitionOut, step, inTransitionIn }) => {
+const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, transitionOut, step, inTransitionIn, responseAlignment, nested }) => {
 
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
         if (transitionOut) {
@@ -61,8 +65,12 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
         })
     }
 
+    const variantsClass = nested
+        ? 'dialog-variants dialog-variants--nested'
+        : dialogVariantsClass(responseAlignment);
+
     return (
-        <div className="dialog-variants">
+        <div className={variantsClass}>
             {state.fatalError ? [] : dialogVariants()}
         </div>
     );

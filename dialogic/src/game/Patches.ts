@@ -1,6 +1,6 @@
 import lodash from "lodash";
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
-import { GameDescription, createDefaultConfig } from "./GameDescription";
+import { GameDescription, createDefaultConfig, createDefaultVisuals } from "./GameDescription";
 import { createTranslations } from "../exec/Localization";
 import { initGameUiElementDescr } from "./GameUiElementDescr";
 
@@ -136,6 +136,36 @@ export class PatchFrom10To011 implements Patch {
     }
 }
 
+export class PatchFrom11To012 implements Patch {
+    from(): string {
+        return "0.11"
+    }
+    to(): string {
+        return "0.12"
+    }
+    apply(obj: unknown): GameDescription {
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData = obj as GameDescription
+        objData.visuals = createDefaultVisuals()
+        return objData
+    }
+}
+
+export class PatchFrom12To013 implements Patch {
+    from(): string {
+        return "0.12"
+    }
+    to(): string {
+        return "0.13"
+    }
+    apply(obj: unknown): GameDescription {
+        console.log(`Patching ${this.from()} to ${this.to()}`)
+        const objData = obj as GameDescription
+        objData.visuals = { ...createDefaultVisuals(), ...objData.visuals }
+        return objData
+    }
+}
+
 const PATCHES = [
     new PatchFrom04To05(),
     new PatchFrom05To06(),
@@ -144,6 +174,8 @@ const PATCHES = [
     new PatchFrom08To09(),
     new PatchFrom09To010(),
     new PatchFrom10To011(),
+    new PatchFrom11To012(),
+    new PatchFrom12To013(),
 ]
 
 export function loadJsonStringAndPatch(json: string, currentEngine: string) {
@@ -167,6 +199,12 @@ export function loadJsonStringAndPatch(json: string, currentEngine: string) {
                 pac.background = ''
             }
         }
+    }
+
+    if (!result.visuals) {
+        result.visuals = createDefaultVisuals()
+    } else {
+        result.visuals = { ...createDefaultVisuals(), ...result.visuals }
     }
 
     return result;

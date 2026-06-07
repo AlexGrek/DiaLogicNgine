@@ -9,6 +9,7 @@ import "./player.css";
 import DiscussionTopicPicker from './DiscussionTopicPicker';
 import { PlayerSettings } from './PlayerSettings';
 import { useTypewriterText } from './useTypewriterText';
+import { dialogResponsesClass, dialogTextClass, resolveVisuals } from './visualsClasses';
 
 interface CharDialogViewProps {
     game: GameExecManager
@@ -21,6 +22,7 @@ interface CharDialogViewProps {
 }
 
 const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd, view, transitionOut, step, playerSettings }) => {
+    const visuals = resolveVisuals(game.game.visuals)
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
     const [inTransitionOut, setInTransitionOut] = useState<boolean>(false)
     const [discuss, setDiscuss] = useState<boolean>(false)
@@ -145,13 +147,17 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
 
             </div>
             {!discuss && <div className='dialog-controls'>
-                <div key={step << 1} className={transitionOutClass("dialog-text")}>
+                <div key={step << 1} className={transitionOutClass(dialogTextClass(visuals.dialogTextAlignment))}>
                     <p className='dialog-current-text' key={step << 1}>
                         {state.fatalError ? state.fatalError.message : displayText}
                     </p>
                 </div>
-                {showOptions && <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} />}
-                {showOptions && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} text={text} />}
+                {showOptions && (
+                    <div className={dialogResponsesClass(visuals.responseAlignment)}>
+                        <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} links={[discussLink]} responseAlignment={visuals.responseAlignment} nested />
+                        <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={inTransitionOut} inTransitionIn={inTransitionIn} text={text} responseAlignment={visuals.responseAlignment} nested />
+                    </div>
+                )}
                 {clickToContinue && isComplete && !state.fatalError &&
                     <div className='dialog-continue-hint' data-testid="char-dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>

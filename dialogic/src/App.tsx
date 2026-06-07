@@ -37,6 +37,7 @@ import NotificationBar from "./components/notification/NotificationBar";
 import GameUiElementDescr from "./game/GameUiElementDescr";
 import UiElementsMenu from "./components/menuitems/uielements/UiElementsMenu";
 import PointAncClick from "./components/menuitems/pointandclick/PointAncClick";
+import VisualsMenu from "./components/menuitems/visuals/VisualsMenu";
 import { PointAndClick } from "./game/PointAndClick";
 import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
 import HomePage from "./components/home/HomePage";
@@ -119,6 +120,11 @@ function ConfigRoute() {
   return (
     <ConfigurationMenu handlers={updates} onSetGame={setGame} game={game} />
   );
+}
+
+function VisualsRoute() {
+  const { game, setGame } = useOutletContext<AppOutletContext>();
+  return <VisualsMenu game={game} onSetGame={setGame} />;
 }
 
 function LocsRoute() {
@@ -363,6 +369,7 @@ export default function App() {
           <Route path="playerv2" element={<PlayerV2Route />} />
           <Route path="saveload" element={<SaveLoadRoute />} />
           <Route path="config" element={<ConfigRoute />} />
+          <Route path="visuals" element={<VisualsRoute />} />
           <Route path="locs" element={<LocsRoute />} />
           <Route path="chars" element={<CharsRoute />} />
           <Route path="scripts" element={<ScriptsRoute />} />

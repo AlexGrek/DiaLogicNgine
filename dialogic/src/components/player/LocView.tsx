@@ -3,6 +3,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { LocRouteRenderView, LocationRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
+import { dialogTextClass, resolveVisuals } from './visualsClasses';
 import "./player.css";
 import LocButton from './LocButton';
 
@@ -16,6 +17,7 @@ interface LocViewProps {
 }
 
 const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transitionOut, step }) => {
+    const visuals = resolveVisuals(game.game.visuals)
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
@@ -79,7 +81,7 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
                 {locButtons()}
             </div>
             <div className='dialog-controls'>
-                <div key={step << 1} className={transitionOutClass("dialog-text")}>
+                <div key={step << 1} className={transitionOutClass(dialogTextClass(visuals.dialogTextAlignment))}>
                     {/* <p className='dialog-prev-text' key={state.stepCount}>
                             {prevText}
                         </p> */}
@@ -87,7 +89,7 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, transi
                         {state.fatalError ? state.fatalError.message : text}
                     </p>
                 </div>
-                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} />
+                <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} responseAlignment={visuals.responseAlignment} />
             </div>
         </div>
     );

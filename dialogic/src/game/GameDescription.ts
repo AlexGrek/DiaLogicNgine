@@ -12,7 +12,24 @@ import QuestLine from "./Objectives";
 import { PointAndClick, PointAndClickZone } from "./PointAndClick";
 import Prop, { createNumberProp, createVariantProp } from "./Prop";
 
-export const ENGINE_VERSION = "0.10"
+export const ENGINE_VERSION = "0.13"
+
+export type DialogTextAlignment = "left" | "center" | "right"
+export type ResponseAlignment = "column" | "row" | "flexible"
+
+export interface VisualsConfiguration {
+    dialogTextAlignment: DialogTextAlignment
+    responseAlignment: ResponseAlignment
+    shortHistoryVisible: boolean
+}
+
+export function createDefaultVisuals(): VisualsConfiguration {
+    return {
+        dialogTextAlignment: "right",
+        responseAlignment: "column",
+        shortHistoryVisible: true,
+    }
+}
 
 export interface StartMenuConfiguration {
     menuBackground?: string
@@ -64,6 +81,7 @@ export interface GameDescription {
     translations: Translations
     uiElements: GameUiElementDescr
     pacWidgets: PointAndClick[]
+    visuals: VisualsConfiguration
 }
 
 export function createDefaultGame(): GameDescription {
@@ -456,6 +474,7 @@ export function createDefaultGame(): GameDescription {
             ],
         },
         pacWidgets: [examplePac],
+        visuals: createDefaultVisuals(),
     };
 
     return game;

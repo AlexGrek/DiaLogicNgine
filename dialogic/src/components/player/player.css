@@ -136,6 +136,14 @@
     background: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 59%, rgba(0, 0, 0, 0.7) 100%);
 }
 
+.dialog-window-view--no-short-history {
+    grid-template-rows: 1fr;
+}
+
+.dialog-window-view--no-short-history .dialog-controls {
+    grid-row: 1;
+}
+
 .dialog-control-pad {
     position: absolute;
     z-index: 10;
@@ -173,16 +181,33 @@
 
 .dialog-text {
     width: 100%;
-    text-align: right;
     font-size: 22px;
-    margin-right: 12pt;
     background-color: #04040446;
-    margin-right: 24pt;
     overflow: hidden;
-    padding: 10pt 10pt 10pt 0;
     position: relative;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     /* font-family: 'M PLUS 1p', sans-serif; */
+}
+
+.dialog-text--align-left {
+    text-align: left;
+    margin-left: 24pt;
+    margin-right: 12pt;
+    padding: 10pt 0 10pt 10pt;
+}
+
+.dialog-text--align-center {
+    text-align: center;
+    margin-left: 12pt;
+    margin-right: 12pt;
+    padding: 10pt;
+}
+
+.dialog-text--align-right {
+    text-align: right;
+    margin-right: 24pt;
+    margin-left: 12pt;
+    padding: 10pt 10pt 10pt 0;
 }
 
 .dialog-current-text {
@@ -247,13 +272,69 @@
 .dialog-variants {
     font-size: 20px;
     max-width: 100%;
-    text-align: right;
     margin: 15pt 0 15pt 15pt;
     display: flex;
+    padding-left: 5pt;
+}
+
+.dialog-variants--column {
     flex-direction: column;
     align-items: flex-end;
-    /* outline: 2px solid grey; */
+    text-align: right;
+}
+
+.dialog-variants--row {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    text-align: right;
+    gap: 8px;
+}
+
+.dialog-variants--flexible {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.dialog-variants--nested {
+    display: contents;
+}
+
+.dialog-responses {
+    display: flex;
+    font-size: 20px;
+    max-width: 100%;
+    margin: 15pt 0 15pt 15pt;
     padding-left: 5pt;
+}
+
+.dialog-responses--column {
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+}
+
+.dialog-responses--row {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    text-align: right;
+    gap: 8px;
+}
+
+.dialog-responses--flexible {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
 }
 
 .dialog-variant-icon {
@@ -284,6 +365,13 @@
         transform: translateY(4px);
         opacity: 0.9;
     }
+}
+
+.dialog-variants--row button,
+.dialog-variants--flexible button,
+.dialog-responses--row .dialog-button,
+.dialog-responses--flexible .dialog-button {
+    margin: 0;
 }
 
 .dialog-variants button {

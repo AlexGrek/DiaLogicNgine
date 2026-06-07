@@ -6,6 +6,7 @@ import { DialogRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
 import { PlayerSettings } from './PlayerSettings';
 import { useTypewriterText } from './useTypewriterText';
+import { dialogTextClass, resolveVisuals } from './visualsClasses';
 import "./player.css";
 
 interface DialogWindowViewProps {
@@ -19,10 +20,11 @@ interface DialogWindowViewProps {
 }
 
 const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStateUpd, view, transitionOut, step, playerSettings }) => {
+    const visuals = resolveVisuals(game.game.visuals)
     const [inTransitionIn, setInTransitionIn] = useState<boolean>(false)
 
     useEffect(() => {
-        if (state.shortHistory.length > 0) {
+        if (visuals.shortHistoryVisible && state.shortHistory.length > 0) {
             const latest = document.getElementById("dialog-short-history-scrollable")
             if (latest) {
                 setTimeout(() => {
@@ -34,7 +36,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
 
         setInTransitionIn(true)
         setTimeout(() => setInTransitionIn(false), 250)
-    }, [view, state.shortHistory.length])
+    }, [view, state.shortHistory.length, visuals.shortHistoryVisible])
 
     const text = view.text
 
@@ -128,14 +130,20 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
         return state.shortHistory.map((item, index) => renderShortHistoryItem(item, index === state.shortHistory.length - 1, index))
     }
 
+    const windowViewClass = visuals.shortHistoryVisible
+        ? 'dialog-window-view'
+        : 'dialog-window-view dialog-window-view--no-short-history'
+
     return (
-        <div className={transitionOutClass("dialog-window-view")} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
-            <div className="dialog-short-history" id="dialog-short-history-scrollable">
-                {renderShortHistory()}
-            </div>
+        <div className={transitionOutClass(windowViewClass)} onClick={isClickable ? handleAreaClick : undefined} style={isClickable ? { cursor: 'pointer' } : undefined} data-testid="dialog-window-view">
+            {visuals.shortHistoryVisible && (
+                <div className="dialog-short-history" id="dialog-short-history-scrollable">
+                    {renderShortHistory()}
+                </div>
+            )}
             <div className='dialog-controls'>
                 {renderAvatar()}
-                <div key={step << 1} className={transitionOutClass("dialog-text")}>
+                <div key={step << 1} className={transitionOutClass(dialogTextClass(visuals.dialogTextAlignment))}>
                     {/* <p className='dialog-prev-text' key={state.stepCount}>
                             {prevText}
                         </p> */}
@@ -143,7 +151,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
                         {state.fatalError ? state.fatalError.message : displayText}
                     </p>
                 </div>
-                {isComplete && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} text={text} />}
+                {isComplete && <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} transitionOut={transitionOut} inTransitionIn={inTransitionIn} text={text} responseAlignment={visuals.responseAlignment} />}
                 {clickToContinue && isComplete && !state.fatalError &&
                     <div className='dialog-continue-hint' data-testid="dialog-continue-hint">
                         <span className='dialog-continue-chevron'>﹀</span>

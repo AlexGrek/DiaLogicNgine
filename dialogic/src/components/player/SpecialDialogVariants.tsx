@@ -1,6 +1,8 @@
 import React from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
+import { ResponseAlignment } from '../../game/GameDescription';
+import { dialogVariantsClass } from './visualsClasses';
 import "./player.css";
 
 export interface SpecialDialogVariant {
@@ -19,9 +21,11 @@ interface SpecialDialogVariantsProps {
     transitionOut: boolean
     inTransitionIn: boolean
     text?: string
+    responseAlignment: ResponseAlignment
+    nested?: boolean
 }
 
-const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, links, transitionOut, inTransitionIn }) => {
+const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, links, transitionOut, inTransitionIn, responseAlignment, nested }) => {
 
     const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
         if (transitionOut) {
@@ -63,8 +67,12 @@ const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, 
         })
     }
 
+    const variantsClass = nested
+        ? 'dialog-variants dialog-variants--nested special'
+        : `${dialogVariantsClass(responseAlignment)} special`;
+
     return (
-        <div className="dialog-variants special">
+        <div className={variantsClass}>
             {specialDialogVariants()}
         </div>
     );
