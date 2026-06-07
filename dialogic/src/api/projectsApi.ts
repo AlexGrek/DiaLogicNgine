@@ -13,6 +13,7 @@ export interface ProjectMeta {
   dialogCount?: number;
   characterCount?: number;
   locationCount?: number;
+  lastModified?: string;
 }
 
 export interface ProjectsPage {

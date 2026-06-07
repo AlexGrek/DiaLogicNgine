@@ -27,7 +27,11 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
       "Skill(backend)",
       "Skill(backend:*)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(curl -s http://localhost:4267/api/v1/projects)",
+      "Bash(ls node_modules/@tabler/icons-react)",
+      "Bash(node -e \"const t=require\\('@tabler/icons-react'\\); console.log\\('IconFunction' in t, 'IconVariable' in t, 'IconBox' in t, 'IconPointFilled' in t\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('app/api/v1/projects.py'\\).read\\(\\)\\); print\\('OK'\\)\")"
     ],
     "additionalDirectories": [
       "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"

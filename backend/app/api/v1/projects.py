@@ -1,6 +1,7 @@
 """Projects API: list projects, save/load game JSON per project."""
 import json
 import shutil
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -77,7 +78,13 @@ async def list_projects(page: int = Query(1, ge=1)):
     if not base.exists():
         return {"projects": [], "total": 0, "page": page, "pageSize": PAGE_SIZE}
 
-    dirs = sorted([d for d in base.iterdir() if d.is_dir()])
+    # Only list directories that hold an actual saved game. Image uploads can
+    # create a project directory (with images/ but no game.json); such folders
+    # are not loadable games and must not appear in the list, or opening them
+    # would 404 on GET /projects/{name}/game.
+    dirs = sorted(
+        d for d in base.iterdir() if d.is_dir() and (d / "game.json").exists()
+    )
     total = len(dirs)
     start = (page - 1) * PAGE_SIZE
     page_dirs = dirs[start : start + PAGE_SIZE]
@@ -85,6 +92,16 @@ async def list_projects(page: int = Query(1, ge=1)):
     projects = []
     for d in page_dirs:
         meta = _get_metadata(d.name, d)
+        if "lastModified" not in meta:
+            # Projects saved before lastModified was tracked: derive it from
+            # the game.json file's modification time so the UI still has a date.
+            mtime = (d / "game.json").stat().st_mtime
+            meta = {
+                **meta,
+                "lastModified": datetime.fromtimestamp(
+                    mtime, timezone.utc
+                ).isoformat(),
+            }
         projects.append({"name": d.name, **meta})
 
     return {"projects": projects, "total": total, "page": page, "pageSize": PAGE_SIZE}
@@ -101,6 +118,7 @@ async def save_game(project_name: str, request: Request):
     project_dir.mkdir(parents=True, exist_ok=True)
     (project_dir / "game.json").write_bytes(body)
     metadata = _extract_metadata(game)
+    metadata["lastModified"] = datetime.now(timezone.utc).isoformat()
     _set_metadata(project_name, project_dir, metadata)
     return {"status": "ok"}
 

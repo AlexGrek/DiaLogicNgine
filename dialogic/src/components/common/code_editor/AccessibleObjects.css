@@ -1,41 +1,144 @@
-.name-ao {
-    font-size: 11pt;
-    margin: 2pt;
-    font-weight: normal;
-    font-family: monospace;
-    font-variant: normal;
-}
-
-.name-ao:hover {
-    text-decoration: underline;
-    color: yellowgreen;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.button-import-ao {
-    margin-left: 5pt;
-    font-size: x-small;
-    background: none;
-    border: 1px solid rgba(128, 128, 128, 0.3);
-    opacity: 0.3;
-    height: 14pt;
-    width: 14pt;
-    display: inline;
-    border-radius: 50%;
-}
-
-.button-import-ao:hover {
-    opacity: 1;
-}
+/* ============================================================
+   Apple-style tree rows for the "Available objects" navigator.
+   ============================================================ */
 
 .checkbox-ao ul {
     list-style-type: none;
     margin: 0;
-    padding-left: 10pt;
+    padding-left: 0;
 }
 
 .checkbox-ao li {
-    float: left;
+    float: none !important;
     margin: 0;
+}
+
+/* A single tree row */
+.ao-node-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+    color: rgba(235, 235, 245, 0.78);
+}
+
+.ao-node-row:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* leading icon slot (arrow for branches, type icon for leaves) */
+.ao-row-icon {
+    width: 16px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* rsuite expand/collapse arrows */
+.ao-arrow {
+    color: rgba(235, 235, 245, 0.45);
+    font-size: 11px;
+}
+
+/* tabler type icons */
+.ao-icon {
+    flex-shrink: 0;
+}
+
+.ao-icon-fn {
+    color: #d6a2ff; /* function — purple */
+}
+
+.ao-icon-prop {
+    color: #64d2ff; /* property — cyan */
+}
+
+.name-ao {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12.5px;
+    margin: 0;
+    font-weight: 400;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-variant: normal;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 4px;
+    transition: color 0.12s ease;
+}
+
+.name-ao:hover {
+    text-decoration: none;
+    color: #6cb6ff;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* The "+" insert button */
+.button-import-ao {
+    flex-shrink: 0;
+    margin-left: 4px;
+    font-size: 12px;
+    line-height: 1;
+    color: rgba(235, 235, 245, 0.7);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    opacity: 0;
+    height: 18px;
+    width: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.ao-node-row:hover .button-import-ao {
+    opacity: 1;
+}
+
+.button-import-ao:hover {
+    opacity: 1;
+    background: #0a84ff;
+    border-color: #0a84ff;
+    color: #fff;
+}
+
+/* Hover tooltip ------------------------------------------------------------ */
+.ao-tooltip .rs-tooltip-inner,
+.ao-tooltip.rs-tooltip .rs-tooltip-arrow::after {
+    background: rgba(40, 40, 43, 0.96);
+}
+
+.ao-tooltip .rs-tooltip-inner {
+    max-width: 280px;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    padding: 8px 10px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.ao-tooltip-name {
+    display: block;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: #6cb6ff;
+    margin-bottom: 3px;
+}
+
+.ao-tooltip-descr {
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(235, 235, 245, 0.85);
 }

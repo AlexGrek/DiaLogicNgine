@@ -3,10 +3,11 @@
 }
 
 .image-picker-container {
-    border: 1px solid rgba(40, 60, 80, .8);
+    border: 1px solid rgba(255,255,255,0.09);
     padding: 6pt;
-    border-radius: 4pt;
+    border-radius: 6pt;
     margin: 3px;
+    background: rgba(44,44,46,0.3);
 }
 
 .image-picker-container > img {
@@ -75,9 +76,9 @@
 }
 
 .image-picker-modal-source.active {
-    background: rgba(52, 152, 219, 0.15);
+    background: rgba(90, 200, 250, 0.15);
     color: #fff;
-    border-left-color: #3498db;
+    border-left-color: #5ac8fa;
 }
 
 /* Other-project sub-list */
@@ -103,9 +104,9 @@
 }
 
 .image-picker-modal-other-project.active {
-    background: rgba(52, 152, 219, 0.10);
+    background: rgba(90, 200, 250, 0.10);
     color: #fff;
-    border-left-color: #3498db;
+    border-left-color: #5ac8fa;
 }
 
 /* Grid area */
@@ -135,8 +136,8 @@
 }
 
 .image-picker-modal-item.selected {
-    border-color: #3498db;
-    background: rgba(52, 152, 219, 0.12);
+    border-color: #5ac8fa;
+    background: rgba(90, 200, 250, 0.12);
 }
 
 .image-picker-modal-item img {
@@ -283,7 +284,7 @@
 
 .imggen-progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #3498db, #5dade2);
+    background: linear-gradient(90deg, #5ac8fa, #7dd4fc);
     border-radius: 3px;
     transition: width 0.1s linear;
 }

@@ -381,7 +381,7 @@
 }
 
 .dialog-actor-name {
-    color: lightblue;
+    color: #7dd4fc;
 }
 
 .route-button {
@@ -687,14 +687,14 @@
 }
 
 .main-menu-btn-primary {
-    background-color: #1c2a45;
-    border-color: #4c6da0;
-    color: #e8edf7;
+    background-color: #001a2e;
+    border-color: #2a6fa0;
+    color: #d0e8f5;
     animation-delay: 0.2s;
 }
 
 .main-menu-btn-primary:hover {
-    background-color: #2e4670;
+    background-color: #002840;
 }
 
 .main-menu-btn-exit {

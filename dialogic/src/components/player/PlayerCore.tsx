@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
-import { State } from '../../exec/GameState';
+import { InGameNotificationType, State } from '../../exec/GameState';
 import { RenderView } from '../../exec/RenderView';
 import { styleWithImage } from '../UiUtils';
 import GameMenuPanel from './GameMenuPanel';
@@ -8,6 +8,7 @@ import GameUiWidgetDisplay from './GameUiWidgetDisplay';
 import InGameControlPad from './InGameControlPad';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
 import GameUiElementsView from './GameUiElementsView';
+import GameNotificationsView from './GameNotificationsView';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -22,6 +23,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     const [prevbackground, setPrevbackground] = React.useState<string | null>(null)
     const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
+    const [widgetRequest, setWidgetRequest] = React.useState<{ name: string } | null>(null);
 
     const savesManager = useRef<SavesManager>(new SavesManager(game.game.general.name))
 
@@ -70,6 +72,14 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         setMenuOpen(open)
     }
 
+    // Map a notification type to the menu widget it should open, then open the menu there.
+    const handleNotificationClick = (type: InGameNotificationType) => {
+        const widget = (type === 'itemadded' || type === 'itemremoved') ? 'Inventory' : 'Journal'
+        setMenuOpen(true)
+        // new object each call so the request effect re-fires even for the same widget
+        setWidgetRequest({ name: widget })
+    }
+
     const menuPanelClass = (base: string) => {
         if (!menuOpen) {
             return `${base} menu-close`
@@ -92,13 +102,14 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
             <div className='player-core-container' id='player-core'>
                 <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground)}></div>
                 <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background)}></div>
+                <GameNotificationsView state={state} game={game} onNotificationClick={handleNotificationClick} />
                 <div className='player-core-widget-container' id='player-current-widget-host'>
                     <div className="dialog-control-pad">
                         <InGameControlPad onFullscreen={() => onFullScreen()} uiElements={currentView?.uiElements || []}></InGameControlPad>
                         <GameUiElementsView elements={currentView?.uiElements || []}/>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd}/>
+                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd}/>
                     </div>
                     <div className={gameWidgetClass('player-core-uiwidget-container')}>
                         <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} />

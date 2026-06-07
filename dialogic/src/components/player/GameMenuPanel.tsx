@@ -11,6 +11,7 @@ import TabsUiMenuWidget from './TabsUiMenuWidget';
 import './gamemenupanel.css';
 import ObjectivesTab from './ObjectivesTab';
 import MenuTab from './MenuTab';
+import InventoryTab from './InventoryTab';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
 
 
@@ -23,9 +24,10 @@ interface GameMenuPanelProps {
     executor: GameExecManager
     onStateChange: (newstate: State) => void
     savesManager: SavesManager
+    widgetRequest?: { name: string } | null
 }
 
-const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose, game, executor, onStateChange, savesManager }) => {
+const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose, game, executor, onStateChange, savesManager, widgetRequest }) => {
     const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
     const [selectedWidgetPrev, setSelectedWidgetPrev] = useState<string | null>(null);
 
@@ -44,6 +46,15 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
             }, 250)
         }
     }, [open]);
+
+    // Open a specific widget on external request (e.g. clicking a notification toast).
+    // Declared after the [open] effect so it wins when the menu opens and that
+    // effect would otherwise reset the selection to null.
+    useEffect(() => {
+        if (widgetRequest) {
+            setSelectedWidget(widgetRequest.name)
+        }
+    }, [widgetRequest]);
 
     const getClass = (base: string) => {
         const addClass = open ? "opening" : "closing"
@@ -145,6 +156,9 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
         <div className={getClass('game-menu-container')}>
             <div className='game-menu-top'>
                 <div className={getClass('game-menu-widget-container')}>
+                    {('Inventory' === selectedWidget || 'Inventory' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Inventory')}>
+                        <InventoryTab state={state} game={executor} onUseItem={(uid) => { onOpenClose(false); onStateChange(executor.useItemInDialog(state, uid)); }} />
+                    </div>}
                     {('Facts' === selectedWidget || 'Facts' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Facts')}>
                         <TabsUiMenuWidget data={factTabs()} />
                     </div>}

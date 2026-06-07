@@ -26,7 +26,7 @@ export function traverseRt(rt: RuntimeRt) {
     for (let ql in rt.objectives) {
         if (rt.objectives.hasOwnProperty(ql) && !ql.startsWith('_')) {
             // add questline funcs and props
-            const qlAction = `objetives.${ql}`
+            const qlAction = `objectives.${ql}`
             const actions = ["open", "close"]
             const readableProps = ["status"]
             all.push(...actions.map(act => `${qlAction}.${act}()`))
@@ -36,7 +36,7 @@ export function traverseRt(rt: RuntimeRt) {
             for (let q in rt.objectives[ql]) {
                 if (rt.objectives[ql].hasOwnProperty(q) && !q.startsWith('_')) {
                     // add quest funcs and props
-                    const qAction = `objetives.${ql}.${q}`
+                    const qAction = `objectives.${ql}.${q}`
                     const actions = ["fail", "complete", "open"]
                     const readableProps = ["status"]
                     all.push(...actions.map(act => `${qAction}.${act}()`))
@@ -46,7 +46,7 @@ export function traverseRt(rt: RuntimeRt) {
                     for (let task in rt.objectives[ql][q]) {
                         if (rt.objectives[ql][q].hasOwnProperty(task) && !task.startsWith('_')) {
                             // add task funcs and props
-                            const taskAction = `objetives.${ql}.${q}.${task}`
+                            const taskAction = `objectives.${ql}.${q}.${task}`
                             const actions = ["fail", "complete", "open"]
                             const readableProps = ["status", "isCompleted", "isFailed", "isOpen"]
                             all.push(...actions.map(act => `${taskAction}.${act}()`))

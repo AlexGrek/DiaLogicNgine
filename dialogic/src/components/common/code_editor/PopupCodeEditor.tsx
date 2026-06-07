@@ -25,7 +25,25 @@ export const DEFAULT_ARGS = {
     "rt.ch": "all claracters",
     "ch": "all claracters",
     "rt.facts": "all facts",
-    "facts": "all facts"
+    "facts": "all facts",
+    "objectives": "all quest lines, quests and tasks",
+    "rt.objectives": "all quest lines, quests and tasks",
+    "situation": "current situation string (or undefined)",
+    "rt.situation": "current situation string (or undefined)",
+    "items": "inventory manager (same as rt.items)",
+    "items.add()": "items.add(uid): add one item to the inventory",
+    "items.remove()": "items.remove(uid): remove one item from the inventory",
+    "items.has()": "items.has(uid) => boolean: is the item carried",
+    "items.count()": "items.count(uid) => number: how many of this item are carried",
+    "items.countTotal()": "items.countTotal() => number: total number of carried items",
+    "items.list()": "items.list() => CarriedItem[]: all carried items",
+    "items.listWithTag()": "items.listWithTag(tag) => CarriedItem[]: carried items having the given tag",
+    "rt.items": "inventory manager (same as items)",
+    "rt.history": "game history accessor",
+    "rt.history.eventHappened()": "rt.history.eventHappened(name) => boolean: has the named event happened",
+    "rt.history.thisEventHappened()": "rt.history.thisEventHappened(context) => boolean: has the current event already happened",
+    "context": "context variables passed into the script (may be empty)",
+    "context.usedItem": "uid of the item used from the inventory in the current dialog window (set when the player presses 'Use' on an item; available in the window entry script)"
 }
 
 interface PopupCodeEditorProps {
@@ -69,10 +87,11 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
 
     const renderEditor = () => {
         return <CodeEditor value={codeVal} language="js" placeholder="Please enter JS code or leave blank for no action." data-color-mode="dark" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
-            padding={10}
+            padding={12}
             style={{
-                fontSize: 14,
-                backgroundColor: "#050505",
+                fontSize: 13.5,
+                backgroundColor: "transparent",
+                borderRadius: 10,
                 fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
             }} />
     }
@@ -116,7 +135,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     return open ? (
-        <Modal size={'lg'} open={open} onClose={() => onSaveClose(codeVal)} backdrop="static" style={{outline: "1px solid grey", backdropFilter: "blur(7px)"}}>
+        <Modal size={'lg'} open={open} onClose={() => onSaveClose(codeVal)} backdrop="static" className="apple-code-editor">
             <Modal.Header>
                 <Modal.Title>{ui.header}</Modal.Title>
             </Modal.Header>

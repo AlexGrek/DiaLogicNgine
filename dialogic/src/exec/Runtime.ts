@@ -4,7 +4,7 @@ import { GameDescription } from "../game/GameDescription";
 import QuestLine, { Quest, Task } from "../game/Objectives";
 import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
-import { CarriedItem, State } from "./GameState";
+import { CarriedItem, State, createInGameNotification } from "./GameState";
 import { ObjectiveStatus } from "./QuestProcessor";
 import { getItemByIdOrNull } from "../game/Items";
 
@@ -185,6 +185,7 @@ export class RuntimeItemsManager {
                 // append to list
                 this.state.carriedItems.push({ item: itemUid, quantity: 1 })
             }
+            this.state.notifications.push(createInGameNotification("itemadded", item.name, itemUid))
         } else {
             console.error("Item not found: " + itemUid)
         }

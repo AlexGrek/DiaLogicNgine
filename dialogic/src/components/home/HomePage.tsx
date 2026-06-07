@@ -15,6 +15,19 @@ interface HomePageProps {
   onOpenProject: (game: GameDescription, name: string) => void;
 }
 
+function formatLastModified(iso?: string): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 interface ProjectCardProps {
   project: ProjectMeta;
   opening: boolean;
@@ -34,6 +47,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   const displayName = project.displayName || project.name;
   const showId = project.displayName && project.displayName !== project.name;
+  const lastModified = formatLastModified(project.lastModified);
 
   return (
     <Panel bordered className="home-project-card" data-testid="project-card">
@@ -94,6 +108,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
             {project.locationCount !== undefined && (
               <Tag size="sm">{project.locationCount} locs</Tag>
+            )}
+            {lastModified && (
+              <span className="home-project-modified">Updated {lastModified}</span>
             )}
           </Stack>
         </div>

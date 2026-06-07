@@ -476,6 +476,14 @@ export class GameExecManager {
         return afterWindowUpd
     }
 
+    useItemInDialog(state: State, itemUid: string): State {
+        const dw = this.getCurrentDialogWindow(state)
+        if (dw === null) return state
+        const [, window] = dw
+        if (!window.entryScript) return state
+        return evaluateAsStateProcessor(this.game, window.entryScript, this, state, { usedItem: itemUid })
+    }
+
     stateError(state: State, message: string, exception?: any) {
         const newState = lodash.cloneDeep(state)
         newState.fatalError = { message: message, exception: exception }

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import TreeView, { flattenTree } from "react-accessible-treeview";
 import ArrowRightIcon from '@rsuite/icons/ArrowRight';
 import ArrowDownIcon from '@rsuite/icons/ArrowDown';
+import { Tooltip, Whisper } from 'rsuite';
+import { IconFunction, IconVariable } from '@tabler/icons-react';
 import './AccessibleObjects.css';
 
 interface AccessibleObjectsProps {
@@ -10,23 +12,26 @@ interface AccessibleObjectsProps {
     onAddClick: (name: string) => void
 }
 
-type TreeNode = {name: string, lastname: string, children: TreeNode[]}
+type TreeNode = { name: string, lastname: string, children: TreeNode[] }
+
+// A node is a callable function if its (qualified) name ends with "()"
+const isFunctionName = (name: string) => name.trimEnd().endsWith(')')
 
 const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, onObjectClick, onAddClick }) => {
     const prepareData = (inputObjects: { [key: string]: string }) => {
         const qualifiedEntries = Object.entries(inputObjects).map((obj) => {
             const [name, descr] = obj
-            const qualifiers = name.split(".") // comma-separated qualifiers for each entry
+            const qualifiers = name.split(".") // dot-separated qualifiers for each entry
             return {
                 name: name,
                 qualifiers: qualifiers,
                 description: descr
             }
         })
-        var rootNode = { lastname: "", name: "", children: [] } as TreeNode
+        const rootNode = { lastname: "", name: "", children: [] } as TreeNode
         const getOrCreate = (subtree: TreeNode, lastname: string) => {
             // return child of provided subtree, create if missing
-            var child = subtree.children.find(ch => ch.lastname === lastname)
+            let child = subtree.children.find(ch => ch.lastname === lastname)
             if (child) {
                 // exist, so just return it
                 return child
@@ -39,14 +44,14 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
             }
         }
         qualifiedEntries.forEach(item => {
-            var node = rootNode
+            let node = rootNode
             item.qualifiers.forEach((qualifier) => {
                 node = getOrCreate(node, qualifier)
             })
         })
         return flattenTree(rootNode)
     }
-    
+
     const [objects, setObjects] = useState(prepareData(objectDescrMap));
     useEffect(() => {
         setObjects(prepareData(objectDescrMap));
@@ -54,13 +59,20 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
 
     const renderArrow = (isOpen: boolean) => {
         if (!isOpen) {
-            return <ArrowRightIcon></ArrowRightIcon>
+            return <ArrowRightIcon className='ao-arrow' />
         } else {
-            return <ArrowDownIcon></ArrowDownIcon>
+            return <ArrowDownIcon className='ao-arrow' />
         }
     }
 
-    const objectClick = (_e: any, oname: string) => {
+    const renderLeafIcon = (name: string) => {
+        if (isFunctionName(name)) {
+            return <IconFunction className='ao-icon ao-icon-fn' size={15} stroke={1.75} />
+        }
+        return <IconVariable className='ao-icon ao-icon-prop' size={15} stroke={1.75} />
+    }
+
+    const objectClick = (_e: React.MouseEvent, oname: string) => {
         onObjectClick(oname);
         return true;
     }
@@ -70,7 +82,7 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
             <div className="checkbox-ao">
                 <TreeView
                     data={objects}
-                    aria-label="Checkbox tree"
+                    aria-label="Available objects tree"
                     multiSelect
                     propagateSelect
                     propagateSelectUpwards
@@ -83,27 +95,44 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
                         level,
                         handleExpand,
                     }) => {
+                        const nodeProps = getNodeProps({ onClick: handleExpand })
+                        const name = String(element.name)
+                        const description = objectDescrMap[name] ?? name
+                        const tooltip = (
+                            <Tooltip className='ao-tooltip'>
+                                <span className='ao-tooltip-name'>{name}</span>
+                                <span className='ao-tooltip-descr'>{description}</span>
+                            </Tooltip>
+                        )
                         return (
-                            <>
+                            <Whisper
+                                placement="right"
+                                trigger="hover"
+                                delayOpen={250}
+                                controlId={`ao-tip-${element.id}`}
+                                speaker={tooltip}
+                            >
                                 <div
-                                    {...getNodeProps({ onClick: handleExpand })}
+                                    {...nodeProps}
+                                    className={`${nodeProps.className ?? ''} ao-node-row`}
                                     style={{
-                                        marginLeft: 1 * (level - 1),
+                                        paddingLeft: 10 * (level - 1),
                                     }}
                                 >
-                                    {isBranch && renderArrow(isExpanded)}
-                                    <span className="name-ao" onClick={(e) => objectClick(e, element.name)}>{element.name}</span>
+                                    <span className='ao-row-icon'>
+                                        {isBranch ? renderArrow(isExpanded) : renderLeafIcon(name)}
+                                    </span>
+                                    <span className="name-ao" onClick={(e) => objectClick(e, name)}>{name}</span>
                                     <button className='button-import-ao'
                                         onClick={(e) => {
-                                            onAddClick(element.name);
+                                            onAddClick(name);
                                             e.stopPropagation()
-                                        } 
-                                        }
+                                        }}
                                     >
                                         {"+"}
                                     </button>
                                 </div>
-                            </>
+                            </Whisper>
                         );
                     }}
                 />

@@ -1,0 +1,132 @@
+.game-notifications-container {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    width: max-content;
+    max-width: 80%;
+}
+
+.game-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 220px;
+    max-width: 360px;
+    padding: 8px 14px 8px 8px;
+    border-radius: 14px;
+    background: rgba(30, 30, 32, 0.72);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 12px 36px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.92);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    animation: game-toast-in 0.32s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.game-toast:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow:
+        0 16px 44px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.game-toast:active {
+    transform: scale(0.98);
+}
+
+.game-toast-media {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.game-toast-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* colored accent for non-item (e.g. quest) notifications */
+.game-toast-accent {
+    width: 6px;
+    height: 24px;
+    border-radius: 3px;
+    background: #0a84ff;
+}
+
+.game-toast-itemadded .game-toast-accent {
+    background: #30d158; /* green */
+}
+
+.game-toast-itemremoved .game-toast-accent {
+    background: #ff453a; /* red */
+}
+
+.game-toast-questcompleted .game-toast-accent,
+.game-toast-questlineclose .game-toast-accent {
+    background: #30d158;
+}
+
+.game-toast-questfailed .game-toast-accent {
+    background: #ff453a;
+}
+
+.game-toast-questnew .game-toast-accent,
+.game-toast-questlineopen .game-toast-accent,
+.game-toast-questprogress .game-toast-accent {
+    background: #ffd60a; /* amber */
+}
+
+.game-toast-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.game-toast-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(235, 235, 245, 0.55);
+}
+
+.game-toast-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@keyframes game-toast-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-14px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

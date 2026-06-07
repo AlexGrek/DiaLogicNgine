@@ -3,7 +3,6 @@ import {
   Container,
   Content,
   CustomProvider,
-  Footer,
   Header,
   Sidebar,
 } from "rsuite";
@@ -203,6 +202,11 @@ function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProp
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings>(loadSettings);
 
+  useEffect(() => {
+    const gameName = game.general?.name;
+    document.title = gameName ? `${gameName} — DiaLogic Ngine` : 'DiaLogic Ngine';
+  }, [game.general?.name]);
+
   const handlePaste = useCallback(() => copied, [copied]);
 
   const handleCopy = useCallback((obj: unknown, typename: string) => {
@@ -333,7 +337,6 @@ function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProp
           <Outlet context={outletContext} />
         </Content>
       </Container>
-      <Footer>Footer</Footer>
     </Container>
   );
 }

@@ -114,7 +114,10 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         fetch('/api/v1/projects')
             .then(r => r.json())
             .then(data => {
-                const all: string[] = Array.isArray(data.projects) ? data.projects : [];
+                const all: string[] = Array.isArray(data.projects)
+                    ? data.projects.map((p: { name: string } | string) =>
+                        typeof p === 'string' ? p : p.name)
+                    : [];
                 const others = all.filter(p => p !== projectName);
                 setOtherProjects(others);
                 if (others.length > 0 && (otherProject === null || !others.includes(otherProject))) {

@@ -1,3 +1,22 @@
+:root {
+  --bg-base:       #1c1c1e;
+  --bg-surface:    #2a2a2c;
+  --bg-elevated:   #3a3a3c;
+  --bg-glass:      rgba(36,36,38,0.72);
+  --glass-blur:    blur(20px) saturate(180%);
+  --glass-border:  rgba(255,255,255,0.10);
+  --glass-shine:   rgba(255,255,255,0.06);
+  --accent:        #5ac8fa;
+  --accent-glow:   rgba(90,200,250,0.35);
+  --accent-dim:    rgba(90,200,250,0.18);
+  --modal-border:  rgba(90,200,250,0.45);
+  --text-primary:  rgba(255,255,255,0.92);
+  --text-muted:    rgba(255,255,255,0.50);
+  --text-subtle:   rgba(255,255,255,0.30);
+  --shadow-hard:   0 8px 32px rgba(0,0,0,0.65);
+  --shadow-soft:   0 2px 12px rgba(0,0,0,0.40);
+}
+
 body, html {
   margin: 0;
   padding: 0;
@@ -6,7 +25,7 @@ body, html {
 
 #root {
   height: 100%;
-  outline: 1px solid green;
+  outline: 1px solid rgba(90,200,250,0.25);
 }
 
 .root-container {
@@ -20,10 +39,18 @@ body, html {
   height: 100%;
 }
 
-.main-sidebar, .app-main-sidebar {
+.main-sidebar {
   height: 100%;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main-sidebar {
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .content-container {
@@ -48,18 +75,18 @@ body, html {
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: var(--bg-base);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--text-primary);
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--accent);
 }
 
 .app-header-container {
@@ -67,8 +94,8 @@ body, html {
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
-  background-color: #282c34;
-  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+  background-color: var(--bg-surface);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 2px 12px rgba(0,0,0,0.55);
   height: 22pt;
   overflow-y: hidden;
 }
@@ -109,20 +136,25 @@ body, html {
   height: fit-content;
   margin: 12px;
   width: 23em;
-  background-color: black;
-  border-radius: 8pt;
-  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+  background-color: var(--bg-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 13pt;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-hard);
 }
 
 .window-widget-header {
-  background-color: #282c30;
+  background-color: rgba(58,58,60,0.85);
   padding: 4pt 6pt;
-  border-radius: 8pt 8pt 0 0;
+  border-radius: 13pt 13pt 0 0;
   font-size: larger;
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .window-widget-main:hover {
-  background-color: slategray;
+  background-color: rgba(58,58,60,0.75);
+  border-color: rgba(255,255,255,0.15);
 }
 
 .window-widget-content {
@@ -155,15 +187,17 @@ body, html {
 }
 
 .window-widget-footer {
-  background-color: #282c34ce;
+  background-color: rgba(28,28,30,0.7);
   padding: 5pt 0pt;
-  border-radius: 0pt 0pt 8pt 8pt;
+  border-radius: 0pt 0pt 13pt 13pt;
   font-size: small;
   cursor: pointer;
+  border-top: 1px solid var(--glass-border);
 }
 
 .highlighted {
-  outline: 2px solid yellow;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .window-editor-grid.rs-grid-container {
@@ -185,9 +219,9 @@ body, html {
 }
 
 .window-editor-grid-content {
-  background-color: #4c52603b;
+  background-color: rgba(42,42,44,0.22);
   height: 100%;
-  border-radius: 0 0 8pt 8pt;
+  border-radius: 0 0 13pt 13pt;
   padding-bottom: 12pt;
 }
 
@@ -199,8 +233,9 @@ body, html {
   min-height: 4em;
   width: 96%;
   margin: 3pt;
-  border-radius: 4pt;
-  background-color: #4c52603b;
+  border-radius: 8pt;
+  background-color: rgba(58,58,60,0.35);
+  border: 1px solid var(--glass-border);
   cursor: pointer;
   padding: 2pt 4pt;
 }
@@ -223,18 +258,20 @@ body, html {
 }
 
 .link-short-view:hover {
-  background-color: rgba(86, 98, 112, 0.3);
+  background-color: rgba(80,80,84,0.45);
+  border-color: rgba(255,255,255,0.16);
 }
 
 .link-editor-body {
-  background-color: #4c52603b;
+  background-color: rgba(58,58,60,0.35);
+  border: 1px solid var(--glass-border);
   padding: 4pt;
-  border-radius: 4pt;
+  border-radius: 8pt;
 }
 
 .link-editor-section {
   background-color: rgba(0,0,0,0.1);
-  border-radius: 4pt;
+  border-radius: 6pt;
   padding: 6pt;
   margin-top: 3pt;
 }
@@ -289,13 +326,25 @@ div.text-field-editor {
   font-family: 'IconFont';
 }
 
-/* Smooth modal animations: replace rsuite's elastic bounce with a clean spring ease */
+/* Modal enter: fade in + drop from slightly above */
+@keyframes modal-drop-in {
+  0%   { opacity: 0; transform: translateY(-18px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0)     scale(1); }
+}
+
+@keyframes modal-drop-out {
+  0%   { opacity: 1; transform: translateY(0)    scale(1); }
+  100% { opacity: 0; transform: translateY(10px) scale(0.97); }
+}
+
 .rs-anim-bounce-in {
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
-  animation-duration: 0.35s !important;
+  animation-name: modal-drop-in !important;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+  animation-duration: 0.30s !important;
 }
 
 .rs-anim-bounce-out {
+  animation-name: modal-drop-out !important;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
   animation-duration: 0.18s !important;
 }
@@ -318,7 +367,9 @@ div.text-field-editor {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background-color: #1a1d24;
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(90,200,250,0.07) 0%, transparent 70%);
   padding: 0 16px 40px;
 }
 
@@ -336,7 +387,7 @@ div.text-field-editor {
 
 .home-subtitle {
   font-size: 13pt;
-  color: #aaa;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -354,7 +405,7 @@ div.text-field-editor {
 
 .home-section-label {
   font-size: 11pt;
-  color: #888;
+  color: var(--text-muted);
   margin: 0 0 4px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -378,13 +429,13 @@ div.text-field-editor {
 .home-project-title {
   display: block;
   font-size: 10pt;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 .home-empty {
   width: 100%;
-  color: #666;
+  color: var(--text-subtle);
   text-align: center;
 }
 
@@ -392,32 +443,39 @@ div.text-field-editor {
   width: 80px;
   height: 60px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
 .home-project-id {
   display: block;
   font-size: 10pt;
-  color: #555;
+  color: var(--text-subtle);
   margin-top: 1px;
 }
 
 .home-project-authors {
   display: block;
   font-size: 10pt;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
 .home-project-description {
   font-size: 10pt;
-  color: #999;
+  color: var(--text-muted);
   margin: 4px 0 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   max-width: 360px;
+}
+
+.home-project-modified {
+  font-size: 9pt;
+  color: var(--text-subtle);
+  white-space: nowrap;
+  align-self: center;
 }
 
 /* Save/Load page */
@@ -462,4 +520,120 @@ div.text-field-editor {
 .rs-drawer-backdrop.rs-anim-fade {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
   transition-duration: 0.25s !important;
+}
+
+/* ─── Apple Liquid Glass: Modals ─────────────────────────────────────────── */
+
+.rs-modal-content {
+  background: var(--bg-glass) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-radius: 18px !important;
+  border: 2px solid var(--modal-border) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.07) inset,
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 24px 64px rgba(0,0,0,0.75),
+    0 0 0 1px rgba(90,200,250,0.10) !important;
+}
+
+.rs-modal-header {
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  padding-bottom: 10px !important;
+}
+
+.rs-modal-header .rs-modal-title {
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.rs-modal-footer {
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+  padding-top: 10px !important;
+}
+
+/* ─── Apple Liquid Glass: Drawers ────────────────────────────────────────── */
+
+.rs-drawer-content {
+  background: var(--bg-glass) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-left: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    -24px 0 64px rgba(0,0,0,0.65) !important;
+}
+
+.rs-drawer-header {
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ─── RSuite dark-theme surface tweaks ───────────────────────────────────── */
+
+.rs-picker-menu,
+.rs-picker-select-menu {
+  background: rgba(44,44,46,0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55) !important;
+}
+
+/* Restore input horizontal padding (overridden by cascade) */
+.rs-input {
+  padding-left: 11px !important;
+  padding-right: 11px !important;
+}
+
+.rs-input-sm .rs-input,
+.rs-input-group-sm > .rs-input {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.rs-input-xs .rs-input,
+.rs-input-group-xs > .rs-input {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Accent focus ring on RSuite inputs */
+.rs-input:focus,
+.rs-input-number:focus-within {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px var(--accent-dim) !important;
+}
+
+/* Global button breathing room + rounder corners (not for buttons embedded inside input groups) */
+.rs-btn:not(.rs-input-group-btn):not(.rs-input-group > .rs-btn) {
+  margin: 2px !important;
+  border-radius: 9px !important;
+}
+
+/* Input fields — flatter, more editorial */
+.rs-input,
+.rs-input-group,
+.rs-picker-input,
+.rs-picker-toggle {
+  border-radius: 4px !important;
+}
+
+/* Restore IconButton layout when it has a text label */
+.rs-btn-icon.rs-btn-icon-with-text {
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Accent primary buttons — color only, no layout interference */
+.rs-btn-primary {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #0a1a24 !important;
+}
+
+.rs-btn-primary:hover,
+.rs-btn-primary:focus {
+  background-color: #38b0e8 !important;
+  border-color: #38b0e8 !important;
 }
