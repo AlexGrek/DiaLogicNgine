@@ -116,7 +116,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                 <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background, storageProject)}></div>
                 <GameNotificationsView state={state} game={game} onNotificationClick={handleNotificationClick} />
                 <div className='player-core-widget-container' id='player-current-widget-host'>
-                    <div className="dialog-control-pad">
+                    <div className="player-top-panel-row">
                         <InGameControlPad onFullscreen={() => onFullScreen()} uiElements={currentView?.uiElements || []}></InGameControlPad>
                         <GameUiElementsView elements={currentView?.uiElements || []}/>
                     </div>

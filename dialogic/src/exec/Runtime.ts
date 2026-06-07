@@ -175,37 +175,47 @@ export class RuntimeItemsManager {
         return -1; // Return -1 if the item is not found
     }
 
-    public add(itemUid: string) {
+    public add(itemUid: string, count: number = 1) {
         const item = getItemByIdOrNull(this._context.game.items, itemUid);
-        if (item != null) {
+        if (item == null) {
+            console.error("Item not found: " + itemUid)
+            return
+        }
+        const n = Math.max(1, Math.floor(count))
+        if (item.stackable) {
             const index = this.getIndexByItemId(this.state.carriedItems, itemUid);
-            if (item.stackable && index >= 0) {
+            if (index >= 0) {
                 // just increase number
-                this.state.carriedItems[index].quantity += 1
+                this.state.carriedItems[index].quantity += n
             } else {
-                // append to list
+                this.state.carriedItems.push({ item: itemUid, quantity: n })
+            }
+        } else {
+            // non-stackable: each unit is a distinct carried entry
+            for (let k = 0; k < n; k++) {
                 this.state.carriedItems.push({ item: itemUid, quantity: 1 })
             }
-            this.state.notifications.push(createInGameNotification("itemadded", item.name, itemUid))
-        } else {
-            console.error("Item not found: " + itemUid)
         }
+        const text = n > 1 ? `${item.name} ×${n}` : item.name
+        this.state.notifications.push(createInGameNotification("itemadded", text, itemUid))
     }
 
-    public remove(itemUid: string) {
-        // warning: ai-generated
-        const index = this.getIndexByItemId(this.state.carriedItems, itemUid);
-        if (index !== -1) {
+    public remove(itemUid: string, count: number = 1) {
+        const n = Math.max(1, Math.floor(count))
+        for (let k = 0; k < n; k++) {
+            const index = this.getIndexByItemId(this.state.carriedItems, itemUid);
+            if (index === -1) {
+                // nothing (more) to remove
+                break;
+            }
             const item = this.state.carriedItems[index];
-            if (item.quantity === 1) {
+            if (item.quantity <= 1) {
                 // Remove the item from the carried items array if there is only one left
                 this.state.carriedItems.splice(index, 1);
             } else {
-                // Decrease the quantity if the item is stackable and there are multiple of it
+                // Decrease the quantity if there are multiple of it
                 item.quantity -= 1;
             }
-        } else {
-            console.error("Item not found: " + itemUid);
         }
     }
 

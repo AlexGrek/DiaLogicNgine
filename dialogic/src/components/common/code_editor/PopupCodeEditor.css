@@ -156,9 +156,17 @@
     color: var(--ace-text);
 }
 
+/* Right column: code panel + smart generators stacked --------------------- */
+.editor-right-code {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 /* Right code panel --------------------------------------------------------- */
 .editor-panel-code {
-    flex: 1 1 auto;
     min-width: 0;
     padding: 14px 16px;
     background: rgba(0, 0, 0, 0.32);

@@ -25,6 +25,12 @@ export type ResponseAlignment = "column" | "row" | "flexible"
 
 /** 0–100 opacity for the dialog text panel background (matches legacy #04040446 ≈ 27). */
 export const DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY = 27
+/** 0–100 opacity for the notification toast background. */
+export const DEFAULT_NOTIFICATION_BACKGROUND_OPACITY = 72
+/** Border radius in px for notification toasts (0 = square). */
+export const DEFAULT_NOTIFICATION_BORDER_RADIUS = 0
+/** 0–100 opacity for the notification toast border (0 = no border). */
+export const DEFAULT_NOTIFICATION_BORDER_OPACITY = 0
 
 export interface VisualsConfiguration {
     dialogTextAlignment: DialogTextAlignment
@@ -34,6 +40,9 @@ export interface VisualsConfiguration {
     textFontId: FontId
     responsesFontId: FontId
     dialogTextBackgroundOpacity: number
+    notificationBackgroundOpacity: number
+    notificationBorderRadius: number
+    notificationBorderOpacity: number
 }
 
 export function createDefaultVisuals(): VisualsConfiguration {
@@ -45,6 +54,9 @@ export function createDefaultVisuals(): VisualsConfiguration {
         textFontId: DEFAULT_TEXT_FONT_ID,
         responsesFontId: DEFAULT_RESPONSES_FONT_ID,
         dialogTextBackgroundOpacity: DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
+        notificationBackgroundOpacity: DEFAULT_NOTIFICATION_BACKGROUND_OPACITY,
+        notificationBorderRadius: DEFAULT_NOTIFICATION_BORDER_RADIUS,
+        notificationBorderOpacity: DEFAULT_NOTIFICATION_BORDER_OPACITY,
     }
 }
 

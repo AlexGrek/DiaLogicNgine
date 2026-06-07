@@ -1,6 +1,9 @@
 import type { CSSProperties } from 'react';
 import {
     DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
+    DEFAULT_NOTIFICATION_BACKGROUND_OPACITY,
+    DEFAULT_NOTIFICATION_BORDER_OPACITY,
+    DEFAULT_NOTIFICATION_BORDER_RADIUS,
     DialogTextAlignment,
     ResponseAlignment,
     VisualsConfiguration,
@@ -31,11 +34,11 @@ function normalizeFontId(value: unknown, fallback: FontId): FontId {
     return fallback;
 }
 
-function normalizeOpacity(value: unknown): number {
+function clampInt(value: unknown, min: number, max: number, fallback: number): number {
     if (typeof value !== 'number' || Number.isNaN(value)) {
-        return DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY;
+        return fallback;
     }
-    return Math.min(100, Math.max(0, Math.round(value)));
+    return Math.min(max, Math.max(min, Math.round(value)));
 }
 
 export function resolveVisuals(visuals: VisualsConfiguration | undefined): VisualsConfiguration {
@@ -44,8 +47,21 @@ export function resolveVisuals(visuals: VisualsConfiguration | undefined): Visua
     merged.menuFontId = normalizeFontId(merged.menuFontId, DEFAULT_MENU_FONT_ID);
     merged.textFontId = normalizeFontId(merged.textFontId, DEFAULT_TEXT_FONT_ID);
     merged.responsesFontId = normalizeFontId(merged.responsesFontId, DEFAULT_RESPONSES_FONT_ID);
-    merged.dialogTextBackgroundOpacity = normalizeOpacity(merged.dialogTextBackgroundOpacity);
+    merged.dialogTextBackgroundOpacity = clampInt(merged.dialogTextBackgroundOpacity, 0, 100, DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY);
+    merged.notificationBackgroundOpacity = clampInt(merged.notificationBackgroundOpacity, 0, 100, DEFAULT_NOTIFICATION_BACKGROUND_OPACITY);
+    merged.notificationBorderRadius = clampInt(merged.notificationBorderRadius, 0, 50, DEFAULT_NOTIFICATION_BORDER_RADIUS);
+    merged.notificationBorderOpacity = clampInt(merged.notificationBorderOpacity, 0, 100, DEFAULT_NOTIFICATION_BORDER_OPACITY);
     return merged;
+}
+
+export function notificationVisualsCssVars(visuals: VisualsConfiguration): CSSProperties {
+    const bgOpacity = visuals.notificationBackgroundOpacity / 100;
+    const borderOpacity = visuals.notificationBorderOpacity / 100;
+    return {
+        '--notif-bg': `rgba(30, 30, 32, ${bgOpacity})`,
+        '--notif-border-radius': `${visuals.notificationBorderRadius}px`,
+        '--notif-border-color': `rgba(255, 255, 255, ${borderOpacity})`,
+    } as CSSProperties;
 }
 
 export function playerVisualsCssVars(visuals: VisualsConfiguration): CSSProperties {

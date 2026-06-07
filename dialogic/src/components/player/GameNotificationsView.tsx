@@ -6,6 +6,7 @@ import { getItemByIdOrUnknown } from '../../game/Items';
 import { generateImageUrl } from '../../Utils';
 import { resolveImageProject } from '../common/projectImages';
 import { useProjectImages } from '../common/ProjectImagesContext';
+import { notificationVisualsCssVars, resolveVisuals } from './visualsClasses';
 import './gamenotifications.css';
 
 interface GameNotificationsViewProps {
@@ -41,6 +42,8 @@ const LABEL_KEYS: Record<InGameNotificationType, string> = {
 const GameNotificationsView: React.FC<GameNotificationsViewProps> = ({ state, game, onNotificationClick }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
     const storageProject = resolveImageProject(useProjectImages());
+    const visuals = resolveVisuals(game.game.visuals);
+    const notifStyle = notificationVisualsCssVars(visuals);
     const seenRef = useRef<number>(state.notifications.length);
     const idRef = useRef<number>(0);
     const timersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
@@ -131,7 +134,7 @@ const GameNotificationsView: React.FC<GameNotificationsViewProps> = ({ state, ga
     }
 
     return (
-        <div className='game-notifications-container' data-testid='game-notifications'>
+        <div className='game-notifications-container' style={notifStyle} data-testid='game-notifications'>
             {toasts.map(renderToast)}
         </div>
     );

@@ -1,0 +1,116 @@
+/* ============================================================
+   Smart code generators panel (quest / facts / items).
+   Lives inside .apple-code-editor, so it inherits the --ace-* vars.
+   ============================================================ */
+
+.smart-gen {
+    background: var(--ace-panel, rgba(58, 58, 62, 0.45));
+    border: 1px solid var(--ace-hairline, rgba(255, 255, 255, 0.1));
+    border-radius: 14px;
+    padding: 10px 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.smart-gen-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.smart-gen-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ace-text-secondary, rgba(235, 235, 245, 0.6));
+    margin-right: 4px;
+}
+
+.smart-gen-tab {
+    border: 1px solid var(--ace-hairline-strong, rgba(255, 255, 255, 0.16));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ace-text, rgba(255, 255, 255, 0.92));
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.smart-gen-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.smart-gen-tab.active {
+    background: var(--ace-accent, #0a84ff);
+    border-color: var(--ace-accent, #0a84ff);
+    color: #fff;
+}
+
+.smart-gen-body {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.smart-gen-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.smart-gen-path {
+    display: block;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    color: #6cb6ff;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--ace-hairline, rgba(255, 255, 255, 0.1));
+    border-radius: 8px;
+    padding: 6px 10px;
+    word-break: break-all;
+}
+
+.smart-gen-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.smart-gen-group-label {
+    font-size: 11px;
+    color: var(--ace-text-secondary, rgba(235, 235, 245, 0.6));
+    min-width: 86px;
+}
+
+.smart-gen-action-btn {
+    border: 1px solid var(--ace-hairline-strong, rgba(255, 255, 255, 0.16));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ace-text, rgba(255, 255, 255, 0.92));
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.smart-gen-action-btn:hover:not(:disabled) {
+    background: var(--ace-accent, #0a84ff);
+    border-color: var(--ace-accent, #0a84ff);
+    color: #fff;
+}
+
+.smart-gen-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.smart-gen-hint {
+    font-size: 12.5px;
+    color: var(--ace-text-secondary, rgba(235, 235, 245, 0.6));
+    margin: 0;
+}

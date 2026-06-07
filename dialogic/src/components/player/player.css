@@ -68,6 +68,8 @@
     height: 100%;
     z-index: 100;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .player-window {
@@ -108,8 +110,31 @@
     position: relative;
 }
 
+.player-top-panel-row {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.player-top-panel-row > * {
+    pointer-events: auto;
+}
+
+.game-ui-elements-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 auto;
+    padding: 4px 8px;
+}
+
 .player-core-uiwidget-container {
-    height: 100%;
+    flex: 1 1 auto;
     width: 100%;
     min-height: 0;
     transition: opacity .2s;
@@ -185,13 +210,6 @@
     grid-template-rows: minmax(0, 1fr) auto;
 }
 
-.dialog-control-pad {
-    position: absolute;
-    z-index: 10;
-    grid-column: 1;
-    grid-row: 1;
-    place-self: start start;
-}
 
 .player-core-ingame-menu {
     position: absolute;

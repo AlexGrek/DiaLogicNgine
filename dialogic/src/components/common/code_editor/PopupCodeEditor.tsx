@@ -3,6 +3,7 @@ import { Button, Modal } from 'rsuite';
 import CodeEditor from '@uiw/react-textarea-code-editor';
 import "./PopupCodeEditor.css"
 import AccessibleObjects from './AccessibleObjects';
+import SmartCodeGenerators from './SmartCodeGenerators';
 import { GameDescription } from '../../../game/GameDescription';
 import { createRtDoc } from './RtObjectTraverse';
 import { mergeDicts } from '../../../Utils';
@@ -29,11 +30,12 @@ export const DEFAULT_ARGS = {
     "facts": "all facts",
     "objectives": "all quest lines, quests and tasks",
     "rt.objectives": "all quest lines, quests and tasks",
-    "situation": "current situation string (or undefined)",
-    "rt.situation": "current situation string (or undefined)",
+    "situation": "current situation string (or undefined) — read-only snapshot; use state.situation to set",
+    "rt.situation": "current situation string (or undefined) — read-only snapshot",
+    "state.situation": "read/write: set to a situation name string or undefined to clear (e.g. state.situation = 'combat')",
     "items": "inventory manager (same as rt.items)",
-    "items.add()": "items.add(uid): add one item to the inventory",
-    "items.remove()": "items.remove(uid): remove one item from the inventory",
+    "items.add()": "items.add(uid, count=1): add one or more of an item to the inventory",
+    "items.remove()": "items.remove(uid, count=1): remove one or more of an item from the inventory",
     "items.has()": "items.has(uid) => boolean: is the item carried",
     "items.count()": "items.count(uid) => number: how many of this item are carried",
     "items.countTotal()": "items.countTotal() => number: total number of carried items",
@@ -119,6 +121,11 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
         setCode(codeVal + name);
     }
 
+    // Append a generated snippet on its own line.
+    const insertSnippet = (snippet: string) => {
+        setCode(prev => prev.trimEnd().length > 0 ? `${prev.replace(/\s*$/, '')}\n${snippet}` : snippet);
+    }
+
     const renderExamples = () => {
         const applyCodeTemplate = (name: string) => {
             setCode(ui.functionTemplates[name])
@@ -151,13 +158,16 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                             {renderDoc()}
                         </div>
                     </div>
-                    <div className='editor-panel-code' style={{minHeight: "50vh"}}>
-                        function {ui.functionName}({argumentsCommaSeparated(getArguments())}) {"{"}
-                        {renderEditor()}
-                        {"}"}
-                        <br />
-                        <br />
-                        <span className="load-examples-code">{"// Load examples: "}{renderExamples()}</span>
+                    <div className='editor-right-code'>
+                        <div className='editor-panel-code' style={{minHeight: "40vh"}}>
+                            function {ui.functionName}({argumentsCommaSeparated(getArguments())}) {"{"}
+                            {renderEditor()}
+                            {"}"}
+                            <br />
+                            <br />
+                            <span className="load-examples-code">{"// Load examples: "}{renderExamples()}</span>
+                        </div>
+                        {game && <SmartCodeGenerators game={game} onInsert={insertSnippet} />}
                     </div>
                 </div>}
 
