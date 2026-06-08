@@ -71,7 +71,7 @@ const EventEditorDrawer: React.FC<EventEditorDrawerProps> = ({ event, handlers, 
 
     const renderCodeEditor = (menu: CodeEditMenu) => {
         const code = ev[menu]
-        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation}></PopupCodeEditor>
     }
 
     const onSetDialogWindow = (d: string | null, w: string | null) => {

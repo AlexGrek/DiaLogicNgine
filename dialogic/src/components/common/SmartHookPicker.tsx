@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SelectPicker } from 'rsuite';
+import { InputPicker, SelectPicker } from 'rsuite';
 import { GameDescription } from '../../game/GameDescription';
 import {
     makeFactDiscoveredHook,
@@ -24,6 +24,7 @@ type PickerKind = 'fact' | 'item' | 'situation' | 'quest';
 interface SmartHookPickerProps {
     game: GameDescription;
     onSelect: (hookString: string) => void;
+    onAddSituation?: (name: string) => void;
 }
 
 // ── Facts ────────────────────────────────────────────────────────────────────
@@ -85,11 +86,8 @@ const ItemHookPanel: React.FC<SmartHookPickerProps> = ({ game, onSelect }) => {
 };
 
 // ── Situations ───────────────────────────────────────────────────────────────
-const SituationHookPanel: React.FC<SmartHookPickerProps> = ({ game, onSelect }) => {
+const SituationHookPanel: React.FC<SmartHookPickerProps> = ({ game, onSelect, onAddSituation }) => {
     const [name, setName] = useState<string | null>(null);
-
-    if (game.situations.length === 0)
-        return <p className='smart-gen-hint'>No situations defined yet.</p>;
 
     const data = game.situations.map(s => ({ label: s, value: s }));
     const startedHook = name ? makeSituationStartedHook(name) : null;
@@ -97,7 +95,16 @@ const SituationHookPanel: React.FC<SmartHookPickerProps> = ({ game, onSelect }) 
     return (
         <div className='smart-gen-body'>
             <div className='smart-gen-row'>
-                <SelectPicker size='sm' placeholder='Situation' data={data} value={name} onChange={setName} style={{ width: 220 }} />
+                <InputPicker
+                    size='sm'
+                    placeholder='Situation'
+                    data={data}
+                    value={name}
+                    onChange={setName}
+                    creatable={!!onAddSituation}
+                    onCreate={(value) => onAddSituation?.(value)}
+                    style={{ width: 220 }}
+                />
             </div>
             {name && <code className='smart-gen-path'>{startedHook}</code>}
             <div className='smart-gen-actions'>
@@ -189,7 +196,7 @@ const QuestHookPanel: React.FC<SmartHookPickerProps> = ({ game, onSelect }) => {
 };
 
 // ── Container ────────────────────────────────────────────────────────────────
-const SmartHookPicker: React.FC<SmartHookPickerProps> = ({ game, onSelect }) => {
+const SmartHookPicker: React.FC<SmartHookPickerProps> = ({ game, onSelect, onAddSituation }) => {
     const [active, setActive] = useState<PickerKind | null>(null);
 
     const toggle = (k: PickerKind) => setActive(prev => (prev === k ? null : k));
@@ -205,7 +212,7 @@ const SmartHookPicker: React.FC<SmartHookPickerProps> = ({ game, onSelect }) => 
             </div>
             {active === 'fact'      && <FactHookPanel      game={game} onSelect={onSelect} />}
             {active === 'item'      && <ItemHookPanel      game={game} onSelect={onSelect} />}
-            {active === 'situation' && <SituationHookPanel game={game} onSelect={onSelect} />}
+            {active === 'situation' && <SituationHookPanel game={game} onSelect={onSelect} onAddSituation={onAddSituation} />}
             {active === 'quest'     && <QuestHookPanel     game={game} onSelect={onSelect} />}
         </div>
     );

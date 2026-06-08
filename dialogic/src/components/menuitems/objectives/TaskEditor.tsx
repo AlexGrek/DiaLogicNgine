@@ -41,7 +41,7 @@ interface TaskEditorProps {
     handlers?: IUpds
 }
 
-const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }) => {
+const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest, handlers }) => {
     const [task, setTask] = useState<Task>(value || createTaskByUid("_", ["_", "_"]))
     const textFieldRef = useRef<HTMLInputElement>(null)
 
@@ -85,7 +85,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({ value, game, onSetTask, quest }
         if (menu === 'autoCheckScript') {
             ui = CODE_EDITOR_UI_AUTOCHECK
         }
-        return <PopupCodeEditor game={game} ui={ui} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor game={game} ui={ui} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen} onAddSituation={handlers?.createSituation}></PopupCodeEditor>
     }
 
     const editCode = (menu: CodeEditMenu, val: string) => {

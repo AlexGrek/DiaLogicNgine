@@ -135,6 +135,7 @@ const HooksEditorTab: React.FC<HooksEditorTabProps> = ({ game, onSetGame }) => {
                             <SmartHookPicker
                                 game={game}
                                 onSelect={hookString => setDraft(d => ({ ...d, hook: hookString }))}
+                                onAddSituation={s => onSetGame({ ...game, situations: [...game.situations, s] })}
                             />
 
                             <Divider>Script body</Divider>
@@ -154,6 +155,7 @@ const HooksEditorTab: React.FC<HooksEditorTabProps> = ({ game, onSetGame }) => {
                                         setDraft(d => ({ ...d, body: v }))
                                         setCodeEditorOpen(false)
                                     }}
+                                    onAddSituation={s => onSetGame({ ...game, situations: [...game.situations, s] })}
                                 />
                             </div>
                         </div>

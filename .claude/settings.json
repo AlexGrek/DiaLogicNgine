@@ -35,7 +35,18 @@
       "Bash(xargs cat -n)",
       "Bash(npm show *)",
       "Bash(python3 -c \"import sys,json; vs=[v for v in json.load\\(sys.stdin\\) if v.startswith\\('5.'\\)]; print\\(vs[-10:]\\)\")",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\([k for k in d.get\\('exports',{}\\).keys\\(\\) if 'seg' in k.lower\\(\\)]\\)\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\([k for k in d.get\\('exports',{}\\).keys\\(\\) if 'seg' in k.lower\\(\\)]\\)\")",
+      "Bash(npm pack *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); exp=d.get\\('exports',{}\\); print\\([k for k in exp.keys\\(\\) if 'seg' in k.lower\\(\\)]\\)\")",
+      "Bash(cd /tmp/rsuite-check && npm install rsuite@6.1.3 --silent 2>/dev/null && ls node_modules/rsuite/cjs/ | grep -i seg || echo \"not found in 6.1.3\")",
+      "Read(//private/tmp/rsuite-check/**)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('version'\\), d.get\\('description',''\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:v for k,v in {**d.get\\('dependencies',{}\\),**d.get\\('devDependencies',{}\\)}.items\\(\\) if 'rsuite' in k or 'react' in k}, indent=2\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); pkgs=d.get\\('packages',{}\\); print\\(pkgs.get\\('node_modules/rsuite',{}\\).get\\('version','not found'\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('dependencies',{}\\), indent=2\\)\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(cat vite.config.ts)",
+      "Bash(cat vite.config.js)"
     ],
     "additionalDirectories": [
       "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"

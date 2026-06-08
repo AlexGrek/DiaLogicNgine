@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, ButtonGroup, InputNumber, Slider, Toggle } from 'rsuite';
+import { InputNumber, SegmentedControl, Slider, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
 import PillLikeTabs, { PillTab } from '../../common/PillLikeTabs';
 import {
@@ -69,11 +69,11 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
     );
 
     const fontSizeButtons = (value: FontSizeId, onChange: (v: FontSizeId) => void) => (
-        <ButtonGroup>
-            {FONT_SIZE_LABELS.map(({ value: v, label }) => (
-                <Button key={v} active={value === v} onClick={() => onChange(v)}>{label}</Button>
-            ))}
-        </ButtonGroup>
+        <SegmentedControl
+            data={FONT_SIZE_LABELS}
+            value={value}
+            onChange={(v) => onChange(v as FontSizeId)}
+        />
     );
 
     const typographyTab = (
@@ -120,32 +120,20 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
             <div>
                 <p className="editor-label">Dialog text placement</p>
                 <p className="visuals-property-hint">Where the dialog text panel appears in the player.</p>
-                <ButtonGroup>
-                    {TEXT_ALIGNMENTS.map(({ value, label }) => (
-                        <Button
-                            key={value}
-                            active={visuals.dialogTextAlignment === value}
-                            onClick={() => updateVisuals({ dialogTextAlignment: value })}
-                        >
-                            {label}
-                        </Button>
-                    ))}
-                </ButtonGroup>
+                <SegmentedControl
+                    data={TEXT_ALIGNMENTS}
+                    value={visuals.dialogTextAlignment}
+                    onChange={(v) => updateVisuals({ dialogTextAlignment: v as DialogTextAlignment })}
+                />
             </div>
             <div>
                 <p className="editor-label">Response alignment</p>
                 <p className="visuals-property-hint">How choice buttons are laid out in the player.</p>
-                <ButtonGroup>
-                    {RESPONSE_ALIGNMENTS.map(({ value, label }) => (
-                        <Button
-                            key={value}
-                            active={visuals.responseAlignment === value}
-                            onClick={() => updateVisuals({ responseAlignment: value })}
-                        >
-                            {label}
-                        </Button>
-                    ))}
-                </ButtonGroup>
+                <SegmentedControl
+                    data={RESPONSE_ALIGNMENTS}
+                    value={visuals.responseAlignment}
+                    onChange={(v) => updateVisuals({ responseAlignment: v as ResponseAlignment })}
+                />
             </div>
             <div>
                 <p className="editor-label">Text background opacity</p>

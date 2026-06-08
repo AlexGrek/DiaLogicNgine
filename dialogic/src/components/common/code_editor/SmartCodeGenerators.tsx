@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, ButtonGroup, InputNumber, SelectPicker } from 'rsuite';
+import { Button, ButtonGroup, InputNumber, InputPicker, SelectPicker } from 'rsuite';
 import { GameDescription } from '../../../game/GameDescription';
 import ItemsPicker from '../../menuitems/items/ItemsPicker';
 import './SmartCodeGenerators.css';
@@ -7,6 +7,7 @@ import './SmartCodeGenerators.css';
 interface SmartCodeGeneratorsProps {
     game: GameDescription;
     onInsert: (snippet: string) => void;
+    onAddSituation?: (name: string) => void;
 }
 
 type GeneratorKind = 'quest' | 'fact' | 'item' | 'situation';
@@ -170,19 +171,24 @@ const ItemCodeBuilder: React.FC<SmartCodeGeneratorsProps> = ({ game, onInsert })
 // ----------------------------------------------------------------------------
 // Situation lifecycle builder
 // ----------------------------------------------------------------------------
-const SituationCodeBuilder: React.FC<SmartCodeGeneratorsProps> = ({ game, onInsert }) => {
+const SituationCodeBuilder: React.FC<SmartCodeGeneratorsProps> = ({ game, onInsert, onAddSituation }) => {
     const [sitName, setSitName] = useState<string | null>(null);
-
-    if (game.situations.length === 0) {
-        return <p className='smart-gen-hint'>No situations defined yet. Add them in the game configuration.</p>;
-    }
 
     const sitData = game.situations.map(s => ({ label: s, value: s }));
 
     return (
         <div className='smart-gen-body'>
             <div className='smart-gen-row'>
-                <SelectPicker size='sm' placeholder='Situation' data={sitData} value={sitName} onChange={setSitName} style={{ width: 200 }} />
+                <InputPicker
+                    size='sm'
+                    placeholder='Situation'
+                    data={sitData}
+                    value={sitName}
+                    onChange={setSitName}
+                    creatable={!!onAddSituation}
+                    onCreate={(value) => onAddSituation?.(value)}
+                    style={{ width: 200 }}
+                />
             </div>
 
             {sitName && <code className='smart-gen-path'>situation === {JSON.stringify(sitName)}</code>}
@@ -220,7 +226,7 @@ const SituationCodeBuilder: React.FC<SmartCodeGeneratorsProps> = ({ game, onInse
 // ----------------------------------------------------------------------------
 // Container
 // ----------------------------------------------------------------------------
-const SmartCodeGenerators: React.FC<SmartCodeGeneratorsProps> = ({ game, onInsert }) => {
+const SmartCodeGenerators: React.FC<SmartCodeGeneratorsProps> = ({ game, onInsert, onAddSituation }) => {
     const [active, setActive] = useState<GeneratorKind | null>(null);
 
     const toggle = (k: GeneratorKind) => setActive(prev => (prev === k ? null : k));
@@ -237,7 +243,7 @@ const SmartCodeGenerators: React.FC<SmartCodeGeneratorsProps> = ({ game, onInser
             {active === 'quest' && <QuestCodeBuilder game={game} onInsert={onInsert} />}
             {active === 'fact' && <FactCodeBuilder game={game} onInsert={onInsert} />}
             {active === 'item' && <ItemCodeBuilder game={game} onInsert={onInsert} />}
-            {active === 'situation' && <SituationCodeBuilder game={game} onInsert={onInsert} />}
+            {active === 'situation' && <SituationCodeBuilder game={game} onInsert={onInsert} onAddSituation={onAddSituation} />}
         </div>
     );
 };

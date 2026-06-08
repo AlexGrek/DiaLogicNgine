@@ -60,7 +60,7 @@ const CharDialogEditorDrawer: React.FC<CharDialogEditorDrawerProps> = ({ value, 
             return
         }
         const code = char.dialog[menu]
-        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen}></PopupCodeEditor>
+        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation}></PopupCodeEditor>
     }
 
     const editCode = (menu: CodeEditMenu, val: string) => {

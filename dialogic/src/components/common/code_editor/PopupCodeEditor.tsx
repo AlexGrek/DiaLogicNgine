@@ -61,9 +61,10 @@ interface PopupCodeEditorProps {
     open: boolean;
     onSaveClose: (c: string) => void;
     game?: GameDescription;
+    onAddSituation?: (name: string) => void;
 }
 
-const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose, game }) => {
+const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose, game, onAddSituation }) => {
     const [codeVal, setCode] = useState<string>(code);
     const [docOpenFor, setDocOpenFor] = useState<string | null>(null)
     useEffect(() => {
@@ -181,7 +182,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                             <br />
                             <span className="load-examples-code">{"// Load examples: "}{renderExamples()}</span>
                         </div>
-                        {game && <SmartCodeGenerators game={game} onInsert={insertSnippet} />}
+                        {game && <SmartCodeGenerators game={game} onInsert={insertSnippet} onAddSituation={onAddSituation} />}
                     </div>
                 </div>}
 
