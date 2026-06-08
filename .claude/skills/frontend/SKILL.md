@@ -20,7 +20,26 @@ description: Work on the DiaLogicNgine React/TypeScript frontend (editor + playe
 npm run dev      # Vite dev server with HMR
 npm run build    # tsc + vite build
 npm run lint     # ESLint, zero-warnings tolerance
+npm run cypress:run   # integration tests (headless)
 ```
+
+## Mandatory: run integration tests after every change
+
+After completing any frontend task, run the Cypress suite before reporting done:
+
+```bash
+# Requires both services running (see CLAUDE.md for full startup sequence)
+cd dialogic && npm run cypress:run
+```
+
+All 33 tests must pass. Fix any regressions before closing the task. Never skip this step.
+
+Specs under `dialogic/cypress/e2e/`:
+- `home-page.cy.js` — home page and create-project form
+- `editor-routes.cy.js` — direct URL nav + sidebar clicks for all 12 routes
+- `main-path.cy.js` — create project → editor → sidebar → player → new game
+
+If you add a new route or sidebar nav item, add it to `cypress/support/app-routes.js` and cover it in `editor-routes.cy.js`.
 
 ## Entry points
 
