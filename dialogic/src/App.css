@@ -146,7 +146,7 @@ body, html {
   z-index: 1;
 }
 
-.window-widget-main:has(.rs-dropdown-open) {
+.window-widget-main:has([data-open="true"]) {
   z-index: 100;
 }
 

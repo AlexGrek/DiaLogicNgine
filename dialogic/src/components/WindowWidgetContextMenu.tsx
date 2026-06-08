@@ -151,7 +151,7 @@ export default class WindowWidgetContextMenu extends React.Component<IWindowWidg
         onClose={this.closeAll}
         initialPatch={this.buildDemoPatch()}
       />
-      <Dropdown noCaret title={<span><MoreIcon/></span>}>
+      <Dropdown noCaret placement="bottomEnd" title={<span><MoreIcon/></span>}>
         <Dropdown.Item onClick={(e) => { e.stopPropagation(); this.demoClick() }}>Demo from here</Dropdown.Item>
         <Dropdown.Separator />
         <Dropdown.Item onClick={(e) => { e.stopPropagation(); this.duplicateClick() }}>Duplicate</Dropdown.Item>
