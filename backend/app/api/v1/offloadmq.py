@@ -28,6 +28,10 @@ load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
 OFFLOADMQ_URL = os.getenv("OFFLOADMQ_URL", "").rstrip("/")
 OFFLOADMQ_API_KEY = os.getenv("OFFLOADMQ_API_KEY", "")
+# Comma-separated model name suffixes (without "imggen." prefix) that are
+# allowed for each workflow.  If empty, all online imggen.* models are returned.
+IMGGEN_TXT2IMG_MODELS = os.getenv("IMGGEN_TXT2IMG_MODELS", "")
+IMGGEN_IMG2IMG_MODELS = os.getenv("IMGGEN_IMG2IMG_MODELS", "")
 
 router = APIRouter(prefix="/imggen", tags=["imggen"])
 
@@ -50,8 +54,14 @@ def _check_config() -> None:
 # ---------------------------------------------------------------------------
 
 @router.get("/models")
-async def list_models() -> list[str]:
-    """Return available imggen.* capabilities from online agents."""
+async def list_models(workflow: str | None = None) -> list[str]:
+    """Return available imggen.* capabilities from online agents.
+
+    Optional ``workflow`` query param (``txt2img`` or ``img2img``) filters
+    results using the IMGGEN_TXT2IMG_MODELS / IMGGEN_IMG2IMG_MODELS env vars
+    (comma-separated model suffixes without the ``imggen.`` prefix).
+    If the relevant env var is empty all online imggen.* caps are returned.
+    """
     _check_config()
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.post(
@@ -61,7 +71,15 @@ async def list_models() -> list[str]:
     if r.status_code != 200:
         raise HTTPException(status_code=r.status_code, detail=r.text)
     caps: list[str] = r.json()
-    return [c for c in caps if c.startswith("imggen.")]
+    all_imggen = [c for c in caps if c.startswith("imggen.")]
+
+    if workflow == "txt2img" and IMGGEN_TXT2IMG_MODELS:
+        allowed = {m.strip() for m in IMGGEN_TXT2IMG_MODELS.split(",") if m.strip()}
+        return [c for c in all_imggen if c.removeprefix("imggen.") in allowed]
+    if workflow == "img2img" and IMGGEN_IMG2IMG_MODELS:
+        allowed = {m.strip() for m in IMGGEN_IMG2IMG_MODELS.split(",") if m.strip()}
+        return [c for c in all_imggen if c.removeprefix("imggen.") in allowed]
+    return all_imggen
 
 
 # ---------------------------------------------------------------------------

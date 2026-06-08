@@ -27,7 +27,8 @@ type GenStatus = 'idle' | 'submitting' | 'polling' | 'done' | 'error';
 
 interface GenState {
     status: GenStatus;
-    models: string[];
+    txt2imgModels: string[];
+    img2imgModels: string[];
     modelsLoaded: boolean;
     model: string;
     prompt: string;
@@ -58,9 +59,25 @@ interface GenState {
 const DEFAULT_THUMBNAIL_PROMPT =
     'game UI thumbnail, square crop, clear focal subject, vibrant colors, clean composition';
 
+const SIZE_PRESETS = [
+    { label: '512 × 512',   w: 512,  h: 512 },
+    { label: '768 × 512',   w: 768,  h: 512 },
+    { label: '512 × 768',   w: 512,  h: 768 },
+    { label: '768 × 768',   w: 768,  h: 768 },
+    { label: '1024 × 576',  w: 1024, h: 576 },
+    { label: '576 × 1024',  w: 576,  h: 1024 },
+    { label: '1024 × 768',  w: 1024, h: 768 },
+    { label: '768 × 1024',  w: 768,  h: 1024 },
+    { label: '1024 × 1024', w: 1024, h: 1024 },
+    { label: '1280 × 720',  w: 1280, h: 720 },
+    { label: '1152 × 896',  w: 1152, h: 896 },
+    { label: '1216 × 832',  w: 1216, h: 832 },
+];
+
 const DEFAULT_GEN: GenState = {
     status: 'idle',
-    models: [],
+    txt2imgModels: [],
+    img2imgModels: [],
     modelsLoaded: false,
     model: '',
     prompt: '',
@@ -192,15 +209,18 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     useEffect(() => {
         if (source !== 'generate' && source !== 'fromSource') return;
         if (gen.modelsLoaded) return;
-        fetch('/api/v1/imggen/models')
-            .then(r => r.json())
-            .then((models: string[]) => {
-                setGen(g => ({
-                    ...g,
-                    models,
-                    modelsLoaded: true,
-                    model: g.model || (models.length > 0 ? models[0] : ''),
-                }));
+        Promise.all([
+            fetch('/api/v1/imggen/models?workflow=txt2img').then(r => r.json() as Promise<string[]>),
+            fetch('/api/v1/imggen/models?workflow=img2img').then(r => r.json() as Promise<string[]>),
+        ])
+            .then(([txt2imgModels, img2imgModels]) => {
+                setGen(g => {
+                    const currentModels = g.workflow === 'txt2img' ? txt2imgModels : img2imgModels;
+                    const model = (g.model && currentModels.includes(g.model))
+                        ? g.model
+                        : (currentModels[0] ?? '');
+                    return { ...g, txt2imgModels, img2imgModels, modelsLoaded: true, model };
+                });
             })
             .catch(() => {
                 setGen(g => ({ ...g, modelsLoaded: true, error: 'Failed to load models', status: 'error' }));
@@ -637,7 +657,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                 <div className="imggen-field">
                                     <label>Model</label>
                                     <SelectPicker
-                                        data={gen.models.map(m => ({ label: m.replace('imggen.', ''), value: m }))}
+                                        data={gen.img2imgModels.map(m => ({ label: m.replace('imggen.', ''), value: m }))}
                                         value={gen.model}
                                         onChange={v => setGen(g => ({ ...g, model: v ?? '' }))}
                                         cleanable={false}
@@ -700,10 +720,35 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                     ) : (
                         <div className="imggen-panel">
                             <div className="imggen-form">
+                                <div className="imggen-mode-row">
+                                    <Button
+                                        appearance={gen.workflow === 'txt2img' ? 'primary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setGen(g => {
+                                            const models = g.txt2imgModels;
+                                            const model = models.includes(g.model) ? g.model : (models[0] ?? g.model);
+                                            return { ...g, workflow: 'txt2img', model };
+                                        })}
+                                    >
+                                        txt2img
+                                    </Button>
+                                    <Button
+                                        appearance={gen.workflow === 'img2img' ? 'primary' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => setGen(g => {
+                                            const models = g.img2imgModels;
+                                            const model = models.includes(g.model) ? g.model : (models[0] ?? g.model);
+                                            return { ...g, workflow: 'img2img', model };
+                                        })}
+                                    >
+                                        img2img
+                                    </Button>
+                                </div>
                                 <div className="imggen-field">
                                     <label>Model</label>
                                     <SelectPicker
-                                        data={gen.models.map(m => ({ label: m.replace('imggen.', ''), value: m }))}
+                                        data={(gen.workflow === 'txt2img' ? gen.txt2imgModels : gen.img2imgModels)
+                                            .map(m => ({ label: m.replace('imggen.', ''), value: m }))}
                                         value={gen.model}
                                         onChange={v => setGen(g => ({ ...g, model: v ?? '' }))}
                                         cleanable={false}
@@ -721,22 +766,6 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                         onChange={v => setGen(g => ({ ...g, prompt: v }))}
                                         placeholder="Describe the image…"
                                     />
-                                </div>
-                                <div className="imggen-mode-row">
-                                    <Button
-                                        appearance={gen.workflow === 'txt2img' ? 'primary' : 'ghost'}
-                                        size="sm"
-                                        onClick={() => setGen(g => ({ ...g, workflow: 'txt2img' }))}
-                                    >
-                                        txt2img
-                                    </Button>
-                                    <Button
-                                        appearance={gen.workflow === 'img2img' ? 'primary' : 'ghost'}
-                                        size="sm"
-                                        onClick={() => setGen(g => ({ ...g, workflow: 'img2img' }))}
-                                    >
-                                        img2img
-                                    </Button>
                                 </div>
                                 {gen.workflow === 'img2img' && (
                                     <div className="imggen-field imggen-input-section">
@@ -825,26 +854,41 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                         />
                                     )}
                                 </div>
-                                <div className="imggen-size-row">
-                                    <div className="imggen-field">
-                                        <label>Width</label>
-                                        <InputNumber
-                                            value={gen.width}
-                                            min={256}
-                                            max={2048}
-                                            step={64}
-                                            onChange={v => setGen(g => ({ ...g, width: Number(v) }))}
-                                        />
+                                <div className="imggen-field">
+                                    <label>Size</label>
+                                    <div className="imggen-size-presets">
+                                        {SIZE_PRESETS.map(p => (
+                                            <button
+                                                key={p.label}
+                                                type="button"
+                                                className={`imggen-size-preset${gen.width === p.w && gen.height === p.h ? ' active' : ''}`}
+                                                onClick={() => setGen(g => ({ ...g, width: p.w, height: p.h }))}
+                                            >
+                                                {p.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                    <div className="imggen-field">
-                                        <label>Height</label>
-                                        <InputNumber
-                                            value={gen.height}
-                                            min={256}
-                                            max={2048}
-                                            step={64}
-                                            onChange={v => setGen(g => ({ ...g, height: Number(v) }))}
-                                        />
+                                    <div className="imggen-size-row">
+                                        <div className="imggen-field">
+                                            <label>Width</label>
+                                            <InputNumber
+                                                value={gen.width}
+                                                min={256}
+                                                max={2048}
+                                                step={64}
+                                                onChange={v => setGen(g => ({ ...g, width: Number(v) }))}
+                                            />
+                                        </div>
+                                        <div className="imggen-field">
+                                            <label>Height</label>
+                                            <InputNumber
+                                                value={gen.height}
+                                                min={256}
+                                                max={2048}
+                                                step={64}
+                                                onChange={v => setGen(g => ({ ...g, height: Number(v) }))}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 <details className="imggen-advanced">
