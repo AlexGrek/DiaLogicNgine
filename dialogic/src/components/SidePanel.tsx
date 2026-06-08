@@ -28,13 +28,15 @@ interface NavItemProps {
   label: string;
   active?: boolean;
   onClick: () => void;
+  testId?: string;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, active, onClick }) => (
+const NavItem: React.FC<NavItemProps> = ({ icon, label, active, onClick, testId }) => (
   <button
     className={`sp-item${active ? ' sp-item--active' : ''}`}
     onClick={onClick}
     title={label}
+    data-testid={testId}
   >
     <span className="sp-item-icon">{icon}</span>
     <span className="sp-item-label">{label}</span>
@@ -98,18 +100,18 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
 
         {/* ── file section ── */}
         <div className="sp-section">
-          <NavItem icon={<HomeIcon />} label="Home" active={isActive('home')} onClick={() => setConfirmHome(true)} />
-          <NavItem icon={<AttachmentIcon />} label="Save / Load" active={isActive('saveload')} onClick={() => navigate('/saveload')} />
+          <NavItem icon={<HomeIcon />} label="Home" active={isActive('home')} onClick={() => setConfirmHome(true)} testId="nav-home" />
+          <NavItem icon={<AttachmentIcon />} label="Save / Load" active={isActive('saveload')} onClick={() => navigate('/saveload')} testId="nav-saveload" />
         </div>
 
         <div className="sp-divider" />
 
         {/* ── game section ── */}
         <div className="sp-section">
-          <NavItem icon={<SettingHorizontalIcon />} label="Game Properties" active={isActive('config')} onClick={() => navigate('/config')} />
-          <NavItem icon={<Image size={14} />} label="Visuals" active={isActive('visuals')} onClick={() => navigate('/visuals')} />
-          <NavItem icon={<PlayOutlineIcon />} label="Play" active={isActive('player')} onClick={() => navigate('/player')} />
-          <NavItem icon={<PlayOutlineIcon />} label="Play (Phaser)" active={isActive('playerv2')} onClick={() => navigate('/playerv2')} />
+          <NavItem icon={<SettingHorizontalIcon />} label="Game Properties" active={isActive('config')} onClick={() => navigate('/config')} testId="nav-config" />
+          <NavItem icon={<Image size={14} />} label="Visuals" active={isActive('visuals')} onClick={() => navigate('/visuals')} testId="nav-visuals" />
+          <NavItem icon={<PlayOutlineIcon />} label="Play" active={isActive('player')} onClick={() => navigate('/player')} testId="nav-play" />
+          <NavItem icon={<PlayOutlineIcon />} label="Play (Phaser)" active={isActive('playerv2')} onClick={() => navigate('/playerv2')} testId="nav-play-v2" />
         </div>
 
         <div className="sp-divider" />
@@ -156,17 +158,18 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
             </div>
           )}
 
-          <NavItem icon={<ToolsIcon />} label="Scripts" active={isActive('scripts')} onClick={() => navigate('/scripts')} />
-          <NavItem icon={<IdMappingIcon />} label="Characters" active={isActive('chars')} onClick={() => navigate('/chars')} />
-          <NavItem icon={<ExploreIcon />} label="Locations" active={isActive('locs')} onClick={() => navigate('/locs')} />
-          <NavItem icon={<FunnelTimeIcon />} label="Facts & Objectives" active={isActive('facts')} onClick={() => navigate('/facts')} />
-          <NavItem icon={<DeviceOtherIcon />} label="Items" active={isActive('items')} onClick={() => navigate('/items')} />
-          <NavItem icon={<TreemapIcon />} label="UI Elements" active={isActive('ui')} onClick={() => navigate('/ui')} />
+          <NavItem icon={<ToolsIcon />} label="Scripts" active={isActive('scripts')} onClick={() => navigate('/scripts')} testId="nav-scripts" />
+          <NavItem icon={<IdMappingIcon />} label="Characters" active={isActive('chars')} onClick={() => navigate('/chars')} testId="nav-chars" />
+          <NavItem icon={<ExploreIcon />} label="Locations" active={isActive('locs')} onClick={() => navigate('/locs')} testId="nav-locs" />
+          <NavItem icon={<FunnelTimeIcon />} label="Facts & Objectives" active={isActive('facts')} onClick={() => navigate('/facts')} testId="nav-facts" />
+          <NavItem icon={<DeviceOtherIcon />} label="Items" active={isActive('items')} onClick={() => navigate('/items')} testId="nav-items" />
+          <NavItem icon={<TreemapIcon />} label="UI Elements" active={isActive('ui')} onClick={() => navigate('/ui')} testId="nav-ui" />
           <NavItem
             icon={<SquareDashedMousePointer size={14} />}
             label="Point & Click"
             active={isActive('pac')}
             onClick={() => navigate('/pac')}
+            testId="nav-pac"
           />
         </div>
 

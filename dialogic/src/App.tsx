@@ -323,7 +323,7 @@ function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProp
   const lastNotification = notifications[notifications.length - 1];
 
   return (
-    <Container className="root-container">
+    <Container className="root-container" data-testid="editor-layout">
       <Header className="app-header-container">
         <div className="app-header-left">
           <p className="app-header-text">🇺🇦 DiaLogic Ngine</p>
