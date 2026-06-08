@@ -18,8 +18,8 @@ interface PlayerProps {
 
 const Player: React.FC<PlayerProps> = ({ game }) => {
     const [, setGame] = useState<GameDescription>(game);
-    const [gameExecutor, setGameExecutor] = useState<GameExecManager>(new GameExecManager(game));
-    const [gameState, setGameState] = useState<State>(createInitialState(game))
+    const [gameExecutor, setGameExecutor] = useState<GameExecManager>(() => new GameExecManager(game));
+    const [gameState, setGameState] = useState<State>(() => gameExecutor.executeEntry(createInitialState(game)))
     const [stateEditorOpen, setStateEditorOpen] = useState<boolean>(false)
     const [started, setStarted] = useState<boolean>(false)
 
@@ -46,7 +46,7 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
     }
 
     const handleRestart = () => {
-        setGameState(createInitialState(game));
+        setGameState(gameExecutor.executeEntry(createInitialState(game)));
         setStarted(false);
     }
 

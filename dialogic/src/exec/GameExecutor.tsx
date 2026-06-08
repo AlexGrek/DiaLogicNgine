@@ -269,7 +269,7 @@ export class GameExecManager {
         return this.executeEntry(lodash.cloneDeep(state))
     }
 
-    private executeEntry(state: State) {
+    executeEntry(state: State) {
         let newState = state
         const location = this.getCurrentLocation(state)
         if (location != null) {
