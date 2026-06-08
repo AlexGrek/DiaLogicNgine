@@ -423,7 +423,7 @@ div.text-field-editor {
 
 /* ─── Modals ─────────────────────────────────────────────────────────────── */
 
-.rs-modal-content {
+.rs-modal .rs-modal-dialog {
   background: var(--bg-surface) !important;
   border-radius: 18px !important;
   border: 2px solid var(--modal-border) !important;
@@ -451,7 +451,7 @@ div.text-field-editor {
 
 /* ─── Drawers ────────────────────────────────────────────────────────────── */
 
-.rs-drawer-content {
+.rs-drawer {
   background: var(--bg-surface) !important;
   border-left: 1px solid rgba(255,255,255,0.10) !important;
   box-shadow:

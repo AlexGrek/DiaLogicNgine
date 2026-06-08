@@ -15,9 +15,31 @@ npm run dev       # Start Vite dev server with HMR
 npm run build     # TypeScript compile + Vite production build
 npm run lint      # ESLint (zero warnings tolerance)
 npm run preview   # Preview production build
+npm run cypress:run   # Run Cypress integration tests (headless)
+npm run cypress:open  # Open Cypress interactive runner
 ```
 
-There is no test suite configured.
+## Integration tests
+
+Cypress e2e tests live in `dialogic/cypress/e2e/`. **Run them whenever a change touches routing, navigation, the home page, the editor layout, the sidebar, or the player.** Both services must be running first:
+
+```bash
+# Terminal 1
+cd dialogic && npm run dev        # frontend on :5173
+
+# Terminal 2
+cd backend && uv run python main.py   # backend on :4267
+
+# Terminal 3
+cd dialogic && npm run cypress:run
+```
+
+The scripts handle the `ELECTRON_RUN_AS_NODE` NVM quirk automatically — never run `npx cypress run` directly.
+
+Specs:
+- `home-page.cy.js` — home page load, create-form validation
+- `editor-routes.cy.js` — direct URL nav + sidebar nav for all 12 routes
+- `main-path.cy.js` — create project → editor → sidebar → player → new game
 
 ## Architecture
 

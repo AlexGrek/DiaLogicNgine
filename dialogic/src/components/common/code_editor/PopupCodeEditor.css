@@ -18,7 +18,7 @@
 }
 
 /* The dialog card itself --------------------------------------------------- */
-.apple-code-editor .rs-modal-content {
+.apple-code-editor .rs-modal .rs-modal-dialog {
     background: var(--ace-bg);
     border: 1px solid var(--ace-hairline);
     border-radius: 18px;

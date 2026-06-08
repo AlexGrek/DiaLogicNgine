@@ -55,3 +55,7 @@ Override with `cypress.env.json`:
 - Node.js + npm (`dialogic/node_modules`)
 - Frontend dev server running on port 5173 (`npm run dev`)
 - Backend running on port 4267 (`uv run python main.py`)
+
+## Troubleshooting
+
+**"Cannot find module …index.js"** — NVM sets `ELECTRON_RUN_AS_NODE=1` in the shell, which triggers a wrong path in Cypress's spawn logic. The `cypress:run` / `cypress:open` npm scripts already unset it. If running `npx cypress` directly, prefix with `unset ELECTRON_RUN_AS_NODE &&`.
