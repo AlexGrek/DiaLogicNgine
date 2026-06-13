@@ -12,20 +12,53 @@
     width: 100%;
 }
 
-.savegame-container {
-    padding: 6pt;
+.savegame-card {
     display: flex;
-    overflow-y: auto;
-    flex-direction: column;
-    width: 30em;
+    flex-direction: row;
     align-items: center;
-    margin: 4pt;
-    background-color: rgba(0, 0, 0, .4);
-    transition: background-color .4s ease-out;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(2px);
+    transition: background-color .2s ease, border-color .2s ease, transform .12s ease;
 }
 
-.savegame-container:hover {
-    background-color: rgba(60, 60, 60, .6);
+.savegame-card:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.savegame-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.savegame-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.savegame-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.savegame-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .game-menu-tab-menu {
@@ -67,66 +100,201 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* width: 100%; */
     height: 100%;
-    align-items: center;
-    padding: 8pt;
+    align-items: stretch;
+    gap: 14px;
+    padding: 32px;
     background-color: rgba(0, 0, 0, .3);
     width: 30em;
+    box-sizing: border-box;
 }
 
-.savegame-new-container input {
-    background-color: black;
+.savegame-new-title {
+    font-size: large;
+    opacity: .9;
+    margin: 0;
+}
+
+.savegame-new-input {
+    background: rgba(255, 255, 255, 0.06);
     color: white;
-    border: none;
-    padding: 2pt;
-    margin: 4pt;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: medium;
+    outline: none;
+    transition: border-color .2s ease, background-color .2s ease;
 }
 
-.savegame-new-container button {
-    background-color: transparent;
-    margin: 4pt;
-    padding: 3pt;
-    font-size: larger;
+.savegame-new-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
-.savegame-new-container button:hover {
-    background-color: rgba(0, 0, 0, .7);
+.savegame-new-input:focus {
+    border-color: rgba(120, 180, 255, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.savegame-name {
+    font-size: medium;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .savegame-date {
-    opacity: .7;
+    opacity: .65;
     font-size: smaller;
     font-family: monospace;
 }
 
-.savegame-attributes {
+.savegame-step {
     font-size: small;
     font-family: monospace;
-    background-color: rgba(0, 60, 100, 0.55);
+    opacity: .7;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
 }
 
-.savegame-container:hover {
-
+.savegame-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    font-family: monospace;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
 }
 
-.savegame-container button {
-    background-color: rgba(0, 0, 0, .7);
-    margin: 4pt;
-    padding: 3pt;
-    font-size: larger;
-    min-width: 9em;
+.savegame-badge.auto {
+    background: rgba(0, 120, 200, 0.45);
 }
 
-.savegame-container button:hover {
-    background-color: rgba(200, 200, 200, .3);
+.savegame-badge.quick {
+    background: rgba(180, 120, 0, 0.5);
+}
+
+.savegame-btn {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: medium;
+    cursor: pointer;
+    color: white;
+    background: rgba(255, 255, 255, 0.08);
+    transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
+}
+
+.savegame-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.savegame-btn:active {
+    transform: scale(.97);
+}
+
+.savegame-btn.primary {
+    background: rgba(70, 140, 230, 0.55);
+    border-color: rgba(120, 180, 255, 0.5);
+}
+
+.savegame-btn.primary:hover {
+    background: rgba(80, 155, 245, 0.75);
+}
+
+.savegame-btn.primary.wide {
+    width: 100%;
+    padding: 10px;
+    font-size: large;
+}
+
+.savegame-btn.danger {
+    background: rgba(200, 50, 50, 0.6);
+    border-color: rgba(255, 100, 100, 0.5);
+}
+
+.savegame-btn.danger:hover {
+    background: rgba(225, 60, 60, 0.8);
+}
+
+.savegame-btn.ghost {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.savegame-btn.ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.savegame-btn.icon {
+    padding: 7px 10px;
+    background: transparent;
+    opacity: .55;
+    line-height: 1;
+}
+
+.savegame-btn.icon:hover {
+    background: rgba(200, 50, 50, 0.5);
+    opacity: 1;
 }
 
 .savegame-list-container {
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
-    overflow: auto;
+    gap: 20px;
+    overflow-y: auto;
+    width: 34em;
+    max-width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+}
+
+.savegame-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.savegame-group-title {
+    margin: 0;
+    font-size: small;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    opacity: .55;
+    padding-left: 2px;
+}
+
+.savegame-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.savegame-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 8px;
+    text-align: center;
+    opacity: .7;
+}
+
+.savegame-empty-title {
+    font-size: large;
+    margin: 0;
+}
+
+.savegame-empty-sub {
+    font-size: small;
+    opacity: .7;
+    margin: 0;
 }
 
 .game-menu-tab-about {

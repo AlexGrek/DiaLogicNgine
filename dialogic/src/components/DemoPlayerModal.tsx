@@ -99,6 +99,7 @@ const DemoPlayerModal: React.FC<DemoPlayerModalProps> = ({ game, open, onClose, 
                         />
                         <StateDisplayDrawer
                             state={gameState}
+                            game={game}
                             open={stateEditorOpen}
                             onClose={() => setStateEditorOpen(false)}
                             onStateChange={setGameState}

@@ -6,6 +6,7 @@ import PropsEditMenu from './PropsEditMenu';
 import Prop from '../../../game/Prop';
 import EventsEditorTab from '../eventedit/EventsEditorTab';
 import HooksEditorTab from './HooksEditorTab';
+import FunctionsEditorTab from './FunctionsEditorTab';
 
 interface ScriptEditMenuProps {
     game: GameDescription;
@@ -29,7 +30,7 @@ const ScriptEditMenu: React.FC<ScriptEditMenuProps> = ({ game, onSetGame, handle
     const createScriptsEditorTab = () => {
         return {
             header: "Scripting",
-            content: <p>scripts tab!</p>
+            content: <FunctionsEditorTab game={game} onSetGame={onSetGame} />
         }
     }
 

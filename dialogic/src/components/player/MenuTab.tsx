@@ -4,8 +4,28 @@ import { State, createInitialState } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { FONT_SIZE_LABELS, FontSizeId } from '../../game/GameDescription';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
+import SaveGame from '../../savegame/Saves';
 import { MAX_LETTER_SPEED_MS, MIN_LETTER_SPEED_MS, PlayerSettings } from './PlayerSettings';
 import './MenuTab.css';
+
+function formatRelativeTime(date: Date): string {
+    const d = new Date(date)
+    const diffMs = Date.now() - d.getTime()
+    const sec = Math.round(diffMs / 1000)
+    if (sec < 45) return "just now"
+    const min = Math.round(sec / 60)
+    if (min < 60) return `${min} min ago`
+    const hrs = Math.round(min / 60)
+    if (hrs < 24) return `${hrs} hr${hrs === 1 ? '' : 's'} ago`
+    const days = Math.round(hrs / 24)
+    if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`
+    return d.toLocaleDateString()
+}
+
+function formatFullDate(date: Date): string {
+    const d = new Date(date)
+    return d.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
 
 interface MenuTabProps {
     gameExecutor: GameExecManager
@@ -23,13 +43,16 @@ type OpenMenu = "load" | "save" | "about"| "newgame" | "settings" | null
 const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, onStateChange, manager, onCloseMenu, playerSettings, onPlayerSettingsChange }) => {
     const [openMenu, setOpenMenu] = useState<OpenMenu>(null)
     const [newSaveName, setNewSaveName] = useState<string>("")
+    const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+    // Bump to force a re-read of saves after a delete (storage is external to React state).
+    const [savesVersion, setSavesVersion] = useState<number>(0)
 
     useEffect(() => {
         setOpenMenu(null)
     }, [state])
 
     const handleSave = () => {
-        manager.newSave(state, newSaveName)
+        manager.newSave(state, newSaveName.trim())
         setNewSaveName("")
         onCloseMenu()
     }
@@ -39,29 +62,99 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
         onCloseMenu()
     }
 
+    const handleDelete = (savegame: SaveGame) => {
+        manager.deleteSave(savegame)
+        setPendingDelete(null)
+        setSavesVersion((v) => v + 1)
+    }
+
     const handleRestart = () => {
         const initialState = createInitialState(gameExecutor.game)
         handleLoad(initialState)
     }
 
-    const renderLoadMenuDetails = () => {
-        return <div className='savegame-list-container'>
-            {manager.listAllSaves().map((savegame) => {
-                return <div className='savegame-container'>
-                    <p className='savegame-name'>{savegame.name}</p>
-                    <p className='savegame-date'>{`${savegame.created}`}</p>
-                    <p className='savegame-attributes'>{savegame.isAutosave ? "auto" : ""}{savegame.isQuicksave ? "quick" : ""}</p>
-                    <button onClick={() => handleLoad(savegame.state)}>Load</button>
+    const saveKey = (savegame: SaveGame) => `${savegame.name}|${new Date(savegame.created).getTime()}`
+
+    const renderSaveCard = (savegame: SaveGame) => {
+        const key = saveKey(savegame)
+        const isPendingDelete = pendingDelete === key
+        const badge = savegame.isAutosave ? "AUTO" : savegame.isQuicksave ? "QUICK" : null
+        const badgeClass = savegame.isAutosave ? "auto" : savegame.isQuicksave ? "quick" : ""
+        const step = savegame.state?.stepCount
+        return (
+            <div className='savegame-card' key={key}>
+                <div className='savegame-card-main'>
+                    <div className='savegame-card-header'>
+                        <span className='savegame-name'>{savegame.name}</span>
+                        {badge && <span className={`savegame-badge ${badgeClass}`}>{badge}</span>}
+                    </div>
+                    <div className='savegame-card-meta'>
+                        <span className='savegame-date' title={formatFullDate(savegame.created)}>{formatRelativeTime(savegame.created)}</span>
+                        {typeof step === 'number' && <span className='savegame-step'>{localmanager.local("step")} {step}</span>}
+                    </div>
                 </div>
-            })}
+                <div className='savegame-card-actions'>
+                    {isPendingDelete ? (
+                        <>
+                            <button className='savegame-btn danger' onClick={() => handleDelete(savegame)}>{localmanager.local("Delete")}</button>
+                            <button className='savegame-btn ghost' onClick={() => setPendingDelete(null)}>{localmanager.local("Cancel")}</button>
+                        </>
+                    ) : (
+                        <>
+                            <button className='savegame-btn primary' onClick={() => handleLoad(savegame.state)}>{localmanager.local("Load")}</button>
+                            <button className='savegame-btn icon' title={localmanager.local("Delete")} onClick={() => setPendingDelete(key)}>&#x2715;</button>
+                        </>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    const renderSaveGroup = (title: string, saves: SaveGame[]) => {
+        if (saves.length === 0) return null
+        return (
+            <div className='savegame-group' key={title}>
+                <p className='savegame-group-title'>{title}</p>
+                <div className='savegame-group-list'>
+                    {saves.map(renderSaveCard)}
+                </div>
+            </div>
+        )
+    }
+
+    const renderLoadMenuDetails = () => {
+        // savesVersion forces a fresh read after deletes
+        void savesVersion
+        const grouped = manager.listGroupedSaves()
+        const total = grouped.manual.length + grouped.quick.length + grouped.auto.length
+        return <div className='savegame-list-container'>
+            {total === 0 ? (
+                <div className='savegame-empty'>
+                    <p className='savegame-empty-title'>{localmanager.local("No saved games yet")}</p>
+                    <p className='savegame-empty-sub'>{localmanager.local("Your saves will appear here")}</p>
+                </div>
+            ) : (
+                <>
+                    {renderSaveGroup(localmanager.local("Saves"), grouped.manual)}
+                    {renderSaveGroup(localmanager.local("Quicksaves"), grouped.quick)}
+                    {renderSaveGroup(localmanager.local("Autosaves"), grouped.auto)}
+                </>
+            )}
         </div>
     }
 
     const renderSaveMenuDetails = () => {
         return <div className='savegame-new-container'>
-            <p>{localmanager.local("Create new save")}</p>
-            <input value={newSaveName} onChange={(ev) => setNewSaveName(ev.target.value)}></input>
-            <button name='save' onClick={handleSave}>{localmanager.local("Save")}</button>
+            <p className='savegame-new-title'>{localmanager.local("Create new save")}</p>
+            <input
+                className='savegame-new-input'
+                value={newSaveName}
+                placeholder={localmanager.local("Save name (optional)")}
+                onChange={(ev) => setNewSaveName(ev.target.value)}
+                onKeyDown={(ev) => { if (ev.key === 'Enter') handleSave() }}
+                autoFocus
+            ></input>
+            <button className='savegame-btn primary wide' name='save' onClick={handleSave}>{localmanager.local("Save")}</button>
         </div>
     }
 

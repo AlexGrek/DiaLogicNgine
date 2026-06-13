@@ -4,6 +4,7 @@ import { GameDescription } from '../../../game/GameDescription';
 import Prop from '../../../game/Prop';
 import './propeditor.css'
 import LocationPicker from '../../linkedit/LocationPicker';
+import StringListEditor from '../../common/StringListEditor';
 
 interface PropsEditorDrawerProps {
     value: Prop;
@@ -16,12 +17,8 @@ interface PropsEditorDrawerProps {
 
 const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUpdateProp, onClose, onlyDefault, game }) => {
     const [prop, setProp] = useState<Prop>(value);
-    const [listOfVariantsAsString, setListOfVariantsAsString] = useState<string>("")
     useEffect(() => {
         setProp(value);
-        if (value.datatype === "variant") {
-            setListOfVariantsAsString(value.variants.join(","))
-        }
     }, [value]);
 
     const onCloseHandler = (save: boolean) => {
@@ -65,17 +62,14 @@ const PropsEditorDrawer: React.FC<PropsEditorDrawerProps> = ({ value, open, onUp
             </div>
         }
         if (prop.datatype === "variant") {
-            const updateList = (listAsCommaSepStr: string) => {
-                const decoded = listAsCommaSepStr.split(",")
-                setProp({...prop, variants: decoded})
-                setListOfVariantsAsString(listAsCommaSepStr)
+            const updateList = (variants: string[]) => {
+                setProp({...prop, variants})
             }
             return <div className='prop-editor-long'>
                 <p>Default value</p>
                 <AutoComplete data={prop.variants}  value={prop.defaultValue} onChange={v => setProp({...prop, defaultValue: v})}/>
                 <p>Variants</p>
-                <Input readOnly={onlyDefault} placeholder='comma-separated list of values' value={listOfVariantsAsString} onChange={updateList}></Input>
-                <p className='prop-editor-tip'>Comma-separated values. Example: <code>a,b,c</code></p>
+                <StringListEditor value={prop.variants} onChange={updateList} editTextOnly={onlyDefault} />
             </div>
         }
     }

@@ -8,6 +8,7 @@ import { GameExecManager } from "./GameExecutor";
 import { CarriedItem, State, createInGameNotification } from "./GameState";
 import { ObjectiveStatus } from "./QuestProcessor";
 import { getItemByIdOrNull } from "../game/Items";
+import { isValidFunctionName } from "../game/ScriptFunction";
 
 type StateProvider = () => State
 
@@ -406,6 +407,15 @@ export class RuntimeRt {
         }
         return this.state
     }
+
+    /**
+     * Current step counter. Increments once per selected choice / navigation,
+     * but NOT while paging through subtext of the same dialog window.
+     * Read-only from scripts.
+     */
+    public get step(): number {
+        return this.mustGetState().stepCount
+    }
 }
 
 export function createRtObject(game: GameDescription, context: GameExecManager, state?: State) {
@@ -430,12 +440,26 @@ export function stateIsValid(stateCandidate: any) {
     return expectedProps.every((prp) => keys.includes(prp))
 }
 
-function makeFunctionBody(s: string) {
-    return `(function (rt, state, props, ch, facts, objectives, situation, items, context) { ${s} })`
+/**
+ * Builds JS function declarations for all reusable functions defined in the
+ * Scripting tab. They are injected into every script's scope so scripts can
+ * call them by name; inside their bodies the usual context (rt, state, props…)
+ * is available via closure.
+ */
+function buildFunctionsPreamble(game: GameDescription): string {
+    const functions = game.functions ?? []
+    return functions
+        .filter(fn => isValidFunctionName(fn.name))
+        .map(fn => `function ${fn.name}(${fn.args ?? ''}) {\n${fn.body ?? ''}\n}`)
+        .join('\n')
+}
+
+function makeFunctionBody(s: string, preamble: string) {
+    return `(function (rt, state, props, ch, facts, objectives, situation, items, context) { ${preamble}\n${s} })`
 }
 
 function evaluate(game: GameDescription, s: string, execManager: GameExecManager, prevState: State, contextVars?: any): [any, State] {
-    const body = makeFunctionBody(s)
+    const body = makeFunctionBody(s, buildFunctionsPreamble(game))
     const stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
     rt.contextVars = contextVars;

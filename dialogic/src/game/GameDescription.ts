@@ -18,8 +18,9 @@ import {
     type FontId,
 } from "../lib/fonts";
 import { HookScript } from "./HookScript";
+import { ScriptFunction } from "./ScriptFunction";
 
-export const ENGINE_VERSION = "0.20"
+export const ENGINE_VERSION = "0.21"
 
 export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
@@ -160,6 +161,7 @@ export interface GameDescription {
     pacWidgets: PointAndClick[]
     visuals: VisualsConfiguration
     hooks: HookScript[]
+    functions: ScriptFunction[]
     dev: DevConfig
 }
 
@@ -555,6 +557,14 @@ export function createDefaultGame(): GameDescription {
         pacWidgets: [examplePac],
         visuals: createDefaultVisuals(),
         hooks: [],
+        functions: [
+            {
+                name: "addScore",
+                args: "amount",
+                description: "Adds the given amount to the 'score' prop and returns the new total.",
+                body: "rt.props.score += amount\nreturn rt.props.score",
+            },
+        ],
         dev: createDefaultDevConfig(),
     };
 

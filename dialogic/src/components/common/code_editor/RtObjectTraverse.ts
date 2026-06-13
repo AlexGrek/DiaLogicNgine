@@ -79,5 +79,14 @@ export function createRtDoc(game: GameDescription): { [key: string]: string } {
         initial[`rt.general.extras.${key}`] = `additional info — ${key}: ${val}`
     }
 
+    // Reusable functions defined in the Scripting tab — callable from any script
+    for (const fn of game.functions ?? []) {
+        if (fn.name) {
+            initial[`${fn.name}(${fn.args ?? ''})`] = fn.description
+                ? `reusable function — ${fn.description}`
+                : `reusable function ${fn.name}`
+        }
+    }
+
     return initial
 }

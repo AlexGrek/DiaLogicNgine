@@ -400,7 +400,8 @@ export class GameExecManager {
     }
 
     private withUpdatedHistory(state: State, clickData: HistoryRecord): State {
-        // also changes step value
+        // appends a history record; the step counter is bumped separately in
+        // withUpdatedStep (called from followLink) when a choice is followed
         const s = lodash.cloneDeep(state)
         if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
             s.shortHistory.shift() // remove latest entry
@@ -420,14 +421,15 @@ export class GameExecManager {
 
     advanceDialogPage(prevState: State, blockText: string): State {
         // advance to the next "---" text block of the current window without
-        // following any link; record the block we are leaving in short history
+        // following any link; record the block we are leaving in short history.
+        // stepCount is intentionally NOT incremented: paging through subtext of
+        // the same window is not a "choice", so scripts see a stable step value.
         const s = lodash.cloneDeep(prevState)
         const record: HistoryRecord = { actor: null, text: blockText, answer: '', step: s.stepCount }
         if (s.shortHistory.length > MAX_SHORT_HISTORY_RECORDS) {
             s.shortHistory.shift()
         }
         s.shortHistory.push(record)
-        s.stepCount = s.stepCount + 1
         s.dialogPage = (s.dialogPage ?? 0) + 1
         return s
     }
