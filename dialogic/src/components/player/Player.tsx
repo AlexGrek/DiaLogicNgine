@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, ButtonGroup } from 'rsuite';
 import { IUpds } from '../../App';
 import { trace } from '../../Trace';
@@ -8,7 +8,9 @@ import { GameDescription } from '../../game/GameDescription';
 import MainMenuView from './MainMenuView';
 import PlayerCore from './PlayerCore';
 import StateDisplayDrawer from './StateDisplayDrawer';
+import GoToPickerDrawer from './GoToPickerDrawer';
 import { playerVisualsCssVars, resolveVisuals } from './visualsClasses';
+import lodash from 'lodash';
 import "./player.css";
 
 interface PlayerProps {
@@ -21,6 +23,7 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
     const [gameExecutor, setGameExecutor] = useState<GameExecManager>(() => new GameExecManager(game));
     const [gameState, setGameState] = useState<State>(() => gameExecutor.executeEntry(createInitialState(game)))
     const [stateEditorOpen, setStateEditorOpen] = useState<boolean>(false)
+    const [goToOpen, setGoToOpen] = useState<boolean>(false)
     const [started, setStarted] = useState<boolean>(false)
 
     useEffect(() => {
@@ -50,6 +53,22 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
         setStarted(false);
     }
 
+    const handleGoTo = useCallback((target: Parameters<React.ComponentProps<typeof GoToPickerDrawer>['onGoTo']>[0]) => {
+        setGameState(prev => {
+            const next = lodash.cloneDeep(prev);
+            next.positionStack = [];
+            if (target.type === 'window') {
+                next.position = target.id;
+            } else {
+                next.position = target.id;
+                next.location = target.id.location;
+                next.charDialog = null;
+            }
+            return next;
+        });
+        setStarted(true);
+    }, []);
+
     const visuals = resolveVisuals(game.visuals);
     const visualsStyle = playerVisualsCssVars(visuals);
 
@@ -59,7 +78,7 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
                 <ButtonGroup className='player-controls'>
                     <Button name='restart' onClick={handleRestart}>Restart</Button>
                     <Button name='statedisplay' onClick={() => setStateEditorOpen(true)}>State</Button>
-                    <Button name='goto'>Go to</Button>
+                    <Button name='goto' onClick={() => setGoToOpen(true)}>Go to</Button>
                 </ButtonGroup>
             </div>
             <div className="player-main">
@@ -72,6 +91,7 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
                 )}
             </div>
             <StateDisplayDrawer state={gameState} game={game} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen} onStateChange={handleStateChange} />
+            <GoToPickerDrawer open={goToOpen} game={game} onClose={() => setGoToOpen(false)} onGoTo={handleGoTo} />
         </div>
     );
 };
