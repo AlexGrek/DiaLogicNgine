@@ -89,9 +89,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     aspectRatioBox: {
         position: 'relative',
-        width: '100%',
-        maxWidth: '100vw',
-        maxHeight: '100vh',
+        // Fit the whole scene inside the viewport while preserving the 16:9
+        // ratio. Using min() for both dimensions guarantees the box can never
+        // exceed the viewport on either axis, so the aspect ratio is never
+        // violated and the percentage-based zone coordinates stay aligned with
+        // the background.
+        width: 'min(100vw, calc(100vh * 16 / 9))',
+        height: 'min(100vh, calc(100vw * 9 / 16))',
         aspectRatio: '16 / 9',
     },
     content: {

@@ -50,7 +50,7 @@ const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view, transi
     }, [game, onStateUpd, view])
 
     return (
-        <div className={transitionOutClass("dialog-window-view")}>
+        <div className={transitionOutClass("pac-window-view")}>
             <PointAndClickScene backgroundImage={view.pac.background} zones={view.items} onZoneClick={handleZoneClick} />
         </div>
     );
