@@ -178,12 +178,17 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     const [otherProjects, setOtherProjects] = useState<string[]>([]);
     const [otherProject, setOtherProject] = useState<string | null>(null);
     const [otherImages, setOtherImages] = useState<string[]>([]);
-    const [gen, setGen] = useState<GenState>(DEFAULT_GEN);
+    const [gen, setGen] = useState<GenState>(() => ({ ...DEFAULT_GEN, ...loadPersistedParams() }));
     const [fullscreenSrc, setFullscreenSrc] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const rafRef = useRef<number | null>(null);
     const imggenInputFileRef = useRef<HTMLInputElement>(null);
+
+    // Persist tunable generation parameters (not the prompt) across sessions.
+    useEffect(() => {
+        savePersistedParams(gen);
+    }, [gen]);
 
     useEffect(() => {
         if (!fullscreenSrc) return;
