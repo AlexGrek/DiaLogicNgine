@@ -6,6 +6,7 @@ import { useOutletContext } from 'react-router-dom';
 import { AppOutletContext } from '../../App';
 import { resolveImageProject, projectImageApiBase } from '../common/projectImages';
 import { countImageReferences, removeImageReferences } from '../../game/imageRefs';
+import PillLikeTabs, { PillTab } from '../common/PillLikeTabs';
 import ConfirmationDialog from '../ConfirmationDialog';
 import type { PromptHistoryEntry } from '../ai/PromptHistory';
 
@@ -185,12 +186,8 @@ const ResourcesMenu: React.FC = () => {
     };
   };
 
-  return (
-    <div className="saveload-page">
-      <h2 className="center-header">Resources</h2>
-
-      <div className="saveload-content">
-        {/* ── Images ── */}
+  const imagesTab = (
+    <div className="saveload-content">
         <Panel bordered className="saveload-section">
           <Stack justifyContent="space-between" alignItems="center" style={{ marginBottom: 10 }}>
             <p className="home-section-label" style={{ margin: 0 }}>
@@ -266,8 +263,11 @@ const ResourcesMenu: React.FC = () => {
             })}
           </div>
         </Panel>
+    </div>
+  );
 
-        {/* ── AI prompts ── */}
+  const promptsTab = (
+    <div className="saveload-content">
         <Panel bordered className="saveload-section">
           <Stack justifyContent="space-between" alignItems="center" style={{ marginBottom: 10 }}>
             <p className="home-section-label" style={{ margin: 0 }}>
@@ -328,7 +328,18 @@ const ResourcesMenu: React.FC = () => {
             </div>
           ))}
         </Panel>
-      </div>
+    </div>
+  );
+
+  const tabs: PillTab[] = [
+    { header: 'Images', content: imagesTab },
+    { header: 'AI prompts', content: promptsTab },
+  ];
+
+  return (
+    <div className="saveload-page">
+      <h2 className="center-header">Resources</h2>
+      <PillLikeTabs tabs={tabs} />
 
       {confirmClearPrompts && (
         <ConfirmationDialog
