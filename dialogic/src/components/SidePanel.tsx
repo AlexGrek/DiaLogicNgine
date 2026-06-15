@@ -113,7 +113,6 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
           <NavItem icon={<SettingHorizontalIcon />} label="Game Properties" active={isActive('config')} onClick={() => navigate('/config')} testId="nav-config" />
           <NavItem icon={<Image size={14} />} label="Visuals" active={isActive('visuals')} onClick={() => navigate('/visuals')} testId="nav-visuals" />
           <NavItem icon={<PlayOutlineIcon />} label="Play" active={isActive('player')} onClick={() => navigate('/player')} testId="nav-play" />
-          <NavItem icon={<PlayOutlineIcon />} label="Play (Phaser)" active={isActive('playerv2')} onClick={() => navigate('/playerv2')} testId="nav-play-v2" />
         </div>
 
         <div className="sp-divider" />

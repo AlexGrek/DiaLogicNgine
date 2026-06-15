@@ -27,7 +27,6 @@ import ConfigurationMenu from "./components/menuitems/configuration/Configuratio
 import LocationMenu from "./components/menuitems/locedit/LocationMenu";
 import ScriptEditMenu from "./components/menuitems/scriptedit/ScriptEditMenu";
 import Player from "./components/player/Player";
-import PlayerV2 from "./components/player/PlayerV2";
 import Loc from "./game/Loc";
 import Prop from "./game/Prop";
 import FactsObjectivesTabs from "./components/menuitems/factsobjectives/FactsObjectivesTabs";
@@ -106,11 +105,6 @@ function DialogRoute() {
 function PlayerRoute() {
   const { game, updates } = useOutletContext<AppOutletContext>();
   return <Player game={game} handlers={updates} />;
-}
-
-function PlayerV2Route() {
-  const { game, updates } = useOutletContext<AppOutletContext>();
-  return <PlayerV2 game={game} handlers={updates} />;
 }
 
 function SaveLoadRoute() {
@@ -375,7 +369,6 @@ export default function App() {
           <Route path="dialog" element={<DialogRoute />} />
           <Route path="dialog/:dialogId" element={<DialogRoute />} />
           <Route path="player" element={<PlayerRoute />} />
-          <Route path="playerv2" element={<PlayerV2Route />} />
           <Route path="resources" element={<ResourcesRoute />} />
           <Route path="saveload" element={<SaveLoadRoute />} />
           <Route path="config" element={<ConfigRoute />} />
