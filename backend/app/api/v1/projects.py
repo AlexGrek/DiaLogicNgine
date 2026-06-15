@@ -8,6 +8,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
+from app import prompt_history
+
 STORAGE_ROOT = Path(__file__).parent.parent.parent.parent / "storage"
 METADATA_FILENAME = ".metadata"
 PAGE_SIZE = 10
@@ -137,6 +139,7 @@ async def delete_project(project_name: str):
     project_dir = _safe_project_dir(project_name)
     if not project_dir.exists():
         raise HTTPException(status_code=404, detail="Project not found")
-    shutil.rmtree(project_dir)
+    shutil.rmtree(project_dir)  # removes game.json, images/ and image_thumbs/
     _evict_metadata(project_name)
+    prompt_history.clear_project(project_name)  # drop host-DB prompt history
     return {"status": "ok"}

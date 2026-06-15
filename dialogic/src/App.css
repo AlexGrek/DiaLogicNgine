@@ -414,6 +414,29 @@ div.text-field-editor {
   align-items: center;
 }
 
+/* AI prompt rows on the Resources page */
+.resource-prompt-row {
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.resource-prompt-text {
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.resource-prompt-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
 /* Backdrop fade: match the smoothed timing */
 .rs-modal-backdrop.rs-anim-fade,
 .rs-drawer-backdrop.rs-anim-fade {

@@ -21,6 +21,7 @@ import { GameDescription, createDefaultGame } from "./game/GameDescription";
 import { Notification, NotificationType, NotifyCallback } from "./UiNotifications";
 import DialogEditor from "./components/DialogEditor";
 import SaveLoadMenu from "./components/menuitems/SaveLoadMenu";
+import ResourcesMenu from "./components/menuitems/ResourcesMenu";
 import CharEditorTabs from "./components/menuitems/charedit/CharEditorTabs";
 import ConfigurationMenu from "./components/menuitems/configuration/ConfigurationMenu";
 import LocationMenu from "./components/menuitems/locedit/LocationMenu";
@@ -114,6 +115,10 @@ function PlayerV2Route() {
 
 function SaveLoadRoute() {
   return <SaveLoadMenu />;
+}
+
+function ResourcesRoute() {
+  return <ResourcesMenu />;
 }
 
 function ConfigRoute() {
@@ -371,6 +376,7 @@ export default function App() {
           <Route path="dialog/:dialogId" element={<DialogRoute />} />
           <Route path="player" element={<PlayerRoute />} />
           <Route path="playerv2" element={<PlayerV2Route />} />
+          <Route path="resources" element={<ResourcesRoute />} />
           <Route path="saveload" element={<SaveLoadRoute />} />
           <Route path="config" element={<ConfigRoute />} />
           <Route path="visuals" element={<VisualsRoute />} />

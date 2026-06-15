@@ -14,6 +14,7 @@ import FunnelTimeIcon from '@rsuite/icons/FunnelTime';
 import DeviceOtherIcon from '@rsuite/icons/DeviceOther';
 import ExploreIcon from '@rsuite/icons/Explore';
 import TreemapIcon from '@rsuite/icons/Treemap';
+import StorageIcon from '@rsuite/icons/Storage';
 import { IUpds } from '../App';
 import { ChevronDown, ChevronRight, Image, Plus, SquareDashedMousePointer } from 'lucide-react';
 import './side-panel.css';
@@ -101,6 +102,7 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
         {/* ── file section ── */}
         <div className="sp-section">
           <NavItem icon={<HomeIcon />} label="Home" active={isActive('home')} onClick={() => setConfirmHome(true)} testId="nav-home" />
+          <NavItem icon={<StorageIcon />} label="Resources" active={isActive('resources')} onClick={() => navigate('/resources')} testId="nav-resources" />
           <NavItem icon={<AttachmentIcon />} label="Save / Load" active={isActive('saveload')} onClick={() => navigate('/saveload')} testId="nav-saveload" />
         </div>
 

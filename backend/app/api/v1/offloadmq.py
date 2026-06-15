@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from app import prompt_history
 from app.image_storage import image_dir, safe_path, save_image
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
@@ -199,6 +200,12 @@ async def generate(req: GenerateRequest) -> TaskRef:
         raise HTTPException(status_code=submit_r.status_code, detail=submit_r.text)
 
     data = submit_r.json()
+    prompt_history.record_prompt(
+        req.project_name,
+        "image",
+        req.prompt,
+        {"model": req.model, "workflow": req.workflow},
+    )
     return TaskRef(
         cap=data["id"]["cap"],
         id=data["id"]["id"],

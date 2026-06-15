@@ -10,6 +10,9 @@ import {
 } from 'rsuite';
 import { DialogWindow, createDialogLink, createWindow } from '../../game/Dialog';
 import { isValidJsIdentifier } from '../../Utils';
+import { useProjectImages } from '../common/ProjectImagesContext';
+import { resolveImageProject } from '../common/projectImages';
+import PromptHistory from './PromptHistory';
 
 interface LLMWindowStub {
     uid: string;
@@ -61,6 +64,7 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
     onApply,
     existingUids,
 }) => {
+    const project = resolveImageProject(useProjectImages());
     const [models, setModels] = useState<string[]>([]);
     const [modelsLoading, setModelsLoading] = useState(false);
     const [capability, setCapability] = useState<string | null>(null);
@@ -97,7 +101,7 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
             const r = await fetch('/api/v1/llm/generate-dialog', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ capability, prompt: prompt.trim() }),
+                body: JSON.stringify({ capability, prompt: prompt.trim(), project_name: project }),
             });
             if (!r.ok) {
                 const detail = await r.text();
@@ -167,6 +171,10 @@ const AiGenerateModal: React.FC<AiGenerateModalProps> = ({
                     </div>
 
                     <Divider style={{ marginTop: 4, marginBottom: 4 }}>Prompt</Divider>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <PromptHistory project={project} workflow="dialog" onPick={setPrompt} />
+                    </div>
 
                     <Input
                         as="textarea"

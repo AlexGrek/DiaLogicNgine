@@ -5,6 +5,7 @@ import { useServerImages } from './useServerImages';
 import { IMAGES, isServerImage } from './ImagePicker';
 import { projectImageApiBase, resolveImageProject } from './projectImages';
 import { useProjectImages } from './ProjectImagesContext';
+import PromptHistory from '../ai/PromptHistory';
 
 interface ImagePickerModalProps {
     open: boolean;
@@ -667,7 +668,15 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                     />
                                 </div>
                                 <div className="imggen-field">
-                                    <label>Prompt</label>
+                                    <div className="imggen-label-row">
+                                        <label>Prompt</label>
+                                        <PromptHistory
+                                            project={storageProject}
+                                            workflow="image"
+                                            onPick={v => setGen(g => ({ ...g, prompt: v }))}
+                                            size="xs"
+                                        />
+                                    </div>
                                     <Input
                                         as="textarea"
                                         rows={3}
@@ -758,7 +767,15 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                     />
                                 </div>
                                 <div className="imggen-field">
-                                    <label>Prompt</label>
+                                    <div className="imggen-label-row">
+                                        <label>Prompt</label>
+                                        <PromptHistory
+                                            project={storageProject}
+                                            workflow="image"
+                                            onPick={v => setGen(g => ({ ...g, prompt: v }))}
+                                            size="xs"
+                                        />
+                                    </div>
                                     <Input
                                         as="textarea"
                                         rows={4}

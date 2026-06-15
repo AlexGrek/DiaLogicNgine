@@ -14,6 +14,7 @@ export const EDITOR_ROUTES = [
   { path: "/ui", navTestId: "nav-ui" },
   { path: "/pac", navTestId: "nav-pac" },
   { path: "/player", navTestId: "nav-play" },
+  { path: "/resources", navTestId: "nav-resources" },
   { path: "/saveload", navTestId: "nav-saveload" },
 ];
 
@@ -28,5 +29,6 @@ export const SIDEBAR_NAV_ITEMS = [
   { testId: "nav-ui", path: "/ui" },
   { testId: "nav-pac", path: "/pac" },
   { testId: "nav-play", path: "/player" },
+  { testId: "nav-resources", path: "/resources" },
   { testId: "nav-saveload", path: "/saveload" },
 ];

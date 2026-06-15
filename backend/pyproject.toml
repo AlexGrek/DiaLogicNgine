@@ -9,5 +9,6 @@ dependencies = [
     "pillow>=12.2.0",
     "python-dotenv>=1.2.2",
     "python-multipart>=0.0.22",
+    "sqlitedict>=2.1.0",
     "uvicorn>=0.43.0",
 ]

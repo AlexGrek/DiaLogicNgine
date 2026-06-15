@@ -1,6 +1,9 @@
 import React, { forwardRef, useCallback, useState } from 'react';
 import { Button, Input, Loader, Message, SelectPicker } from 'rsuite';
 import CreativeIcon from '@rsuite/icons/Creative';
+import { useProjectImages } from './ProjectImagesContext';
+import { resolveImageProject } from './projectImages';
+import PromptHistory from '../ai/PromptHistory';
 
 interface LlmTextareaProps {
     value: string;
@@ -13,6 +16,7 @@ interface LlmTextareaProps {
 
 const LlmTextarea = forwardRef<HTMLTextAreaElement, LlmTextareaProps>(
     ({ value, onChange, rows = 5, placeholder, className, style }, ref) => {
+        const project = resolveImageProject(useProjectImages());
         const [aiOpen, setAiOpen] = useState(false);
         const [models, setModels] = useState<string[]>([]);
         const [modelsLoading, setModelsLoading] = useState(false);
@@ -47,7 +51,7 @@ const LlmTextarea = forwardRef<HTMLTextAreaElement, LlmTextareaProps>(
                 const r = await fetch('/api/v1/llm/generate-text', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ capability, prompt: prompt.trim() }),
+                    body: JSON.stringify({ capability, prompt: prompt.trim(), project_name: project }),
                 });
                 if (!r.ok) throw new Error(await r.text());
                 const data: { text: string } = await r.json();
@@ -59,7 +63,7 @@ const LlmTextarea = forwardRef<HTMLTextAreaElement, LlmTextareaProps>(
             } finally {
                 setGenerating(false);
             }
-        }, [capability, prompt, onChange]);
+        }, [capability, prompt, onChange, project]);
 
         const cancel = useCallback(() => {
             setAiOpen(false);
@@ -133,6 +137,9 @@ const LlmTextarea = forwardRef<HTMLTextAreaElement, LlmTextareaProps>(
                                 placeholder="Select LLM model"
                             />
                         )}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <PromptHistory project={project} workflow="text" onPick={setPrompt} size="xs" />
+                        </div>
                         <Input
                             as="textarea"
                             rows={3}

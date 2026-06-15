@@ -21,6 +21,8 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from app import prompt_history
+
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
 OFFLOADMQ_URL = os.getenv("OFFLOADMQ_URL", "").rstrip("/")
@@ -93,6 +95,7 @@ async def list_models() -> list[str]:
 class GenerateDialogRequest(BaseModel):
     capability: str  # e.g. "llm.dolphin-mistral"
     prompt: str
+    project_name: str | None = None  # when set, prompt is saved to host history
 
 
 @router.post("/generate-dialog")
@@ -141,6 +144,9 @@ async def generate_dialog(req: GenerateDialogRequest) -> list[dict]:
             detail=f"Could not parse LLM response as JSON: {exc}",
         )
 
+    prompt_history.record_prompt(
+        req.project_name, "dialog", req.prompt, {"capability": req.capability}
+    )
     return windows
 
 
@@ -159,6 +165,7 @@ class GenerateTextRequest(BaseModel):
     capability: str
     prompt: str
     system_prompt: str = ""
+    project_name: str | None = None  # when set, prompt is saved to host history
 
 
 @router.post("/generate-text")
@@ -200,4 +207,7 @@ async def generate_text(req: GenerateTextRequest) -> dict:
     if not content:
         raise HTTPException(status_code=502, detail="LLM returned empty response")
 
+    prompt_history.record_prompt(
+        req.project_name, "text", req.prompt, {"capability": req.capability}
+    )
     return {"text": content.strip()}
