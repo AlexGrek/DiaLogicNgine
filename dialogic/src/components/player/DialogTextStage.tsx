@@ -25,9 +25,6 @@ interface DialogTextStageProps {
     lineKey: string;
     /** Footer slot: choices, continue hint, etc. Rendered pinned below the text. */
     footer?: React.ReactNode;
-    /** Whole-stage click handler (skip typewriter / advance). */
-    onClick?: () => void;
-    clickable?: boolean;
     isError?: boolean;
 }
 
@@ -43,8 +40,6 @@ const DialogTextStage: React.FC<DialogTextStageProps> = ({
     displayText,
     lineKey,
     footer,
-    onClick,
-    clickable,
     isError,
 }) => {
     const storageProject = resolveImageProject(useProjectImages());
@@ -76,7 +71,6 @@ const DialogTextStage: React.FC<DialogTextStageProps> = ({
         const curTop = current.offsetTop;
         const curH = current.offsetHeight;
         scroller.scrollTop = curH >= viewH ? curTop : Math.max(0, curTop + curH - viewH);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lineKey, fullText, displayText]);
 
     const renderAvatar = () => {
@@ -92,12 +86,7 @@ const DialogTextStage: React.FC<DialogTextStageProps> = ({
     };
 
     return (
-        <div
-            className={`dlg-stage dlg-stage--${alignment}`}
-            data-testid="dialog-text-stage"
-            onClick={clickable ? onClick : undefined}
-            style={clickable ? { cursor: 'pointer' } : undefined}
-        >
+        <div className={`dlg-stage dlg-stage--${alignment}`} data-testid="dialog-text-stage">
             <LayoutGroup>
                 <div className="dlg-scroll" ref={scrollRef}>
                     {history.length > 0 && (

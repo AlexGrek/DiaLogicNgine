@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { GameDescription } from '../../game/GameDescription';
 import { resolveImageProject } from '../common/projectImages';
 import { useProjectImages } from '../common/ProjectImagesContext';
@@ -10,56 +11,72 @@ interface MainMenuViewProps {
     onExit?: () => void;
 }
 
-const MainMenuView: React.FC<MainMenuViewProps> = ({ game, onStart, onExit }) => {
-    const [visible, setVisible] = useState(false);
-    const storageProject = resolveImageProject(useProjectImages());
+const rise = {
+    hidden: { opacity: 0, y: 12 },
+    show: (delay: number) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as const } }),
+};
 
-    useEffect(() => {
-        const id = setTimeout(() => setVisible(true), 10);
-        return () => clearTimeout(id);
-    }, []);
+const MainMenuView: React.FC<MainMenuViewProps> = ({ game, onStart, onExit }) => {
+    const storageProject = resolveImageProject(useProjectImages());
 
     const bgStyle = game.startMenu.menuBackground
         ? styleWithImage(game.startMenu.menuBackground, storageProject)
         : {};
 
     return (
-        <div
+        <motion.div
             data-testid="main-menu-overlay"
-            className={`main-menu-overlay${visible ? ' main-menu-visible' : ''}`}
+            className="main-menu-overlay"
             style={bgStyle}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
         >
             <div className="main-menu-backdrop" />
             <div className="main-menu-content">
-                <h1 className="main-menu-title">
+                <motion.h1 className="main-menu-title" variants={rise} initial="hidden" animate="show" custom={0}>
                     {game.general.name || 'DiaLogicNgine'}
-                </h1>
+                </motion.h1>
                 {game.general.description && (
-                    <p className="main-menu-subtitle">{game.general.description}</p>
+                    <motion.p className="main-menu-subtitle" variants={rise} initial="hidden" animate="show" custom={0.1}>
+                        {game.general.description}
+                    </motion.p>
                 )}
                 <div className="main-menu-buttons">
-                    <button
+                    <motion.button
                         data-testid="main-menu-new-game"
                         className="main-menu-btn main-menu-btn-primary"
                         onClick={onStart}
+                        variants={rise}
+                        initial="hidden"
+                        animate="show"
+                        custom={0.2}
+                        whileHover={{ y: -1 }}
+                        whileTap={{ y: 0 }}
                     >
                         ▶&nbsp;&nbsp;New Game
-                    </button>
+                    </motion.button>
                     {onExit && (
-                        <button
+                        <motion.button
                             data-testid="main-menu-exit"
                             className="main-menu-btn main-menu-btn-exit"
                             onClick={onExit}
+                            variants={rise}
+                            initial="hidden"
+                            animate="show"
+                            custom={0.3}
+                            whileHover={{ y: -1 }}
+                            whileTap={{ y: 0 }}
                         >
                             Exit
-                        </button>
+                        </motion.button>
                     )}
                 </div>
-                <div className="main-menu-footer">
+                <motion.div className="main-menu-footer" variants={rise} initial="hidden" animate="show" custom={0.35}>
                     v{game.general.version || '0.0.0'}
-                </div>
+                </motion.div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

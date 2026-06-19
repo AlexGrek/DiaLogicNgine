@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { InGameNotificationType, State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
@@ -108,13 +109,20 @@ const GameNotificationsView: React.FC<GameNotificationsViewProps> = ({ state, ga
         const img = item ? generateImageUrl(item.thumbnail || item.image || '', storageProject) : '';
         const label = localmanager.current.local(LABEL_KEYS[t.type] ?? t.type);
         return (
-            <div
+            <motion.div
                 key={t.id}
+                layout
                 className={`game-toast game-toast-${t.type}`}
                 data-testid={`game-toast-${t.type}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => handleToastClick(t)}
+                initial={{ opacity: 0, x: 40, scale: 0.96 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 40, scale: 0.96 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
             >
                 <div className='game-toast-media'>
                     {isItem && img
@@ -125,17 +133,15 @@ const GameNotificationsView: React.FC<GameNotificationsViewProps> = ({ state, ga
                     <span className='game-toast-label'>{label}</span>
                     <span className='game-toast-text'>{t.text}</span>
                 </div>
-            </div>
+            </motion.div>
         );
     };
 
-    if (toasts.length === 0) {
-        return null;
-    }
-
     return (
         <div className='game-notifications-container' style={notifStyle} data-testid='game-notifications'>
-            {toasts.map(renderToast)}
+            <AnimatePresence>
+                {toasts.map(renderToast)}
+            </AnimatePresence>
         </div>
     );
 };

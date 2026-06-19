@@ -233,6 +233,8 @@ body, html {
 
 .window-editor-code-editors-stack {
   display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .link-short-view {
@@ -565,8 +567,8 @@ div.text-field-editor {
   box-shadow: 0 0 0 2px var(--accent-dim) !important;
 }
 
-/* Global button breathing room + rounder corners (not for buttons embedded inside input groups) */
-.rs-btn:not(.rs-input-group-btn):not(.rs-input-group > .rs-btn) {
+/* Global button breathing room + rounder corners (not for buttons embedded inside input groups, not code-sample buttons) */
+.rs-btn:not(.rs-input-group-btn):not(.rs-input-group > .rs-btn):not(.code-sample-button) {
   margin: 2px !important;
   border-radius: 9px !important;
 }

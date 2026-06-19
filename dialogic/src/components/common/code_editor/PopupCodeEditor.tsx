@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, Modal } from 'rsuite';
 import CodeEditor from '@uiw/react-textarea-code-editor';
 import "./PopupCodeEditor.css"
@@ -69,10 +69,102 @@ interface PopupCodeEditorProps {
 const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose, game, onAddSituation }) => {
     const [codeVal, setCode] = useState<string>(code);
     const [docOpenFor, setDocOpenFor] = useState<string | null>(null)
+    // Underlying <textarea> (the editor forwards its ref to it).
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    // Last caret/selection the user had inside the editor. Survives focus
+    // moving to a snippet button, so inserts land where the user was typing.
+    const cursorRef = useRef<{ start: number; end: number }>({ start: code.length, end: code.length });
+    // Caret to restore after an insert re-renders the editor.
+    const pendingCaretRef = useRef<{ pos: number; value: string } | null>(null);
+
     useEffect(() => {
         setCode(code);
         setDocOpenFor(null);
+        cursorRef.current = { start: code.length, end: code.length };
     }, [code, ui]);
+
+    // Track the caret while the editor is focused.
+    const rememberCaret = () => {
+        const ta = textareaRef.current;
+        if (ta) cursorRef.current = { start: ta.selectionStart, end: ta.selectionEnd };
+    };
+
+    // Where to insert: live selection if the editor is focused, otherwise the
+    // last remembered caret (clamped to the current code length).
+    const getCaret = () => {
+        const ta = textareaRef.current;
+        if (ta && document.activeElement === ta) {
+            return { start: ta.selectionStart, end: ta.selectionEnd };
+        }
+        const len = codeVal.length;
+        return {
+            start: Math.min(cursorRef.current.start, len),
+            end: Math.min(cursorRef.current.end, len),
+        };
+    };
+
+    // The editor mirrors `value` into its own internal state via an effect, so
+    // the textarea DOM trails a programmatic change by one commit. Wait until
+    // the DOM reflects the new code, then refocus and place the caret.
+    useEffect(() => {
+        const pending = pendingCaretRef.current;
+        if (!pending) return;
+        let raf = 0;
+        let tries = 0;
+        const apply = () => {
+            const ta = textareaRef.current;
+            if (!ta) { pendingCaretRef.current = null; return; }
+            if (ta.value === pending.value || tries++ > 20) {
+                ta.focus();
+                ta.setSelectionRange(pending.pos, pending.pos);
+                cursorRef.current = { start: pending.pos, end: pending.pos };
+                pendingCaretRef.current = null;
+                return;
+            }
+            raf = requestAnimationFrame(apply);
+        };
+        raf = requestAnimationFrame(apply);
+        return () => cancelAnimationFrame(raf);
+    }, [codeVal]);
+
+    // Indent every line of a block after the first to match the caret's line.
+    const indentBlock = (snippet: string, indent: string) =>
+        snippet.split('\n').map((ln, i) => (i === 0 || ln === '' ? ln : indent + ln)).join('\n');
+
+    // Insert text at the remembered caret. `block` formats multi-line
+    // statements onto their own line(s), matching the current indentation, and
+    // parks the caret inside an empty `{ }` body when the snippet has one.
+    const insertAtCaret = (text: string, block: boolean) => {
+        const { start, end } = getCaret();
+        const before = codeVal.slice(0, start);
+        const after = codeVal.slice(end);
+
+        let insertion = text;
+        let caretInInsertion = text.length;
+
+        if (block) {
+            const lineStart = before.lastIndexOf('\n') + 1;
+            const linePrefix = before.slice(lineStart);
+            const indent = (linePrefix.match(/^[ \t]*/) ?? [''])[0];
+            const codeBefore = linePrefix.trim().length > 0;
+            const nl = after.indexOf('\n');
+            const codeAfter = after.slice(0, nl < 0 ? after.length : nl).trim().length > 0;
+
+            const body = indentBlock(text, indent);
+            insertion = (codeBefore ? '\n' + indent : '') + body + (codeAfter ? '\n' + indent : '');
+
+            const hollow = insertion.match(/\{\n([ \t]*)\n\}/);
+            if (hollow && hollow.index !== undefined) {
+                caretInInsertion = hollow.index + 2 + hollow[1].length;
+            } else {
+                caretInInsertion = (codeBefore ? 1 + indent.length : 0) + body.length;
+            }
+        }
+
+        const newCode = before + insertion + after;
+        setCode(newCode);
+        pendingCaretRef.current = { pos: start + caretInInsertion, value: newCode };
+    };
 
     const rt = () => game ? createRtDoc(game) : null
 
@@ -106,7 +198,8 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     const renderEditor = () => {
-        return <CodeEditor value={codeVal} language="js" placeholder="Please enter JS code or leave blank for no action." data-color-mode="dark" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
+        return <CodeEditor ref={textareaRef} value={codeVal} language="js" placeholder="Please enter JS code or leave blank for no action." data-color-mode="dark" data-testid="popup-code-editor-textarea" minHeight={12} onChange={(evn) => setCode(evn.target.value)}
+            onSelect={rememberCaret} onKeyUp={rememberCaret} onClick={rememberCaret} onFocus={rememberCaret}
             padding={12}
             style={{
                 fontSize: 13.5,
@@ -135,12 +228,12 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     const accessibleObjectAddClick = (name: string) => {
-        setCode(codeVal + name);
+        insertAtCaret(name, false);
     }
 
-    // Append a generated snippet on its own line.
+    // Insert a generated snippet as a block at the caret position.
     const insertSnippet = (snippet: string) => {
-        setCode(prev => prev.trimEnd().length > 0 ? `${prev.replace(/\s*$/, '')}\n${snippet}` : snippet);
+        insertAtCaret(snippet, true);
     }
 
     const renderExamples = () => {

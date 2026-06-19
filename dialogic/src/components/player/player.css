@@ -5,60 +5,27 @@
     src: local('IconFont'), url(../../fonts/palanquin-regular.ttf) format('truetype');
 }
 
-.player-bg-host {
+/* ── Background ────────────────────────────────────────────── */
+
+.player-bg-stage {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-size: cover;
-}
-
-.player-bg-host.bg-host-old.fade {
-    animation: disappear .8s ease-in-out forwards;
-}
-
-.player-bg-host.bg-host-old {
+    inset: 0;
     z-index: 1;
+    transition: filter .3s ease;
 }
 
-.player-bg-host.bg-host-new {
-    z-index: 10;
-}
-
-.player-bg-host.bg-host-new.menu-open {
+.player-bg-stage.menu-open {
     filter: blur(10px);
 }
 
-.player-bg-host.bg-host-new.fade {
-    animation: appear 1s ease-in-out forwards;
-    opacity: 0;
-    animation-delay: 0.3s;
+.player-bg-host {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
 }
-
-@keyframes disappear {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0;
-    }
-}
-
-@keyframes appear {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
 
 .player-core-widget-container {
     position: absolute;
@@ -138,88 +105,7 @@
     flex: 1 1 auto;
     width: 100%;
     min-height: 0;
-    transition: opacity .2s;
-    opacity: 1;
 }
-
-.player-core-uiwidget-container.hiding {
-    opacity: 0;
-    pointer-events: none;
-}
-
-
-
-.dialog-window-view {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: 5fr 4fr;
-    grid-template-rows: 1fr;
-    min-height: 0;
-    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-}
-
-/* Point-and-click scenes are not laid out in the dialog text/avatar grid:
-   they fill the whole viewport and the scene shrinks to fit inside it. */
-.pac-window-view {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-}
-
-.dialog-window-view--text-right {
-    justify-items: end;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 59%, rgba(0, 0, 0, 0.7) 100%);
-}
-
-.dialog-window-view--text-left {
-    grid-template-columns: 4fr 5fr;
-    justify-items: start;
-    background: linear-gradient(to left, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 59%, rgba(0, 0, 0, 0.7) 100%);
-}
-
-.dialog-window-view--text-full {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-    justify-items: stretch;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 55%, rgba(0, 0, 0, 0.78) 100%);
-}
-
-.dialog-content-column {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    height: 100%;
-    min-height: 0;
-    max-height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-sizing: border-box;
-    align-content: end;
-}
-
-.dialog-window-view--text-right .dialog-content-column {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.dialog-window-view--text-left .dialog-content-column {
-    grid-column: 1;
-    grid-row: 1;
-}
-
-.dialog-window-view--text-full .dialog-content-column {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: end;
-    width: 100%;
-    max-height: 100%;
-}
-
-.dialog-window-view--no-short-history .dialog-content-column {
-    grid-template-rows: minmax(0, 1fr) auto;
-}
-
 
 .player-core-ingame-menu {
     position: absolute;
@@ -229,195 +115,298 @@
     height: 100%;
     pointer-events: none;
 }
-    
 
-.dialog-text.transition-out {
-    animation: shrink .15s ease-out forwards;
-}
+/* ── Dialog / char / location view shell ───────────────────── */
 
-@keyframes shrink {
-    0% {
-        transform: scaleY(100%);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scaleY(80%);
-        opacity: 0;
-    }
-}
-
-
-.dialog-text {
-    width: 100%;
-    font-size: var(--player-text-font-size, 22px);
-    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-    background-color: var(--player-dialog-text-bg, rgba(4, 4, 4, 0.275));
+.dialog-window-view {
     position: relative;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-    flex-shrink: 0;
-}
-
-.dialog-window-view--text-right .dialog-text {
-    text-align: right;
-    padding: 10pt 10pt 10pt 0;
-}
-
-.dialog-window-view--text-left .dialog-text {
-    text-align: left;
-    padding: 10pt 0 10pt 10pt;
-}
-
-.dialog-window-view--text-full .dialog-text {
-    text-align: left;
-    padding: 10pt;
-}
-
-.dialog-current-text {
     width: 100%;
-    animation-name: nexttext;
-    animation-duration: .15s;
-    animation-iteration-count: 1;
-    animation-direction: normal;
-    animation-timing-function: ease-out;
-    animation-fill-mode: forwards;
-    animation-delay: 0s;
+    height: 100%;
+    min-height: 0;
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
 }
 
-.dialog-current-text--measure {
-    visibility: hidden;
-    user-select: none;
-    pointer-events: none;
-    animation: none;
+/* Point-and-click scenes fill the whole viewport, not the text panel. */
+.pac-window-view {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
 }
 
-.dialog-current-text--visible {
+/* ── Text stage: a positioned panel that hosts history + current line + footer */
+
+.dlg-stage {
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    box-sizing: border-box;
+    pointer-events: auto;
+}
+
+.dlg-stage--right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: clamp(330px, 46%, 700px);
+    text-align: right;
+    background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.82) 100%);
+}
+
+.dlg-stage--left {
     top: 0;
     left: 0;
+    bottom: 0;
+    width: clamp(330px, 46%, 700px);
+    text-align: left;
+    background: linear-gradient(to left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.82) 100%);
+}
+
+.dlg-stage--full {
+    left: 0;
     right: 0;
-    margin: 0;
-    animation-name: nexttext;
-    animation-duration: .15s;
-    animation-iteration-count: 1;
-    animation-direction: normal;
-    animation-timing-function: ease-out;
-    animation-fill-mode: forwards;
-    animation-delay: 0s;
-}
-
-@keyframes nexttext {
-    100% {
-        transform: translate(0, 0);
-        opacity: 1;
-    }
-
-    0% {
-        transform: translate(20pt, 0);
-        opacity: 0;
-    }
-}
-
-.dialog-prev-text {
-    position: absolute;
-    top: 14pt;
-    right: 10pt;
+    top: 38%;
+    bottom: 0;
     width: 100%;
-    animation-name: prevtext;
-    animation-duration: .5s;
-    /* or: Xms */
-    animation-iteration-count: 1;
-    animation-direction: normal;
-    /* or: normal */
-    animation-timing-function: ease-in-out;
-    /* or: ease, ease-in, ease-in-out, linear, cubic-bezier(x1, y1, x2, y2) */
-    animation-fill-mode: forwards;
-    /* or: backwards, both, none */
-    animation-delay: 0s;
-    /* or: Xms */
+    text-align: left;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 42%, rgba(0,0,0,0.86) 100%);
 }
 
-@keyframes prevtext {
-    0% {
-        transform: translate(0, 0);
-        opacity: 1;
-    }
-
-    100% {
-        transform: translate(0, -150%);
-        opacity: 0;
-    }
+.dlg-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 22px 6px;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.25) transparent;
 }
 
-.dialog-variants {
+/* Bottom-anchor content when it is shorter than the panel, while remaining
+   fully scrollable from the top when it is taller (avoids the flex-end clip). */
+.dlg-scroll > :first-child {
+    margin-top: auto;
+}
+
+.dlg-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dlg-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+.dlg-stage--full .dlg-scroll {
+    padding-left: 7%;
+    padding-right: 7%;
+}
+
+/* ── Short history (emerges from / morphs out of the current line) ── */
+
+.dlg-history {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
+.dlg-history-rec {
+    margin-bottom: 0.9em;
+    opacity: 0.6;
+}
+
+.dlg-history-text {
+    margin: 0;
+    font-size: calc(var(--player-text-font-size, 22px) * 0.72);
+    line-height: 1.35;
+    color: rgba(236, 238, 244, 0.95);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    word-wrap: break-word;
+}
+
+.dlg-history-ans {
+    margin: 2px 0 0;
+    font-size: calc(var(--player-text-font-size, 22px) * 0.64);
+    color: rgba(160, 190, 220, 0.78);
+    font-style: italic;
+    word-wrap: break-word;
+}
+
+/* ── Current line ──────────────────────────────────────────── */
+
+.dlg-current {
+    display: flex;
+    flex-direction: column;
+}
+
+.dlg-stage--right .dlg-current { align-items: flex-end; }
+.dlg-stage--left .dlg-current { align-items: flex-start; }
+.dlg-stage--full .dlg-current { align-items: flex-start; }
+
+.dlg-line {
+    margin: 0;
+    width: 100%;
+    font-size: var(--player-text-font-size, 22px);
+    line-height: 1.42;
+    color: #f4f5f8;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    word-wrap: break-word;
+}
+
+.dlg-line--error {
+    color: #ff9b9b;
+}
+
+/* Revealed text is visible; the not-yet-typed tail keeps layout but is hidden. */
+.dlg-line-rest {
+    opacity: 0;
+}
+
+/* ── Actor ─────────────────────────────────────────────────── */
+
+.dlg-actor {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.dlg-stage--right .dlg-actor { align-items: flex-end; }
+.dlg-stage--left .dlg-actor { align-items: flex-start; }
+.dlg-stage--full .dlg-actor { align-items: flex-start; }
+
+.dlg-actor-avatar {
+    max-width: 112px;
+    max-height: 150px;
+    border-radius: 4px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+    display: block;
+}
+
+.dlg-actor-name {
+    margin-top: 5px;
+    color: #7dd4fc;
+    font-size: calc(var(--player-text-font-size, 22px) * 0.82);
+    font-family: var(--player-font-menu, "Involve", sans-serif);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Footer (choices + continue hint) ──────────────────────── */
+
+.dlg-footer {
+    flex: 0 0 auto;
+    padding: 4px 22px 18px;
+    box-sizing: border-box;
+}
+
+.dlg-stage--full .dlg-footer {
+    padding-left: 7%;
+    padding-right: 7%;
+}
+
+/* ── Choices / responses ───────────────────────────────────── */
+
+.dialog-variants,
+.dialog-responses {
     font-size: var(--player-responses-font-size, 20px);
     font-family: var(--player-font-responses, "PalanquinRegular", sans-serif);
     max-width: 100%;
-    margin: 15pt 0 15pt 15pt;
-    display: flex;
-    padding-left: 5pt;
-}
-
-.dialog-variants--column {
-    flex-direction: column;
-    align-items: flex-end;
-    text-align: right;
-}
-
-.dialog-variants--row {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-    text-align: right;
-    gap: 8px;
-}
-
-.dialog-variants--flexible {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    gap: 8px;
-}
-
-.dialog-variants--nested {
-    display: contents;
+    perspective: 900px;
 }
 
 .dialog-responses {
     display: flex;
-    font-size: var(--player-responses-font-size, 20px);
-    font-family: var(--player-font-responses, "PalanquinRegular", sans-serif);
-    max-width: 100%;
-    margin: 15pt 0 15pt 15pt;
-    padding-left: 5pt;
 }
 
+.dialog-variants-group {
+    display: flex;
+}
+
+/* response alignment (applies to the inner group, or to the responses row) */
+.dialog-variants--column .dialog-variants-group,
 .dialog-responses--column {
     flex-direction: column;
-    align-items: flex-end;
-    text-align: right;
 }
 
+.dialog-variants--row .dialog-variants-group,
 .dialog-responses--row {
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: flex-end;
     align-items: center;
-    text-align: right;
     gap: 8px;
 }
 
+.dialog-variants--flexible .dialog-variants-group,
 .dialog-responses--flexible {
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
-    text-align: center;
     gap: 8px;
+}
+
+/* horizontal anchoring follows the text side */
+.dlg-stage--right .dialog-variants-group,
+.dlg-stage--right .dialog-responses { align-items: flex-end; }
+.dlg-stage--right .dialog-variants--row .dialog-variants-group,
+.dlg-stage--right .dialog-variants--flexible .dialog-variants-group { justify-content: flex-end; }
+
+.dlg-stage--left .dialog-variants-group,
+.dlg-stage--full .dialog-variants-group,
+.dlg-stage--left .dialog-responses,
+.dlg-stage--full .dialog-responses { align-items: flex-start; }
+.dlg-stage--left .dialog-variants--row .dialog-variants-group,
+.dlg-stage--left .dialog-variants--flexible .dialog-variants-group,
+.dlg-stage--full .dialog-variants--row .dialog-variants-group,
+.dlg-stage--full .dialog-variants--flexible .dialog-variants-group { justify-content: flex-start; }
+
+.dialog-variants--nested .dialog-variants-group {
+    display: contents;
+}
+
+.dialog-variant-button-container {
+    perspective: 900px;
+}
+
+.dialog-button {
+    background-color: rgba(20, 20, 20, 0.34);
+    color: rgba(255, 255, 255, 0.88);
+    border: none;
+    padding: 6px 12px;
+    margin: 0 0 6px 0;
+    border-radius: 3px;
+    cursor: pointer;
+    font: inherit;
+    text-align: inherit;
+    display: inline-flex;
+    align-items: center;
+    transform-style: preserve-3d;
+    transform-origin: top center;
+    transition: background-color .15s ease, color .15s ease;
+    backdrop-filter: blur(2px);
+}
+
+.dialog-button:hover:not(:disabled) {
+    background-color: rgba(64, 64, 64, 0.85);
+    color: #ffffff;
+}
+
+.dialog-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.dialog-variants--row .dialog-button,
+.dialog-variants--flexible .dialog-button {
+    margin: 0;
+}
+
+.dialog-variants--pending {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .dialog-variant-icon {
@@ -442,308 +431,41 @@
     margin: 0 4px;
 }
 
-.dialog-variants--pending {
-    visibility: hidden;
-    pointer-events: none;
-}
+/* ── Continue hint ─────────────────────────────────────────── */
 
 .dialog-continue-hint {
     width: 100%;
     text-align: center;
-    margin: 6pt 0 2pt 0;
+    margin: 8px 0 2px 0;
     pointer-events: none;
-}
-
-.dialog-continue-hint--pending {
-    visibility: hidden;
 }
 
 .dialog-continue-chevron {
     display: inline-block;
     font-size: 22px;
-    color: rgba(255, 255, 255, 0.6);
-    animation: dialog-continue-bounce 1.2s ease-in-out infinite;
+    color: rgba(255, 255, 255, 0.65);
 }
 
-@keyframes dialog-continue-bounce {
-    0%, 100% {
-        transform: translateY(0);
-        opacity: 0.4;
-    }
-    50% {
-        transform: translateY(4px);
-        opacity: 0.9;
-    }
-}
+/* ── Location routes ───────────────────────────────────────── */
 
-.dialog-variants--row button,
-.dialog-variants--flexible button,
-.dialog-responses--row .dialog-button,
-.dialog-responses--flexible .dialog-button {
-    margin: 0;
-}
-
-.dialog-variants button {
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.85);
-    padding: 4pt 4pt;
-    margin: 0 1em 3pt 0;
-    background-color: rgba(20, 20, 20, 0.3);
-    transition-property: background-color opacity transform;
-    transition-duration: .2s;
-    transform-style: preserve-3d;
-    transform-origin: top center;
-    display: inline-flex;
-    align-items: center;
-}
-
-@keyframes dialog-variants-appear {
-    0% {
-        transform: rotateX(90deg) translateY(10%);
-        opacity: 0;
-    }
-
-    100% {
-        transform: rotateX(0) translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes dialog-variants-dissappear {
-    0% {
-        transform: rotateX(0) translateY(0);
-        opacity: 1;
-    }
-
-    100% {
-        transform: rotateX(90deg) translateY(10%);
-        opacity: 0;
-    }
-}
-
-.dialog-variant-button-container {
-    perspective: 800px;
-}
-
-.dialog-variants button:hover {
-    color: rgba(255, 255, 255, 1);
-    background-color: rgba(40, 40, 40, 0.8);
-    transition-duration: .1s;
-    transform: rotateX(28deg) translateY(6%);
-}
-
-.dialog-variant-button-container.transition-out button {
-    animation: dialog-variants-dissappear .2s ease-in forwards;
-}
-
-.dialog-variant-button-container.transition-in button {
-    animation: dialog-variants-appear .2s ease-out forwards;
-}
-
-
-.dialog-short-history {
-    grid-row: 1;
-    position: relative;
-    scroll-behavior: smooth;
-    overflow-y: auto;
-    overflow-x: hidden;
-    opacity: .6;
-    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-    min-height: 0;
-    align-self: end;
-}
-
-.dialog-controls {
-    grid-row: 2;
+.dialog-window-view--location .loc-routes {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    overflow: visible;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-.dialog-window-view--text-right .dialog-controls {
-    padding-right: 10pt;
-}
-
-.dialog-window-view--text-left .dialog-controls {
-    padding-left: 10pt;
-}
-
-.dialog-window-view--text-full .dialog-controls {
-    width: 100%;
-    padding: 10pt;
-}
-
-.dialog-widget-special-links {
-    grid-row: 1;
-    max-width: 70%;
-    min-height: 300pt;
-    margin-bottom: 30pt;
-    perspective: 800px;
-    display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
-    align-items: end;
-}
-
-.dialog-window-view--location .dialog-widget-special-links {
-    grid-column: 1;
-    place-self: end start;
-}
-
-.dialog-window-view--location .dialog-content-column {
-    grid-column: 2;
-    grid-row: 1;
-}
-
-.dialog-window-view--text-right .dialog-widget-special-links {
-    grid-column: 1;
-    place-self: end start;
-}
-
-.dialog-window-view--text-left .dialog-widget-special-links {
-    grid-column: 2;
-    place-self: end end;
-}
-
-.dialog-window-view--text-full .dialog-widget-special-links {
-    grid-column: 1;
-    grid-row: 1;
-    place-self: end start;
-    max-width: 100%;
-    padding: 0 10pt 10pt;
-    box-sizing: border-box;
-    z-index: 1;
-    pointer-events: auto;
-}
-
-.dialog-window-view--text-full .dialog-content-column {
+    align-items: flex-end;
+    gap: 8px;
+    padding: 14px;
+    max-width: 54%;
     z-index: 2;
+    perspective: 900px;
 }
 
-.dialog-widget-special-links.transition-out {
-    animation: disappear .2s ease-in forwards;
-}
-
-.dialog-widget-special-links.transition-in {
-    animation: appear .2s ease-in forwards;
-}
-
-.dialog-history-record {
-    opacity: .8;
-    margin-bottom: 1em;
-}
-
-.dialog-window-view--text-right .dialog-history-record {
-    margin-left: auto;
-    margin-right: 12pt;
-    max-width: 70%;
-    text-align: right;
-}
-
-.dialog-window-view--text-left .dialog-history-record {
-    margin-right: auto;
-    margin-left: 12pt;
-    max-width: 70%;
-    text-align: left;
-}
-
-.dialog-window-view--text-full .dialog-history-record {
-    margin-left: 0;
-    margin-right: 0;
-    max-width: 100%;
-    text-align: left;
-}
-
-.dialog-history-record-text {
-    font-size: calc(var(--player-text-font-size, 22px) * 0.85);
-    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-}
-
-.dialog-window-view--text-right .dialog-history-record-text {
-    margin-right: 1em;
-}
-
-.dialog-window-view--text-left .dialog-history-record-text {
-    margin-left: 1em;
-}
-
-.dialog-history-record-ans {
-    font-size: calc(var(--player-text-font-size, 22px) * 0.79);
-    font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
-    color: rgb(120, 120, 120);
-}
-
-.dialog-window-view--text-right .dialog-history-record-ans {
-    margin-left: auto;
-    margin-right: 4pt;
-}
-
-.dialog-window-view--text-left .dialog-history-record-ans {
-    margin-right: auto;
-    margin-left: 4pt;
-}
-
-.dialog-actor-container {
-    position: relative;
-    text-align: center;
-    width: fit-content;
-    background-color: rgba(6, 1, 35, 0.142);
-    padding: 2pt;
-    border-radius: 2pt;
-}
-
-.dialog-window-view--text-right .dialog-actor-container {
-    margin-left: auto;
-}
-
-.dialog-window-view--text-left .dialog-actor-container {
-    margin-right: auto;
-}
-
-.dialog-window-view--text-full .dialog-actor-container {
-    margin-right: auto;
-}
-
-.dialog-window-view--text-left .dialog-variants,
-.dialog-window-view--text-left .dialog-responses {
-    margin: 15pt 15pt 15pt 0;
-}
-
-.dialog-window-view--text-left .dialog-variants--column,
-.dialog-window-view--text-left .dialog-responses--column {
-    align-items: flex-start;
-    text-align: left;
-}
-
-.dialog-window-view--text-left .dialog-variants--row,
-.dialog-window-view--text-left .dialog-responses--row {
-    justify-content: flex-start;
-}
-
-.dialog-window-view--text-full .dialog-variants,
-.dialog-window-view--text-full .dialog-responses {
-    margin: 15pt 0;
-    width: 100%;
-}
-
-.dialog-window-view--text-full .dialog-variants--column,
-.dialog-window-view--text-full .dialog-responses--column {
-    align-items: stretch;
-    text-align: left;
-}
-
-.dialog-actor-container img {
-    max-width: 100pt;
-    max-height: 130pt;
-    display: block;
-    border-radius: 3pt;
-}
-
-.dialog-actor-name {
-    color: #7dd4fc;
+/* keep route thumbnails clear of a left-aligned text panel */
+.dialog-window-view--location:has(.dlg-stage--left) .loc-routes {
+    left: auto;
+    right: 0;
 }
 
 .route-button {
@@ -756,13 +478,13 @@
     color: white;
     margin: 6px;
     transform-style: preserve-3d;
-    transition-property: transform;
     transform-origin: top center;
-    transition-duration: .2s;
+    cursor: pointer;
 }
 
-.route-button:hover {
-    transform: rotateX(8deg) translateY(6%);
+.route-button:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .route-button-inside {
@@ -776,11 +498,6 @@
 }
 
 .route-button-inside:hover {
-    display: flex;
-    align-items: end;
-    justify-content: end;
-    height: 100%;
-    width: 100%;
     background-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -794,6 +511,17 @@
 
 .route-button-inside:hover p {
     font-size: large;
+}
+
+/* ── Discussion picker ─────────────────────────────────────── */
+
+.dlg-discuss {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.82) 100%);
 }
 
 .discuss-picker-menu {
@@ -811,7 +539,6 @@
     background-color: #04040452;
     padding: 6pt 0pt;
     backdrop-filter: blur(8px);
-    animation: discussMenuTabAppear .2s ease-out forwards;
     transform-style: preserve-3d;
     transform-origin: center center;
 }
@@ -846,18 +573,6 @@
     background-color: #d9d9d952;
 }
 
-@keyframes discussMenuTabAppear {
-    0% {
-        transform: translateY(5%) scale(.9) rotateX(10deg);
-        opacity: 0;
-    }
-
-    100% {
-        transform:  translateY(0) scale(1);
-        opacity: 1;
-    }
-}
-
 .discuss-picker-control-panel {
     display: flex;
     flex-direction: row;
@@ -867,11 +582,12 @@
 }
 
 .discuss-picker-control-panel button {
-    background-color: transparent;
     color: rgba(255, 255, 255, 0.85);
     padding: 4pt 4pt;
     margin: 1px;
     background-color: rgba(20, 20, 20, 0.3);
+    border: none;
+    cursor: pointer;
 }
 
 .discuss-picker-control-panel button:hover {
@@ -942,7 +658,6 @@
     border-radius: 4pt;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.19);
     transition: box-shadow 0.3s ease-in-out;
-    
 }
 
 .items-descr-header:hover {
@@ -973,13 +688,7 @@
     background-color: #05080f;
     background-size: cover;
     background-position: center;
-    opacity: 0;
-    transition: opacity 0.4s ease;
     border-radius: 6px;
-}
-
-.main-menu-overlay.main-menu-visible {
-    opacity: 1;
 }
 
 .main-menu-backdrop {
@@ -1007,7 +716,6 @@
     color: #f5f7fb;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     margin: 0 0 4px;
-    animation: main-menu-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .main-menu-subtitle {
@@ -1017,7 +725,6 @@
     max-width: min(700px, 80vw);
     margin: 0;
     line-height: 1.5;
-    animation: main-menu-rise 0.6s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .main-menu-buttons {
@@ -1036,23 +743,12 @@
     font-family: var(--player-font-menu, "Involve", sans-serif);
     font-size: clamp(14px, 1.5vw, 20px);
     cursor: pointer;
-    transition: background-color 0.15s, transform 0.1s;
-    animation: main-menu-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.main-menu-btn:hover {
-    transform: translateY(-1px);
-}
-
-.main-menu-btn:active {
-    transform: translateY(0);
 }
 
 .main-menu-btn-primary {
     background-color: #001a2e;
     border-color: #2a6fa0;
     color: #d0e8f5;
-    animation-delay: 0.2s;
 }
 
 .main-menu-btn-primary:hover {
@@ -1063,7 +759,6 @@
     background-color: #100a0a;
     border-color: #5b2020;
     color: #e0a4a4;
-    animation-delay: 0.3s;
 }
 
 .main-menu-btn-exit:hover {
@@ -1075,30 +770,8 @@
     font-size: 11px;
     color: #6c7894;
     margin-top: 8px;
-    animation: main-menu-rise 0.6s 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes main-menu-rise {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes main-menu-slide-in {
-    from {
-        opacity: 0;
-        transform: translateX(-16px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
 /* --- Interactive state editor (StateEditor.tsx) --- */
 .state-editor .rs-panel {
     margin-bottom: 12px;

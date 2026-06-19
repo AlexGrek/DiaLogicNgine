@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { CarriedItem, State } from '../../exec/GameState';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { getItemByIdOrUnknown } from '../../game/Items';
@@ -22,12 +23,17 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) =
         const imgUrl = generateImageUrl(item.thumbnail || item.image || '', storageProject);
         const isSelected = index === selectedIndex;
         return (
-            <div
+            <motion.div
                 key={carried.item}
                 data-testid={`inventory-item-${carried.item}`}
                 className={`inventory-item-card${isSelected ? ' selected' : ''}`}
                 onClick={() => setSelectedIndex(index)}
                 style={imgUrl ? { backgroundImage: `url(${imgUrl})` } : {}}
+                initial={{ opacity: 0, y: 12, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.2, delay: Math.min(index, 12) * 0.03, ease: 'easeOut' }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.98 }}
             >
                 <div className='inventory-item-card-footer'>
                     <span className='inventory-item-card-name'>{item.name}</span>
@@ -35,16 +41,16 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) =
                         <span className='inventory-item-card-qty'>x{carried.quantity}</span>
                     )}
                 </div>
-            </div>
+            </motion.div>
         );
     };
 
     const renderDetail = () => {
         if (selectedIndex === null || selectedIndex >= state.carriedItems.length) {
             return (
-                <div className='inventory-detail-empty'>
+                <motion.div key="empty" className='inventory-detail-empty' initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
                     <p>Select an item</p>
-                </div>
+                </motion.div>
             );
         }
         const carried = state.carriedItems[selectedIndex];
@@ -52,7 +58,14 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) =
         const imgUrl = generateImageUrl(item.image || item.thumbnail || '', storageProject);
         const statsKeys = Object.keys(item.stats);
         return (
-            <div className='inventory-detail' data-testid='inventory-detail'>
+            <motion.div
+                key={carried.item}
+                className='inventory-detail'
+                data-testid='inventory-detail'
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
                 <h2 className='inventory-detail-name'>{item.name}</h2>
                 {imgUrl && (
                     <div className='inventory-detail-image-wrap'>
@@ -76,7 +89,7 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) =
                         Use
                     </button>
                 )}
-            </div>
+            </motion.div>
         );
     };
 
@@ -96,7 +109,9 @@ const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) =
                 </div>
             </div>
             <div className='inventory-detail-panel'>
-                {renderDetail()}
+                <AnimatePresence mode="wait">
+                    {renderDetail()}
+                </AnimatePresence>
             </div>
         </div>
     );

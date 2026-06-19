@@ -3,6 +3,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State, createInitialState } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { FONT_SIZE_LABELS, FontSizeId } from '../../game/GameDescription';
+import { resolveVisuals } from './visualsClasses';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
 import SaveGame from '../../savegame/Saves';
 import { MAX_LETTER_SPEED_MS, MIN_LETTER_SPEED_MS, PlayerSettings } from './PlayerSettings';
@@ -188,6 +189,7 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
     );
 
     const renderSettingsMenuDetails = () => {
+        const authorShortHistory = resolveVisuals(gameExecutor.game.visuals).shortHistoryVisible
         return (
             <div className='game-menu-tab-settings' data-testid="player-settings-panel" style={{ marginLeft: 8, marginRight: 8 }}>
                 <label className='player-settings-row'>
@@ -199,6 +201,17 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
                     />
                     <span>{localmanager.local("Letter by letter")}</span>
                 </label>
+                {authorShortHistory && (
+                    <label className='player-settings-row'>
+                        <input
+                            type="checkbox"
+                            checked={playerSettings.shortHistory}
+                            onChange={(ev) => onPlayerSettingsChange({ ...playerSettings, shortHistory: ev.target.checked })}
+                            data-testid="player-settings-short-history"
+                        />
+                        <span>{localmanager.local("Short history")}</span>
+                    </label>
+                )}
                 {playerSettings.letterByLetter && (
                     <label className='player-settings-row player-settings-speed'>
                         <span>{localmanager.local("Text speed")}</span>

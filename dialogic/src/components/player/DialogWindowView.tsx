@@ -91,7 +91,12 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
     )
 
     return (
-        <div className="dialog-window-view" data-testid="dialog-window-view">
+        <div
+            className="dialog-window-view"
+            data-testid="dialog-window-view"
+            onClick={isClickable ? handleAreaClick : undefined}
+            style={isClickable ? { cursor: 'pointer' } : undefined}
+        >
             <DialogTextStage
                 morphScope="dialog"
                 alignment={visuals.dialogTextAlignment}
@@ -102,8 +107,6 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
                 displayText={state.fatalError ? text : displayText}
                 lineKey={typewriterKey}
                 footer={footer}
-                onClick={handleAreaClick}
-                clickable={isClickable}
                 isError={!!state.fatalError}
             />
         </div>

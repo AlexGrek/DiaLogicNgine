@@ -100,20 +100,23 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     ) : null
 
     return (
-        <div className="dialog-window-view" data-testid="char-dialog-view">
+        <div
+            className="dialog-window-view"
+            data-testid="char-dialog-view"
+            onClick={isClickable ? handleAreaClick : undefined}
+            style={isClickable ? { cursor: 'pointer' } : undefined}
+        >
             <AnimatePresence mode="wait">
                 {discuss ? (
                     <motion.div
                         key="discuss"
-                        className={`dlg-stage dlg-stage--${visuals.dialogTextAlignment}`}
+                        className="dlg-discuss"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        <div className="dlg-scroll">
-                            <DiscussionTopicPicker localization={localmanager.current} game={game} state={state} view={view} onCancel={handleCancelSpecialUi} onTopicSelected={handleDiscussion} />
-                        </div>
+                        <DiscussionTopicPicker localization={localmanager.current} game={game} state={state} view={view} onCancel={handleCancelSpecialUi} onTopicSelected={handleDiscussion} />
                     </motion.div>
                 ) : (
                     <motion.div key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ height: '100%' }}>
@@ -127,8 +130,6 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
                             displayText={state.fatalError ? text : displayText}
                             lineKey={typewriterKey}
                             footer={footer}
-                            onClick={handleAreaClick}
-                            clickable={isClickable}
                             isError={!!state.fatalError}
                         />
                     </motion.div>

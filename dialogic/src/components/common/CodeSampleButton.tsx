@@ -3,7 +3,7 @@ import { Button } from 'rsuite';
 import ReadyRoundIcon from '@rsuite/icons/ReadyRound';
 import './CodeSampleButton.css'
 
-const MAX_LINE_LENGTH = 80
+const MAX_LINES = 6
 
 interface CodeSampleButtonProps {
     name: string;
@@ -13,31 +13,9 @@ interface CodeSampleButtonProps {
 
 const CodeSampleButton: React.FC<CodeSampleButtonProps> = ({ name, code, onClick }) => {
 
+    // Keep only the first few lines so the snippet fits the button height.
     const shortenCode = (code: string) => {
-        let firstNindex = -1
-        let cropIndex = code.length
-        let linei = 0;
-        for (let i = 0; i < code.length; i++) {
-            linei++;
-            if (code[i] === "\n") {
-                linei = 0;
-                if (firstNindex > 0) {
-                    cropIndex = i
-                    break
-                }
-                else {
-                    firstNindex = i
-                }
-            }
-            if (linei > MAX_LINE_LENGTH) {
-                cropIndex = MAX_LINE_LENGTH - 1
-                break
-            }
-        }
-
-        // crop by crop index
-        const newCode = code.substring(0, cropIndex);
-        return newCode;
+        return code.split("\n").slice(0, MAX_LINES).join("\n")
     }
 
     return (

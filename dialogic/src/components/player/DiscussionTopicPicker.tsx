@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
 import { CarriedItem, State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
@@ -18,10 +19,15 @@ interface DiscussionTopicPickerProps {
 }
 
 const DiscussionTab: React.FC<{ children: ReactNode, name: string }> = ({ children, name }) => (
-    <div className='discuss-picker-tab'>
+    <motion.div
+        className='discuss-picker-tab'
+        initial={{ opacity: 0, y: '5%', scale: 0.9, rotateX: 10 }}
+        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+    >
         <p className='discuss-picker-name'>{name}</p>
         <div className='discuss-picker-body'>{children}</div>
-    </div>
+    </motion.div>
 );
 
 const SimpleTextList: React.FC<{

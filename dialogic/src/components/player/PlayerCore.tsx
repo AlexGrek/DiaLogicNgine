@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { InGameNotificationType, State } from '../../exec/GameState';
 import { RenderView } from '../../exec/RenderView';
@@ -22,12 +23,14 @@ interface PlayerCoreProps {
     onStateUpd: (newState: State) => void
 }
 
+// Brief window after an accepted state change during which further clicks are
+// ignored, so a fast double-click cannot skip a step. The typewriter "skip on
+// first click" handles the common case; this is just a debounce safety net.
+const INPUT_LOCK_MS = 130
+
 const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
-    const [prevView, setPrevView] = React.useState<RenderView | null>(null)
     const [currentView, setCurrentView] = React.useState<RenderView | null>(null)
     const [background, setBackground] = React.useState<string | null>(null)
-    const [prevbackground, setPrevbackground] = React.useState<string | null>(null)
-    const [inTransitionState, setInTransitionState] = React.useState<boolean>(false)
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
     const [widgetRequest, setWidgetRequest] = React.useState<{ name: string } | null>(null);
     const [playerSettings, setPlayerSettings] = React.useState<PlayerSettings>(() => {
@@ -37,9 +40,11 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
             letterByLetterSpeedMs: visuals.typewriterSpeedMs,
             textFontSize: visuals.textFontSize,
             responsesFontSize: visuals.responsesFontSize,
+            shortHistory: visuals.shortHistoryVisible,
         });
     });
     const storageProject = resolveImageProject(useProjectImages());
+    const lastAcceptedRef = useRef<number>(0)
 
     const savesManager = useRef<SavesManager>(new SavesManager(game.game.general.name))
 
@@ -49,20 +54,11 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
 
     useEffect(() => {
         const view = game.renderer.render(state, background)
-        setPrevView(currentView)
         setCurrentView(view)
-
-        // calculate background change
         if (view.backgroundChange) {
-            setPrevbackground(background)
             setBackground(view.backgroundChange.nextbg)
         }
-
-        // start transition animation
-        setInTransitionState(true)
-        // transition away should be completed
-        setTimeout(() => setInTransitionState(false), 200)
-    // Only re-render view when game state changes; background/currentView are read for transition logic.
+    // Only re-render view when game state changes; background is read for transition logic.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state])
 
@@ -77,22 +73,14 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
 
     const onFullScreen = () => { }
 
-    const animation = currentView?.backgroundChange?.effect === 'fast' ? 'fade' : null
-
-    const backgroundContainerStyle = (host: 'old' | 'new', animation: string | null) => {
-        const animationClass = animation ? ` ${animation}` : ''
-        return `player-bg-host bg-host-${host}${animationClass}`
-    }
-
     const handleStateUpd = (newState: State) => {
-        if (inTransitionState) {
-            // do nothing if user is trying to change state while transition is happening
+        const now = Date.now()
+        if (now - lastAcceptedRef.current < INPUT_LOCK_MS) {
             return;
         }
-        else {
-            savesManager.current.newAutoSave(newState)
-            onStateUpd(newState)
-        }
+        lastAcceptedRef.current = now
+        savesManager.current.newAutoSave(newState)
+        onStateUpd(newState)
     }
 
     const handleMenuPanelOpen = (open: boolean) => {
@@ -112,29 +100,23 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         setWidgetRequest({ name: widget })
     }
 
-    const menuPanelClass = (base: string) => {
-        if (!menuOpen) {
-            return `${base} menu-close`
-        } else {
-            return `${base} menu-open`
-        }
-    }
-
-    const gameWidgetClass = (base: string) => {
-        if (menuOpen) {
-            return `${base} hiding`
-        } else {
-            return `${base}`
-        }
-    }
-
     if (currentView) {
-        const viewToRenderNow = (inTransitionState && prevView) ? prevView : currentView
         const fontSizeStyle = fontSizeOverrideCssVars(playerSettings.textFontSize, playerSettings.responsesFontSize);
         return (
             <div className='player-core-container' id='player-core' style={fontSizeStyle}>
-                <div key={prevbackground || 'prevbg'} id='player-previous-background-host' className={backgroundContainerStyle('old', animation)} style={styleWithImage(prevbackground, storageProject)}></div>
-                <div key={background || 'bg'} id='player-current-background-host' className={menuPanelClass(backgroundContainerStyle('new', animation))} style={styleWithImage(background, storageProject)}></div>
+                <div className={`player-bg-stage${menuOpen ? ' menu-open' : ''}`}>
+                    <AnimatePresence>
+                        <motion.div
+                            key={background || 'bg'}
+                            className='player-bg-host'
+                            style={styleWithImage(background, storageProject)}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.8, ease: 'easeInOut' }}
+                        />
+                    </AnimatePresence>
+                </div>
                 <GameNotificationsView state={state} game={game} onNotificationClick={handleNotificationClick} />
                 <div className='player-core-widget-container' id='player-current-widget-host'>
                     <div className="player-top-panel-row">
@@ -142,11 +124,16 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         <GameUiElementsView elements={currentView?.uiElements || []}/>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={viewToRenderNow} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd} playerSettings={playerSettings} onPlayerSettingsChange={handlePlayerSettingsChange}/>
+                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={currentView} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd} playerSettings={playerSettings} onPlayerSettingsChange={handlePlayerSettingsChange}/>
                     </div>
-                    <div className={gameWidgetClass('player-core-uiwidget-container')}>
-                        <GameUiWidgetDisplay transitionOut={inTransitionState} view={viewToRenderNow} game={game} state={state} onStateUpd={handleStateUpd} playerSettings={playerSettings} />
-                    </div>
+                    <motion.div
+                        className='player-core-uiwidget-container'
+                        animate={{ opacity: menuOpen ? 0 : 1 }}
+                        transition={{ duration: 0.2 }}
+                        style={menuOpen ? { pointerEvents: 'none' } : undefined}
+                    >
+                        <GameUiWidgetDisplay view={currentView} game={game} state={state} onStateUpd={handleStateUpd} playerSettings={playerSettings} />
+                    </motion.div>
                 </div>
             </div>
         )
