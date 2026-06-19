@@ -18,10 +18,11 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app import prompt_history
+from app import auth, prompt_history
+from app.ownership import require_owner
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
@@ -74,7 +75,7 @@ def _extract_json_array(text: str) -> list:
 # ---------------------------------------------------------------------------
 
 @router.get("/models")
-async def list_models() -> list[str]:
+async def list_models(user: str = Depends(auth.get_current_user)) -> list[str]:
     """Return available llm.* capabilities from online agents."""
     _check_config()
     async with httpx.AsyncClient(timeout=10) as client:
@@ -99,9 +100,14 @@ class GenerateDialogRequest(BaseModel):
 
 
 @router.post("/generate-dialog")
-async def generate_dialog(req: GenerateDialogRequest) -> list[dict]:
+async def generate_dialog(
+    req: GenerateDialogRequest,
+    user: str = Depends(auth.get_current_user),
+) -> list[dict]:
     """Submit an urgent LLM task and return parsed dialog window stubs."""
     _check_config()
+    if req.project_name:
+        require_owner(req.project_name, user)
 
     model = req.capability.removeprefix("llm.")
     payload = {
@@ -169,9 +175,14 @@ class GenerateTextRequest(BaseModel):
 
 
 @router.post("/generate-text")
-async def generate_text(req: GenerateTextRequest) -> dict:
+async def generate_text(
+    req: GenerateTextRequest,
+    user: str = Depends(auth.get_current_user),
+) -> dict:
     """Submit an urgent LLM task and return generated free-form text."""
     _check_config()
+    if req.project_name:
+        require_owner(req.project_name, user)
 
     model = req.capability.removeprefix("llm.")
     system_content = req.system_prompt.strip() or _DEFAULT_TEXT_SYSTEM_PROMPT

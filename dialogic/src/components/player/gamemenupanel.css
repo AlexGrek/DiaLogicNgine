@@ -112,11 +112,14 @@
 .game-menu-button-group {
     pointer-events: all;
     text-align: center;
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
     gap: 6px;
     padding: 4px;
+    box-sizing: border-box;
 }
 
 .game-menu-button-main {

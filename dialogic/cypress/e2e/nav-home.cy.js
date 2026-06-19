@@ -3,6 +3,7 @@
  */
 describe("Navigate home from editor", () => {
   beforeEach(() => {
+    cy.login();
     cy.visit("/dialog");
     cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");
   });

@@ -3,9 +3,15 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from app import auth
 from app.api.v1.router import router
 
 app = FastAPI(title="DiaLogicNgine API")
+
+# Create the root user (password 000000) and assign all pre-existing projects to
+# it. Idempotent — safe to run on every startup.
+auth.ensure_root_and_migrate()
+
 app.include_router(router)
 
 _static_dir = os.getenv("STATIC_DIR", "")

@@ -253,7 +253,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
     }
 
     return open ? (
-        <Modal size={'lg'} open={open} onClose={() => onSaveClose(codeVal)} backdrop="static" className="apple-code-editor">
+        <Modal size={'lg'} open={open} onClose={() => onSaveClose(codeVal)} backdrop="static" overflow={false} className="apple-code-editor">
             <Modal.Header>
                 <Modal.Title>{ui.header}</Modal.Title>
             </Modal.Header>

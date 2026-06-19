@@ -4,8 +4,10 @@ import {
   Content,
   CustomProvider,
   Header,
+  Loader,
   Sidebar,
 } from "rsuite";
+import { LogOut } from "lucide-react";
 import {
   Outlet,
   Route,
@@ -42,6 +44,8 @@ import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./comp
 import HomePage from "./components/home/HomePage";
 import PlayOnlyPage from "./components/play/PlayOnlyPage";
 import { ProjectImagesContext } from "./components/common/ProjectImagesContext";
+import LoginPage from "./components/auth/LoginPage";
+import { AuthUser, getMe, logout } from "./api/authApi";
 
 export interface CopiedObject {
   value: unknown;
@@ -187,9 +191,11 @@ interface AppLayoutProps {
   setGame: React.Dispatch<React.SetStateAction<GameDescription>>;
   projectName: string;
   setProjectName: (name: string) => void;
+  currentUser: AuthUser;
+  onLogout: () => void;
 }
 
-function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProps) {
+function AppLayout({ game, setGame, projectName, setProjectName, currentUser, onLogout }: AppLayoutProps) {
   const [activeDialog, setActiveDialog] = useState("1");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [copied, setCopied] = useState<CopiedObject | undefined>(undefined);
@@ -316,6 +322,20 @@ function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProp
           <SettingsButton onClick={() => setSettingsOpen(true)} />
         </div>
         <NotificationBar notification={lastNotification} />
+        <div className="app-header-user">
+          <span className="app-header-username" data-testid="current-user">
+            {currentUser.username}
+          </span>
+          <button
+            type="button"
+            className="app-header-logout"
+            onClick={onLogout}
+            title="Log out"
+            data-testid="logout-btn"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </Header>
       <SettingsPanel
         open={settingsOpen}
@@ -337,9 +357,14 @@ function AppLayout({ game, setGame, projectName, setProjectName }: AppLayoutProp
   );
 }
 
-// ---- App (router) ----
+// ---- Authenticated app (home + editor) ----
 
-export default function App() {
+interface AuthedAppProps {
+  currentUser: AuthUser;
+  onLogout: () => void;
+}
+
+function AuthedApp({ currentUser, onLogout }: AuthedAppProps) {
   const [game, setGame] = useState<GameDescription>(createDefaultGame);
   const [projectName, setProjectName] = useState<string>("");
 
@@ -349,26 +374,70 @@ export default function App() {
   }, []);
 
   return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <HomePage
+            onOpenProject={handleOpenProject}
+            currentUser={currentUser}
+            onLogout={onLogout}
+          />
+        }
+      />
+      <Route element={<AppLayout game={game} setGame={setGame} projectName={projectName} setProjectName={setProjectName} currentUser={currentUser} onLogout={onLogout} />}>
+        <Route path="dialog" element={<DialogRoute />} />
+        <Route path="dialog/:dialogId" element={<DialogRoute />} />
+        <Route path="player" element={<PlayerRoute />} />
+        <Route path="resources" element={<ResourcesRoute />} />
+        <Route path="saveload" element={<SaveLoadRoute />} />
+        <Route path="config" element={<ConfigRoute />} />
+        <Route path="visuals" element={<VisualsRoute />} />
+        <Route path="locs" element={<LocsRoute />} />
+        <Route path="chars" element={<CharsRoute />} />
+        <Route path="scripts" element={<ScriptsRoute />} />
+        <Route path="facts" element={<FactsRoute />} />
+        <Route path="items" element={<ItemsRoute />} />
+        <Route path="ui" element={<UiRoute />} />
+        <Route path="special" element={<SpecialWindowsMenu />} />
+      </Route>
+    </Routes>
+  );
+}
+
+// ---- App (auth gate + router) ----
+
+export default function App() {
+  // undefined = checking session, null = logged out, AuthUser = logged in
+  const [currentUser, setCurrentUser] = useState<AuthUser | null | undefined>(undefined);
+
+  useEffect(() => {
+    getMe()
+      .then(setCurrentUser)
+      .catch(() => setCurrentUser(null));
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    logout().finally(() => setCurrentUser(null));
+  }, []);
+
+  const gated =
+    currentUser === undefined ? (
+      <div className="app-auth-loading" data-testid="auth-loading">
+        <Loader size="lg" content="Loading…" vertical />
+      </div>
+    ) : currentUser === null ? (
+      <LoginPage onAuth={setCurrentUser} />
+    ) : (
+      <AuthedApp currentUser={currentUser} onLogout={handleLogout} />
+    );
+
+  return (
     <CustomProvider theme="dark">
       <Routes>
-        <Route path="/" element={<HomePage onOpenProject={handleOpenProject} />} />
+        {/* Public: published games are playable without an account. */}
         <Route path="/play/:projectName" element={<PlayOnlyPage />} />
-        <Route element={<AppLayout game={game} setGame={setGame} projectName={projectName} setProjectName={setProjectName} />}>
-          <Route path="dialog" element={<DialogRoute />} />
-          <Route path="dialog/:dialogId" element={<DialogRoute />} />
-          <Route path="player" element={<PlayerRoute />} />
-          <Route path="resources" element={<ResourcesRoute />} />
-          <Route path="saveload" element={<SaveLoadRoute />} />
-          <Route path="config" element={<ConfigRoute />} />
-          <Route path="visuals" element={<VisualsRoute />} />
-          <Route path="locs" element={<LocsRoute />} />
-          <Route path="chars" element={<CharsRoute />} />
-          <Route path="scripts" element={<ScriptsRoute />} />
-          <Route path="facts" element={<FactsRoute />} />
-          <Route path="items" element={<ItemsRoute />} />
-          <Route path="ui" element={<UiRoute />} />
-          <Route path="special" element={<SpecialWindowsMenu />} />
-        </Route>
+        <Route path="/*" element={gated} />
       </Routes>
     </CustomProvider>
   );

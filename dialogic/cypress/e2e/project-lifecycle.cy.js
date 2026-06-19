@@ -5,7 +5,12 @@
 describe("Project lifecycle", () => {
   const projectName = `e2e-lifecycle-${Date.now()}`;
 
+  beforeEach(() => {
+    cy.login();
+  });
+
   before(() => {
+    cy.login();
     cy.visit("/");
     cy.getByTestId("home-page", { timeout: 20000 }).should("be.visible");
     cy.getByTestId("new-project-input").type(projectName);
@@ -14,6 +19,7 @@ describe("Project lifecycle", () => {
   });
 
   after(() => {
+    cy.login();
     cy.request({
       method: "DELETE",
       url: `/api/v1/projects/${encodeURIComponent(projectName)}`,

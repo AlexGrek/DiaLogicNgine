@@ -1,5 +1,6 @@
 describe("Home page", () => {
   beforeEach(() => {
+    cy.login();
     cy.visit("/");
     cy.getByTestId("home-page", { timeout: 20000 }).should("be.visible");
   });

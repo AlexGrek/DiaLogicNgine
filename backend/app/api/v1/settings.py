@@ -2,9 +2,10 @@
 from pathlib import Path
 
 from dotenv import set_key
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from app import auth
 from app.api.v1 import offloadmq as mq_module
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -21,7 +22,7 @@ def _masked(key: str) -> str:
 
 
 @router.get("/offloadmq")
-def get_offloadmq():
+def get_offloadmq(user: str = Depends(auth.get_current_user)):
     return {
         "url": mq_module.OFFLOADMQ_URL,
         "api_key_masked": _masked(mq_module.OFFLOADMQ_API_KEY),
@@ -35,7 +36,7 @@ class OffloadMqConfig(BaseModel):
 
 
 @router.post("/offloadmq")
-def set_offloadmq(cfg: OffloadMqConfig):
+def set_offloadmq(cfg: OffloadMqConfig, user: str = Depends(auth.get_current_user)):
     ENV_FILE.touch(exist_ok=True)
     if cfg.url:
         mq_module.OFFLOADMQ_URL = cfg.url.rstrip("/")

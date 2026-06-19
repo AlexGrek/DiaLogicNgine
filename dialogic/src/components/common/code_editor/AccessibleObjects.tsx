@@ -78,7 +78,7 @@ const AccessibleObjects: React.FC<AccessibleObjectsProps> = ({ objectDescrMap, o
     }
 
     return (
-        <div>
+        <div className="ao-tree-wrap">
             <div className="checkbox-ao">
                 <TreeView
                     data={objects}

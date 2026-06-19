@@ -71,8 +71,8 @@
       "Bash(/Users/vedmedik/Library/Caches/Cypress/14.5.4/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=1)",
       "Bash(/Users/vedmedik/Library/Caches/Cypress/14.5.4/Cypress.app/Contents/MacOS/Cypress --type=renderer)",
       "Bash(npm list *)",
-      "Bash(unset ELECTRON_RUN_AS_NODE)",
-      "Edit(/.claude/skills/frontend/**)"
+      "Bash(grep *)",
+      "Bash(unset ELECTRON_RUN_AS_NODE)"
     ],
     "additionalDirectories": [
       "/Users/vedmedik/dev/DiaLogicNgine/.claude/skills"

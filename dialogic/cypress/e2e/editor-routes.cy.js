@@ -1,6 +1,10 @@
 import { EDITOR_ROUTES, SIDEBAR_NAV_ITEMS } from "../support/app-routes";
 
 describe("Editor routes (direct navigation)", () => {
+  beforeEach(() => {
+    cy.login();
+  });
+
   EDITOR_ROUTES.forEach(({ path }) => {
     it(`loads ${path}`, () => {
       cy.visit(path);
@@ -12,6 +16,7 @@ describe("Editor routes (direct navigation)", () => {
 
 describe("Sidebar navigation", () => {
   beforeEach(() => {
+    cy.login();
     cy.visit("/dialog");
     cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");
   });

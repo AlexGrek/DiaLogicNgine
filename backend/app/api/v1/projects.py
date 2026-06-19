@@ -5,10 +5,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
-from app import prompt_history
+from app import auth, prompt_history
+from app.ownership import require_owner
 
 STORAGE_ROOT = Path(__file__).parent.parent.parent.parent / "storage"
 METADATA_FILENAME = ".metadata"
@@ -75,17 +76,24 @@ def _evict_metadata(project_name: str) -> None:
 
 
 @router.get("/projects")
-async def list_projects(page: int = Query(1, ge=1)):
+async def list_projects(
+    page: int = Query(1, ge=1),
+    user: str = Depends(auth.get_current_user),
+):
     base = _projects_base()
     if not base.exists():
         return {"projects": [], "total": 0, "page": page, "pageSize": PAGE_SIZE}
 
-    # Only list directories that hold an actual saved game. Image uploads can
-    # create a project directory (with images/ but no game.json); such folders
-    # are not loadable games and must not appear in the list, or opening them
-    # would 404 on GET /projects/{name}/game.
+    # Only list directories that hold an actual saved game AND are owned by the
+    # current user. Image uploads can create a project directory (with images/
+    # but no game.json); such folders are not loadable games and must not appear
+    # in the list, or opening them would 404 on GET /projects/{name}/game.
     dirs = sorted(
-        d for d in base.iterdir() if d.is_dir() and (d / "game.json").exists()
+        d
+        for d in base.iterdir()
+        if d.is_dir()
+        and (d / "game.json").exists()
+        and _get_metadata(d.name, d).get("owner") == user
     )
     total = len(dirs)
     start = (page - 1) * PAGE_SIZE
@@ -110,7 +118,12 @@ async def list_projects(page: int = Query(1, ge=1)):
 
 
 @router.put("/projects/{project_name}/game")
-async def save_game(project_name: str, request: Request):
+async def save_game(
+    project_name: str,
+    request: Request,
+    user: str = Depends(auth.get_current_user),
+):
+    require_owner(project_name, user)  # 403 if the project belongs to someone else
     body = await request.body()
     try:
         game = json.loads(body)
@@ -120,6 +133,7 @@ async def save_game(project_name: str, request: Request):
     project_dir.mkdir(parents=True, exist_ok=True)
     (project_dir / "game.json").write_bytes(body)
     metadata = _extract_metadata(game)
+    metadata["owner"] = user
     metadata["lastModified"] = datetime.now(timezone.utc).isoformat()
     _set_metadata(project_name, project_dir, metadata)
     return {"status": "ok"}
@@ -127,6 +141,8 @@ async def save_game(project_name: str, request: Request):
 
 @router.get("/projects/{project_name}/game")
 async def load_game(project_name: str):
+    # Public: anyone can load a game's JSON so published games stay playable
+    # via /play/{project} without an account.
     project_dir = _safe_project_dir(project_name)
     game_file = project_dir / "game.json"
     if not game_file.exists():
@@ -135,7 +151,11 @@ async def load_game(project_name: str):
 
 
 @router.delete("/projects/{project_name}")
-async def delete_project(project_name: str):
+async def delete_project(
+    project_name: str,
+    user: str = Depends(auth.get_current_user),
+):
+    require_owner(project_name, user)
     project_dir = _safe_project_dir(project_name)
     if not project_dir.exists():
         raise HTTPException(status_code=404, detail="Project not found")

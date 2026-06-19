@@ -19,11 +19,12 @@ from typing import Literal
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from app import prompt_history
+from app import auth, prompt_history
 from app.image_storage import image_dir, safe_path, save_image
+from app.ownership import require_owner
 
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
@@ -55,7 +56,10 @@ def _check_config() -> None:
 # ---------------------------------------------------------------------------
 
 @router.get("/models")
-async def list_models(workflow: str | None = None) -> list[str]:
+async def list_models(
+    workflow: str | None = None,
+    user: str = Depends(auth.get_current_user),
+) -> list[str]:
     """Return available imggen.* capabilities from online agents.
 
     Optional ``workflow`` query param (``txt2img`` or ``img2img``) filters
@@ -111,9 +115,13 @@ class TaskRef(BaseModel):
 
 
 @router.post("/generate")
-async def generate(req: GenerateRequest) -> TaskRef:
+async def generate(
+    req: GenerateRequest,
+    user: str = Depends(auth.get_current_user),
+) -> TaskRef:
     """Create required buckets, submit txt2img/img2img task, return task reference."""
     _check_config()
+    require_owner(req.project_name, user)
     if not req.model.startswith("imggen."):
         raise HTTPException(status_code=400, detail="Model must start with imggen.")
     if req.workflow == "img2img" and not req.input_image:
@@ -218,7 +226,13 @@ async def generate(req: GenerateRequest) -> TaskRef:
 # ---------------------------------------------------------------------------
 
 @router.get("/status/{project_name}/{cap}/{task_id}/{output_bucket}")
-async def poll_status(project_name: str, cap: str, task_id: str, output_bucket: str):
+async def poll_status(
+    project_name: str,
+    cap: str,
+    task_id: str,
+    output_bucket: str,
+    user: str = Depends(auth.get_current_user),
+):
     """
     Poll task status.
 
@@ -227,6 +241,7 @@ async def poll_status(project_name: str, cap: str, task_id: str, output_bucket: 
     and returns {status: 'completed', filename: '<saved name>'}.
     """
     _check_config()
+    require_owner(project_name, user)
 
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.post(

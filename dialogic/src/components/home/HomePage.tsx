@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderOpen,
+  LogOut,
   MapPin,
   MessageSquare,
   MousePointerClick,
@@ -16,6 +17,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
+import { AuthUser } from '../../api/authApi';
 import { GameDescription, createDefaultGame } from '../../game/GameDescription';
 import {
   ProjectMeta,
@@ -29,6 +31,8 @@ import './HomePage.css';
 
 interface HomePageProps {
   onOpenProject: (game: GameDescription, name: string) => void;
+  currentUser: AuthUser;
+  onLogout: () => void;
 }
 
 function formatLastModified(iso?: string): string | null {
@@ -170,7 +174,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   );
 };
 
-const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
+const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogout }) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [projectsPage, setProjectsPage] = useState<ProjectsPage | null>(null);
@@ -255,6 +259,21 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
       <div className="home-orb home-orb--1" aria-hidden />
       <div className="home-orb home-orb--2" aria-hidden />
       <div className="home-orb home-orb--3" aria-hidden />
+
+      <div className="home-userbar">
+        <span className="home-userbar-name" data-testid="current-user">
+          {currentUser.username}
+        </span>
+        <button
+          type="button"
+          className="home-userbar-logout"
+          onClick={onLogout}
+          data-testid="logout-btn"
+        >
+          <LogOut size={14} />
+          Log out
+        </button>
+      </div>
 
       <div className="home-inner">
         <header className="home-hero">

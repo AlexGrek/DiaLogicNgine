@@ -1,10 +1,12 @@
 import mimetypes
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from app import auth
+from app.ownership import require_owner
 from app.image_storage import (
     ALLOWED_MIME_PREFIXES,
     THUMB_MAX_PX,
@@ -19,7 +21,13 @@ router = APIRouter(tags=["images"])
 
 
 @router.put("/projects/{project_name}/images/{filename}")
-async def upload_image(project_name: str, filename: str, file: UploadFile):
+async def upload_image(
+    project_name: str,
+    filename: str,
+    file: UploadFile,
+    user: str = Depends(auth.get_current_user),
+):
+    require_owner(project_name, user)
     mime = file.content_type or mimetypes.guess_type(filename)[0] or ""
     if not any(mime.startswith(p) for p in ALLOWED_MIME_PREFIXES):
         raise HTTPException(status_code=415, detail=f"Unsupported media type: {mime}")
@@ -43,7 +51,12 @@ async def upload_image(project_name: str, filename: str, file: UploadFile):
 
 
 @router.get("/projects/{project_name}/images")
-async def list_images(project_name: str):
+async def list_images(
+    project_name: str,
+    user: str = Depends(auth.get_current_user),
+):
+    # Editor-only: listing a project's uploads is owner-scoped.
+    require_owner(project_name, user)
     base = image_dir(project_name)
     if not base.exists():
         return {"images": []}
@@ -52,6 +65,7 @@ async def list_images(project_name: str):
 
 @router.get("/projects/{project_name}/images/{filename}")
 async def serve_image(project_name: str, filename: str):
+    # Public: serving an image by name keeps published games playable.
     path = safe_path(image_dir(project_name), filename)
     if not path.exists():
         raise HTTPException(status_code=404, detail="Image not found")
@@ -72,8 +86,13 @@ class ResizeImageRequest(BaseModel):
 
 
 @router.post("/projects/{project_name}/images/resize")
-async def resize_image(project_name: str, req: ResizeImageRequest):
+async def resize_image(
+    project_name: str,
+    req: ResizeImageRequest,
+    user: str = Depends(auth.get_current_user),
+):
     """Resize/crop an existing project image and save the result as a new image (no AI)."""
+    require_owner(project_name, user)
     from pathlib import Path
     source_filename = Path(req.source_image).name
     src_path = safe_path(image_dir(project_name), source_filename)
@@ -98,7 +117,12 @@ async def resize_image(project_name: str, req: ResizeImageRequest):
 
 
 @router.delete("/projects/{project_name}/images/{filename}")
-async def delete_image(project_name: str, filename: str):
+async def delete_image(
+    project_name: str,
+    filename: str,
+    user: str = Depends(auth.get_current_user),
+):
+    require_owner(project_name, user)
     img_path = safe_path(image_dir(project_name), filename)
     thumb_path = safe_path(thumb_dir(project_name), filename)
     if not img_path.exists():

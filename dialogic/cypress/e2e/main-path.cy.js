@@ -11,7 +11,12 @@
 describe("Main path: home → create project → editor → player", () => {
   const projectName = `e2e-main-${Date.now()}`;
 
+  beforeEach(() => {
+    cy.login();
+  });
+
   after(() => {
+    cy.login();
     cy.request({
       method: "DELETE",
       url: `/api/v1/projects/${encodeURIComponent(projectName)}`,
