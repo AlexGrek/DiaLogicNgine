@@ -92,7 +92,7 @@ export function createDefaultVisuals(): VisualsConfiguration {
         notificationBorderRadius: DEFAULT_NOTIFICATION_BORDER_RADIUS,
         notificationBorderOpacity: DEFAULT_NOTIFICATION_BORDER_OPACITY,
         typewriterEnabled: true,
-        typewriterSpeedMs: 30,
+        typewriterSpeedMs: 12,
         menuPanelOpacity: DEFAULT_MENU_PANEL_OPACITY,
         menuPanelBorderRadius: DEFAULT_MENU_PANEL_BORDER_RADIUS,
         customCss: "",

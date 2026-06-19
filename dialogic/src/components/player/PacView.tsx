@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { PacRenderView } from '../../exec/RenderView';
@@ -12,47 +13,22 @@ interface PacViewProps {
     view: PacRenderView
     step: number
     onStateUpd: (newState: State) => void
-    transitionOut: boolean
 }
 
-const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view, transitionOut }) => {
-    const [, setInTransitionIn] = useState<boolean>(false)
-
-    useEffect(() => {
-        if (state.shortHistory.length > 0) {
-            const latest = document.getElementById("dialog-short-history-scrollable")
-            if (latest) {
-                setTimeout(() => {
-                    latest.scrollTop = latest.scrollHeight;
-                    console.log("Scroll to bottom applied")
-                }, 100)
-            }
-        }
-
-        setInTransitionIn(true)
-        setTimeout(() => setInTransitionIn(false), 250)
-    }, [view, state.shortHistory.length])
-
-    const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (!transitionOut) {
-            return base
-        }
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-out-${inumber}`
-        }
-        return `${base} transition-out${indexString}`
-    }
-
+const PacView: React.FC<PacViewProps> = ({ game, onStateUpd, view }) => {
     const handleZoneClick = useCallback((zone: PointAndClickZone) => {
         onStateUpd(game.pacZoneApply(zone, view))
     }, [game, onStateUpd, view])
 
     return (
-        <div className={transitionOutClass("pac-window-view")}>
+        <motion.div
+            className="pac-window-view"
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+        >
             <PointAndClickScene backgroundImage={view.pac.background} zones={view.items} onZoneClick={handleZoneClick} />
-        </div>
+        </motion.div>
     );
 };
 

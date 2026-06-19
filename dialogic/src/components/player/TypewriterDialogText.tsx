@@ -3,26 +3,20 @@ import React from 'react';
 interface TypewriterDialogTextProps {
     fullText: string;
     displayText: string;
-    reserveLayout: boolean;
 }
 
-const TypewriterDialogText: React.FC<TypewriterDialogTextProps> = ({
-    fullText,
-    displayText,
-    reserveLayout,
-}) => {
-    if (!reserveLayout || !fullText) {
-        return <p className="dialog-current-text">{displayText}</p>;
-    }
-
+/**
+ * Renders the full text always, with the not-yet-revealed tail kept transparent.
+ * The element box therefore never changes while the typewriter runs, so nothing
+ * below it reflows and any framer-motion layout morph of this element stays clean.
+ */
+const TypewriterDialogText: React.FC<TypewriterDialogTextProps> = ({ fullText, displayText }) => {
+    const revealed = fullText.startsWith(displayText) ? displayText : fullText;
+    const rest = fullText.slice(revealed.length);
     return (
         <>
-            <p className="dialog-current-text dialog-current-text--measure" aria-hidden="true">
-                {fullText}
-            </p>
-            <p className="dialog-current-text dialog-current-text--visible">
-                {displayText}
-            </p>
+            <span className="dlg-line-typed">{revealed}</span>
+            {rest && <span className="dlg-line-rest" aria-hidden="true">{rest}</span>}
         </>
     );
 };

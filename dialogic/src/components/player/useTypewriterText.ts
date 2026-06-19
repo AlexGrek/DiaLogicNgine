@@ -1,57 +1,63 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { animate } from 'framer-motion'
 
+/**
+ * Reveals `fullText` character by character using a framer-motion value tween.
+ * Unlike a setInterval typewriter this is frame-driven (smooth, refresh-rate
+ * independent) and the whole reveal is finished in `fullText.length * speedMs`.
+ *
+ * The returned `displayText` is the revealed prefix; callers render the full
+ * text with the unrevealed tail kept transparent so layout never reflows.
+ */
 export function useTypewriterText(
     fullText: string,
     enabled: boolean,
     speedMs: number,
     resetKey: string,
 ) {
-    const [displayText, setDisplayText] = useState(enabled ? '' : fullText)
-    const [isComplete, setIsComplete] = useState(!enabled)
-    const indexRef = useRef(0)
-    const timerRef = useRef<number | null>(null)
+    const [count, setCount] = useState<number>(enabled ? 0 : fullText.length)
+    const [isComplete, setIsComplete] = useState<boolean>(!enabled)
+    const stopRef = useRef<(() => void) | null>(null)
 
-    const clearTimer = useCallback(() => {
-        if (timerRef.current != null) {
-            window.clearInterval(timerRef.current)
-            timerRef.current = null
+    const stop = useCallback(() => {
+        if (stopRef.current) {
+            stopRef.current()
+            stopRef.current = null
         }
     }, [])
 
     useEffect(() => {
-        clearTimer()
+        stop()
         if (!enabled || !fullText) {
-            setDisplayText(fullText)
+            setCount(fullText.length)
             setIsComplete(true)
-            indexRef.current = fullText.length
-            return clearTimer
+            return
         }
-        indexRef.current = 0
-        setDisplayText('')
+        setCount(0)
         setIsComplete(false)
-        timerRef.current = window.setInterval(() => {
-            indexRef.current += 1
-            if (indexRef.current >= fullText.length) {
-                setDisplayText(fullText)
+        const duration = Math.max(0.05, (fullText.length * speedMs) / 1000)
+        const controls = animate(0, fullText.length, {
+            duration,
+            ease: 'linear',
+            onUpdate: (value) => setCount(Math.min(fullText.length, Math.floor(value))),
+            onComplete: () => {
+                setCount(fullText.length)
                 setIsComplete(true)
-                clearTimer()
-            } else {
-                setDisplayText(fullText.slice(0, indexRef.current))
-            }
-        }, speedMs)
-        return clearTimer
-    }, [fullText, enabled, speedMs, resetKey, clearTimer])
+            },
+        })
+        stopRef.current = () => controls.stop()
+        return stop
+    }, [fullText, enabled, speedMs, resetKey, stop])
 
     const skip = useCallback(() => {
-        if (indexRef.current >= fullText.length) {
+        if (count >= fullText.length) {
             return false
         }
-        clearTimer()
-        setDisplayText(fullText)
+        stop()
+        setCount(fullText.length)
         setIsComplete(true)
-        indexRef.current = fullText.length
         return true
-    }, [fullText, clearTimer])
+    }, [count, fullText.length, stop])
 
-    return { displayText, isComplete, skip }
+    return { displayText: fullText.slice(0, count), isComplete, skip }
 }

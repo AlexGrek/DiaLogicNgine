@@ -180,12 +180,12 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
             {visuals.typewriterEnabled && (
                 <div>
                     <p className="editor-label">Typewriter speed</p>
-                    <p className="visuals-property-hint">Milliseconds between characters — lower is faster (10–80 ms).</p>
+                    <p className="visuals-property-hint">Milliseconds between characters — lower is faster (3–80 ms).</p>
                     {sliderNumber(
                         visuals.typewriterSpeedMs,
                         80,
                         (n) => updateVisuals({ typewriterSpeedMs: n }),
-                        10,
+                        3,
                     )}
                 </div>
             )}

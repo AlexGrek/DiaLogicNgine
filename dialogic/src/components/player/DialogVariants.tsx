@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { RenderLink } from '../../exec/RenderView';
@@ -14,46 +15,24 @@ interface DialogVariantsProps {
     links: RenderLink[]
     step: number
     onStateUpd: (newState: State) => void
-    transitionOut: boolean
-    inTransitionIn: boolean
     text?: string
     responseAlignment: ResponseAlignment
     nested?: boolean
     interactive?: boolean
 }
 
-const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, transitionOut, step, inTransitionIn, responseAlignment, nested, interactive = true }) => {
+// 3D "card flip" reveal, preserved from the previous CSS keyframes but driven by framer-motion.
+const containerVariants: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.045, delayChildren: 0.02 } },
+};
 
-    const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (!interactive) {
-            return base
-        }
-        if (transitionOut) {
-            return transitionOutClass(base, index, maxindex)
-        }
-        if (!inTransitionIn)
-            return base
+const itemVariants: Variants = {
+    hidden: { rotateX: 90, opacity: 0, y: '10%' },
+    show: { rotateX: 0, opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
+};
 
-        // we are in transition in, so...
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-in-${inumber}`
-        }
-        return `${base} transition-in${indexString}`
-    }
-
-    const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (!transitionOut) {
-            return base
-        }
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-out-${inumber}`
-        }
-        return `${base} transition-out${indexString}`
-    }
+const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, step, responseAlignment, nested, interactive = true }) => {
 
     const click = (link: DialogLink, textOfLink: string, ev: React.MouseEvent) => {
         ev.stopPropagation()
@@ -61,25 +40,40 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
         onStateUpd(game.dialogVariantApply(state, link, clickData))
     }
 
-    const dialogVariants = () => {
-        return links.map((link, i) => {
-            const textOfLink = link.text
-            return (<div key={link.text + i} className={transitionInOutClass("dialog-variant-button-container")}>
-                <button disabled={link.disabled || !interactive} className='dialog-button' onClick={interactive ? (ev) => click(link.link, textOfLink, ev) : undefined}>
-                    <LinkButtonContent link={link.link} text={textOfLink} />
-                </button>
-            </div>)
-        })
-    }
-
     const variantsClass = [
         nested ? 'dialog-variants dialog-variants--nested' : dialogVariantsClass(responseAlignment),
         !interactive ? 'dialog-variants--pending' : '',
     ].filter(Boolean).join(' ');
 
+    if (state.fatalError) {
+        return <div className={variantsClass} />
+    }
+
     return (
         <div className={variantsClass}>
-            {state.fatalError ? [] : dialogVariants()}
+            <AnimatePresence mode="popLayout">
+                <motion.div
+                    key={`${step}-${interactive}`}
+                    className="dialog-variants-group"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                >
+                    {links.map((link, i) => (
+                        <motion.div key={link.text + i} className="dialog-variant-button-container" variants={itemVariants}>
+                            <motion.button
+                                disabled={link.disabled || !interactive}
+                                className="dialog-button"
+                                onClick={interactive ? (ev) => click(link.link, link.text, ev) : undefined}
+                                whileHover={link.disabled ? undefined : { rotateX: 22, y: '6%' }}
+                                transition={{ duration: 0.12, ease: 'easeOut' }}
+                            >
+                                <LinkButtonContent link={link.link} text={link.text} />
+                            </motion.button>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 };

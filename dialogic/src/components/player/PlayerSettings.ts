@@ -6,17 +6,21 @@ export interface PlayerSettings {
     letterByLetterSpeedMs: number
     textFontSize: FontSizeId
     responsesFontSize: FontSizeId
+    /** Player preference to show the short history strip. Only effective when the
+     *  game author has enabled short history (visuals.shortHistoryVisible). */
+    shortHistory: boolean
 }
 
 export const DEFAULT_PLAYER_SETTINGS: PlayerSettings = {
     letterByLetter: true,
-    letterByLetterSpeedMs: 30,
+    letterByLetterSpeedMs: 12,
     textFontSize: 'normal',
     responsesFontSize: 'normal',
+    shortHistory: true,
 }
 
-export const MIN_LETTER_SPEED_MS = 10
-export const MAX_LETTER_SPEED_MS = 80
+export const MIN_LETTER_SPEED_MS = 3
+export const MAX_LETTER_SPEED_MS = 60
 
 const STORAGE_KEY = 'dialogicngine_player_settings'
 
@@ -39,6 +43,7 @@ export function loadPlayerSettings(gameDefaults?: Partial<PlayerSettings>): Play
                 letterByLetterSpeedMs: clampSpeed(parsed.letterByLetterSpeedMs ?? base.letterByLetterSpeedMs),
                 textFontSize: normalizeFontSizeId(parsed.textFontSize ?? base.textFontSize),
                 responsesFontSize: normalizeFontSizeId(parsed.responsesFontSize ?? base.responsesFontSize),
+                shortHistory: typeof parsed.shortHistory === 'boolean' ? parsed.shortHistory : base.shortHistory,
             }
         }
     } catch {

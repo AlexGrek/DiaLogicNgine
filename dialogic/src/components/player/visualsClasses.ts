@@ -64,7 +64,7 @@ export function resolveVisuals(visuals: VisualsConfiguration | undefined): Visua
     merged.notificationBorderRadius = clampInt(merged.notificationBorderRadius, 0, 50, DEFAULT_NOTIFICATION_BORDER_RADIUS);
     merged.notificationBorderOpacity = clampInt(merged.notificationBorderOpacity, 0, 100, DEFAULT_NOTIFICATION_BORDER_OPACITY);
     merged.typewriterEnabled = Boolean(merged.typewriterEnabled ?? true);
-    merged.typewriterSpeedMs = clampInt(merged.typewriterSpeedMs, 10, 80, 30);
+    merged.typewriterSpeedMs = clampInt(merged.typewriterSpeedMs, 3, 80, 12);
     merged.textFontSize = normalizeFontSizeId(merged.textFontSize);
     merged.responsesFontSize = normalizeFontSizeId(merged.responsesFontSize);
     merged.menuPanelOpacity = clampInt(merged.menuPanelOpacity, 0, 100, DEFAULT_MENU_PANEL_OPACITY);

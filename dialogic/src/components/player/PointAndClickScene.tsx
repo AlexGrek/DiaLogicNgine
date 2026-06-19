@@ -1,5 +1,6 @@
 import { PointAndClickZoneRenderView } from "../../exec/RenderView";
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { PointAndClickZone } from "../../game/PointAndClick";
 import { generateImageUrlCss } from "../../Utils";
 
@@ -46,7 +47,7 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                                 : (zone.zone.idleOpacity ?? 0.3);
 
                             return (
-                                <div
+                                <motion.div
                                     key={zone.zone.id}
                                     style={{
                                         ...styles.zone,
@@ -54,20 +55,29 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                                         top: `${zone.zone.y}%`,
                                         width: `${zone.zone.width}%`,
                                         height: `${zone.zone.height}%`,
-                                        opacity: opacity,
                                         backgroundImage: zone.zone.image ? generateImageUrlCss(zone.zone.image) : 'none',
                                         backgroundColor: zone.zone.image ? 'transparent' : 'rgba(255, 255, 100, 0.5)',
                                     }}
+                                    animate={{ opacity }}
+                                    transition={{ duration: 0.2, ease: 'easeOut' }}
                                     onMouseEnter={() => setHoveredZone(zone.zone.id)}
                                     onMouseLeave={() => setHoveredZone(null)}
                                     onClick={() => handleZoneClick(zone.zone)}
                                 >
-                                    {isHovered && (
-                                        <div style={styles.zoneName}>
-                                            {zone.zone.name}
-                                        </div>
-                                    )}
-                                </div>
+                                    <AnimatePresence>
+                                        {isHovered && (
+                                            <motion.div
+                                                style={styles.zoneName}
+                                                initial={{ opacity: 0, y: -6 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -6 }}
+                                                transition={{ duration: 0.15 }}
+                                            >
+                                                {zone.zone.name}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
                             );
                         })}
                     </div>

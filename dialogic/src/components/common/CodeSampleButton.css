@@ -1,7 +1,11 @@
+.rs-btn.code-sample-button {
+    border-radius: 0 !important;
+}
+
 .button-content-cs {
     text-align: left;
     min-width: 16em;
-    height: 42pt;
+    height: 55pt;
     padding: 0;
     margin: 0;
     overflow: hidden;

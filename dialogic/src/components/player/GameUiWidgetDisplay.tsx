@@ -14,28 +14,27 @@ interface GameUiWidgetDisplayProps {
     state: State;
     onStateUpd: (newState: State) => void
     view: RenderView
-    transitionOut: boolean
     playerSettings: PlayerSettings
 }
 
-const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view, transitionOut, playerSettings }) => {
+const GameUiWidgetDisplay: React.FC<GameUiWidgetDisplayProps> = ({ game, state, onStateUpd, view, playerSettings }) => {
 
     if (view.uiWidgetView.widget === 'dialog') {
         return (
-            <DialogWindowView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} playerSettings={playerSettings} />
+            <DialogWindowView step={view.step} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} playerSettings={playerSettings} />
         )
     }
 
     if (view.uiWidgetView.widget === 'location') {
-        return <LocView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
+        return <LocView step={view.step} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
     }
 
     if (view.uiWidgetView.widget === 'char') {
-        return <CharDialogView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} playerSettings={playerSettings} />
+        return <CharDialogView step={view.step} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} playerSettings={playerSettings} />
     }
 
     if (view.uiWidgetView.widget === 'pac') {
-        return <PacView step={view.step} transitionOut={transitionOut} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
+        return <PacView step={view.step} view={view.uiWidgetView} game={game} state={state} onStateUpd={onStateUpd} />
     }
 
     if (view.uiWidgetView.widget === 'error') {

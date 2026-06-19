@@ -41,7 +41,7 @@ const CodeSampleButton: React.FC<CodeSampleButtonProps> = ({ name, code, onClick
     }
 
     return (
-        <Button onClick={onClick}>
+        <Button className="code-sample-button" onClick={onClick}>
             <div className="button-content-cs">
                 <p className="header-cs"><ReadyRoundIcon style={{ fontSize: '1em' }} />
                     <span className="name-cs">{name}</span>

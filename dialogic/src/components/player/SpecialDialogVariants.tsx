@@ -1,4 +1,5 @@
 import React from 'react';
+import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { ResponseAlignment } from '../../game/GameDescription';
@@ -18,58 +19,23 @@ interface SpecialDialogVariantsProps {
     state: State
     links: SpecialDialogVariant[]
     onClick: (name: string) => void
-    transitionOut: boolean
-    inTransitionIn: boolean
     text?: string
     responseAlignment: ResponseAlignment
     nested?: boolean
     interactive?: boolean
 }
 
-const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, links, transitionOut, inTransitionIn, responseAlignment, nested, interactive = true }) => {
+const containerVariants: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.045, delayChildren: 0.02 } },
+};
 
-    const transitionInOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (!interactive) {
-            return base
-        }
-        if (transitionOut) {
-            return transitionOutClass(base, index, maxindex)
-        }
-        if (!inTransitionIn)
-            return base
+const itemVariants: Variants = {
+    hidden: { rotateX: 90, opacity: 0, y: '10%' },
+    show: { rotateX: 0, opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
+};
 
-        // we are in transition in, so...
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-in-${inumber}`
-        }
-        return `${base} transition-in${indexString}`
-    }
-
-    const transitionOutClass = (base: string, index?: number, maxindex?: number) => {
-        if (!transitionOut) {
-            return base
-        }
-        let indexString = ''
-        if (index !== undefined && maxindex) {
-            const inumber = index > maxindex ? maxindex : index
-            indexString = ` transition-out-${inumber}`
-        }
-        return `${base} transition-out${indexString}`
-    }
-
-    const specialDialogVariants = () => {
-        return links.map((link, i) => {
-            const textOfLink = link.name
-            return (<div key={link.name + i} className={transitionInOutClass("dialog-variant-button-container special")}>
-                <button disabled={link.disabled || !interactive} className='dialog-button special' onClick={interactive ? () => onClick(link.value) : undefined}>
-                    <span className='dialog-variant-icon'>{link.icon || ''}</span>
-                    {textOfLink}
-                </button>
-            </div>)
-        })
-    }
+const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, links, responseAlignment, nested, interactive = true }) => {
 
     const variantsClass = [
         nested ? 'dialog-variants dialog-variants--nested special' : `${dialogVariantsClass(responseAlignment)} special`,
@@ -78,7 +44,30 @@ const SpecialDialogVariants: React.FC<SpecialDialogVariantsProps> = ({ onClick, 
 
     return (
         <div className={variantsClass}>
-            {specialDialogVariants()}
+            <AnimatePresence mode="popLayout">
+                <motion.div
+                    key={`${interactive}`}
+                    className="dialog-variants-group"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                >
+                    {links.map((link, i) => (
+                        <motion.div key={link.name + i} className="dialog-variant-button-container special" variants={itemVariants}>
+                            <motion.button
+                                disabled={link.disabled || !interactive}
+                                className="dialog-button special"
+                                onClick={interactive ? () => onClick(link.value) : undefined}
+                                whileHover={link.disabled ? undefined : { rotateX: 22, y: '6%' }}
+                                transition={{ duration: 0.12, ease: 'easeOut' }}
+                            >
+                                <span className="dialog-variant-icon">{link.icon || ''}</span>
+                                {link.name}
+                            </motion.button>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 };
