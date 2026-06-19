@@ -9,6 +9,7 @@ import {
   MapPin,
   MessageSquare,
   MousePointerClick,
+  Play,
   Plus,
   Sparkles,
   Target,
@@ -49,6 +50,7 @@ interface ProjectCardProps {
   anyBusy: boolean;
   deleting: boolean;
   onOpen: (name: string) => void;
+  onPlay: (name: string) => void;
   onDelete: (name: string) => void;
 }
 
@@ -66,6 +68,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   anyBusy,
   deleting,
   onOpen,
+  onPlay,
   onDelete,
 }) => {
   const displayName = project.displayName || project.name;
@@ -142,6 +145,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <Button
             appearance="primary"
             size="sm"
+            disabled={anyBusy}
+            onClick={() => onPlay(project.name)}
+            data-testid="play-project-btn"
+            className="home-project-play-btn"
+          >
+            <Play size={14} style={{ marginRight: 4 }} />
+            Play
+          </Button>
+          <Button
+            appearance="primary"
+            size="sm"
             loading={opening}
             disabled={anyBusy}
             onClick={() => onOpen(project.name)}
@@ -193,6 +207,13 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
       setCreating(false);
     }
   }, [newName, onOpenProject, navigate]);
+
+  const handlePlay = useCallback(
+    (name: string) => {
+      navigate(`/play/${encodeURIComponent(name)}`);
+    },
+    [navigate]
+  );
 
   const handleOpen = useCallback(
     async (name: string) => {
@@ -342,6 +363,7 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject }) => {
                   anyBusy={anyBusy}
                   deleting={deletingName === proj.name}
                   onOpen={handleOpen}
+                  onPlay={handlePlay}
                   onDelete={setConfirmDelete}
                 />
               ))}

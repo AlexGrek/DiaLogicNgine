@@ -40,6 +40,7 @@ import SpecialWindowsMenu from "./components/menuitems/specialwindows/SpecialWin
 import VisualsMenu from "./components/menuitems/visuals/VisualsMenu";
 import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
 import HomePage from "./components/home/HomePage";
+import PlayOnlyPage from "./components/play/PlayOnlyPage";
 import { ProjectImagesContext } from "./components/common/ProjectImagesContext";
 
 export interface CopiedObject {
@@ -351,6 +352,7 @@ export default function App() {
     <CustomProvider theme="dark">
       <Routes>
         <Route path="/" element={<HomePage onOpenProject={handleOpenProject} />} />
+        <Route path="/play/:projectName" element={<PlayOnlyPage />} />
         <Route element={<AppLayout game={game} setGame={setGame} projectName={projectName} setProjectName={setProjectName} />}>
           <Route path="dialog" element={<DialogRoute />} />
           <Route path="dialog/:dialogId" element={<DialogRoute />} />
