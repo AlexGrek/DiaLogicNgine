@@ -153,7 +153,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
             const body = indentBlock(text, indent);
             insertion = (codeBefore ? '\n' + indent : '') + body + (codeAfter ? '\n' + indent : '');
 
-            const hollow = insertion.match(/\{\n([ \t]*)\n\}/);
+            const hollow = insertion.match(/\{\n([ \t]*)\n[ \t]*\}/);
             if (hollow && hollow.index !== undefined) {
                 caretInInsertion = hollow.index + 2 + hollow[1].length;
             } else {
