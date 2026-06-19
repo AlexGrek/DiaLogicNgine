@@ -28,8 +28,15 @@ cd dialogic && npm run cypress:open
 | File | Coverage |
 |------|----------|
 | `home-page.cy.js` | Home page UI, project create form validation |
-| `editor-routes.cy.js` | Direct navigation to all `/editor/*` routes + sidebar nav items |
+| `editor-routes.cy.js` | Direct navigation to all editor routes + sidebar nav items |
 | `main-path.cy.js` | Create project → editor → sidebar nav → player → new game |
+| `open-test-project.cy.js` | `cy.openTestProject()` custom command — seed + open via UI |
+| `project-lifecycle.cy.js` | Create project → list → reopen → delete with confirmation |
+| `editor-sections.cy.js` | Key editor sections render expected headings and UI |
+| `sidebar-dialog.cy.js` | Create a dialog via the sidebar plus button |
+| `nav-home.cy.js` | Home navigation from editor with confirmation dialog |
+| `scripts-tabs.cy.js` | Scripts editor tab switching (Props, Scripting, Events, Hooks) |
+| `api-health.cy.js` | Backend health endpoints via Vite proxy |
 
 Route list is in `cypress/support/app-routes.js`.
 
