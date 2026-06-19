@@ -30,7 +30,7 @@ Cypress.Commands.add("ensureTestProject", () => {
       situations: [],
       pacWidgets: [],
       hooks: [],
-      uiElements: {},
+      uiElements: { meters: [] },
       translations: {},
       visuals: {},
       config: {},

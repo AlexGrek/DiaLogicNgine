@@ -48,6 +48,15 @@
     box-sizing: border-box;
 }
 
+.player-window--play-only {
+    height: 100vh;
+    height: 100dvh;
+}
+
+.player-window--play-only .player-main {
+    max-width: none;
+}
+
 .player-top-panel {
     flex: 0 0 auto;
 }

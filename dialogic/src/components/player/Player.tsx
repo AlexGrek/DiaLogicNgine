@@ -16,9 +16,11 @@ import "./player.css";
 interface PlayerProps {
     game: GameDescription;
     handlers?: IUpds;
+    playOnly?: boolean;
+    onExit?: () => void;
 }
 
-const Player: React.FC<PlayerProps> = ({ game }) => {
+const Player: React.FC<PlayerProps> = ({ game, playOnly, onExit }) => {
     const [, setGame] = useState<GameDescription>(game);
     const [gameExecutor, setGameExecutor] = useState<GameExecManager>(() => new GameExecManager(game));
     const [gameState, setGameState] = useState<State>(() => gameExecutor.executeEntry(createInitialState(game)))
@@ -73,25 +75,32 @@ const Player: React.FC<PlayerProps> = ({ game }) => {
     const visualsStyle = playerVisualsCssVars(visuals);
 
     return (
-        <div className='player-window' style={visualsStyle}>
-            <div className='player-top-panel'>
-                <ButtonGroup className='player-controls'>
-                    <Button name='restart' onClick={handleRestart}>Restart</Button>
-                    <Button name='statedisplay' onClick={() => setStateEditorOpen(true)}>State</Button>
-                    <Button name='goto' onClick={() => setGoToOpen(true)}>Go to</Button>
-                </ButtonGroup>
-            </div>
+        <div className={`player-window${playOnly ? ' player-window--play-only' : ''}`} style={visualsStyle}>
+            {!playOnly && (
+                <div className='player-top-panel'>
+                    <ButtonGroup className='player-controls'>
+                        <Button name='restart' onClick={handleRestart}>Restart</Button>
+                        <Button name='statedisplay' onClick={() => setStateEditorOpen(true)}>State</Button>
+                        <Button name='goto' onClick={() => setGoToOpen(true)}>Go to</Button>
+                    </ButtonGroup>
+                </div>
+            )}
             <div className="player-main">
                 <PlayerCore game={gameExecutor} state={gameState} onStateUpd={handleStateChange} />
                 {!started && (
                     <MainMenuView
                         game={game}
                         onStart={() => setStarted(true)}
+                        onExit={playOnly ? onExit : undefined}
                     />
                 )}
             </div>
-            <StateDisplayDrawer state={gameState} game={game} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen} onStateChange={handleStateChange} />
-            <GoToPickerDrawer open={goToOpen} game={game} onClose={() => setGoToOpen(false)} onGoTo={handleGoTo} />
+            {!playOnly && (
+                <>
+                    <StateDisplayDrawer state={gameState} game={game} onClose={() => setStateEditorOpen(false)} open={stateEditorOpen} onStateChange={handleStateChange} />
+                    <GoToPickerDrawer open={goToOpen} game={game} onClose={() => setGoToOpen(false)} onGoTo={handleGoTo} />
+                </>
+            )}
         </div>
     );
 };
