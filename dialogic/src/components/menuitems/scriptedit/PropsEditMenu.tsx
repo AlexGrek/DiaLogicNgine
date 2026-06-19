@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ButtonGroup, IconButton, Input, InputGroup, RadioTile, RadioTileGroup } from 'rsuite';
 import { IUpds } from '../../../App';
-import { Button, Stack, Table } from 'rsuite';
+import { Stack, Table } from 'rsuite';
 import ListIcon from '@rsuite/icons/List';
 import OffIcon from '@rsuite/icons/Off';
 import ParagraphIcon from '@rsuite/icons/Paragraph';
@@ -176,20 +176,22 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
         <div>
             {canCreate ? createOrPasteMenu() : null}
             <Table
+                autoHeight
+                hover
                 data={createTableData()}>
-                <Table.Column width={35}>
+                <Table.Column width={50} align="center">
                     <Table.HeaderCell>ID</Table.HeaderCell>
                     <Table.Cell dataKey="index" />
                 </Table.Column>
-                <Table.Column width={150}>
+                <Table.Column flexGrow={2} minWidth={120}>
                     <Table.HeaderCell>Name</Table.HeaderCell>
                     <Table.Cell dataKey="name" />
                 </Table.Column>
-                <Table.Column width={150}>
+                <Table.Column flexGrow={1} minWidth={100}>
                     <Table.HeaderCell>Data type</Table.HeaderCell>
                     <Table.Cell dataKey="type" />
                 </Table.Column>
-                <Table.Column width={150}>
+                <Table.Column flexGrow={2} minWidth={120}>
                     <Table.HeaderCell>Default</Table.HeaderCell>
                     <Table.Cell dataKey="value" />
                 </Table.Column>
@@ -198,13 +200,9 @@ const PropsEditMenu: React.FC<PropsEditMenuProps> = ({ props, onSetProps, game, 
                     <Table.Cell style={{ padding: '6px' }}>
                         {rowData => (
                             <ButtonGroup>
-                                <Button onClick={() => editProp(rowData.index)}>
-                                    <GearIcon />
-                                </Button>
-                                <Button onClick={() => deleteProp(rowData.index)}>
-                                    <TrashIcon />
-                                </Button>
+                                <IconButton appearance="subtle" size="sm" icon={<GearIcon />} title="Edit" onClick={() => editProp(rowData.index)} />
                                 {handlers ? <CopyButton handlers={handlers} typename={'prop'} obj={rowData.item} buttonStyle='onlyIcon' /> : null}
+                                <IconButton appearance="subtle" size="sm" color="red" icon={<TrashIcon />} title="Delete" onClick={() => deleteProp(rowData.index)} />
                             </ButtonGroup>
                         )}
                     </Table.Cell>

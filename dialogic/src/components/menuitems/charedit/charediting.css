@@ -15,6 +15,78 @@
     width: 100%;
 }
 
+.char-editing-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+    max-width: 800pt;
+    box-sizing: border-box;
+    margin: 12px 8pt 0;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #262b35 0%, #1c2129 100%);
+    border: 1px solid #373a3f;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.char-editing-header-identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.char-editing-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #3b4250;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+}
+
+.char-editing-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2a2f3a;
+    color: #6b7280;
+}
+
+.char-editing-identity-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.char-editing-identity-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #8a93a3;
+}
+
+.char-editing-uid {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e6e9ef;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-all;
+}
+
+.char-editing-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .char-role-editing {
     display: flex;
     width: 100%;

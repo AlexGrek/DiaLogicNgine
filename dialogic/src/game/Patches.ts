@@ -4,6 +4,11 @@ import { GameDescription, createDefaultConfig, createDefaultDevConfig, createDef
 import { createTranslations } from "../exec/Localization";
 import { initGameUiElementDescr } from "./GameUiElementDescr";
 
+// SANITY-CHECK COMPLIANCE: when a patch here introduces or rewrites a field that
+// holds a reference/pointer (a UID, a dialog-window id, an image filename, a new
+// link type, …), also update `runSanityCheck` in ./sanityCheck.ts so the new
+// reference is validated for dangling pointers. See CLAUDE.md → "Sanity check".
+
 export default interface Patch {
     from(): string;
     to(): string;

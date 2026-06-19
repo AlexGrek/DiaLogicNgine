@@ -81,7 +81,7 @@ src/savegame/   browser localStorage persistence for runtime save slots
 | `/facts` | `FactsRoute` | Facts & objectives |
 | `/items` | `ItemsRoute` | Inventory items |
 | `/ui` | `UiRoute` | HUD/UI element editor |
-| `/pac` | `PacRoute` | Point-and-click scene editor |
+| `/special` | `SpecialWindowsMenu` | Special windows (Point & Click + placeholders) |
 
 **Navigation:** always use `useNavigate()` — never `window.location`. Dialog links use `navigate('/dialog/' + encodeURIComponent(name))`.
 
@@ -246,12 +246,12 @@ Rapid sequential dialog creation:
 - Triggered from `DialogEditor` toolbar (Chain button)
 - Result is applied via `handlers.handleDialogApplyChange`
 
-### Point-and-click editor (`/pac` route)
+### Special windows editor (`/special` route)
 
-- `PointAncClick` manages a list of `PointAndClick` scene definitions
-- Each scene has a background image + `PointAndClickZone[]`
-- Zones have position, size, and trigger scripts
-- Edited via `PointAndClickEditor`
+- `SpecialWindowsMenu` (`components/menuitems/specialwindows/`) groups special dialog-window widget types into `PillLikeTabs`
+- **Point & Click** tab — `PointAncClick` manages a list of `PointAndClick` scene definitions; each scene has a background image + `PointAndClickZone[]` (position, size, trigger scripts), edited via `PointAndClickEditor`
+- Remaining tabs (Trading, Navigation, Canvas, Chapter opening) are `SpecialWindowPlaceholder` stubs — not implemented yet
+- Replaces the former standalone `/pac` route
 
 ### JSON mode (Save/Load menu)
 

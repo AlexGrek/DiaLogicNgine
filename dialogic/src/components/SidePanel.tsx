@@ -16,7 +16,7 @@ import ExploreIcon from '@rsuite/icons/Explore';
 import TreemapIcon from '@rsuite/icons/Treemap';
 import StorageIcon from '@rsuite/icons/Storage';
 import { IUpds } from '../App';
-import { ChevronDown, ChevronRight, Image, Plus, SquareDashedMousePointer } from 'lucide-react';
+import { AppWindow, ChevronDown, ChevronRight, Image, Plus } from 'lucide-react';
 import './side-panel.css';
 
 interface ISidePanelProps {
@@ -166,11 +166,11 @@ const SidePanel: React.FC<ISidePanelProps> = ({ game, handlers }) => {
           <NavItem icon={<DeviceOtherIcon />} label="Items" active={isActive('items')} onClick={() => navigate('/items')} testId="nav-items" />
           <NavItem icon={<TreemapIcon />} label="UI Elements" active={isActive('ui')} onClick={() => navigate('/ui')} testId="nav-ui" />
           <NavItem
-            icon={<SquareDashedMousePointer size={14} />}
-            label="Point & Click"
-            active={isActive('pac')}
-            onClick={() => navigate('/pac')}
-            testId="nav-pac"
+            icon={<AppWindow size={14} />}
+            label="Special windows"
+            active={isActive('special')}
+            onClick={() => navigate('/special')}
+            testId="nav-special"
           />
         </div>
 

@@ -113,6 +113,12 @@ All editor state lives in `App.tsx` as `useState<GameDescription>`. All mutation
 
 `SaveLoadManager.ts` serializes/deserializes `GameDescription` to/from JSON. `savegame/LocalStorageSavesManager.ts` handles browser localStorage persistence for runtime save slots.
 
+### Sanity check
+
+`game/sanityCheck.ts` (`runSanityCheck`) is a pure validator that walks the whole `GameDescription` looking for **dangling pointers** — links and references whose target no longer exists (dialog/location/character links, startup dialog, actors, situations, PAC widgets, event links) and image file references missing on the server. It is surfaced in the editor under **Game configuration → Sanity check** tab (`components/menuitems/configuration/SanityCheckPanel.tsx`).
+
+**Compliance rule:** the sanity checker must stay in sync with the data model. Whenever you add or change a reference/pointer field on the model — a new link type, a new field that holds a UID/dialog-window id, a new image-bearing field, or a migration in `game/Patches.ts` that introduces or rewrites such a field — review `runSanityCheck` and extend it so the new reference is validated. A patch that adds referencing data without a matching sanity-check rule is incomplete.
+
 ## Backend
 
 A FastAPI + uvicorn Python backend lives in `backend/`. It serves file storage for the editor.

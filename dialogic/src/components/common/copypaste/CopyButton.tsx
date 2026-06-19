@@ -27,7 +27,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({ handlers, customText, obj, type
 
     const genSpecificButton = (style: CopyButtonStyle) => {
         if (style === "onlyIcon") {
-            return <Button disabled={pressed} onClick={() => press()}><CopyIcon />{customText || ""}</Button>
+            return <IconButton appearance="subtle" size="sm" disabled={pressed} onClick={() => press()} icon={<CopyIcon />}>{customText || ""}</IconButton>
         }
         if (style === "link") {
             return <Button disabled={pressed} appearance='link' onClick={() => press()}>{customText || "copy"}</Button>

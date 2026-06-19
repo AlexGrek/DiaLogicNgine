@@ -36,9 +36,8 @@ import lodash from "lodash";
 import NotificationBar from "./components/notification/NotificationBar";
 import GameUiElementDescr from "./game/GameUiElementDescr";
 import UiElementsMenu from "./components/menuitems/uielements/UiElementsMenu";
-import PointAncClick from "./components/menuitems/pointandclick/PointAncClick";
+import SpecialWindowsMenu from "./components/menuitems/specialwindows/SpecialWindowsMenu";
 import VisualsMenu from "./components/menuitems/visuals/VisualsMenu";
-import { PointAndClick } from "./game/PointAndClick";
 import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
 import HomePage from "./components/home/HomePage";
 import { ProjectImagesContext } from "./components/common/ProjectImagesContext";
@@ -174,19 +173,6 @@ function UiRoute() {
       ui={game.uiElements}
       onSetUi={(items: GameUiElementDescr) =>
         setGame((prev) => ({ ...prev, uiElements: items }))
-      }
-      game={game}
-    />
-  );
-}
-
-function PacRoute() {
-  const { game, setGame } = useOutletContext<AppOutletContext>();
-  return (
-    <PointAncClick
-      items={game.pacWidgets}
-      onSetItems={(items: PointAndClick[]) =>
-        setGame((prev) => ({ ...prev, pacWidgets: items }))
       }
       game={game}
     />
@@ -379,7 +365,7 @@ export default function App() {
           <Route path="facts" element={<FactsRoute />} />
           <Route path="items" element={<ItemsRoute />} />
           <Route path="ui" element={<UiRoute />} />
-          <Route path="pac" element={<PacRoute />} />
+          <Route path="special" element={<SpecialWindowsMenu />} />
         </Route>
       </Routes>
     </CustomProvider>

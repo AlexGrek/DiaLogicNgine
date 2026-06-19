@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { generateImageUrl } from '../../../Utils';
-import { Button, ButtonGroup, Panel, PanelGroup } from 'rsuite';
+import { IconButton, Panel, PanelGroup } from 'rsuite';
+import { MessageSquare, User } from 'lucide-react';
 import Character from '../../../game/Character';
 import { GameDescription } from '../../../game/GameDescription';
 import { ImageList } from '../../../game/ImageList';
@@ -17,7 +18,6 @@ import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 import CharDialogEditorDrawer from './CharDialogEditorDrawer';
 import { IUpds } from '../../../App';
 import CopyButton from '../../common/copypaste/CopyButton';
-import Note from '../../userguide/Note';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -83,10 +83,10 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     const avatar = (img: ImageList) => {
         if (img.main === undefined) {
-            return null
+            return <div className="char-editing-avatar char-editing-avatar-placeholder"><User size={28} /></div>
         }
         const uri = img.main
-        return <img alt="background preview" height="128" src={generateImageUrl(uri, storageProject)}></img>
+        return <img className="char-editing-avatar" alt={`${ch.uid} avatar`} src={generateImageUrl(uri, storageProject)}></img>
     }
 
     const renderDeleteButton = () => {
@@ -99,15 +99,20 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
 
     return (
         <div className='char-editing-main-container' onBlur={save}>
-            <Note warning text={"**Under construction.** \n\nThis component is under heavy development, design will be changed"}/>
-            <p>{avatar(ch.avatar)}{ch.uid}<br/>
-            <ButtonGroup>
-                {renderDeleteButton()}
-                <CopyButton handlers={handlers} typename={'char'} obj={ch}/>
-                <Button onClick={() => setDialogEditorOpen(true)} appearance='primary' color='green'>Dialog...</Button>
-                
-                </ButtonGroup>
-            </p>
+            <div className='char-editing-header'>
+                <div className='char-editing-header-identity'>
+                    {avatar(ch.avatar)}
+                    <div className='char-editing-identity-text'>
+                        <span className='char-editing-identity-label'>Character</span>
+                        <span className='char-editing-uid'>{ch.uid}</span>
+                    </div>
+                </div>
+                <div className='char-editing-header-actions'>
+                    <IconButton appearance='primary' color='green' icon={<MessageSquare size={16} />} onClick={() => setDialogEditorOpen(true)}>Dialog...</IconButton>
+                    <CopyButton handlers={handlers} typename={'char'} obj={ch}/>
+                    {renderDeleteButton()}
+                </div>
+            </div>
             <PanelGroup accordion bordered className='char-editing-main-menu'>
                 <Panel header="Display name" defaultExpanded>
                     <TextListEditor singleLine={true} textList={ch.displayName} onChange={p => setCh({ ...ch, displayName: p })} />
