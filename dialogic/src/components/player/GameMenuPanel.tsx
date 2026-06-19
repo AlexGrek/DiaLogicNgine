@@ -14,6 +14,7 @@ import MenuTab from './MenuTab';
 import InventoryTab from './InventoryTab';
 import SavesManager from '../../savegame/LocalStorageSavesManager';
 import { PlayerSettings } from './PlayerSettings';
+import { resolveVisuals } from './visualsClasses';
 
 
 interface GameMenuPanelProps {
@@ -162,7 +163,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
             <div className='game-menu-top'>
                 <div className={getClass('game-menu-widget-container')}>
                     {('Inventory' === selectedWidget || 'Inventory' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Inventory')}>
-                        <InventoryTab state={state} game={executor} onUseItem={(uid) => { onOpenClose(false); onStateChange(executor.useItemInDialog(state, uid)); }} />
+                        <InventoryTab state={state} game={executor} layout={resolveVisuals(game.visuals).inventoryLayout} onUseItem={(uid) => { onOpenClose(false); onStateChange(executor.useItemInDialog(state, uid)); }} />
                     </div>}
                     {('Facts' === selectedWidget || 'Facts' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Facts')}>
                         <TabsUiMenuWidget data={factTabs()} />

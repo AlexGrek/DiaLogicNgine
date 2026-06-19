@@ -1,119 +1,45 @@
-import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { CarriedItem, State } from '../../exec/GameState';
+import React, { useMemo, useState } from 'react';
+import { State } from '../../exec/GameState';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { getItemByIdOrUnknown } from '../../game/Items';
+import { InventoryLayout } from '../../game/GameDescription';
 import { generateImageUrl } from '../../Utils';
 import { resolveImageProject } from '../common/projectImages';
 import { useProjectImages } from '../common/ProjectImagesContext';
-import './inventorytab.css';
+import InventoryView, { InventoryItemVM } from './InventoryView';
 
 interface InventoryTabProps {
     state: State;
     game: GameExecManager;
+    layout?: InventoryLayout;
     onUseItem?: (itemUid: string) => void;
 }
 
-const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, onUseItem }) => {
+const InventoryTab: React.FC<InventoryTabProps> = ({ state, game, layout = 'matrix', onUseItem }) => {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const storageProject = resolveImageProject(useProjectImages());
 
-    const renderItemCard = (carried: CarriedItem, index: number) => {
+    const items = useMemo<InventoryItemVM[]>(() => state.carriedItems.map((carried) => {
         const item = getItemByIdOrUnknown(game.game.items, carried.item);
-        const imgUrl = generateImageUrl(item.thumbnail || item.image || '', storageProject);
-        const isSelected = index === selectedIndex;
-        return (
-            <motion.div
-                key={carried.item}
-                data-testid={`inventory-item-${carried.item}`}
-                className={`inventory-item-card${isSelected ? ' selected' : ''}`}
-                onClick={() => setSelectedIndex(index)}
-                style={imgUrl ? { backgroundImage: `url(${imgUrl})` } : {}}
-                initial={{ opacity: 0, y: 12, scale: 0.94 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.2, delay: Math.min(index, 12) * 0.03, ease: 'easeOut' }}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.98 }}
-            >
-                <div className='inventory-item-card-footer'>
-                    <span className='inventory-item-card-name'>{item.name}</span>
-                    {carried.quantity > 1 && (
-                        <span className='inventory-item-card-qty'>x{carried.quantity}</span>
-                    )}
-                </div>
-            </motion.div>
-        );
-    };
-
-    const renderDetail = () => {
-        if (selectedIndex === null || selectedIndex >= state.carriedItems.length) {
-            return (
-                <motion.div key="empty" className='inventory-detail-empty' initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
-                    <p>Select an item</p>
-                </motion.div>
-            );
-        }
-        const carried = state.carriedItems[selectedIndex];
-        const item = getItemByIdOrUnknown(game.game.items, carried.item);
-        const imgUrl = generateImageUrl(item.image || item.thumbnail || '', storageProject);
-        const statsKeys = Object.keys(item.stats);
-        return (
-            <motion.div
-                key={carried.item}
-                className='inventory-detail'
-                data-testid='inventory-detail'
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-            >
-                <h2 className='inventory-detail-name'>{item.name}</h2>
-                {imgUrl && (
-                    <div className='inventory-detail-image-wrap'>
-                        <img className='inventory-detail-image' src={imgUrl} alt={item.name} />
-                    </div>
-                )}
-                <p className='inventory-detail-description'>{item.description}</p>
-                {statsKeys.length > 0 && (
-                    <div className='inventory-detail-stats'>
-                        {statsKeys.map(k => (
-                            <span key={k} className='inventory-detail-stat'>{k}: {item.stats[k]}</span>
-                        ))}
-                    </div>
-                )}
-                {onUseItem && (
-                    <button
-                        className='inventory-detail-use-btn'
-                        data-testid='inventory-use-btn'
-                        onClick={() => onUseItem(carried.item)}
-                    >
-                        Use
-                    </button>
-                )}
-            </motion.div>
-        );
-    };
-
-    if (state.carriedItems.length === 0) {
-        return (
-            <div className='inventory-empty' data-testid='inventory-empty'>
-                <p>Inventory is empty</p>
-            </div>
-        );
-    }
+        return {
+            uid: carried.item,
+            name: item.name,
+            quantity: carried.quantity,
+            cardImageUrl: generateImageUrl(item.thumbnail || item.image || '', storageProject),
+            detailImageUrl: generateImageUrl(item.image || item.thumbnail || '', storageProject),
+            description: item.description,
+            stats: item.stats,
+        };
+    }), [state.carriedItems, game.game.items, storageProject]);
 
     return (
-        <div className='inventory-tab-container' data-testid='inventory-tab'>
-            <div className='inventory-grid-panel'>
-                <div className='inventory-grid'>
-                    {state.carriedItems.map((carried, i) => renderItemCard(carried, i))}
-                </div>
-            </div>
-            <div className='inventory-detail-panel'>
-                <AnimatePresence mode="wait">
-                    {renderDetail()}
-                </AnimatePresence>
-            </div>
-        </div>
+        <InventoryView
+            items={items}
+            layout={layout}
+            selectedIndex={selectedIndex}
+            onSelect={setSelectedIndex}
+            onUseItem={onUseItem}
+        />
     );
 };
 

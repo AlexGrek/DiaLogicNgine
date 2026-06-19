@@ -25,6 +25,13 @@ export const ENGINE_VERSION = "0.21"
 export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
 export type FontSizeId = "xsmall" | "small" | "normal" | "large" | "huge"
+/** Layout variant for the in-game inventory / item picker menu. */
+export type InventoryLayout = "matrix" | "list"
+
+export const INVENTORY_LAYOUT_LABELS: { value: InventoryLayout; label: string }[] = [
+    { value: 'matrix', label: 'Matrix' },
+    { value: 'list', label: 'List' },
+]
 
 export const FONT_SIZE_LABELS: { value: FontSizeId; label: string }[] = [
     { value: 'xsmall', label: 'X-Small' },
@@ -74,6 +81,10 @@ export interface VisualsConfiguration {
     typewriterSpeedMs: number
     menuPanelOpacity: number
     menuPanelBorderRadius: number
+    /** Layout variant for the in-game inventory / item picker menu. */
+    inventoryLayout: InventoryLayout
+    /** Custom CSS injected at runtime, scoped to the inventory / item picker menu. */
+    inventoryCustomCss: string
     customCss: string
 }
 
@@ -95,6 +106,8 @@ export function createDefaultVisuals(): VisualsConfiguration {
         typewriterSpeedMs: 12,
         menuPanelOpacity: DEFAULT_MENU_PANEL_OPACITY,
         menuPanelBorderRadius: DEFAULT_MENU_PANEL_BORDER_RADIUS,
+        inventoryLayout: "matrix",
+        inventoryCustomCss: "",
         customCss: "",
     }
 }

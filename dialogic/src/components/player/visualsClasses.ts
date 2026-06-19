@@ -8,6 +8,7 @@ import {
     DEFAULT_NOTIFICATION_BORDER_RADIUS,
     DialogTextAlignment,
     FontSizeId,
+    InventoryLayout,
     RESPONSES_FONT_SIZE_PX,
     ResponseAlignment,
     TEXT_FONT_SIZE_PX,
@@ -46,6 +47,10 @@ function normalizeFontSizeId(value: unknown): FontSizeId {
     return 'normal';
 }
 
+function normalizeInventoryLayout(value: unknown): InventoryLayout {
+    return value === 'list' ? 'list' : 'matrix';
+}
+
 function clampInt(value: unknown, min: number, max: number, fallback: number): number {
     if (typeof value !== 'number' || Number.isNaN(value)) {
         return fallback;
@@ -69,6 +74,8 @@ export function resolveVisuals(visuals: VisualsConfiguration | undefined): Visua
     merged.responsesFontSize = normalizeFontSizeId(merged.responsesFontSize);
     merged.menuPanelOpacity = clampInt(merged.menuPanelOpacity, 0, 100, DEFAULT_MENU_PANEL_OPACITY);
     merged.menuPanelBorderRadius = clampInt(merged.menuPanelBorderRadius, 0, 50, DEFAULT_MENU_PANEL_BORDER_RADIUS);
+    merged.inventoryLayout = normalizeInventoryLayout(merged.inventoryLayout);
+    if (typeof merged.inventoryCustomCss !== 'string') merged.inventoryCustomCss = '';
     if (typeof merged.customCss !== 'string') merged.customCss = '';
     return merged;
 }

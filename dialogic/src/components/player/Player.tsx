@@ -46,6 +46,16 @@ const Player: React.FC<PlayerProps> = ({ game, playOnly, onExit }) => {
         return () => { style.remove(); };
     }, [game.visuals?.customCss]);
 
+    useEffect(() => {
+        const css = game.visuals?.inventoryCustomCss;
+        if (!css) return;
+        const style = document.createElement('style');
+        style.id = 'dialogic-inventory-custom-css';
+        style.textContent = css;
+        document.head.appendChild(style);
+        return () => { style.remove(); };
+    }, [game.visuals?.inventoryCustomCss]);
+
     const handleStateChange = (s: State) => {
         setGameState(s)
     }

@@ -12,6 +12,7 @@ import {
     VisualsConfiguration,
 } from '../../../game/GameDescription';
 import { resolveVisuals } from '../../player/visualsClasses';
+import InventoryVisualsTab from './InventoryVisualsTab';
 import './VisualsMenu.css';
 
 interface VisualsMenuProps {
@@ -259,9 +260,14 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         </div>
     );
 
+    const inventoryTab = (
+        <InventoryVisualsTab game={game} visuals={visuals} updateVisuals={updateVisuals} />
+    );
+
     const tabs: PillTab[] = [
         { header: 'Typography', content: typographyTab },
         { header: 'Dialog', content: dialogTab },
+        { header: 'Inventory', content: inventoryTab },
         { header: 'Notifications', content: notificationsTab },
         { header: 'Custom CSS', content: customCssTab },
     ];
