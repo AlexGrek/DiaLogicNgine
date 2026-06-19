@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputNumber, SegmentedControl, Slider, Toggle } from 'rsuite';
+import { Button, ButtonGroup, InputNumber, Slider, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
 import PillLikeTabs, { PillTab } from '../../common/PillLikeTabs';
 import {
@@ -68,13 +68,26 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         </div>
     );
 
-    const fontSizeButtons = (value: FontSizeId, onChange: (v: FontSizeId) => void) => (
-        <SegmentedControl
-            data={FONT_SIZE_LABELS}
-            value={value}
-            onChange={(v) => onChange(v as FontSizeId)}
-        />
+    const segmentedControl = <T extends string>(
+        data: { value: T; label: string }[],
+        value: T,
+        onChange: (v: T) => void,
+    ) => (
+        <ButtonGroup>
+            {data.map((item) => (
+                <Button
+                    key={item.value}
+                    active={value === item.value}
+                    onClick={() => onChange(item.value)}
+                >
+                    {item.label}
+                </Button>
+            ))}
+        </ButtonGroup>
     );
+
+    const fontSizeButtons = (value: FontSizeId, onChange: (v: FontSizeId) => void) =>
+        segmentedControl(FONT_SIZE_LABELS, value, onChange);
 
     const typographyTab = (
         <div className="visuals-properties">
@@ -120,20 +133,20 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
             <div>
                 <p className="editor-label">Dialog text placement</p>
                 <p className="visuals-property-hint">Where the dialog text panel appears in the player.</p>
-                <SegmentedControl
-                    data={TEXT_ALIGNMENTS}
-                    value={visuals.dialogTextAlignment}
-                    onChange={(v) => updateVisuals({ dialogTextAlignment: v as DialogTextAlignment })}
-                />
+                {segmentedControl(
+                    TEXT_ALIGNMENTS,
+                    visuals.dialogTextAlignment,
+                    (v) => updateVisuals({ dialogTextAlignment: v }),
+                )}
             </div>
             <div>
                 <p className="editor-label">Response alignment</p>
                 <p className="visuals-property-hint">How choice buttons are laid out in the player.</p>
-                <SegmentedControl
-                    data={RESPONSE_ALIGNMENTS}
-                    value={visuals.responseAlignment}
-                    onChange={(v) => updateVisuals({ responseAlignment: v as ResponseAlignment })}
-                />
+                {segmentedControl(
+                    RESPONSE_ALIGNMENTS,
+                    visuals.responseAlignment,
+                    (v) => updateVisuals({ responseAlignment: v }),
+                )}
             </div>
             <div>
                 <p className="editor-label">Text background opacity</p>
