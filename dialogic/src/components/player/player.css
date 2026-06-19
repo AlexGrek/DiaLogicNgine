@@ -187,12 +187,6 @@
     scrollbar-color: rgba(255,255,255,0.25) transparent;
 }
 
-/* Bottom-anchor content when it is shorter than the panel, while remaining
-   fully scrollable from the top when it is taller (avoids the flex-end clip). */
-.dlg-scroll > :first-child {
-    margin-top: auto;
-}
-
 .dlg-scroll::-webkit-scrollbar {
     width: 6px;
 }

@@ -61,16 +61,19 @@ const DialogTextStage: React.FC<DialogTextStageProps> = ({
     const history = showShortHistory ? shortHistory : [];
     const lineId = (index: number) => `${morphScope}-dline-${lineCounter - (history.length - index)}`;
 
-    // Keep the current line's beginning visible: bottom-align it (history fills the
-    // space above) when it fits, otherwise pin its top so long text starts at the top.
+    // When everything fits, show all of it (history above, current below). When it
+    // overflows, keep the current line's BEGINNING visible at the top — with a small
+    // slice of history peeking above — and let the rest of the line scroll.
     useLayoutEffect(() => {
         const scroller = scrollRef.current;
         const current = currentRef.current;
         if (!scroller || !current) return;
-        const viewH = scroller.clientHeight;
-        const curTop = current.offsetTop;
-        const curH = current.offsetHeight;
-        scroller.scrollTop = curH >= viewH ? curTop : Math.max(0, curTop + curH - viewH);
+        const HISTORY_PEEK = 40;
+        if (scroller.scrollHeight <= scroller.clientHeight) {
+            scroller.scrollTop = 0;
+        } else {
+            scroller.scrollTop = Math.max(0, current.offsetTop - HISTORY_PEEK);
+        }
     }, [lineKey, fullText, displayText]);
 
     const renderAvatar = () => {
