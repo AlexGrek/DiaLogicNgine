@@ -14,6 +14,12 @@ describe("Home page", () => {
     cy.getByTestId("create-project-btn").should("be.visible");
   });
 
+  it("shows the template picker with the available templates", () => {
+    cy.getByTestId("template-picker").should("be.visible");
+    cy.getByTestId("template-option-starter").should("be.visible");
+    cy.getByTestId("template-option-scripting").should("be.visible");
+  });
+
   it("create button is disabled when input is empty", () => {
     cy.getByTestId("create-project-btn").should("be.disabled");
   });
