@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import { AuthUser } from '../../api/authApi';
 import UserMenu from '../auth/UserMenu';
-import { GameDescription, createDefaultGame } from '../../game/GameDescription';
+import { GameDescription } from '../../game/GameDescription';
+import { DEFAULT_TEMPLATE_ID, GAME_TEMPLATES } from '../../game/templates';
 import {
   ProjectMeta,
   ProjectsPage,
@@ -180,6 +181,7 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
   const [projectsPage, setProjectsPage] = useState<ProjectsPage | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [newName, setNewName] = useState('');
+  const [templateId, setTemplateId] = useState(DEFAULT_TEMPLATE_ID);
   const [creating, setCreating] = useState(false);
   const [openingName, setOpeningName] = useState<string | null>(null);
   const [deletingName, setDeletingName] = useState<string | null>(null);
@@ -202,7 +204,9 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
     if (!name) return;
     setCreating(true);
     try {
-      const game = createDefaultGame();
+      const template =
+        GAME_TEMPLATES.find((t) => t.id === templateId) ?? GAME_TEMPLATES[0];
+      const game = template.create();
       game.general.name = name;
       await saveProjectToServer(name, game);
       onOpenProject(game, name);
@@ -210,7 +214,7 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
     } catch {
       setCreating(false);
     }
-  }, [newName, onOpenProject, navigate]);
+  }, [newName, templateId, onOpenProject, navigate]);
 
   const handlePlay = useCallback(
     (name: string) => {
@@ -294,8 +298,36 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
               </div>
               <div>
                 <p className="home-section-label">New project</p>
-                <p className="home-section-title">Start from scratch</p>
+                <p className="home-section-title">Pick a template</p>
               </div>
+            </div>
+            <div
+              className="home-template-picker"
+              role="radiogroup"
+              aria-label="Project template"
+              data-testid="template-picker"
+            >
+              {GAME_TEMPLATES.map((template) => {
+                const active = template.id === templateId;
+                return (
+                  <button
+                    key={template.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    className={
+                      'home-template-option' +
+                      (active ? ' home-template-option--active' : '')
+                    }
+                    onClick={() => setTemplateId(template.id)}
+                    disabled={creating}
+                    data-testid={`template-option-${template.id}`}
+                  >
+                    <span className="home-template-name">{template.name}</span>
+                    <span className="home-template-desc">{template.description}</span>
+                  </button>
+                );
+              })}
             </div>
             <InputGroup className="home-create-input">
               <Input

@@ -212,6 +212,55 @@
   margin: 2px 0 0;
 }
 
+.home-template-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.home-template-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.home-template-option:hover:not(:disabled) {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.home-template-option:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.home-template-option--active {
+  border-color: rgba(99, 102, 241, 0.6);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(236, 72, 153, 0.12));
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35);
+}
+
+.home-template-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.home-template-desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #94a3b8;
+}
+
 .home-create-input .rs-input {
   background: rgba(0, 0, 0, 0.25) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
