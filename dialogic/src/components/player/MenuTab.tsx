@@ -162,7 +162,7 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
     const renderNewgameMenuDetails = () => {
         return <div className='savegame-new-container'>
             <p>{localmanager.local("Confirm restart")}</p>
-            <button name='restart' onClick={handleRestart}>{localmanager.local("Start new game")}</button>
+            <button className='savegame-btn danger wide' name='restart' onClick={handleRestart}>{localmanager.local("Start new game")}</button>
         </div>
     }
 

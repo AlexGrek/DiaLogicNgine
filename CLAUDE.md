@@ -123,6 +123,8 @@ All editor state lives in `App.tsx` as `useState<GameDescription>`. All mutation
 
 A FastAPI + uvicorn Python backend lives in `backend/`. It serves file storage for the editor.
 
+**→ See [`backend/server.md`](backend/server.md) for the full server reference** — authentication, the per-user ownership model, the migration, storage layout, and the complete route map (which endpoints are public vs auth vs owner-gated).
+
 ### Stack
 
 - **Python** (>=3.14), managed with **uv**
@@ -149,6 +151,16 @@ backend/
       images.py               — image upload/serve/thumbnail routes
 storage/projects/{project}/   — uploaded files root (never write outside this)
 ```
+
+### Authentication & ownership
+
+The server is **login-gated** (cookie session, `app/auth.py`). Key facts — full
+details in [`backend/server.md`](backend/server.md):
+
+- Free registration; on first boot a `root` user (password `000000`) is created and **all pre-existing projects are assigned to it** (`auth.ensure_root_and_migrate()`).
+- Projects record their `owner` in `.metadata`; mutations are gated by `app/ownership.py` `require_owner`. Users only **list** their own projects.
+- **Play stays public:** `GET .../game` and image/thumbnail serving need no auth, so `/play/{project}` links work without an account.
+- When adding a route that touches a project, gate it with `Depends(auth.get_current_user)` + `require_owner(...)` unless it must be public (game/image reads).
 
 ### Image API (`/api/v1/projects/{project_name}/`)
 

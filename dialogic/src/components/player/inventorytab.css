@@ -195,6 +195,20 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    opacity: 0.5;
     font-family: var(--player-font-menu, "Involve", sans-serif);
+}
+
+.inventory-detail-empty {
+    opacity: 0.5;
+}
+
+/* Empty inventory renders standalone (no .inventory-tab-container wrapper), so
+   it must carry the dimmed panel background itself to match the other menus. */
+.inventory-empty {
+    width: 100%;
+    background-color: rgba(13, 13, 13, 0.8);
+}
+
+.inventory-empty p {
+    opacity: 0.5;
 }
