@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderOpen,
-  LogOut,
   MapPin,
   MessageSquare,
   MousePointerClick,
@@ -18,6 +17,7 @@ import {
   Users,
 } from 'lucide-react';
 import { AuthUser } from '../../api/authApi';
+import UserMenu from '../auth/UserMenu';
 import { GameDescription, createDefaultGame } from '../../game/GameDescription';
 import {
   ProjectMeta,
@@ -260,20 +260,11 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
       <div className="home-orb home-orb--2" aria-hidden />
       <div className="home-orb home-orb--3" aria-hidden />
 
-      <div className="home-userbar">
-        <span className="home-userbar-name" data-testid="current-user">
-          {currentUser.username}
-        </span>
-        <button
-          type="button"
-          className="home-userbar-logout"
-          onClick={onLogout}
-          data-testid="logout-btn"
-        >
-          <LogOut size={14} />
-          Log out
-        </button>
-      </div>
+      <UserMenu
+        className="home-userbar"
+        username={currentUser.username}
+        onLogout={onLogout}
+      />
 
       <div className="home-inner">
         <header className="home-hero">

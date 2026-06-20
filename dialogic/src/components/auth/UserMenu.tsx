@@ -7,19 +7,16 @@ interface UserMenuProps {
   username: string;
   onLogout: () => void;
   className?: string;
-  /** rsuite Dropdown size — "xs" fits the slim editor header. */
-  size?: 'lg' | 'md' | 'sm' | 'xs';
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout, className, size = 'sm' }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ username, onLogout, className }) => {
   const [pwOpen, setPwOpen] = useState(false);
 
   return (
     <div className={className}>
       <Dropdown
-        size={size}
+        noCaret
         placement="bottomEnd"
-        appearance="subtle"
         title={
           <span className="user-menu-name">
             <User size={14} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />

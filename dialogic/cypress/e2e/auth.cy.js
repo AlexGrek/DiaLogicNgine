@@ -42,11 +42,27 @@ describe("Authentication", () => {
     cy.contains("already taken", { timeout: 10000 }).should("be.visible");
   });
 
-  it("logs out back to the login page", () => {
+  it("logs out from the user menu back to the login page", () => {
     cy.login();
     cy.visit("/");
     cy.getByTestId("home-page", { timeout: 20000 }).should("be.visible");
-    cy.getByTestId("logout-btn").click();
+    cy.getByTestId("current-user").click(); // open the user menu dropdown
+    cy.contains("Log out").click();
     cy.getByTestId("login-page", { timeout: 20000 }).should("be.visible");
+  });
+
+  it("opens the change-password modal from the user menu", () => {
+    cy.login();
+    cy.visit("/");
+    cy.getByTestId("home-page", { timeout: 20000 }).should("be.visible");
+    cy.getByTestId("current-user").click(); // open the user menu dropdown
+    cy.contains("Change password").click();
+    cy.getByTestId("change-password-modal").should("be.visible");
+
+    // Client-side validation: confirmation must match the new password.
+    cy.getByTestId("change-password-new").type("newsecret");
+    cy.getByTestId("change-password-confirm").type("different");
+    cy.getByTestId("change-password-mismatch").should("be.visible");
+    cy.getByTestId("change-password-submit").should("be.disabled");
   });
 });

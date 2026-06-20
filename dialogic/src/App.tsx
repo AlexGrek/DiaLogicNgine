@@ -7,7 +7,6 @@ import {
   Loader,
   Sidebar,
 } from "rsuite";
-import { LogOut } from "lucide-react";
 import {
   Outlet,
   Route,
@@ -45,6 +44,7 @@ import HomePage from "./components/home/HomePage";
 import PlayOnlyPage from "./components/play/PlayOnlyPage";
 import { ProjectImagesContext } from "./components/common/ProjectImagesContext";
 import LoginPage from "./components/auth/LoginPage";
+import UserMenu from "./components/auth/UserMenu";
 import { AuthUser, getMe, logout } from "./api/authApi";
 
 export interface CopiedObject {
@@ -322,20 +322,11 @@ function AppLayout({ game, setGame, projectName, setProjectName, currentUser, on
           <SettingsButton onClick={() => setSettingsOpen(true)} />
         </div>
         <NotificationBar notification={lastNotification} />
-        <div className="app-header-user">
-          <span className="app-header-username" data-testid="current-user">
-            {currentUser.username}
-          </span>
-          <button
-            type="button"
-            className="app-header-logout"
-            onClick={onLogout}
-            title="Log out"
-            data-testid="logout-btn"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+        <UserMenu
+          className="app-header-user"
+          username={currentUser.username}
+          onLogout={onLogout}
+        />
       </Header>
       <SettingsPanel
         open={settingsOpen}
