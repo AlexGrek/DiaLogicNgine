@@ -37,7 +37,7 @@ import {
  *  - reusable `functions` called from scripts        — `earnGold`, `powered`
  *  - lifecycle `hooks` (fact discovered / item got)  — battery counter, fact reward
  *  - quest / task scripting (open + complete)        — "Lab objectives"
- *  - PAC zone `isVisibleIfScript` / `isDisabledIfScript`
+ *  - PAC zone scripts + navigation (acts like a link) — `lab_console`
  *  - a scripted event firing on a location
  */
 export function createScriptingShowcaseGame(): GameDescription {
@@ -219,8 +219,9 @@ export function createScriptingShowcaseGame(): GameDescription {
                 uid: "console_scene",
                 text: {
                     main:
-                        "Point-and-click console. The two switches use isVisibleIfScript and " +
-                        "isDisabledIfScript — the second only appears once power is on.",
+                        "Point-and-click console. Each zone runs a script and some navigate like a dialog " +
+                        "answer: flip the main switch (in-place action), the reactor core is disabled until " +
+                        "powered, and the vault switch only appears once you carry the key.",
                     list: [],
                 },
                 backgrounds: emptyImageList(),
@@ -468,26 +469,61 @@ export function createScriptingShowcaseGame(): GameDescription {
         {
             id: "main_switch",
             name: "Main switch",
-            x: 12,
-            y: 30,
-            width: 25,
-            height: 45,
+            x: 8,
+            y: 28,
+            width: 20,
+            height: 40,
             idleOpacity: 0.25,
             hoverOpacity: 0.85,
-            // disabled until power is on — demonstrates a rendered zone script
+            // In-place action (no navigation): toggles power and completes the
+            // task. The other zones re-evaluate their scripts right after.
+            onClickScript:
+                "rt.props.power = powered() ? 'off' : 'on'\n" +
+                "if (powered()) {\n" +
+                "    rt.objectives.lab_objectives.power_up.turn_on_power.complete()\n" +
+                "}",
+        },
+        {
+            id: "reactor_core",
+            name: "Reactor core",
+            x: 32,
+            y: 28,
+            width: 20,
+            height: 40,
+            idleOpacity: 0.25,
+            hoverOpacity: 0.85,
+            // disabled until power is on — a disabled zone ignores clicks
             isDisabledIfScript: "return !powered()",
+            onClickScript: "earnGold(5)",
         },
         {
             id: "vault_switch",
             name: "Vault switch",
-            x: 60,
-            y: 30,
-            width: 25,
-            height: 45,
+            x: 56,
+            y: 28,
+            width: 20,
+            height: 40,
             idleOpacity: 0.25,
             hoverOpacity: 0.85,
             // only visible once you carry the vault key
             isVisibleIfScript: "return rt.items.has('vault_key')",
+            // navigates like a dialog link, with an alternative direction:
+            // powered → vault_open, otherwise → vault_locked
+            mainDirection: { type: LinkType.Local, direction: "vault_locked" },
+            useAlternativeWhen: "return powered()",
+            alternativeDirections: [{ type: LinkType.Local, direction: "vault_open" }],
+        },
+        {
+            id: "exit_sign",
+            name: "Back to the lab",
+            x: 38,
+            y: 78,
+            width: 24,
+            height: 16,
+            idleOpacity: 0.25,
+            hoverOpacity: 0.85,
+            // plain navigation back to the dialog window that hosts this scene
+            mainDirection: { type: LinkType.Local, direction: "entrance" },
         },
     ];
 

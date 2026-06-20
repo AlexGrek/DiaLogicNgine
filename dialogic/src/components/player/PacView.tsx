@@ -15,14 +15,16 @@ interface PacViewProps {
     onStateUpd: (newState: State) => void
 }
 
-const PacView: React.FC<PacViewProps> = ({ game, onStateUpd, view }) => {
+const PacView: React.FC<PacViewProps> = ({ game, state, step, onStateUpd, view }) => {
     const handleZoneClick = useCallback((zone: PointAndClickZone) => {
-        onStateUpd(game.pacZoneApply(zone, view))
-    }, [game, onStateUpd, view])
+        const clickData = { actor: null, text: '', answer: zone.name, step }
+        onStateUpd(game.pacZoneApply(state, zone, clickData))
+    }, [game, state, step, onStateUpd])
 
     return (
         <motion.div
             className="pac-window-view"
+            data-testid="pac-view"
             initial={{ opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}

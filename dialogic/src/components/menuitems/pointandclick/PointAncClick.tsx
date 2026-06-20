@@ -2,6 +2,7 @@ import lodash from 'lodash';
 import React, { useState } from 'react';
 import { Button, Panel, Stack } from 'rsuite';
 import { GameDescription } from '../../../game/GameDescription';
+import { IUpds } from '../../../App';
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
 import './PointAndClick.css';
 import CreateWithUid, { CreationData } from '../../common/CreateWithUid';
@@ -13,11 +14,12 @@ import { useProjectImages } from '../../common/ProjectImagesContext';
 
 interface PacMenuProps {
     game: GameDescription;
+    handlers: IUpds;
     items: PointAndClick[]
     onSetItems: (items: PointAndClick[]) => void
 }
 
-const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
+const PointAncClick: React.FC<PacMenuProps> = ({ game, handlers, items, onSetItems }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const [editingObject, setEditingObject] = useState<PointAndClick | null>(null);
     const storageProject = resolveImageProject(useProjectImages());
@@ -107,6 +109,8 @@ const PointAncClick: React.FC<PacMenuProps> = ({ items, onSetItems }) => {
                     <PointAndClickEditor
                         value={editingObject}
                         onChange={setEditingObject}
+                        game={game}
+                        handlers={handlers}
                     />
                 </div>
             </Panel>}

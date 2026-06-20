@@ -250,6 +250,26 @@ export function runSanityCheck(
         }
     });
 
+    // ── Point-and-click zone navigation ──
+    // A PAC widget is not bound to a single dialog, so `local` (and `pop`)
+    // resolve against whatever dialog hosts the scene at runtime and cannot be
+    // validated here — every other direction has an absolute target we check.
+    (game.pacWidgets ?? []).forEach((pac) => {
+        pac.zones.forEach((zone) => {
+            const where = `Point-and-click "${pac.id}" → zone "${zone.name || zone.id}"`;
+            const checkZoneDir = (dir: DialogLinkDirection, location: string) => {
+                if (dir.type === LinkType.Local) return;
+                checkDirection(dir, location);
+            };
+            if (zone.mainDirection) {
+                checkZoneDir(zone.mainDirection, `${where} → click`);
+            }
+            zone.alternativeDirections?.forEach((dir, i) =>
+                checkZoneDir(dir, `${where} → alternative ${i + 1}`),
+            );
+        });
+    });
+
     // ── File references (server images) ──
     if (imageFiles === null) {
         return { issues, checkedFiles: false, stats };

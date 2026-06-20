@@ -2,10 +2,13 @@ import React, { useRef, useState } from 'react';
 import { Edit2, PlusCircle, Trash2Icon } from "lucide-react";
 import { Button, ButtonGroup, Drawer, Input, InputNumber, Message, Panel } from "rsuite";
 import { PointAndClick, PointAndClickZone } from "../../../game/PointAndClick";
+import { GameDescription } from "../../../game/GameDescription";
+import { IUpds } from "../../../App";
 import ImagePicker from "../../common/ImagePicker";
 import { generateImageUrl } from "../../../Utils";
 import { resolveImageProject } from "../../common/projectImages";
 import { useProjectImages } from "../../common/ProjectImagesContext";
+import ZoneLinkEditor from "./ZoneLinkEditor";
 
 type EditorMode = 'add' | 'edit';
 
@@ -21,10 +24,12 @@ interface DragState {
 interface PointAndClickEditorProps {
     value: PointAndClick
     onChange: (it: PointAndClick) => void
+    game: GameDescription
+    handlers: IUpds
     projectName?: string
 }
 
-const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChange, projectName }) => {
+const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChange, game, handlers, projectName }) => {
     const contextProject = useProjectImages();
     const storageProject = resolveImageProject(projectName ?? contextProject);
     const [mode, setMode] = useState<EditorMode>('edit');
@@ -468,6 +473,16 @@ const PointAndClickEditor: React.FC<PointAndClickEditorProps> = ({ value, onChan
                                     value={selectedZone.onClickScript || ''}
                                     onChange={(value) => updateSelectedZone({ onClickScript: value || undefined })}
                                     placeholder="JavaScript code to execute"
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 500 }}>Navigation</label>
+                                <ZoneLinkEditor
+                                    zone={selectedZone}
+                                    game={game}
+                                    handlers={handlers}
+                                    onChange={updateSelectedZone}
                                 />
                             </div>
 

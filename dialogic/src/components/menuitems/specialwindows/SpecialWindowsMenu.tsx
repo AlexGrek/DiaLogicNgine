@@ -12,11 +12,12 @@ import SpecialWindowPlaceholder from './SpecialWindowPlaceholder';
  * placeholders for upcoming widget types.
  */
 const SpecialWindowsMenu: React.FC = () => {
-    const { game, setGame } = useOutletContext<AppOutletContext>();
+    const { game, setGame, updates } = useOutletContext<AppOutletContext>();
 
     const pacTab = (
         <PointAncClick
             game={game}
+            handlers={updates}
             items={game.pacWidgets}
             onSetItems={(items: PointAndClick[]) =>
                 setGame(prev => ({ ...prev, pacWidgets: items }))

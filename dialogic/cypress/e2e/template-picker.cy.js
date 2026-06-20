@@ -70,4 +70,32 @@ describe("Template picker", () => {
       .should("be.visible")
       .and("contain", "Scripting Lab");
   });
+
+  it("navigates the player by clicking a point-and-click zone", () => {
+    cy.visit(`/play/${encodeURIComponent(projectName)}`);
+    cy.getByTestId("play-only-page", { timeout: 20000 }).should("be.visible");
+    cy.getByTestId("main-menu-new-game", { timeout: 20000 }).should("be.visible").click();
+
+    // Open the point-and-click console from the entrance window. The link button
+    // becomes enabled once the typewriter finishes; Cypress retries until then.
+    cy.getByTestId("dialog-window-view", { timeout: 20000 }).should("be.visible");
+    cy.contains(".dialog-button", "Open the point-and-click console")
+      .should("not.be.disabled")
+      .click();
+
+    // The PAC scene renders its zones. The vault switch is hidden until the key
+    // is carried; the reactor core is disabled until power is on.
+    cy.getByTestId("pac-view", { timeout: 20000 }).should("be.visible");
+    cy.getByTestId("pac-zone-main_switch").should("be.visible");
+    cy.getByTestId("pac-zone-exit_sign").should("be.visible");
+    cy.getByTestId("pac-zone-vault_switch").should("not.exist");
+    cy.getByTestId("pac-zone-reactor_core").should("have.attr", "data-disabled", "true");
+
+    // Clicking a navigating zone follows its link back to the hosting dialog
+    // window — proving PAC zones can navigate like dialog variants.
+    cy.getByTestId("pac-zone-exit_sign").click();
+    cy.getByTestId("dialog-window-view", { timeout: 20000 })
+      .should("be.visible")
+      .and("contain", "Scripting Lab");
+  });
 });

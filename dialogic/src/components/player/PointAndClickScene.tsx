@@ -17,9 +17,12 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
 }) => {
     const [hoveredZone, setHoveredZone] = useState<string | null>(null);
 
-    const handleZoneClick = (zone: PointAndClickZone) => {
+    const handleZoneClick = (zone: PointAndClickZoneRenderView) => {
+        if (zone.disabled) {
+            return;
+        }
         if (onZoneClick) {
-            onZoneClick(zone);
+            onZoneClick(zone.zone);
         }
     };
 
@@ -41,14 +44,18 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                     {/* Foreground Layer with Zones */}
                     <div style={styles.foregroundLayer}>
                         {zones.map(zone => {
-                            const isHovered = hoveredZone === zone.zone.id;
-                            const opacity = isHovered
-                                ? (zone.zone.hoverOpacity ?? 0.9)
-                                : (zone.zone.idleOpacity ?? 0.3);
+                            const isHovered = hoveredZone === zone.zone.id && !zone.disabled;
+                            const opacity = zone.disabled
+                                ? (zone.zone.idleOpacity ?? 0.3) * 0.4
+                                : isHovered
+                                    ? (zone.zone.hoverOpacity ?? 0.9)
+                                    : (zone.zone.idleOpacity ?? 0.3);
 
                             return (
                                 <motion.div
                                     key={zone.zone.id}
+                                    data-testid={`pac-zone-${zone.zone.id}`}
+                                    data-disabled={zone.disabled ? 'true' : 'false'}
                                     style={{
                                         ...styles.zone,
                                         left: `${zone.zone.x}%`,
@@ -57,12 +64,14 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                                         height: `${zone.zone.height}%`,
                                         backgroundImage: zone.zone.image ? generateImageUrlCss(zone.zone.image) : 'none',
                                         backgroundColor: zone.zone.image ? 'transparent' : 'rgba(255, 255, 100, 0.5)',
+                                        cursor: zone.disabled ? 'not-allowed' : 'pointer',
+                                        filter: zone.disabled ? 'grayscale(0.8)' : undefined,
                                     }}
                                     animate={{ opacity }}
                                     transition={{ duration: 0.2, ease: 'easeOut' }}
                                     onMouseEnter={() => setHoveredZone(zone.zone.id)}
                                     onMouseLeave={() => setHoveredZone(null)}
-                                    onClick={() => handleZoneClick(zone.zone)}
+                                    onClick={() => handleZoneClick(zone)}
                                 >
                                     <AnimatePresence>
                                         {isHovered && (

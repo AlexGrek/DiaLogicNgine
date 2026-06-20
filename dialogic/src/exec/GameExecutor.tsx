@@ -6,14 +6,14 @@ import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
 import { DialogWindowId, HistoryRecord, State } from "./GameState";
 import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
-import { LocRouteRenderView, PacRenderView, RenderViewGenerator } from "./RenderView";
+import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 import EventsProcessor from "./EventsProcessor";
 import DiscussionProcessor from "./DiscussionProcessor";
 import QuestProcessor from "./QuestProcessor";
 import GameUiElementsProcessor from "./GameUiElementsProcessor";
 import HooksProcessor from "./HooksProcessor";
-import { PointAndClickZone } from "../game/PointAndClick";
+import { PointAndClickZone, zoneAsDialogLink, zoneHasNavigation } from "../game/PointAndClick";
 
 const MAX_SHORT_HISTORY_RECORDS = 12 // max entries in state.shortHistory queue
 export class GameExecManager {
@@ -52,8 +52,27 @@ export class GameExecManager {
         return tryGetLocationById(this.game, state.position)
     }
 
-    pacZoneApply(_zone: PointAndClickZone, _view: PacRenderView): State {
-        throw new Error('Method not implemented.');
+    pacZoneApply(state: State, zone: PointAndClickZone, clickData: HistoryRecord): State {
+        // Never act on a zone the render decided is disabled — a fast click could
+        // otherwise sneak in before the view refreshes.
+        if (zone.isDisabledIfScript) {
+            const { decision } = evaluateAsBoolProcessor(this.game, zone.isDisabledIfScript, this, state)
+            if (decision) {
+                return state
+            }
+        }
+
+        if (zoneHasNavigation(zone)) {
+            // Follow the zone exactly like a dialog variant: runs onClickScript
+            // (as the link's actionCode), navigates, records history and runs the
+            // destination's entry script.
+            return this.dialogVariantApply(state, zoneAsDialogLink(zone), clickData)
+        }
+
+        // No navigation: run the click script in place and stay on the scene so
+        // the zones re-evaluate their visibility/disabled state against the
+        // updated game state.
+        return this.modifyStateScript(state, zone.onClickScript)
     }
 
     private goToLocalLink(directionName: string, prevState: State) {
