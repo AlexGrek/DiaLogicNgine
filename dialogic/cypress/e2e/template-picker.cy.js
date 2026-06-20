@@ -71,7 +71,7 @@ describe("Template picker", () => {
       .and("contain", "Scripting Lab");
   });
 
-  it("navigates the player by clicking a point-and-click zone", () => {
+  it("runs scripts and navigates from point-and-click zones", () => {
     cy.visit(`/play/${encodeURIComponent(projectName)}`);
     cy.getByTestId("play-only-page", { timeout: 20000 }).should("be.visible");
     cy.getByTestId("main-menu-new-game", { timeout: 20000 }).should("be.visible").click();
@@ -91,8 +91,18 @@ describe("Template picker", () => {
     cy.getByTestId("pac-zone-vault_switch").should("not.exist");
     cy.getByTestId("pac-zone-reactor_core").should("have.attr", "data-disabled", "true");
 
-    // Clicking a navigating zone follows its link back to the hosting dialog
-    // window — proving PAC zones can navigate like dialog variants.
+    // In-place action: flipping the main switch runs onClickScript (powers the
+    // lab on) without leaving the scene — the reactor core then re-enables.
+    // The player debounces input for ~130ms after each accepted state change
+    // (INPUT_LOCK_MS in PlayerCore), so we space clicks out to clear the lock.
+    cy.wait(250);
+    cy.getByTestId("pac-zone-main_switch").click();
+    cy.getByTestId("pac-zone-reactor_core", { timeout: 10000 })
+      .should("have.attr", "data-disabled", "false");
+
+    // Navigation: clicking a navigating zone follows its link back to the
+    // hosting dialog window — proving zones can navigate like dialog variants.
+    cy.wait(250);
     cy.getByTestId("pac-zone-exit_sign").click();
     cy.getByTestId("dialog-window-view", { timeout: 20000 })
       .should("be.visible")
