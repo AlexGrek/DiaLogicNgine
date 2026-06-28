@@ -6,6 +6,8 @@ import PopupCodeEditor, { DEFAULT_ARGS, PopupCodeEditorUi } from '../../common/c
 import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
 import { GameDescription } from '../../../game/GameDescription';
 import { ScriptFunction, createEmptyScriptFunction, isValidFunctionName } from '../../../game/ScriptFunction';
+import { createEmptyFact } from '../../../game/Fact';
+import { createEmptyItem } from '../../../game/Items';
 
 interface FunctionsEditorTabProps {
     game: GameDescription;
@@ -185,6 +187,9 @@ const FunctionsEditorTab: React.FC<FunctionsEditorTabProps> = ({ game, onSetGame
                                         setCodeEditorOpen(false)
                                     }}
                                     onAddSituation={s => onSetGame({ ...game, situations: [...game.situations, s] })}
+                                    onAddFact={uid => onSetGame({ ...game, facts: [...game.facts, createEmptyFact(uid)] })}
+                                    onAddItem={uid => onSetGame({ ...game, items: [...game.items, createEmptyItem(uid)] })}
+                                    onAddProp={p => onSetGame({ ...game, props: [...game.props, p] })}
                                 />
                             </div>
                         </div>

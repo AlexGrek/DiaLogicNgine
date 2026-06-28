@@ -32,7 +32,8 @@ import Loc from "./game/Loc";
 import Prop from "./game/Prop";
 import FactsObjectivesTabs from "./components/menuitems/factsobjectives/FactsObjectivesTabs";
 import ItemsMenu from "./components/menuitems/items/ItemsMenu";
-import { Item } from "./game/Items";
+import { Item, createEmptyItem } from "./game/Items";
+import { createEmptyFact } from "./game/Fact";
 import lodash from "lodash";
 import NotificationBar from "./components/notification/NotificationBar";
 import GameUiElementDescr from "./game/GameUiElementDescr";
@@ -71,6 +72,8 @@ export interface IUpds {
   handleLocChange: (locs: Loc[]) => void;
   handlePropChange: (props: Prop[]) => void;
   createProp: (prop: Prop) => void;
+  createFact: (uid: string) => void;
+  createItem: (uid: string) => void;
   createSituation: (situation: string) => void;
   notify: NotifyCallback;
   copy: (obj: unknown, typename: string) => void;
@@ -261,6 +264,22 @@ function AppLayout({ game, setGame, projectName, setProjectName, currentUser, on
     setGame((prev) => ({ ...prev, props: [...prev.props, prop] }));
   }, [setGame]);
 
+  const createFact = useCallback((uid: string) => {
+    setGame((prev) =>
+      prev.facts.some((f) => f.uid === uid)
+        ? prev
+        : { ...prev, facts: [...prev.facts, createEmptyFact(uid)] }
+    );
+  }, [setGame]);
+
+  const createItem = useCallback((uid: string) => {
+    setGame((prev) =>
+      prev.items.some((i) => i.uid === uid)
+        ? prev
+        : { ...prev, items: [...prev.items, createEmptyItem(uid)] }
+    );
+  }, [setGame]);
+
   const createSituation = useCallback((s: string) => {
     setGame((prev) => ({ ...prev, situations: [...prev.situations, s] }));
   }, [setGame]);
@@ -285,6 +304,8 @@ function AppLayout({ game, setGame, projectName, setProjectName, currentUser, on
       handleLocChange,
       handlePropChange,
       createProp,
+      createFact,
+      createItem,
       notify: handleNotify,
       copy: handleCopy,
       paste: handlePaste,
@@ -299,6 +320,8 @@ function AppLayout({ game, setGame, projectName, setProjectName, currentUser, on
       handleLocChange,
       handlePropChange,
       createProp,
+      createFact,
+      createItem,
       handleNotify,
       handleCopy,
       handlePaste,

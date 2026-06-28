@@ -131,6 +131,46 @@ body, html {
   margin-right: 8pt;
 }
 
+.user-menu-name {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.user-menu-name:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.user-menu-popover {
+  padding: 4px 0;
+}
+
+.user-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+
+.user-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
 .app-auth-loading {
   display: flex;
   align-items: center;

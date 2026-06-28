@@ -157,7 +157,7 @@ const LocEditor: React.FC<LocEditorProps> = ({ loc, onUpdateLocation, onClose, o
 
     const renderCodeEditor = (menu: CodeEditMenu) => {
         const code = location[menu]
-        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation}></PopupCodeEditor>
+        return <PopupCodeEditor game={game} ui={CODE_EDITOR_UI_NAMESELECTOR} code={code || ""} onSaveClose={(s) => editCode(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation} onAddFact={handlers.createFact} onAddItem={handlers.createItem} onAddProp={handlers.createProp}></PopupCodeEditor>
     }
 
     const editCode = (menu: CodeEditMenu, val: string) => {

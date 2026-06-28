@@ -107,7 +107,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                 ui = CODE_EDITOR_UI_TEXTSELECTOR
                 break;
         }
-        return <PopupCodeEditor ui={ui} code={code || ""} game={game} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation}></PopupCodeEditor>
+        return <PopupCodeEditor ui={ui} code={code || ""} game={game} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation} onAddFact={handlers.createFact} onAddItem={handlers.createItem} onAddProp={handlers.createProp}></PopupCodeEditor>
     }
 
     const modifyWindowBy = (modificator: (input: DialogWindow) => DialogWindow) => {

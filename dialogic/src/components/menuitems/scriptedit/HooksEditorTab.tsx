@@ -7,6 +7,8 @@ import ConfirmDeleteButton from '../../common/ConfirmDeleteButton';
 import SmartHookPicker from '../../common/SmartHookPicker';
 import { GameDescription } from '../../../game/GameDescription';
 import { HookScript, createEmptyHookScript } from '../../../game/HookScript';
+import { createEmptyFact } from '../../../game/Fact';
+import { createEmptyItem } from '../../../game/Items';
 
 const HOOK_EDITOR_UI: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -155,7 +157,7 @@ const HooksEditorTab: React.FC<HooksEditorTabProps> = ({ game, onSetGame }) => {
                                         setDraft(d => ({ ...d, body: v }))
                                         setCodeEditorOpen(false)
                                     }}
-                                    onAddSituation={s => onSetGame({ ...game, situations: [...game.situations, s] })}
+                                    onAddSituation={s => onSetGame({ ...game, situations: [...game.situations, s] })} onAddFact={uid => onSetGame({ ...game, facts: [...game.facts, createEmptyFact(uid)] })} onAddItem={uid => onSetGame({ ...game, items: [...game.items, createEmptyItem(uid)] })} onAddProp={p => onSetGame({ ...game, props: [...game.props, p] })}
                                 />
                             </div>
                         </div>

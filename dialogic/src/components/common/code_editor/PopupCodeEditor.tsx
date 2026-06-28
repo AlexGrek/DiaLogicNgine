@@ -5,6 +5,7 @@ import "./PopupCodeEditor.css"
 import AccessibleObjects from './AccessibleObjects';
 import SmartCodeGenerators from './SmartCodeGenerators';
 import { GameDescription } from '../../../game/GameDescription';
+import Prop from '../../../game/Prop';
 import { createRtDoc } from './RtObjectTraverse';
 import { mergeDicts } from '../../../Utils';
 
@@ -64,9 +65,12 @@ interface PopupCodeEditorProps {
     onSaveClose: (c: string) => void;
     game?: GameDescription;
     onAddSituation?: (name: string) => void;
+    onAddFact?: (uid: string) => void;
+    onAddItem?: (uid: string) => void;
+    onAddProp?: (prop: Prop) => void;
 }
 
-const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose, game, onAddSituation }) => {
+const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSaveClose, game, onAddSituation, onAddFact, onAddItem, onAddProp }) => {
     const [codeVal, setCode] = useState<string>(code);
     const [docOpenFor, setDocOpenFor] = useState<string | null>(null)
     // Underlying <textarea> (the editor forwards its ref to it).
@@ -277,7 +281,7 @@ const PopupCodeEditor: React.FC<PopupCodeEditorProps> = ({ code, ui, open, onSav
                             <br />
                             <span className="load-examples-code">{"// Load examples: "}{renderExamples()}</span>
                         </div>
-                        {game && <SmartCodeGenerators game={game} onInsert={insertSnippet} onAddSituation={onAddSituation} />}
+                        {game && <SmartCodeGenerators game={game} onInsert={insertSnippet} onAddSituation={onAddSituation} onAddFact={onAddFact} onAddItem={onAddItem} onAddProp={onAddProp} />}
                     </div>
                 </div>}
 
