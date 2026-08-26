@@ -59,6 +59,8 @@ savegame/    — Save/load persistence
 
 ### `game/` — Data model
 
+**→ Use the `game_json` skill when authoring, generating or hand-editing game content as JSON** (`game.json`) — it documents every entity's JSON shape, the UID reference graph, the scripting API and a validator.
+
 `GameDescription` is the root data structure holding the entire game definition. Key fields: `dialogs`, `chars`, `roles`, `locs`, `props`, `facts`, `items`, `events`, `eventHosts`, `objectives`, `situations`, `uiElements`, `pacWidgets`, `translations`.
 
 Notable types:
