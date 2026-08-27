@@ -52,7 +52,7 @@ Source: `dialogic/src/game/*.ts`.
 | `typewriterSpeedMs` | `12` | ms per char |
 | `menuPanelOpacity` | `45` | 0–100 |
 | `menuPanelBorderRadius` | `14` | px |
-| `inventoryLayout` | `"matrix"` | `matrix` \| `list` |
+| `inventoryLayout` | `"matrix"` | `matrix` \| `list` \| `popup` \| `subwindow` \| `scroll` |
 | `inventoryCustomCss` | `""` | CSS scoped to the inventory menu |
 | `customCss` | `""` | CSS injected into the player |
 

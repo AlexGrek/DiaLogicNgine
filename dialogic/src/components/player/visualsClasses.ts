@@ -47,8 +47,10 @@ function normalizeFontSizeId(value: unknown): FontSizeId {
     return 'normal';
 }
 
+const INVENTORY_LAYOUTS: InventoryLayout[] = ['matrix', 'list', 'popup', 'subwindow', 'scroll'];
+
 function normalizeInventoryLayout(value: unknown): InventoryLayout {
-    return value === 'list' ? 'list' : 'matrix';
+    return INVENTORY_LAYOUTS.includes(value as InventoryLayout) ? value as InventoryLayout : 'matrix';
 }
 
 function clampInt(value: unknown, min: number, max: number, fallback: number): number {

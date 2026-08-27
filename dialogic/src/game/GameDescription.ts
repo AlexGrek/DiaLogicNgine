@@ -26,11 +26,14 @@ export type DialogTextAlignment = "left" | "right" | "full"
 export type ResponseAlignment = "column" | "row" | "flexible"
 export type FontSizeId = "xsmall" | "small" | "normal" | "large" | "huge"
 /** Layout variant for the in-game inventory / item picker menu. */
-export type InventoryLayout = "matrix" | "list"
+export type InventoryLayout = "matrix" | "list" | "popup" | "subwindow" | "scroll"
 
 export const INVENTORY_LAYOUT_LABELS: { value: InventoryLayout; label: string }[] = [
     { value: 'matrix', label: 'Matrix' },
     { value: 'list', label: 'List' },
+    { value: 'popup', label: 'Popup' },
+    { value: 'subwindow', label: 'Subwindow' },
+    { value: 'scroll', label: 'Scroll' },
 ]
 
 export const FONT_SIZE_LABELS: { value: FontSizeId; label: string }[] = [

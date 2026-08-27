@@ -28,7 +28,7 @@
 
 .inventory-css-doc-row {
     display: grid;
-    grid-template-columns: minmax(170px, auto) 56px 1fr;
+    grid-template-columns: minmax(170px, auto) 80px 1fr;
     gap: 8px;
     align-items: baseline;
     padding: 4px 2px;
@@ -57,7 +57,7 @@
     align-self: center;
 }
 
-.inventory-css-doc-scope--both {
+.inventory-css-doc-scope--all {
     background: rgba(120, 144, 156, 0.3);
 }
 
@@ -71,6 +71,18 @@
 
 .inventory-css-doc-scope--detail {
     background: rgba(255, 213, 121, 0.3);
+}
+
+.inventory-css-doc-scope--popup {
+    background: rgba(206, 147, 216, 0.3);
+}
+
+.inventory-css-doc-scope--subwindow {
+    background: rgba(128, 222, 234, 0.3);
+}
+
+.inventory-css-doc-scope--scroll {
+    background: rgba(255, 171, 145, 0.3);
 }
 
 .inventory-css-doc-desc {

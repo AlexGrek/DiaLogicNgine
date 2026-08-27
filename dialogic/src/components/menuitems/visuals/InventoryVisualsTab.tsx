@@ -18,15 +18,15 @@ interface InventoryVisualsTabProps {
 interface CssClassDoc {
     selector: string;
     /** Which layout(s) the class applies to, for the badge. */
-    scope: 'both' | 'matrix' | 'list' | 'detail';
+    scope: 'all' | 'matrix' | 'list' | 'detail' | 'popup' | 'subwindow' | 'scroll';
     description: string;
 }
 
 const CSS_CLASS_DOCS: CssClassDoc[] = [
-    { selector: '.inventory-tab-container', scope: 'both', description: 'Root container. Also carries .inventory-tab-container--matrix / --list modifiers for layout-specific overrides.' },
-    { selector: '.inventory-grid-panel', scope: 'both', description: 'Left panel that holds the item grid or list (the scrollable picker column).' },
-    { selector: '.inventory-grid', scope: 'matrix', description: 'The matrix grid wrapper (CSS grid of cards). Change grid-template-columns to set the number of columns.' },
-    { selector: '.inventory-item-card', scope: 'matrix', description: 'A single item card in matrix layout. The item thumbnail is its background image.' },
+    { selector: '.inventory-tab-container', scope: 'all', description: 'Root container. Also carries an .inventory-tab-container--<layout> modifier (matrix / list / popup / subwindow / scroll) for layout-specific overrides.' },
+    { selector: '.inventory-grid-panel', scope: 'all', description: 'The scrollable picker panel holding the item grid, list or menu.' },
+    { selector: '.inventory-grid', scope: 'matrix', description: 'The card grid wrapper, used by the matrix, popup and subwindow layouts. Change grid-template-columns to set the number of columns.' },
+    { selector: '.inventory-item-card', scope: 'matrix', description: 'A single item card in the matrix, popup and subwindow layouts. The item thumbnail is its background image.' },
     { selector: '.inventory-item-card.selected', scope: 'matrix', description: 'The currently selected card.' },
     { selector: '.inventory-item-card-footer', scope: 'matrix', description: 'The gradient footer at the bottom of a card holding the name and quantity.' },
     { selector: '.inventory-item-card-name', scope: 'matrix', description: 'Item name text inside a card footer.' },
@@ -37,8 +37,8 @@ const CSS_CLASS_DOCS: CssClassDoc[] = [
     { selector: '.inventory-list-item-thumb', scope: 'list', description: 'The small square thumbnail at the start of a row.' },
     { selector: '.inventory-list-item-name', scope: 'list', description: 'Item name text in a row.' },
     { selector: '.inventory-list-item-qty', scope: 'list', description: 'Quantity badge in a row.' },
-    { selector: '.inventory-detail-panel', scope: 'detail', description: 'Right panel showing the selected item details.' },
-    { selector: '.inventory-detail', scope: 'detail', description: 'Wrapper for the selected item detail content.' },
+    { selector: '.inventory-detail-panel', scope: 'detail', description: 'Right panel showing the selected item details (matrix and list layouts only).' },
+    { selector: '.inventory-detail', scope: 'detail', description: 'Wrapper for the selected item detail content. Shared by every layout — inside the detail panel, the popup, the subwindow or the expanded scroll row.' },
     { selector: '.inventory-detail-name', scope: 'detail', description: 'Selected item title.' },
     { selector: '.inventory-detail-image', scope: 'detail', description: 'Large image of the selected item.' },
     { selector: '.inventory-detail-description', scope: 'detail', description: 'Selected item description text.' },
@@ -46,7 +46,23 @@ const CSS_CLASS_DOCS: CssClassDoc[] = [
     { selector: '.inventory-detail-stat', scope: 'detail', description: 'A single stat chip (e.g. damage: 12).' },
     { selector: '.inventory-detail-use-btn', scope: 'detail', description: 'The "Use" button.' },
     { selector: '.inventory-detail-empty', scope: 'detail', description: 'Placeholder shown when no item is selected.' },
-    { selector: '.inventory-empty', scope: 'both', description: 'Message shown when the inventory is empty.' },
+    { selector: '.inventory-popup-backdrop', scope: 'popup', description: 'Dimmed, blurred overlay behind the detail popup. Clicking it closes the popup.' },
+    { selector: '.inventory-popup', scope: 'popup', description: 'The detail popup card itself.' },
+    { selector: '.inventory-popup-close', scope: 'popup', description: 'Round close button in the popup corner.' },
+    { selector: '.inventory-subwindow', scope: 'subwindow', description: 'The always-open, draggable detail window docked at the right of the grid.' },
+    { selector: '.inventory-subwindow-titlebar', scope: 'subwindow', description: 'Title bar of the detail window — also its drag handle.' },
+    { selector: '.inventory-subwindow-title', scope: 'subwindow', description: 'Title text (the selected item name, or "Details" when nothing is selected).' },
+    { selector: '.inventory-subwindow-grip', scope: 'subwindow', description: 'Small drag-grip glyph at the end of the title bar.' },
+    { selector: '.inventory-subwindow-body', scope: 'subwindow', description: 'Scrollable content area of the detail window.' },
+    { selector: '.inventory-scroll', scope: 'scroll', description: 'The vertical menu wrapper (single scrollable column of rows).' },
+    { selector: '.inventory-scroll-item', scope: 'scroll', description: 'A single menu row. Carries .selected while expanded.' },
+    { selector: '.inventory-scroll-item-head', scope: 'scroll', description: 'Clickable header of a row (thumbnail, name, quantity, chevron).' },
+    { selector: '.inventory-scroll-item-thumb', scope: 'scroll', description: 'Thumbnail at the start of a row.' },
+    { selector: '.inventory-scroll-item-name', scope: 'scroll', description: 'Item name text in a row.' },
+    { selector: '.inventory-scroll-item-qty', scope: 'scroll', description: 'Quantity badge in a row.' },
+    { selector: '.inventory-scroll-item-chevron', scope: 'scroll', description: 'Chevron that rotates when the row expands.' },
+    { selector: '.inventory-scroll-item-body', scope: 'scroll', description: 'Expanding area of a row that holds the inline item details.' },
+    { selector: '.inventory-empty', scope: 'all', description: 'Message shown when the inventory is empty.' },
 ];
 
 const CSS_PLACEHOLDER = `/* Target the classes listed below. Example: */
@@ -80,8 +96,11 @@ const InventoryVisualsTab: React.FC<InventoryVisualsTabProps> = ({ game, visuals
             <div>
                 <p className="editor-label">Layout</p>
                 <p className="visuals-property-hint">
-                    How items are arranged in the item picker. <b>Matrix</b> shows a grid of image cards;
-                    <b> List</b> shows a compact vertical list with thumbnails.
+                    How items are arranged in the item picker. <b>Matrix</b> shows a grid of image cards next to a
+                    detail panel; <b>List</b> shows a compact vertical list with thumbnails;
+                    <b> Popup</b> shows a full-width grid and opens the details in a dismissable popup;
+                    <b> Subwindow</b> shows a full-width grid with an always-open, draggable detail window;
+                    <b> Scroll</b> is a single scrollable menu whose rows expand to reveal their own details.
                 </p>
                 {layoutControl}
             </div>
