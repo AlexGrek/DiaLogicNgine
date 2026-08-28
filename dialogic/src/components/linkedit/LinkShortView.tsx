@@ -1,6 +1,6 @@
 import React from 'react';
 import 'animate.css';
-import { DialogLink, LinkType, resolveLinkIconPlacement } from '../../game/Dialog';
+import { DialogLink, LINK_CATEGORY_LABELS, LinkType, resolveLinkCategory, resolveLinkIconPlacement } from '../../game/Dialog';
 import LinkTypeTag from '../LinkTypeTag';
 import { Tag } from 'rsuite';
 import IconSvg from '../common/IconSvg';
@@ -45,6 +45,10 @@ const LinkShortView: React.FC<LinkShortViewProps> = ({ link, index, onLinkClick,
         }
         if (link.iconId) {
             tags.push(<Tag key="icon" color="violet">icon</Tag>)
+        }
+        const category = resolveLinkCategory(link)
+        if (category !== 'default') {
+            tags.push(<Tag key="category" color="blue">{LINK_CATEGORY_LABELS[category]}</Tag>)
         }
         return tags
     }

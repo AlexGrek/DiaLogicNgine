@@ -389,15 +389,22 @@
     perspective: 900px;
 }
 
+/* Every visual knob is a variable so link categories (Visuals -> Link buttons)
+   can override only what they set, and custom CSS can still override those. */
 .dialog-button {
-    background-color: rgba(20, 20, 20, 0.34);
-    color: rgba(255, 255, 255, 0.88);
+    background-color: var(--link-bg-color, rgba(20, 20, 20, 0.34));
+    color: var(--link-text-color, rgba(255, 255, 255, 0.88));
     border: none;
     padding: 6px 12px;
     margin: 0 0 6px 0;
     border-radius: 3px;
     cursor: pointer;
-    font: inherit;
+    font-family: var(--link-font, inherit);
+    font-size: var(--link-font-size, inherit);
+    font-weight: var(--link-font-weight, inherit);
+    font-style: var(--link-font-style, inherit);
+    line-height: inherit;
+    text-transform: var(--link-text-transform, none);
     text-align: inherit;
     display: inline-flex;
     align-items: center;
@@ -408,8 +415,8 @@
 }
 
 .dialog-button:hover:not(:disabled) {
-    background-color: rgba(64, 64, 64, 0.85);
-    color: #ffffff;
+    background-color: var(--link-bg-color-hover, rgba(64, 64, 64, 0.85));
+    color: var(--link-text-color-hover, #ffffff);
 }
 
 .dialog-button:disabled {

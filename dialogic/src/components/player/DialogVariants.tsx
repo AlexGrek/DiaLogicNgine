@@ -5,7 +5,7 @@ import { State } from '../../exec/GameState';
 import { RenderLink } from '../../exec/RenderView';
 import { DialogLink } from '../../game/Dialog';
 import { ResponseAlignment } from '../../game/GameDescription';
-import { dialogVariantsClass } from './visualsClasses';
+import { dialogVariantsClass, resolveLinkAppearance, resolveVisuals } from './visualsClasses';
 import LinkButtonContent from './LinkButtonContent';
 import "./player.css";
 
@@ -34,6 +34,8 @@ const itemVariants: Variants = {
 
 const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, step, responseAlignment, nested, interactive = true }) => {
 
+    const visuals = resolveVisuals(game.game.visuals)
+
     const click = (link: DialogLink, textOfLink: string, ev: React.MouseEvent) => {
         ev.stopPropagation()
         const clickData = { actor: null, text: text || '', answer: textOfLink, step: step } // TODO: add actor
@@ -59,19 +61,24 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
                     initial="hidden"
                     animate="show"
                 >
-                    {links.map((link, i) => (
-                        <motion.div key={link.text + i} className="dialog-variant-button-container" variants={itemVariants}>
-                            <motion.button
-                                disabled={link.disabled || !interactive}
-                                className="dialog-button"
-                                onClick={interactive ? (ev) => click(link.link, link.text, ev) : undefined}
-                                whileHover={link.disabled ? undefined : { rotateX: 22, y: '6%' }}
-                                transition={{ duration: 0.12, ease: 'easeOut' }}
-                            >
-                                <LinkButtonContent link={link.link} text={link.text} />
-                            </motion.button>
-                        </motion.div>
-                    ))}
+                    {links.map((link, i) => {
+                        const appearance = resolveLinkAppearance(link.link, visuals)
+                        return (
+                            <motion.div key={link.text + i} className="dialog-variant-button-container" variants={itemVariants}>
+                                <motion.button
+                                    disabled={link.disabled || !interactive}
+                                    className={`dialog-button ${appearance.className}`}
+                                    data-link-category={appearance.category}
+                                    style={appearance.cssVars}
+                                    onClick={interactive ? (ev) => click(link.link, link.text, ev) : undefined}
+                                    whileHover={link.disabled ? undefined : { rotateX: 22, y: '6%' }}
+                                    transition={{ duration: 0.12, ease: 'easeOut' }}
+                                >
+                                    <LinkButtonContent icon={appearance.icon} text={link.text} />
+                                </motion.button>
+                            </motion.div>
+                        )
+                    })}
                 </motion.div>
             </AnimatePresence>
         </div>

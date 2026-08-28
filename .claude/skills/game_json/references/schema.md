@@ -55,7 +55,28 @@ Source: `dialogic/src/game/*.ts`.
 | `aspectRatio` | `"16:9"` | `16:9` (landscape) \| `9:16` (portrait / mobile) — shape of the play area |
 | `inventoryLayout` | `"matrix"` | `matrix` \| `list` \| `popup` \| `subwindow` \| `scroll` |
 | `inventoryCustomCss` | `""` | CSS scoped to the inventory menu |
+| `linkCategories` | all 10 empty | `Record<LinkCategory, LinkCategoryStyle>` — see below |
 | `customCss` | `""` | CSS injected into the player |
+
+#### `linkCategories` — look of link buttons per category
+
+Keys are the ten `LinkCategory` values: `default`, `action`, `question`,
+`special_icon`, `special_color`, `class_a` … `class_e`. Missing keys are back-filled
+with `{}` on load. Every field of a `LinkCategoryStyle` is optional; an unset field
+keeps the stock button look.
+
+| Field | Values |
+|---|---|
+| `iconId` | `"<pack>:<icon>"`, rendered before the label. A link's own `iconId` wins over it. |
+| `textColor` | CSS colour for the label. |
+| `backgroundColor` | CSS colour for the button background; `rgba(...)` for translucency. |
+| `fontId` | Any `FontOption.id`; unset inherits `responsesFontId`. |
+| `fontSize` | `xsmall` … `huge`, applied as a *ratio* of the player's current responses size, so the in-game text-size setting keeps working. |
+| `bold` / `italic` / `uppercase` | bool |
+
+Each button also carries the class `dialog-button--category-<category>` and a
+`data-link-category` attribute, so `customCss` can target a category directly —
+which is what `class_a` … `class_e` exist for.
 
 ### `translations` — keys seeded by `createTranslations()`
 
@@ -108,6 +129,8 @@ Any other key is simply unused; the lookup is by the literal default string.
 | `changeLocationInBg` | O | `<loc uid>` | Background/context change on follow. |
 | `iconId` | O | string | `"<pack>:<icon>"` — packs `tabler`, `lucide`, `game` (`src/lib/icons/index.ts`), e.g. `"tabler:sword"`. |
 | `iconPlacement` | O | `"before"` \| `"after"` | Default `"before"`. |
+| `category` | O | `LinkCategory` | Visual bucket, styled in `visuals.linkCategories`. Absent = `"default"`. |
+| `categoryColor` | O | CSS colour | Per-link text colour; honoured **only** when `category` is `"special_color"`. |
 
 ### `DialogLinkDirection`
 

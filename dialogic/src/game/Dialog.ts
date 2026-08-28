@@ -24,6 +24,36 @@ export enum LinkType {
 
 export type LinkIconPlacement = "before" | "after"
 
+/**
+ * Presentation bucket of a link button. Purely visual: the engine never branches
+ * on it — the look of each category is authored once in Visuals → Link buttons.
+ *
+ * `special_icon` and `special_color` are the two parametrized categories: the
+ * former takes its icon from the link's own `iconId`, the latter its colour from
+ * the link's own `categoryColor`, so links inside them can differ from each other.
+ */
+export type LinkCategory =
+    "default" | "action" | "question" | "special_icon" | "special_color" |
+    "class_a" | "class_b" | "class_c" | "class_d" | "class_e"
+
+export const LINK_CATEGORIES: LinkCategory[] = [
+    "default", "action", "question", "special_icon", "special_color",
+    "class_a", "class_b", "class_c", "class_d", "class_e",
+]
+
+export const LINK_CATEGORY_LABELS: Record<LinkCategory, string> = {
+    default: "Default",
+    action: "Action",
+    question: "Question",
+    special_icon: "Special (icon)",
+    special_color: "Special (color)",
+    class_a: "Class A",
+    class_b: "Class B",
+    class_c: "Class C",
+    class_d: "Class D",
+    class_e: "Class E",
+}
+
 export interface DialogLinkDirection {
     direction?: string;
     qualifiedDirection?: DialogWindowId;
@@ -44,10 +74,18 @@ export interface DialogLink {
     changeLocationInBg?: string
     iconId?: string
     iconPlacement?: LinkIconPlacement
+    /** Visual bucket; styled in Visuals → Link buttons. Absent means "default". */
+    category?: LinkCategory
+    /** Per-link colour, honoured only by the `special_color` category. */
+    categoryColor?: string
 }
 
 export function resolveLinkIconPlacement(link: DialogLink): LinkIconPlacement {
     return link.iconPlacement === "after" ? "after" : "before"
+}
+
+export function resolveLinkCategory(link: DialogLink): LinkCategory {
+    return link.category && LINK_CATEGORIES.includes(link.category) ? link.category : "default"
 }
 
 export function createDialogLink(): DialogLink {

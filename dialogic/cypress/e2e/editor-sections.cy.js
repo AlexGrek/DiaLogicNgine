@@ -35,6 +35,27 @@ describe("Editor section content", () => {
     cy.getByTestId("visuals-custom-css").should("be.visible");
   });
 
+  it("visuals page styles link-button categories", () => {
+    cy.visit("/visuals");
+    cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");
+    cy.getByTestId("pill-tabs").contains("Link buttons").click();
+    cy.getByTestId("link-category-tabs").should("be.visible");
+    cy.getByTestId("link-category-preview").should("be.visible");
+
+    // Styling a category must show up on the preview button right away.
+    cy.getByTestId("link-category-tab-action").click();
+    cy.getByTestId("link-category-font-size-large").click();
+    cy.getByTestId("link-category-preview")
+      .find("button")
+      .should("have.attr", "style")
+      .and("include", "--link-font-size");
+
+    cy.getByTestId("link-category-reset").should("not.be.disabled").click();
+    cy.getByTestId("link-category-preview")
+      .find("button")
+      .should("not.have.attr", "style", "--link-font-size");
+  });
+
   it("save/load page shows the current project panel", () => {
     cy.visit("/saveload");
     cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");

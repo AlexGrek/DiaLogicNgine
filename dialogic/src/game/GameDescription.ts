@@ -1,7 +1,7 @@
 import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
 import { createTranslations, Translations } from "../exec/Localization";
 import Character, { Role, createCharacterDialog } from "./Character";
-import Dialog, { LinkType } from "./Dialog";
+import Dialog, { LINK_CATEGORIES, LinkCategory, LinkType } from "./Dialog";
 import GameEvent, { EventHost } from "./Events";
 import Fact from "./Fact";
 import GameUiElementDescr, { initGameUiElementMeter, initMeterProgressBar } from "./GameUiElementDescr";
@@ -87,6 +87,32 @@ export const DEFAULT_MENU_PANEL_OPACITY = 45
 /** Border radius in px for in-game menu panels (0 = square). */
 export const DEFAULT_MENU_PANEL_BORDER_RADIUS = 14
 
+/**
+ * Look of one link-button category. Every field is optional — an unset field
+ * means "inherit the stock button look / the global responses font".
+ */
+export interface LinkCategoryStyle {
+    /** Icon rendered before the label. A link's own `iconId` wins over this. */
+    iconId?: string
+    /** CSS colour for the label. */
+    textColor?: string
+    /** CSS colour for the button background (may be `rgba(...)` for translucency). */
+    backgroundColor?: string
+    /** Font family; unset inherits the global responses font. */
+    fontId?: FontId
+    /** Size tier, applied as a ratio of the player's current responses size. */
+    fontSize?: FontSizeId
+    bold?: boolean
+    italic?: boolean
+    uppercase?: boolean
+}
+
+export type LinkCategoryStyles = Record<LinkCategory, LinkCategoryStyle>
+
+export function createDefaultLinkCategoryStyles(): LinkCategoryStyles {
+    return Object.fromEntries(LINK_CATEGORIES.map((c) => [c, {}])) as LinkCategoryStyles
+}
+
 export interface VisualsConfiguration {
     dialogTextAlignment: DialogTextAlignment
     responseAlignment: ResponseAlignment
@@ -110,6 +136,8 @@ export interface VisualsConfiguration {
     inventoryLayout: InventoryLayout
     /** Custom CSS injected at runtime, scoped to the inventory / item picker menu. */
     inventoryCustomCss: string
+    /** Per-category look of dialog link buttons, keyed by `LinkCategory`. */
+    linkCategories: LinkCategoryStyles
     customCss: string
 }
 
@@ -134,6 +162,7 @@ export function createDefaultVisuals(): VisualsConfiguration {
         aspectRatio: "16:9",
         inventoryLayout: "matrix",
         inventoryCustomCss: "",
+        linkCategories: createDefaultLinkCategoryStyles(),
         customCss: "",
     }
 }

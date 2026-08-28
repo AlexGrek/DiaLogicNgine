@@ -14,6 +14,7 @@ import {
 } from '../../../game/GameDescription';
 import { resolveVisuals } from '../../player/visualsClasses';
 import InventoryVisualsTab from './InventoryVisualsTab';
+import LinkCategoriesTab from './LinkCategoriesTab';
 import './VisualsMenu.css';
 
 interface VisualsMenuProps {
@@ -265,6 +266,10 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         <InventoryVisualsTab game={game} visuals={visuals} updateVisuals={updateVisuals} />
     );
 
+    const linkButtonsTab = (
+        <LinkCategoriesTab visuals={visuals} updateVisuals={updateVisuals} />
+    );
+
     const screenTab = (
         <div className="visuals-properties">
             <div>
@@ -295,6 +300,7 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         { header: 'Screen', content: screenTab },
         { header: 'Typography', content: typographyTab },
         { header: 'Dialog', content: dialogTab },
+        { header: 'Link buttons', content: linkButtonsTab },
         { header: 'Inventory', content: inventoryTab },
         { header: 'Notifications', content: notificationsTab },
         { header: 'Custom CSS', content: customCssTab },

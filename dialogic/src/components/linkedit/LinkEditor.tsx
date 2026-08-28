@@ -7,7 +7,7 @@ import { Button, ButtonGroup, ButtonToolbar, Checkbox, Divider, IconButton, Inpu
 import { IUpds } from '../../App';
 import { genRandomAlphanumericString, prependToCode, stringEnumEntries } from '../../Utils';
 import { createDialogWindowId } from '../../exec/GameState';
-import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LinkIconPlacement, LinkType, createWindow } from '../../game/Dialog';
+import Dialog, { DialogLink, DialogLinkDirection, DialogWindow, LINK_CATEGORIES, LINK_CATEGORY_LABELS, LinkCategory, LinkIconPlacement, LinkType, createWindow, resolveLinkCategory } from '../../game/Dialog';
 import { GameDescription } from '../../game/GameDescription';
 import { createBoolProp } from '../../game/Prop';
 import ButtonPanelSelector from '../ButtonPanelSelector';
@@ -381,6 +381,24 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
 
     const iconPlacement = link.iconPlacement === 'after' ? 'after' : 'before'
 
+    const category = resolveLinkCategory(link)
+
+    const setCategory = (value: LinkCategory) => {
+        // "default" is the implicit value — keep it out of the saved JSON.
+        const next = value === 'default'
+            ? lodash.omit(link, 'category') as DialogLink
+            : { ...link, category: value }
+        onLinkChange(value === 'special_color' ? next : lodash.omit(next, 'categoryColor') as DialogLink, index)
+    }
+
+    const setCategoryColor = (categoryColor: string) => {
+        onLinkChange({ ...link, categoryColor }, index)
+    }
+
+    const clearCategoryColor = () => {
+        onLinkChange(lodash.omit(link, 'categoryColor') as DialogLink, index)
+    }
+
     return (
         <div className="link-editor-body animate__animated animate__fadeInRight animate__faster">
             <Stack wrap alignItems="center" justifyContent='space-between' className="link-editor-toolbar">
@@ -421,6 +439,43 @@ const LinkEditor: React.FC<LinkEditorProps> = ({ char, link, index, dialog, onLi
                         </Button>
                     </ButtonGroup>
                 </>
+            )}
+            <p className="editor-label">Category</p>
+            <p className="link-editor-hint">
+                Picks which look from <i>Visuals &rarr; Link buttons</i> this button uses.
+            </p>
+            <div className="link-category-selector" data-testid="link-category-selector">
+                {LINK_CATEGORIES.map((value) => (
+                    <Button
+                        key={value}
+                        size="xs"
+                        active={category === value}
+                        appearance={category === value ? 'primary' : 'default'}
+                        onClick={() => setCategory(value)}
+                    >
+                        {LINK_CATEGORY_LABELS[value]}
+                    </Button>
+                ))}
+            </div>
+            {category === 'special_icon' && !link.iconId && (
+                <p className="link-editor-hint">
+                    The <i>Special (icon)</i> category takes its icon from this link — pick one above,
+                    otherwise the category icon from Visuals is used.
+                </p>
+            )}
+            {category === 'special_color' && (
+                <div className="link-category-color-row">
+                    <p className="editor-label" style={{ margin: 0 }}>Link color</p>
+                    <input
+                        type="color"
+                        data-testid="link-category-color"
+                        value={link.categoryColor ?? '#ffffff'}
+                        onChange={(e) => setCategoryColor(e.target.value)}
+                    />
+                    {link.categoryColor && (
+                        <Button size="xs" appearance="subtle" onClick={clearCategoryColor}>Clear</Button>
+                    )}
+                </div>
             )}
             <PanelGroup accordion>
                 <Panel className='direction-editor-panel' header="Direction" defaultExpanded>

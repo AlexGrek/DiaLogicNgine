@@ -1,0 +1,84 @@
+.link-category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 8px;
+}
+
+/* Marks a category the author has already styled. */
+.link-category-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: #4ecdc4;
+    vertical-align: middle;
+}
+
+.link-category-description {
+    margin: 10px 8px 0;
+}
+
+.link-category-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 12px;
+    margin: 0 8px;
+    border-radius: 6px;
+    /* A busy-ish backdrop, so translucent button backgrounds read honestly. */
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.06) 25%, transparent 25%) -10px 0/20px 20px,
+        linear-gradient(225deg, rgba(255, 255, 255, 0.06) 25%, transparent 25%) -10px 0/20px 20px,
+        #2b3140;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.link-category-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 8px;
+}
+
+.link-category-color-row input[type="color"] {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 28px;
+    padding: 0;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.link-category-alpha-slider {
+    flex: 1 1 auto;
+    min-width: 80px;
+}
+
+.link-category-alpha-value {
+    flex: 0 0 auto;
+    width: 3.2em;
+    font-size: smaller;
+    opacity: 0.75;
+}
+
+.link-category-inherit-note {
+    margin: 0;
+}
+
+.link-category-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 0 8px;
+}
+
+.link-category-toggles label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
