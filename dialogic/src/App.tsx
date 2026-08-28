@@ -8,6 +8,7 @@ import {
   Sidebar,
 } from "rsuite";
 import {
+  Navigate,
   Outlet,
   Route,
   Routes,
@@ -42,6 +43,7 @@ import SpecialWindowsMenu from "./components/menuitems/specialwindows/SpecialWin
 import VisualsMenu from "./components/menuitems/visuals/VisualsMenu";
 import SettingsPanel, { AppSettings, loadSettings, SettingsButton } from "./components/settings/SettingsPanel";
 import HomePage from "./components/home/HomePage";
+import GalleryPage from "./components/gallery/GalleryPage";
 import PlayOnlyPage from "./components/play/PlayOnlyPage";
 import { ProjectImagesContext } from "./components/common/ProjectImagesContext";
 import LoginPage from "./components/auth/LoginPage";
@@ -435,22 +437,45 @@ export default function App() {
     logout().finally(() => setCurrentUser(null));
   }, []);
 
-  const gated =
-    currentUser === undefined ? (
-      <div className="app-auth-loading" data-testid="auth-loading">
-        <Loader size="lg" content="Loading…" vertical />
-      </div>
-    ) : currentUser === null ? (
-      <LoginPage onAuth={setCurrentUser} />
-    ) : (
-      <AuthedApp currentUser={currentUser} onLogout={handleLogout} />
-    );
+  const checkingSession = currentUser === undefined;
+
+  const loader = (
+    <div className="app-auth-loading" data-testid="auth-loading">
+      <Loader size="lg" content="Loading…" vertical />
+    </div>
+  );
+
+  const gallery = (
+    <GalleryPage currentUser={currentUser ?? null} onLogout={handleLogout} />
+  );
+
+  const login = <LoginPage onAuth={setCurrentUser} />;
+
+  const gated = checkingSession ? (
+    loader
+  ) : currentUser ? (
+    <AuthedApp currentUser={currentUser} onLogout={handleLogout} />
+  ) : (
+    // Logged out: the main page is the public gallery, everything else (the
+    // editor routes) asks for an account first.
+    <Routes>
+      <Route path="/" element={gallery} />
+      <Route path="*" element={login} />
+    </Routes>
+  );
 
   return (
     <CustomProvider theme="dark">
       <Routes>
         {/* Public: published games are playable without an account. */}
         <Route path="/play/:projectName" element={<PlayOnlyPage />} />
+        <Route path="/games" element={checkingSession ? loader : gallery} />
+        <Route
+          path="/login"
+          element={
+            checkingSession ? loader : currentUser ? <Navigate to="/" replace /> : login
+          }
+        />
         <Route path="/*" element={gated} />
       </Routes>
     </CustomProvider>

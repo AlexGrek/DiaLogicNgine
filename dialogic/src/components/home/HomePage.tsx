@@ -5,7 +5,11 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  Check,
   FolderOpen,
+  Globe,
+  Link as LinkIcon,
+  Lock,
   MapPin,
   MessageSquare,
   MousePointerClick,
@@ -26,7 +30,9 @@ import {
   deleteProjectFromServer,
   listServerProjects,
   loadProjectFromServer,
+  projectCoverUrl,
   saveProjectToServer,
+  setProjectPublished,
 } from '../../api/projectsApi';
 import './HomePage.css';
 
@@ -54,9 +60,11 @@ interface ProjectCardProps {
   opening: boolean;
   anyBusy: boolean;
   deleting: boolean;
+  publishing: boolean;
   onOpen: (name: string) => void;
   onPlay: (name: string) => void;
   onDelete: (name: string) => void;
+  onTogglePublish: (name: string, published: boolean) => void;
 }
 
 const FEATURES = [
@@ -72,27 +80,41 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   opening,
   anyBusy,
   deleting,
+  publishing,
   onOpen,
   onPlay,
   onDelete,
+  onTogglePublish,
 }) => {
   const displayName = project.displayName || project.name;
   const showId = project.displayName && project.displayName !== project.name;
   const lastModified = formatLastModified(project.lastModified);
+  const cover = projectCoverUrl(project.name, project.mainImageUrl);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const copyPlayLink = useCallback(() => {
+    const url = `${window.location.origin}/play/${encodeURIComponent(project.name)}`;
+    navigator.clipboard?.writeText(url).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 1500);
+    });
+  }, [project.name]);
 
   return (
     <article className="home-project-card" data-testid="project-card">
       <div className="home-project-card-media">
-        {project.mainImageUrl ? (
-          <img
-            src={project.mainImageUrl}
-            alt={displayName}
-            className="home-project-thumb"
-          />
+        {cover ? (
+          <img src={cover} alt={displayName} className="home-project-thumb" />
         ) : (
           <div className="home-project-thumb-placeholder">
             <FolderOpen size={32} strokeWidth={1.5} />
           </div>
+        )}
+        {project.published && (
+          <span className="home-project-published-badge" data-testid="published-badge">
+            <Globe size={11} />
+            Published
+          </span>
         )}
       </div>
 
@@ -131,6 +153,46 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           )}
           {lastModified && (
             <span className="home-project-modified">Updated {lastModified}</span>
+          )}
+        </div>
+
+        <div className="home-project-publish">
+          <button
+            type="button"
+            className={
+              'home-publish-toggle' +
+              (project.published ? ' home-publish-toggle--on' : '')
+            }
+            disabled={anyBusy || publishing}
+            aria-pressed={!!project.published}
+            onClick={() => onTogglePublish(project.name, !project.published)}
+            data-testid="publish-toggle-btn"
+            title={
+              project.published
+                ? 'Listed in the public gallery — anyone can play it. Click to unpublish.'
+                : 'Private to you. Click to publish it to the public gallery.'
+            }
+          >
+            {publishing ? (
+              <Loader size="xs" />
+            ) : project.published ? (
+              <Globe size={13} />
+            ) : (
+              <Lock size={13} />
+            )}
+            {project.published ? 'Published' : 'Private'}
+          </button>
+          {project.published && (
+            <button
+              type="button"
+              className="home-publish-link"
+              onClick={copyPlayLink}
+              data-testid="copy-play-link-btn"
+              title="Copy the public play link"
+            >
+              {linkCopied ? <Check size={13} /> : <LinkIcon size={13} />}
+              {linkCopied ? 'Copied' : 'Copy link'}
+            </button>
           )}
         </div>
 
@@ -186,6 +248,7 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
   const [openingName, setOpeningName] = useState<string | null>(null);
   const [deletingName, setDeletingName] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [publishingName, setPublishingName] = useState<string | null>(null);
 
   const refreshList = useCallback((p: number) => {
     setLoadingList(true);
@@ -221,6 +284,30 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
       navigate(`/play/${encodeURIComponent(name)}`);
     },
     [navigate]
+  );
+
+  const handleTogglePublish = useCallback(
+    async (name: string, published: boolean) => {
+      setPublishingName(name);
+      try {
+        await setProjectPublished(name, published);
+        // Publication lives in the server metadata, so patch the loaded page
+        // instead of refetching the whole list.
+        setProjectsPage((prev) =>
+          prev
+            ? {
+                ...prev,
+                projects: prev.projects.map((p) =>
+                  p.name === name ? { ...p, published } : p
+                ),
+              }
+            : prev
+        );
+      } finally {
+        setPublishingName(null);
+      }
+    },
+    []
   );
 
   const handleOpen = useCallback(
@@ -264,11 +351,19 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
       <div className="home-orb home-orb--2" aria-hidden />
       <div className="home-orb home-orb--3" aria-hidden />
 
-      <UserMenu
-        className="home-userbar"
-        username={currentUser.username}
-        onLogout={onLogout}
-      />
+      <div className="home-userbar">
+        <Button
+          appearance="ghost"
+          size="sm"
+          className="home-gallery-btn"
+          onClick={() => navigate('/games')}
+          data-testid="browse-gallery-btn"
+        >
+          <Globe size={14} style={{ marginRight: 6 }} />
+          Public games
+        </Button>
+        <UserMenu username={currentUser.username} onLogout={onLogout} />
+      </div>
 
       <div className="home-inner">
         <header className="home-hero">
@@ -404,9 +499,11 @@ const HomePage: React.FC<HomePageProps> = ({ onOpenProject, currentUser, onLogou
                   opening={openingName === proj.name}
                   anyBusy={anyBusy}
                   deleting={deletingName === proj.name}
+                  publishing={publishingName === proj.name}
                   onOpen={handleOpen}
                   onPlay={handlePlay}
                   onDelete={setConfirmDelete}
+                  onTogglePublish={handleTogglePublish}
                 />
               ))}
             </div>

@@ -40,6 +40,7 @@ Specs:
 - `home-page.cy.js` — home page load, create-form validation
 - `editor-routes.cy.js` — direct URL nav + sidebar nav for all 12 routes
 - `main-path.cy.js` — create project → editor → sidebar → player → new game
+- `public-gallery.cy.js` — publishing, the anonymous gallery, playing without an account
 
 ## Architecture
 
@@ -103,6 +104,8 @@ Notable types:
 - `pointandclick/` — point-and-click scene editor
 - `configuration/` — game config & general info
 
+**Public pages** (no account needed): `components/gallery/GalleryPage.tsx` — the main page for logged-out visitors (`/`, and `/games` for everyone), listing published games; `components/play/PlayOnlyPage.tsx` — the standalone `/play/{project}` player. `components/home/HomePage.tsx` is the signed-in dashboard at `/` and owns the publish/unpublish toggle.
+
 **Player components** (`components/player/`): `Player.tsx` → `PlayerCore.tsx` → view components (`DialogWindowView`, `LocationView`, `CharDialogView`, `PacView`, etc.)
 
 → **For player rendering architecture**, see the `game_engine` skill (it covers `Player.tsx`, `PlayerCore.tsx`, and the `GameExecManager` → `RenderView` flow).
@@ -161,8 +164,8 @@ details in [`backend/server.md`](backend/server.md):
 
 - Free registration; on first boot a `root` user (password `000000`) is created and **all pre-existing projects are assigned to it** (`auth.ensure_root_and_migrate()`).
 - Projects record their `owner` in `.metadata`; mutations are gated by `app/ownership.py` `require_owner`. Users only **list** their own projects.
-- **Play stays public:** `GET .../game` and image/thumbnail serving need no auth, so `/play/{project}` links work without an account.
-- When adding a route that touches a project, gate it with `Depends(auth.get_current_user)` + `require_owner(...)` unless it must be public (game/image reads).
+- **Publishing:** `.metadata` also carries `published` / `publishedAt`, flipped by the owner via `POST /projects/{p}/publish`. A published project is listed by the public `GET /projects/published` (the gallery) and its `game.json` is readable without an account, so `/play/{project}` links work; an unpublished one returns 403 to everyone but its owner. Image/thumbnail serving stays public either way.
+- When adding a route that touches a project, gate it with `Depends(auth.get_current_user)` + `require_owner(...)` unless it must be public (published-game reads, image reads).
 
 ### Image API (`/api/v1/projects/{project_name}/`)
 

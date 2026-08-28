@@ -2,7 +2,8 @@
 
 FastAPI + uvicorn backend that stores game projects and uploaded images, proxies
 AI generation (OffloadMQ), and — as of the auth rework — gates everything behind
-a **login/password system** with per-user project ownership.
+a **login/password system** with per-user project ownership, with an opt-in
+**publishing** flag that exposes a game to anonymous players.
 
 - **Stack:** Python ≥ 3.14, FastAPI, uvicorn, Pillow, managed with **uv**
 - **All routes** live under `/api/v1/`
@@ -84,7 +85,8 @@ owner in the project's existing `.metadata` file:
 
 ```jsonc
 // storage/projects/{project}/.metadata
-{ "owner": "root", "displayName": "…", "lastModified": "…", … }
+{ "owner": "root", "published": true, "publishedAt": "…",
+  "displayName": "…", "lastModified": "…", … }
 ```
 
 [`app/ownership.py`](app/ownership.py) exposes:
@@ -99,20 +101,44 @@ owner in the project's existing `.metadata` file:
 |--------|------|
 | List projects | Auth required; returns **only the caller's** projects. |
 | Save / delete project | Auth + `require_owner`. Saving a new project stamps `owner = caller`. |
+| Publish / unpublish | Auth + `require_owner`. |
 | Upload / list / delete / resize images | Auth + `require_owner`. |
 | AI generation (LLM / imggen), prompt history | Auth + `require_owner` on the target project. |
 | OffloadMQ settings | Auth required. |
-| **Load `game.json`** | **Public** — published games stay playable. |
+| **List published projects** | **Public** — backs the gallery on the main page. |
+| **Load `game.json`** | **Public if published**, otherwise owner-only. |
 | **Serve image / thumbnail** | **Public** — required to render a played game. |
 
-### Trade-off (Play is public)
+---
 
-Because game JSON and image serving are public, project **names share one global
-namespace**, and a logged-in user who guesses another user's project *name* can
-open it **read-only** (saving is blocked by `require_owner`). Project
-*enumeration* (the listing) is private — you only see your own. This is the
-deliberate cost of keeping shared `/play/{project}` links working without an
-account.
+## Publishing
+
+Publishing is a per-project boolean in `.metadata` (`published`, plus a
+`publishedAt` timestamp), flipped by the owner through
+`POST /projects/{p}/publish`. It lives outside `game.json`, and `save_game`
+carries it over on every save, so re-saving a game never silently unpublishes it.
+
+A **published** project:
+
+- is listed by the public `GET /projects/published` endpoint (the gallery the
+  frontend renders at `/` for logged-out visitors and at `/games` for everyone);
+- has a **publicly readable `game.json`**, so `/play/{project}` works with no
+  account.
+
+An **unpublished** project is invisible to the gallery and its `game.json`
+returns **403** to anyone but its owner (an *unclaimed* project — no `owner` in
+`.metadata` — stays readable, matching `require_owner`).
+
+### Trade-offs
+
+- Project **names share one global namespace**, so a published game is reachable
+  by anyone who knows its name — that is the point of publishing.
+- Image and thumbnail serving stays public regardless of publication state: a
+  played game must be able to render its assets, and locking images to published
+  projects would break the editor's own image loads. Uploads are still
+  owner-gated, and filenames are not enumerable without auth.
+- The gallery response deliberately omits `owner`: usernames are not public
+  data; attribution comes from the game's own `authors` field.
 
 ---
 
@@ -162,8 +188,10 @@ Public = no auth · Auth = valid session · Owner = auth + `require_owner`.
 | POST | `/api/v1/auth/change-password` | Auth |
 | GET | `/api/v1/auth/me` | Auth |
 | GET | `/api/v1/projects` | Auth (own only) |
-| GET | `/api/v1/projects/{p}/game` | **Public** |
+| GET | `/api/v1/projects/published` | **Public** (paged, `?search=`) |
+| GET | `/api/v1/projects/{p}/game` | **Public if published**, else Owner |
 | PUT | `/api/v1/projects/{p}/game` | Owner |
+| POST | `/api/v1/projects/{p}/publish` | Owner |
 | DELETE | `/api/v1/projects/{p}` | Owner |
 | GET | `/api/v1/projects/{p}/images/{file}`, `/image_thumbs/{file}` | **Public** |
 | GET | `/api/v1/projects/{p}/images` | Owner |

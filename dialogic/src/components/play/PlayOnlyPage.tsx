@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Loader } from 'rsuite';
 import { useNavigate, useParams } from 'react-router-dom';
-import { loadProjectFromServer } from '../../api/projectsApi';
+import { ProjectRequestError, loadProjectFromServer } from '../../api/projectsApi';
 import { GameDescription } from '../../game/GameDescription';
 import { ProjectImagesContext } from '../common/ProjectImagesContext';
 import Player from '../player/Player';
@@ -25,7 +25,16 @@ const PlayOnlyPage: React.FC = () => {
     setError(null);
     loadProjectFromServer(projectName)
       .then(setGame)
-      .catch(() => setError('Failed to load project'))
+      .catch((e) => {
+        // 403 = the game exists but its owner has not published it.
+        if (e instanceof ProjectRequestError && e.status === 403) {
+          setError('This game is not published — ask its author for access.');
+        } else if (e instanceof ProjectRequestError && e.status === 404) {
+          setError('No such game.');
+        } else {
+          setError('Failed to load project');
+        }
+      })
       .finally(() => setLoading(false));
   }, [projectName]);
 
@@ -52,8 +61,8 @@ const PlayOnlyPage: React.FC = () => {
     return (
       <div className="play-only-page play-only-page--error" data-testid="play-only-page">
         <p>{error ?? 'Project not found'}</p>
-        <Button appearance="primary" onClick={handleExit}>
-          Back to home
+        <Button appearance="primary" onClick={handleExit} data-testid="play-back-home">
+          Browse published games
         </Button>
       </div>
     );

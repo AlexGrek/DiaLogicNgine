@@ -72,3 +72,18 @@ Cypress.Commands.add("openTestProject", () => {
   cy.url({ timeout: 20000 }).should("include", "/dialog");
   cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");
 });
+
+/**
+ * Publish / unpublish a project via API (owner-gated, so it logs in first).
+ *
+ * Published projects appear in the public gallery and can be played by
+ * anonymous visitors; unpublished ones are private to their owner.
+ */
+Cypress.Commands.add("setProjectPublished", (name, published) => {
+  cy.login();
+  cy.request({
+    method: "POST",
+    url: `/api/v1/projects/${encodeURIComponent(name)}/publish`,
+    body: { published },
+  });
+});
