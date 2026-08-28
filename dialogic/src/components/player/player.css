@@ -486,6 +486,57 @@
     right: 0;
 }
 
+/* ── Portrait stage: routes become a left column, text takes the rest ─── */
+
+.player-core-container--portrait .dialog-window-view--with-routes .loc-routes {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    width: var(--loc-column-width, 34%);
+    max-width: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    gap: 6px;
+    padding: 10px 8px;
+    background: linear-gradient(to right, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.18) 100%);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.25) transparent;
+}
+
+/* One rule covers every text alignment: the stage is pinned to the right column. */
+.player-core-container--portrait .dialog-window-view--with-routes .dlg-stage {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: var(--loc-column-width, 34%);
+    width: auto;
+}
+
+.player-core-container--portrait .dialog-window-view--with-routes .dlg-scroll {
+    padding: 12px 14px 6px;
+}
+
+.player-core-container--portrait .route-button {
+    width: 100%;
+    height: 52pt;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.player-core-container--portrait .route-button-inside p {
+    font-size: calc(var(--player-responses-font-size, 20px) * 0.72);
+    margin: 0;
+}
+
+.player-core-container--portrait .route-button-inside:hover p {
+    font-size: calc(var(--player-responses-font-size, 20px) * 0.82);
+}
+
 .route-button {
     width: 130pt;
     height: 100pt;

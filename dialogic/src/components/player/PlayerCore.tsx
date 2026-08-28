@@ -15,7 +15,7 @@ import SavesManager from '../../savegame/LocalStorageSavesManager';
 import GameUiElementsView from './GameUiElementsView';
 import GameNotificationsView from './GameNotificationsView';
 import { PlayerSettings, loadPlayerSettings, savePlayerSettings } from './PlayerSettings';
-import { fontSizeOverrideCssVars, resolveVisuals } from './visualsClasses';
+import { fontScaleForAspectRatio, fontSizeOverrideCssVars, resolveVisuals } from './visualsClasses';
 
 interface PlayerCoreProps {
     game: GameExecManager;
@@ -101,9 +101,20 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     }
 
     if (currentView) {
-        const fontSizeStyle = fontSizeOverrideCssVars(playerSettings.textFontSize, playerSettings.responsesFontSize);
+        const aspectRatio = resolveVisuals(game.game.visuals).aspectRatio;
+        const portrait = aspectRatio === '9:16';
+        // The player's own size preference is scaled the same way the author's is.
+        const fontSizeStyle = fontSizeOverrideCssVars(
+            playerSettings.textFontSize,
+            playerSettings.responsesFontSize,
+            fontScaleForAspectRatio(aspectRatio),
+        );
         return (
-            <div className='player-core-container' id='player-core' style={fontSizeStyle}>
+            <div
+                className={`player-core-container${portrait ? ' player-core-container--portrait' : ''}`}
+                id='player-core'
+                style={fontSizeStyle}
+            >
                 <div className={`player-bg-stage${menuOpen ? ' menu-open' : ''}`}>
                     <AnimatePresence>
                         <motion.div

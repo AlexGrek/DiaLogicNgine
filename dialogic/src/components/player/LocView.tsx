@@ -28,13 +28,22 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, step }
         ? <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} responseAlignment={visuals.responseAlignment} />
         : null
 
+    // On a portrait stage the routes become a left column and the text stage is
+    // squeezed into the remaining width — but only when there is a route to show.
+    const hasRoutes = view.routes.length > 0
+
     return (
-        <div className="dialog-window-view dialog-window-view--location" data-testid="location-view">
-            <div className="loc-routes">
-                {view.routes.map((route, i) => (
-                    <LocButton key={route.index} route={route} onClick={clickRoute} index={i} />
-                ))}
-            </div>
+        <div
+            className={`dialog-window-view dialog-window-view--location${hasRoutes ? ' dialog-window-view--with-routes' : ''}`}
+            data-testid="location-view"
+        >
+            {hasRoutes && (
+                <div className="loc-routes">
+                    {view.routes.map((route, i) => (
+                        <LocButton key={route.index} route={route} onClick={clickRoute} index={i} />
+                    ))}
+                </div>
+            )}
             <DialogTextStage
                 morphScope="loc"
                 alignment={visuals.dialogTextAlignment}

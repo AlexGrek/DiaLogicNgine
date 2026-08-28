@@ -60,6 +60,14 @@ function normalizeAspectRatio(value: unknown): AspectRatioId {
     return value === '9:16' ? '9:16' : '16:9';
 }
 
+/** A portrait stage is far narrower than a landscape one, so the same px size reads
+ *  much larger on it. Every tier — large and huge included — is scaled down to match. */
+export const PORTRAIT_FONT_SCALE = 0.72;
+
+export function fontScaleForAspectRatio(aspectRatio: AspectRatioId): number {
+    return aspectRatio === '9:16' ? PORTRAIT_FONT_SCALE : 1;
+}
+
 /** Games saved before the start-menu layout option existed have no `layout` field. */
 export function resolveMainMenuLayout(value: unknown): MainMenuLayout {
     return value === 'mobile' ? 'mobile' : 'classic';
@@ -107,13 +115,14 @@ export function notificationVisualsCssVars(visuals: VisualsConfiguration): CSSPr
 
 export function playerVisualsCssVars(visuals: VisualsConfiguration): CSSProperties {
     const opacity = visuals.dialogTextBackgroundOpacity / 100;
+    const scale = fontScaleForAspectRatio(visuals.aspectRatio);
     return {
         '--player-font-menu': FONT_CSS[visuals.menuFontId],
         '--player-font-text': FONT_CSS[visuals.textFontId],
         '--player-font-responses': FONT_CSS[visuals.responsesFontId],
         '--player-dialog-text-bg': `rgba(4, 4, 4, ${opacity})`,
-        '--player-text-font-size': `${TEXT_FONT_SIZE_PX[visuals.textFontSize]}px`,
-        '--player-responses-font-size': `${RESPONSES_FONT_SIZE_PX[visuals.responsesFontSize]}px`,
+        '--player-text-font-size': `${Math.round(TEXT_FONT_SIZE_PX[visuals.textFontSize] * scale)}px`,
+        '--player-responses-font-size': `${Math.round(RESPONSES_FONT_SIZE_PX[visuals.responsesFontSize] * scale)}px`,
         '--menu-panel-bg-alpha': `${visuals.menuPanelOpacity / 100}`,
         '--menu-panel-border-radius': `${visuals.menuPanelBorderRadius}px`,
         '--player-aspect-ratio': `${ASPECT_RATIO_VALUE[visuals.aspectRatio]}`,
@@ -123,10 +132,11 @@ export function playerVisualsCssVars(visuals: VisualsConfiguration): CSSProperti
 export function fontSizeOverrideCssVars(
     textFontSize: FontSizeId,
     responsesFontSize: FontSizeId,
+    scale = 1,
 ): CSSProperties {
     return {
-        '--player-text-font-size': `${TEXT_FONT_SIZE_PX[textFontSize]}px`,
-        '--player-responses-font-size': `${RESPONSES_FONT_SIZE_PX[responsesFontSize]}px`,
+        '--player-text-font-size': `${Math.round(TEXT_FONT_SIZE_PX[textFontSize] * scale)}px`,
+        '--player-responses-font-size': `${Math.round(RESPONSES_FONT_SIZE_PX[responsesFontSize] * scale)}px`,
     } as CSSProperties;
 }
 
