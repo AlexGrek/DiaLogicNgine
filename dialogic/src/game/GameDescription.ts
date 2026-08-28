@@ -27,6 +27,10 @@ export type ResponseAlignment = "column" | "row" | "flexible"
 export type FontSizeId = "xsmall" | "small" | "normal" | "large" | "huge"
 /** Layout variant for the in-game inventory / item picker menu. */
 export type InventoryLayout = "matrix" | "list" | "popup" | "subwindow" | "scroll"
+/** Layout variant for the start (main) menu shown before the game begins. */
+export type MainMenuLayout = "classic" | "mobile"
+/** Shape of the player stage: landscape 16:9 or portrait 9:16. */
+export type AspectRatioId = "16:9" | "9:16"
 
 export const INVENTORY_LAYOUT_LABELS: { value: InventoryLayout; label: string }[] = [
     { value: 'matrix', label: 'Matrix' },
@@ -35,6 +39,22 @@ export const INVENTORY_LAYOUT_LABELS: { value: InventoryLayout; label: string }[
     { value: 'subwindow', label: 'Subwindow' },
     { value: 'scroll', label: 'Scroll' },
 ]
+
+export const MAIN_MENU_LAYOUT_LABELS: { value: MainMenuLayout; label: string }[] = [
+    { value: 'classic', label: 'Classic' },
+    { value: 'mobile', label: 'Mobile' },
+]
+
+export const ASPECT_RATIO_LABELS: { value: AspectRatioId; label: string }[] = [
+    { value: '16:9', label: '16:9 landscape' },
+    { value: '9:16', label: '9:16 portrait' },
+]
+
+/** width / height as a plain number, used for the `aspect-ratio` CSS variable. */
+export const ASPECT_RATIO_VALUE: Record<AspectRatioId, number> = {
+    "16:9": 16 / 9,
+    "9:16": 9 / 16,
+}
 
 export const FONT_SIZE_LABELS: { value: FontSizeId; label: string }[] = [
     { value: 'xsmall', label: 'X-Small' },
@@ -84,6 +104,8 @@ export interface VisualsConfiguration {
     typewriterSpeedMs: number
     menuPanelOpacity: number
     menuPanelBorderRadius: number
+    /** Shape of the player stage — landscape 16:9 or portrait 9:16 (mobile). */
+    aspectRatio: AspectRatioId
     /** Layout variant for the in-game inventory / item picker menu. */
     inventoryLayout: InventoryLayout
     /** Custom CSS injected at runtime, scoped to the inventory / item picker menu. */
@@ -109,6 +131,7 @@ export function createDefaultVisuals(): VisualsConfiguration {
         typewriterSpeedMs: 12,
         menuPanelOpacity: DEFAULT_MENU_PANEL_OPACITY,
         menuPanelBorderRadius: DEFAULT_MENU_PANEL_BORDER_RADIUS,
+        aspectRatio: "16:9",
         inventoryLayout: "matrix",
         inventoryCustomCss: "",
         customCss: "",
@@ -117,6 +140,8 @@ export function createDefaultVisuals(): VisualsConfiguration {
 
 export interface StartMenuConfiguration {
     menuBackground?: string
+    /** Which start-menu design to render. Defaults to "classic" when absent. */
+    layout?: MainMenuLayout
 }
 
 export interface Config {

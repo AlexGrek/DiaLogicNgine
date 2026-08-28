@@ -55,6 +55,7 @@
 
 .player-window--play-only .player-main {
     max-width: none;
+    padding: 0;
 }
 
 .player-top-panel {
@@ -72,12 +73,24 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    /* The stage is the query container the play area is fitted into; the padding
+       is the breathing room around it (cq units resolve against the content box). */
+    container-type: size;
+    padding: 0 2.5%;
+    box-sizing: border-box;
+}
+
+/* Largest box of the configured ratio that fits the stage on both axes. Driven by
+   --player-aspect-ratio (width / height), set from visuals.aspectRatio. */
+.player-core-container,
+.main-menu-overlay {
+    --player-stage-ratio: var(--player-aspect-ratio, 1.7777778);
+    width: min(100cqw, calc(100cqh * var(--player-stage-ratio)));
+    height: min(100cqh, calc(100cqw / var(--player-stage-ratio)));
 }
 
 .player-core-container {
-    aspect-ratio: 16 / 9;
-    width: min(95%, 100%);
-    max-height: 100%;
+    aspect-ratio: var(--player-stage-ratio);
     overflow: hidden;
     background-color: black;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
@@ -141,6 +154,8 @@
     height: 100%;
     min-height: 0;
     font-family: var(--player-font-text, "PalanquinRegular", sans-serif);
+    /* PointAndClickScene fits its 16:9 zone canvas against this box. */
+    container-type: size;
 }
 
 /* ── Text stage: a positioned panel that hosts history + current line + footer */
@@ -683,7 +698,9 @@
 
 .main-menu-overlay {
     position: absolute;
-    inset: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 200;
     display: flex;
     align-items: center;
@@ -692,6 +709,10 @@
     background-size: cover;
     background-position: center;
     border-radius: 6px;
+    overflow: hidden;
+    /* Menu type scales with the stage, not the browser window — a 9:16 stage on a
+       wide desktop must not get desktop-sized text. */
+    container-type: size;
 }
 
 .main-menu-backdrop {
@@ -714,7 +735,7 @@
 
 .main-menu-title {
     font-family: var(--player-font-menu, "Involve", sans-serif);
-    font-size: clamp(28px, 5vw, 64px);
+    font-size: clamp(24px, 7cqw, 64px);
     font-weight: bold;
     color: #f5f7fb;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
@@ -723,9 +744,9 @@
 
 .main-menu-subtitle {
     font-family: var(--player-font-menu, "Involve", sans-serif);
-    font-size: clamp(13px, 1.6vw, 18px);
+    font-size: clamp(13px, 2.2cqw, 18px);
     color: #b8c2d6;
-    max-width: min(700px, 80vw);
+    max-width: min(700px, 80cqw);
     margin: 0;
     line-height: 1.5;
 }
@@ -735,7 +756,7 @@
     flex-direction: column;
     gap: 12px;
     margin-top: 16px;
-    width: min(260px, 70vw);
+    width: min(260px, 70cqw);
 }
 
 .main-menu-btn {
@@ -744,7 +765,7 @@
     border-radius: 4px;
     border: 1px solid transparent;
     font-family: var(--player-font-menu, "Involve", sans-serif);
-    font-size: clamp(14px, 1.5vw, 20px);
+    font-size: clamp(14px, 2cqw, 20px);
     cursor: pointer;
 }
 
@@ -773,6 +794,80 @@
     font-size: 11px;
     color: #6c7894;
     margin-top: 8px;
+}
+
+/* ── Main menu overlay — mobile layout ─────────────────────── */
+/* Content sits in a bottom sheet so the art stays visible and the buttons land
+   under the thumb; sized for touch rather than for a pointer. */
+
+.main-menu-overlay--mobile {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+}
+
+.main-menu-overlay--mobile .main-menu-backdrop {
+    background: linear-gradient(to bottom,
+        rgba(2, 4, 10, 0.15) 0%,
+        rgba(2, 4, 10, 0.45) 45%,
+        rgba(2, 4, 10, 0.93) 100%);
+}
+
+.main-menu-overlay--mobile .main-menu-content {
+    width: 100%;
+    box-sizing: border-box;
+    align-items: stretch;
+    text-align: left;
+    gap: 10px;
+    padding: 24px clamp(16px, 6cqw, 44px);
+    padding-bottom: calc(clamp(20px, 5cqh, 48px) + env(safe-area-inset-bottom, 0px));
+}
+
+.main-menu-overlay--mobile .main-menu-title {
+    font-size: clamp(26px, 9cqw, 56px);
+    line-height: 1.1;
+    margin: 0;
+}
+
+.main-menu-overlay--mobile .main-menu-subtitle {
+    font-size: clamp(13px, 3.4cqw, 20px);
+    max-width: none;
+    /* Long descriptions must not push the buttons off a short screen. */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.main-menu-overlay--mobile .main-menu-buttons {
+    width: 100%;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.main-menu-overlay--mobile .main-menu-btn {
+    min-height: 54px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: clamp(15px, 4.2cqw, 22px);
+    font-weight: 600;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.main-menu-overlay--mobile .main-menu-btn-primary {
+    background-color: #0d4b76;
+    border-color: #3f9ad4;
+    color: #eaf6ff;
+}
+
+.main-menu-overlay--mobile .main-menu-btn-primary:hover {
+    background-color: #12608f;
+}
+
+.main-menu-overlay--mobile .main-menu-footer {
+    align-self: center;
+    margin-top: 12px;
 }
 
 /* --- Interactive state editor (StateEditor.tsx) --- */

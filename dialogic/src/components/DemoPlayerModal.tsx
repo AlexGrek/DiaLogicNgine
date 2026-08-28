@@ -92,11 +92,15 @@ const DemoPlayerModal: React.FC<DemoPlayerModalProps> = ({ game, open, onClose, 
                         className="player-window"
                         style={{ ...visualsStyle, height: '60vh', position: 'relative', overflow: 'hidden' }}
                     >
-                        <PlayerCore
-                            game={executorRef.current}
-                            state={gameState}
-                            onStateUpd={setGameState}
-                        />
+                        {/* .player-main is the stage the play area is fitted into — it
+                            carries the container-query context PlayerCore sizes against. */}
+                        <div className="player-main">
+                            <PlayerCore
+                                game={executorRef.current}
+                                state={gameState}
+                                onStateUpd={setGameState}
+                            />
+                        </div>
                         <StateDisplayDrawer
                             state={gameState}
                             game={game}

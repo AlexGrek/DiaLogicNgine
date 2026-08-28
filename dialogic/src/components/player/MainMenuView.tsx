@@ -4,6 +4,7 @@ import { GameDescription } from '../../game/GameDescription';
 import { resolveImageProject } from '../common/projectImages';
 import { useProjectImages } from '../common/ProjectImagesContext';
 import { styleWithImage } from '../UiUtils';
+import { resolveMainMenuLayout } from './visualsClasses';
 
 interface MainMenuViewProps {
     game: GameDescription;
@@ -18,6 +19,7 @@ const rise = {
 
 const MainMenuView: React.FC<MainMenuViewProps> = ({ game, onStart, onExit }) => {
     const storageProject = resolveImageProject(useProjectImages());
+    const layout = resolveMainMenuLayout(game.startMenu.layout);
 
     const bgStyle = game.startMenu.menuBackground
         ? styleWithImage(game.startMenu.menuBackground, storageProject)
@@ -26,7 +28,8 @@ const MainMenuView: React.FC<MainMenuViewProps> = ({ game, onStart, onExit }) =>
     return (
         <motion.div
             data-testid="main-menu-overlay"
-            className="main-menu-overlay"
+            data-layout={layout}
+            className={`main-menu-overlay main-menu-overlay--${layout}`}
             style={bgStyle}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -9,6 +9,12 @@
     margin: 0 auto;
 }
 
+.config-property-hint {
+    font-size: smaller;
+    opacity: 0.65;
+    margin: 2px 0 8px;
+}
+
 .sanity-issue {
     display: flex;
     align-items: flex-start;

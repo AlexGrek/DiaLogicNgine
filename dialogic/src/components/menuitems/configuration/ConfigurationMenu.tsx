@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createDialogWindowId } from '../../../exec/GameState';
-import { GameDescription, GeneralGameInfo, createDefaultDevConfig } from '../../../game/GameDescription';
+import { GameDescription, GeneralGameInfo, MAIN_MENU_LAYOUT_LABELS, MainMenuLayout, createDefaultDevConfig } from '../../../game/GameDescription';
 import DialogWindowPicker from '../../common/DialogWindowPicker';
 import { Button, ButtonGroup, Input, Panel, Stack } from 'rsuite';
 import ImagePicker from '../../common/ImagePicker';
@@ -12,6 +12,7 @@ import StringMapEditor from '../../common/StringMapEditor';
 import StringListEditor from '../../common/StringListEditor';
 import PillLikeTabs, { PillTab } from '../../common/PillLikeTabs';
 import SanityCheckPanel from './SanityCheckPanel';
+import { resolveMainMenuLayout } from '../../player/visualsClasses';
 
 interface ConfigurationMenuProps {
     game: GameDescription;
@@ -37,6 +38,12 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
     const onStartupBgChange = (value: string | undefined) => {
         const changes = lodash.cloneDeep(currentGame.startMenu)
         changes.menuBackground = value
+        onSetGame({ ...game, startMenu: changes })
+    }
+
+    const onStartMenuLayoutChange = (value: MainMenuLayout) => {
+        const changes = lodash.cloneDeep(currentGame.startMenu)
+        changes.layout = value
         onSetGame({ ...game, startMenu: changes })
     }
 
@@ -82,8 +89,28 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
         </div>
     );
 
-    const menuBgTab = (
+    const startMenuLayout = resolveMainMenuLayout(game.startMenu.layout);
+
+    const mainMenuTab = (
         <div className="config-tab-panel">
+            <Panel bordered header="Layout">
+                <p className="config-property-hint">
+                    <b>Classic</b> centres the title and buttons over the background.
+                    <b> Mobile</b> anchors them to a bottom sheet with full-width touch targets — pair it with a 9:16 stage in <i>Visuals → Screen</i>.
+                </p>
+                <ButtonGroup>
+                    {MAIN_MENU_LAYOUT_LABELS.map((item) => (
+                        <Button
+                            key={item.value}
+                            active={startMenuLayout === item.value}
+                            onClick={() => onStartMenuLayoutChange(item.value)}
+                            data-testid={`start-menu-layout-${item.value}`}
+                        >
+                            {item.label}
+                        </Button>
+                    ))}
+                </ButtonGroup>
+            </Panel>
             <Panel bordered header="Menu background">
                 <ImagePicker value={game.startMenu.menuBackground} onChange={(val) => onStartupBgChange(val || undefined)} />
             </Panel>
@@ -119,7 +146,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
         { header: 'About', content: aboutTab },
         { header: 'Basic', content: basicTab },
         { header: 'Situations', content: situationsTab },
-        { header: 'Menu background', content: menuBgTab },
+        { header: 'Main menu', content: mainMenuTab },
         { header: 'Localization', content: localizationTab },
         { header: 'Developer / AI', content: devTab },
         { header: 'Sanity check', content: <SanityCheckPanel game={game} /> },

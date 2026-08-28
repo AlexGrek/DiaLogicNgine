@@ -100,7 +100,7 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
 const styles: { [key: string]: React.CSSProperties } = {
     container: {
         width: '100%',
-        height: '100vh',
+        height: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -108,13 +108,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     aspectRatioBox: {
         position: 'relative',
-        // Fit the whole scene inside the viewport while preserving the 16:9
-        // ratio. Using min() for both dimensions guarantees the box can never
-        // exceed the viewport on either axis, so the aspect ratio is never
-        // violated and the percentage-based zone coordinates stay aligned with
-        // the background.
-        width: 'min(100vw, calc(100vh * 16 / 9))',
-        height: 'min(100vh, calc(100vw * 9 / 16))',
+        // Zones are authored on a 16:9 canvas in PointAndClickEditor, so the scene
+        // keeps 16:9 whatever shape the stage is and letterboxes inside it. Sizing
+        // is against the .pac-window-view query container (not the viewport, which
+        // is unrelated to the stage box); min() on both axes guarantees the box
+        // never exceeds it, so percentage zone coordinates stay aligned with the
+        // background.
+        width: 'min(100cqw, calc(100cqh * 16 / 9))',
+        height: 'min(100cqh, calc(100cqw * 9 / 16))',
         aspectRatio: '16 / 9',
     },
     content: {

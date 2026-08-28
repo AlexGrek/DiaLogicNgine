@@ -44,3 +44,22 @@
     resize: vertical;
     box-sizing: border-box;
 }
+
+.visuals-aspect-preview-row {
+    margin-top: 14px;
+}
+
+.visuals-aspect-preview {
+    /* Inline-level + definite height, so the width is derived from the ratio
+       instead of the box stretching to fill the panel. */
+    display: inline-flex;
+    height: 200px;
+    max-width: 100%;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    font-size: 12px;
+    opacity: 0.7;
+}

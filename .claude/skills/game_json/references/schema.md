@@ -14,7 +14,7 @@ Source: `dialogic/src/game/*.ts`.
 | `buildVersion` | R | number | Free-form; nothing reads it. |
 | `general` | R | `GeneralGameInfo` | `{ name, version, authors: string[], description, extras: {} }`. `name` back-filled with a random slug if empty. `version` is copied into save games as `gameVersion`. `extras` is a free `{[k]: string|number}` map exposed read-only as `rt.general.extras`. |
 | `startupDialog` | R | `DialogWindowId` | `{ "kind": "window", "dialog": "<dialog name>", "window": "<window uid>" }`. Where every new game starts. |
-| `startMenu` | R | object | `{ "menuBackground"?: "<image>" }`. `{}` is fine. Also read by the backend for the project card image. |
+| `startMenu` | R | object | `{ "menuBackground"?: "<image>", "layout"?: "classic" \| "mobile" }`. `{}` is fine — `layout` defaults to `classic`. `mobile` renders the start menu as a bottom sheet with full-width touch targets. `menuBackground` is also read by the backend for the project card image. |
 | `config` | R | object | `{ "assetsPath": "" }`. Legacy; `{}` also loads. |
 | `dev` | R | object | `{ "basicPromptSuffix": "" }` — appended to AI generation prompts, no gameplay effect. |
 | `visuals` | R | `VisualsConfiguration` | See below. Missing keys are merged from defaults on load. |
@@ -52,6 +52,7 @@ Source: `dialogic/src/game/*.ts`.
 | `typewriterSpeedMs` | `12` | ms per char |
 | `menuPanelOpacity` | `45` | 0–100 |
 | `menuPanelBorderRadius` | `14` | px |
+| `aspectRatio` | `"16:9"` | `16:9` (landscape) \| `9:16` (portrait / mobile) — shape of the play area |
 | `inventoryLayout` | `"matrix"` | `matrix` \| `list` \| `popup` \| `subwindow` \| `scroll` |
 | `inventoryCustomCss` | `""` | CSS scoped to the inventory menu |
 | `customCss` | `""` | CSS injected into the player |

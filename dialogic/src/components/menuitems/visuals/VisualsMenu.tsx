@@ -3,6 +3,7 @@ import { Button, ButtonGroup, InputNumber, Slider, Toggle } from 'rsuite';
 import FontPicker from '../../common/FontPicker';
 import PillLikeTabs, { PillTab } from '../../common/PillLikeTabs';
 import {
+    ASPECT_RATIO_LABELS,
     DEFAULT_MENU_PANEL_BORDER_RADIUS,
     DialogTextAlignment,
     FONT_SIZE_LABELS,
@@ -264,7 +265,34 @@ const VisualsMenu: React.FC<VisualsMenuProps> = ({ game, onSetGame }) => {
         <InventoryVisualsTab game={game} visuals={visuals} updateVisuals={updateVisuals} />
     );
 
+    const screenTab = (
+        <div className="visuals-properties">
+            <div>
+                <p className="editor-label">Aspect ratio</p>
+                <p className="visuals-property-hint">
+                    Shape of the play area. 16:9 is the classic landscape stage; 9:16 is a portrait
+                    stage for phone-shaped games — pair it with the mobile start menu in <i>Game configuration → Main menu</i>.
+                </p>
+                {segmentedControl(
+                    ASPECT_RATIO_LABELS,
+                    visuals.aspectRatio,
+                    (v) => updateVisuals({ aspectRatio: v }),
+                )}
+                <div className="visuals-aspect-preview-row">
+                    <div
+                        className="visuals-aspect-preview"
+                        style={{ aspectRatio: visuals.aspectRatio.replace(':', ' / ') }}
+                        data-testid="visuals-aspect-preview"
+                    >
+                        {visuals.aspectRatio}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     const tabs: PillTab[] = [
+        { header: 'Screen', content: screenTab },
         { header: 'Typography', content: typographyTab },
         { header: 'Dialog', content: dialogTab },
         { header: 'Inventory', content: inventoryTab },

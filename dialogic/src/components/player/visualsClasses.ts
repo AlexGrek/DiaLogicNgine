@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 import {
+    ASPECT_RATIO_VALUE,
+    AspectRatioId,
     DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
     DEFAULT_MENU_PANEL_BORDER_RADIUS,
     DEFAULT_MENU_PANEL_OPACITY,
@@ -9,6 +11,7 @@ import {
     DialogTextAlignment,
     FontSizeId,
     InventoryLayout,
+    MainMenuLayout,
     RESPONSES_FONT_SIZE_PX,
     ResponseAlignment,
     TEXT_FONT_SIZE_PX,
@@ -53,6 +56,15 @@ function normalizeInventoryLayout(value: unknown): InventoryLayout {
     return INVENTORY_LAYOUTS.includes(value as InventoryLayout) ? value as InventoryLayout : 'matrix';
 }
 
+function normalizeAspectRatio(value: unknown): AspectRatioId {
+    return value === '9:16' ? '9:16' : '16:9';
+}
+
+/** Games saved before the start-menu layout option existed have no `layout` field. */
+export function resolveMainMenuLayout(value: unknown): MainMenuLayout {
+    return value === 'mobile' ? 'mobile' : 'classic';
+}
+
 function clampInt(value: unknown, min: number, max: number, fallback: number): number {
     if (typeof value !== 'number' || Number.isNaN(value)) {
         return fallback;
@@ -76,6 +88,7 @@ export function resolveVisuals(visuals: VisualsConfiguration | undefined): Visua
     merged.responsesFontSize = normalizeFontSizeId(merged.responsesFontSize);
     merged.menuPanelOpacity = clampInt(merged.menuPanelOpacity, 0, 100, DEFAULT_MENU_PANEL_OPACITY);
     merged.menuPanelBorderRadius = clampInt(merged.menuPanelBorderRadius, 0, 50, DEFAULT_MENU_PANEL_BORDER_RADIUS);
+    merged.aspectRatio = normalizeAspectRatio(merged.aspectRatio);
     merged.inventoryLayout = normalizeInventoryLayout(merged.inventoryLayout);
     if (typeof merged.inventoryCustomCss !== 'string') merged.inventoryCustomCss = '';
     if (typeof merged.customCss !== 'string') merged.customCss = '';
@@ -103,6 +116,7 @@ export function playerVisualsCssVars(visuals: VisualsConfiguration): CSSProperti
         '--player-responses-font-size': `${RESPONSES_FONT_SIZE_PX[visuals.responsesFontSize]}px`,
         '--menu-panel-bg-alpha': `${visuals.menuPanelOpacity / 100}`,
         '--menu-panel-border-radius': `${visuals.menuPanelBorderRadius}px`,
+        '--player-aspect-ratio': `${ASPECT_RATIO_VALUE[visuals.aspectRatio]}`,
     } as CSSProperties;
 }
 

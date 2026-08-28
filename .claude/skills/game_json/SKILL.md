@@ -63,10 +63,10 @@ in `GameDescription.ts`).
   "buildVersion": 1,              // free-form int, unused by the engine
   "general":   { "name": "...", "version": "0.1.0", "authors": ["..."], "description": "...", "extras": {} },
   "startupDialog": { "kind": "window", "dialog": "main", "window": "start" },  // where a new game begins
-  "startMenu": { "menuBackground": "bg.png" },     // optional main-menu background
+  "startMenu": { "menuBackground": "bg.png", "layout": "classic" },  // bg + "classic" | "mobile" menu design
   "config":    { "assetsPath": "" },
   "dev":       { "basicPromptSuffix": "" },        // AI-generation prompt suffix, not gameplay
-  "visuals":   { /* fonts, alignment, opacity, typewriter — see schema.md */ },
+  "visuals":   { /* fonts, alignment, opacity, typewriter, aspectRatio — see schema.md */ },
   "translations": { "Menu": "", "Inventory": "" }, // UI-string overrides ("" = use the default)
 
   "dialogs":   [],  // Dialog[]        — the dialog graph (windows + links)
