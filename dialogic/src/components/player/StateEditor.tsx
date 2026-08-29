@@ -21,6 +21,7 @@ import {
     decodeQuestPath,
     decodeTaskPath,
     dialogOptions,
+    dialogWindowOptions,
     encodePath,
     eventOptions,
     factOptions,
@@ -499,6 +500,10 @@ const StateEditor: React.FC<StateEditorProps> = ({ state, game, onStateChange })
                 <Field label='Happened events'>
                     <TagPicker block creatable data={eventOptions(game)} value={state.happenedEvents}
                         onChange={(v) => update({ happenedEvents: v ?? [] })} />
+                </Field>
+                <Field label='Visited dialogs' hint='Every dialog window the player has entered'>
+                    <TagPicker block creatable data={dialogWindowOptions(game)} value={state.visitedDialogs ?? []}
+                        onChange={(v) => update({ visitedDialogs: v ?? [] })} />
                 </Field>
             </Panel>
 

@@ -5,7 +5,7 @@ import { GameDescription, GeneralGameInfo } from "../game/GameDescription";
 import QuestLine, { Quest, Task } from "../game/Objectives";
 import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
-import { CarriedItem, State, createInGameNotification } from "./GameState";
+import { CarriedItem, State, createInGameNotification, getVisitedDialogNames, getVisitedDialogs, isDialogVisited } from "./GameState";
 import { ObjectiveStatus } from "./QuestProcessor";
 import { getItemByIdOrNull } from "../game/Items";
 import { isValidFunctionName } from "../game/ScriptFunction";
@@ -156,6 +156,27 @@ export class RuntimeHistoryAccessManager {
 
     public thisEventHappened(context: any) {
         return this._stateProvider().happenedEvents.includes(context["thisEvent"])
+    }
+
+    /**
+     * Has the player been in this dialog window before? Called with the dialog name
+     * only, it answers whether ANY window of that dialog was visited.
+     * The window the player is entering right now is not counted yet while its own
+     * entryScript runs, so `dialogVisited(here)` inside an entry script means
+     * "I have been here before".
+     */
+    public dialogVisited(dialog: string, window?: string) {
+        return isDialogVisited(this._stateProvider(), dialog, window)
+    }
+
+    /** Names of all dialogs visited so far (no duplicates). */
+    public get visitedDialogs(): string[] {
+        return getVisitedDialogNames(this._stateProvider())
+    }
+
+    /** Every visited dialog window as a "dialog::window" key, in first-visit order. */
+    public get visitedDialogWindows(): string[] {
+        return [...getVisitedDialogs(this._stateProvider())]
     }
 }
 

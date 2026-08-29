@@ -4,7 +4,7 @@ import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
-import { DialogWindowId, HistoryRecord, State } from "./GameState";
+import { DialogWindowId, HistoryRecord, State, dialogWindowKey, getVisitedDialogs } from "./GameState";
 import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
 import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
@@ -274,6 +274,17 @@ export class GameExecManager {
         return newState
     }
 
+    private addToVisitedDialogs(state: State, dialog: string, window: string) {
+        const key = dialogWindowKey(dialog, window)
+        const visited = getVisitedDialogs(state)
+        if (visited.includes(key)) {
+            state.visitedDialogs = visited
+            return state
+        }
+        state.visitedDialogs = [...visited, key]
+        return state
+    }
+
     private addToKnownPlaces(state: State, loc: string) {
         if (state.knownPlaces.includes(loc)) {
             return state
@@ -311,7 +322,7 @@ export class GameExecManager {
 
         const dw = this.getCurrentDialogWindow(state)
         if (dw != null) {
-            const [_, window] = dw
+            const [dialog, window] = dw
             newState = state
             if (window.backgrounds.main) {
                 newState = this.withUpdatedBackground(state, window.backgrounds, window.chooseBackgroundScript)
@@ -320,6 +331,9 @@ export class GameExecManager {
             if (window.changeLocationInBg) {
                 newState.location = window.changeLocationInBg
             }
+            // recorded AFTER the entry script, so that script still sees this window
+            // as unvisited and can tell a first visit from a return visit
+            newState = this.addToVisitedDialogs(newState, dialog.name, window.uid)
             return newState
         }
 

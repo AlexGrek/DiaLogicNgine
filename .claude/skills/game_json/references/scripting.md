@@ -94,8 +94,16 @@ be JS identifiers.
 ```js
 rt.history.eventHappened('Market announcement')   // has this event ever fired?
 rt.history.thisEventHappened(context)             // inside canHappenScript: has THIS event fired?
+rt.history.dialogVisited('tavern', 'entrance')    // has the player been in this window before?
+rt.history.dialogVisited('tavern')                // …in any window of the dialog?
+rt.history.visitedDialogs                         // ['intro', 'tavern', …] (read-only)
+rt.history.visitedDialogWindows                   // ['tavern::entrance', …] in visit order
 rt.step                                           // choices made so far (read-only)
 ```
+
+A window is added to the visited log *after* its own `entryScript` runs, so inside an
+entry script `rt.history.dialogVisited(thisDialog, thisWindow)` still means "I have been
+here before" — handy for first-visit-only text or rewards.
 
 ### `rt.general` (read-only)
 

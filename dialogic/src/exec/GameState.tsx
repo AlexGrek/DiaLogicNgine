@@ -80,7 +80,46 @@ export interface State {
     situation?: string
     carriedItems: CarriedItem[]
     happenedEvents: string[]
+    /**
+     * Every dialog window the player has entered, as `dialog::window` keys
+     * (see dialogWindowKey), deduplicated and kept in first-visit order.
+     * Filled by GameExecManager.executeEntry AFTER the window entry script has
+     * run, so a script can check whether it has been here BEFORE.
+     */
+    visitedDialogs: string[]
     dialogPage: number
+}
+
+/** Separator between dialog name and window uid inside State.visitedDialogs keys. */
+export const VISITED_DIALOG_SEP = "::"
+
+/** Key of a single dialog window as stored in State.visitedDialogs. */
+export function dialogWindowKey(dialog: string, window: string): string {
+    return `${dialog}${VISITED_DIALOG_SEP}${window}`
+}
+
+/** Visited dialog windows of a state; savegames made before visit tracking have none. */
+export function getVisitedDialogs(state: State): string[] {
+    return state.visitedDialogs ?? []
+}
+
+/** Unique names of dialogs the player has visited at least one window of. */
+export function getVisitedDialogNames(state: State): string[] {
+    const names = getVisitedDialogs(state).map(key => key.split(VISITED_DIALOG_SEP)[0])
+    return [...new Set(names)]
+}
+
+/**
+ * Was this dialog window visited? Without `window` it answers whether ANY window
+ * of the dialog was visited.
+ */
+export function isDialogVisited(state: State, dialog: string, window?: string): boolean {
+    const visited = getVisitedDialogs(state)
+    if (window !== undefined) {
+        return visited.includes(dialogWindowKey(dialog, window))
+    }
+    const prefix = `${dialog}${VISITED_DIALOG_SEP}`
+    return visited.some(key => key.startsWith(prefix))
 }
 
 export function createInitialState(game: GameDescription): State {
@@ -104,6 +143,7 @@ export function createInitialState(game: GameDescription): State {
         notifications: [],
         carriedItems: [],
         happenedEvents: [],
+        visitedDialogs: [],
         dialogPage: 0
     }
 }
@@ -124,7 +164,7 @@ export function safeStateUpdate(safeState: State, upd: State): State {
     safeState.carriedItems = upd.carriedItems
 
     // UI stack and position is NOT UPDATED
-    // same for short history
+    // same for short history and the visited dialogs log (both engine-owned)
 
     return safeState
 }

@@ -1,3 +1,4 @@
+import { dialogWindowKey } from '../../exec/GameState';
 import { GameDescription } from '../../game/GameDescription';
 import { QuestPath, TaskPath } from '../../game/Objectives';
 
@@ -50,6 +51,20 @@ export function windowOptions(game: GameDescription, dialog: string): Option[] {
     const d = game.dialogs.find(d => d.name === dialog);
     if (!d) return [];
     return d.windows.map(w => ({ label: w.uid, value: w.uid }));
+}
+
+/** Every dialog window of the game, keyed the way State.visitedDialogs stores them. */
+export function dialogWindowOptions(game: GameDescription): Option[] {
+    const result: Option[] = [];
+    for (const dialog of game.dialogs) {
+        for (const window of dialog.windows) {
+            result.push({
+                label: `${dialog.name} / ${window.uid}`,
+                value: dialogWindowKey(dialog.name, window.uid),
+            });
+        }
+    }
+    return result;
 }
 
 export function questLineOptions(game: GameDescription): Option[] {

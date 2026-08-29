@@ -53,6 +53,7 @@ interface State {
   situation?: string
   carriedItems: CarriedItem[]  // { item: uid, quantity: number }[]
   happenedEvents: string[]
+  visitedDialogs: string[]     // "dialog::window" keys, deduped, in first-visit order
   fatalError?: FatalError | null
   gameVersion: string
   engineVersion: string
@@ -141,7 +142,7 @@ Evaluates `link.useAlternativeWhen` script first (if `isAlternativeLink`). Then 
 Checks `state.position.kind`:
 - **location**: runs `onEntryScript`, updates background, sets `state.location`, adds known places
 - **chardialog**: updates background, sets `state.charDialog`, adds to known people
-- **window**: updates background if present, runs `window.entryScript`, sets `state.location` if `changeLocationInBg` is set
+- **window**: updates background if present, runs `window.entryScript`, sets `state.location` if `changeLocationInBg` is set, then appends the window to `state.visitedDialogs` (after the script, so it can tell a first visit from a return)
 
 ### `getBoolDecisionWithDefault(state, default, script?, contextVars?)` 
 
@@ -213,6 +214,8 @@ class RuntimeRt {
 **`rt.items`** — `RuntimeItemsManager`: `.add(uid)`, `.remove(uid)`, `.has(uid)`, `.count(uid)`, `.countTotal()`, `.list()`, `.listWithTag(tag)`.
 
 **`rt.history.eventHappened(name)`** / **`rt.history.thisEventHappened(context)`** — check `state.happenedEvents`.
+
+**`rt.history.dialogVisited(dialog, window?)`** — check `state.visitedDialogs` (whole dialog if `window` is omitted). **`rt.history.visitedDialogs`** — visited dialog names; **`rt.history.visitedDialogWindows`** — raw `dialog::window` keys.
 
 **Key contract:** scripts that modify state should return the state object (`return state`), or the modified state copy will be used automatically. Scripts that return a bool or non-state value use the `stateCopy` as the resulting state.
 
