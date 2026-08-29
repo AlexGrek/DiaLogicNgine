@@ -4,7 +4,7 @@ import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
-import { DialogWindowId, HistoryRecord, State, dialogWindowKey, getVisitedDialogs } from "./GameState";
+import { DialogWindowId, HistoryRecord, State, dialogWindowKey, getVisitedDialogs, getVisitedLocations } from "./GameState";
 import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
 import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
@@ -285,6 +285,12 @@ export class GameExecManager {
         return state
     }
 
+    private addToVisitedLocations(state: State, loc: string) {
+        const visited = getVisitedLocations(state)
+        state.visitedLocations = visited.includes(loc) ? visited : [...visited, loc]
+        return state
+    }
+
     private addToKnownPlaces(state: State, loc: string) {
         if (state.knownPlaces.includes(loc)) {
             return state
@@ -308,6 +314,9 @@ export class GameExecManager {
             newState.location = location.uid
             // add this location and all visible routes to known places
             newState = this.addAllToKnownPlaces(newState, location)
+            // as with dialog windows: recorded after the entry script, so the script
+            // can still tell a first arrival from a return
+            newState = this.addToVisitedLocations(newState, location.uid)
             return newState
         }
 

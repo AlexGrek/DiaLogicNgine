@@ -54,6 +54,7 @@ interface State {
   carriedItems: CarriedItem[]  // { item: uid, quantity: number }[]
   happenedEvents: string[]
   visitedDialogs: string[]     // "dialog::window" keys, deduped, in first-visit order
+  visitedLocations: string[]   // locations actually entered (knownPlaces also holds unvisited routes)
   fatalError?: FatalError | null
   gameVersion: string
   engineVersion: string
@@ -140,7 +141,7 @@ Evaluates `link.useAlternativeWhen` script first (if `isAlternativeLink`). Then 
 ### `executeEntry(state)` — side-effects on arrival
 
 Checks `state.position.kind`:
-- **location**: runs `onEntryScript`, updates background, sets `state.location`, adds known places
+- **location**: runs `onEntryScript`, updates background, sets `state.location`, adds known places, then appends the location to `state.visitedLocations`
 - **chardialog**: updates background, sets `state.charDialog`, adds to known people
 - **window**: updates background if present, runs `window.entryScript`, sets `state.location` if `changeLocationInBg` is set, then appends the window to `state.visitedDialogs` (after the script, so it can tell a first visit from a return)
 
@@ -215,7 +216,7 @@ class RuntimeRt {
 
 **`rt.history.eventHappened(name)`** / **`rt.history.thisEventHappened(context)`** — check `state.happenedEvents`.
 
-**`rt.history.dialogVisited(dialog, window?)`** — check `state.visitedDialogs` (whole dialog if `window` is omitted). **`rt.history.visitedDialogs`** — visited dialog names; **`rt.history.visitedDialogWindows`** — raw `dialog::window` keys.
+**`rt.history.dialogVisited(dialog, window?)`** — check `state.visitedDialogs` (whole dialog if `window` is omitted). **`rt.history.visitedDialogs`** — visited dialog names; **`rt.history.visitedDialogWindows`** — raw `dialog::window` keys. **`rt.history.locationVisited(uid)`** / **`rt.history.visitedLocations`** — same for `state.visitedLocations`.
 
 **Key contract:** scripts that modify state should return the state object (`return state`), or the modified state copy will be used automatically. Scripts that return a bool or non-state value use the `stateCopy` as the resulting state.
 
@@ -264,6 +265,8 @@ Then dispatches on `state.position.kind`:
 `isLinkVisible(link, state)` — evaluates `link.isVisible` script; defaults true.  
 `isLinkDisabled(link, state)` — evaluates `link.isEnabled` script; disabled = !enabled.  
 Only visible links appear in `RenderLink[]`; disabled links are rendered but marked.
+
+`linkTargetVisited(state, link)` (`NavigationUtils.ts`) fills `RenderLink.visited` from the link's **main** direction only — resolving an alternative would mean running `useAlternativeWhen`, which can mutate state, once per link per render. `resolveLinkAppearance` (`components/player/visualsClasses.ts`) turns category → direction type → visited into the button's CSS vars and classes.
 
 ### Text/actor resolution
 

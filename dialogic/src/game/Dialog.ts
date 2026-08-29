@@ -22,6 +22,24 @@ export enum LinkType {
     QuickReply = "reply", Return = "return"
 }
 
+/** Every direction type, in the order the Visuals editor lists them. */
+export const LINK_TYPES: LinkType[] = [
+    LinkType.Local, LinkType.Push, LinkType.Pop, LinkType.Jump, LinkType.ResetJump,
+    LinkType.NavigateToLocation, LinkType.TalkToPerson, LinkType.QuickReply, LinkType.Return,
+]
+
+export const LINK_TYPE_LABELS: Record<LinkType, string> = {
+    [LinkType.Local]: "Local",
+    [LinkType.Push]: "Push",
+    [LinkType.Pop]: "Pop",
+    [LinkType.Jump]: "Jump",
+    [LinkType.ResetJump]: "Reset jump",
+    [LinkType.NavigateToLocation]: "To location",
+    [LinkType.TalkToPerson]: "Talk to person",
+    [LinkType.QuickReply]: "Quick reply",
+    [LinkType.Return]: "Return",
+}
+
 export type LinkIconPlacement = "before" | "after"
 
 /**

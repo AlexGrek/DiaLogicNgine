@@ -62,13 +62,15 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
                     animate="show"
                 >
                     {links.map((link, i) => {
-                        const appearance = resolveLinkAppearance(link.link, visuals)
+                        const appearance = resolveLinkAppearance(link.link, visuals, link.visited)
                         return (
                             <motion.div key={link.text + i} className="dialog-variant-button-container" variants={itemVariants}>
                                 <motion.button
                                     disabled={link.disabled || !interactive}
                                     className={`dialog-button ${appearance.className}`}
                                     data-link-category={appearance.category}
+                                    data-link-type={appearance.linkType}
+                                    data-link-visited={appearance.visited ? 'true' : undefined}
                                     style={appearance.cssVars}
                                     onClick={interactive ? (ev) => click(link.link, link.text, ev) : undefined}
                                     whileHover={link.disabled ? undefined : { rotateX: 22, y: '6%' }}

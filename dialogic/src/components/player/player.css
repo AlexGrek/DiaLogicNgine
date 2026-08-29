@@ -408,9 +408,12 @@
     text-align: inherit;
     display: inline-flex;
     align-items: center;
+    /* Set only for links leading somewhere the player has already been
+       (Visuals -> Link defaults). :disabled below deliberately outranks it. */
+    opacity: var(--link-opacity, 1);
     transform-style: preserve-3d;
     transform-origin: top center;
-    transition: background-color .15s ease, color .15s ease;
+    transition: background-color .15s ease, color .15s ease, opacity .15s ease;
     backdrop-filter: blur(2px);
 }
 

@@ -2,8 +2,11 @@ import type { CSSProperties } from 'react';
 import {
     ASPECT_RATIO_VALUE,
     AspectRatioId,
+    DEFAULT_VISITED_LINK_OPACITY,
     LinkCategoryStyle,
     LinkCategoryStyles,
+    LinkDefaultsConfiguration,
+    LinkTypeStyles,
     DEFAULT_DIALOG_TEXT_BACKGROUND_OPACITY,
     DEFAULT_MENU_PANEL_BORDER_RADIUS,
     DEFAULT_MENU_PANEL_OPACITY,
@@ -19,13 +22,17 @@ import {
     TEXT_FONT_SIZE_PX,
     VisualsConfiguration,
     createDefaultLinkCategoryStyles,
+    createDefaultLinkDefaults,
+    createDefaultLinkTypeStyles,
     createDefaultVisuals,
 } from '../../game/GameDescription';
 import {
     DialogLink,
     LINK_CATEGORIES,
+    LINK_TYPES,
     LinkCategory,
     LinkIconPlacement,
+    LinkType,
     resolveLinkCategory,
     resolveLinkIconPlacement,
 } from '../../game/Dialog';
@@ -117,6 +124,29 @@ function normalizeLinkCategories(value: unknown): LinkCategoryStyles {
     return result;
 }
 
+function normalizeLinkTypes(value: unknown): LinkTypeStyles {
+    const raw = (value ?? {}) as Record<string, unknown>;
+    const result = createDefaultLinkTypeStyles();
+    for (const linkType of LINK_TYPES) {
+        result[linkType] = normalizeLinkCategoryStyle(raw[linkType]);
+    }
+    return result;
+}
+
+function normalizeLinkDefaults(value: unknown): LinkDefaultsConfiguration {
+    const raw = (value ?? {}) as Record<string, unknown>;
+    const defaults = createDefaultLinkDefaults();
+    return {
+        byDirectionType: Boolean(raw.byDirectionType),
+        directionTypes: normalizeLinkTypes(raw.directionTypes),
+        markVisited: Boolean(raw.markVisited),
+        visitedOpacity: clampInt(raw.visitedOpacity, 0, 100, DEFAULT_VISITED_LINK_OPACITY),
+        visitedTextColor: typeof raw.visitedTextColor === 'string' && raw.visitedTextColor
+            ? raw.visitedTextColor
+            : defaults.visitedTextColor,
+    };
+}
+
 export function resolveVisuals(visuals: VisualsConfiguration | undefined): VisualsConfiguration {
     const merged = { ...createDefaultVisuals(), ...visuals };
     merged.dialogTextAlignment = normalizeDialogTextAlignment(merged.dialogTextAlignment);
@@ -137,6 +167,7 @@ export function resolveVisuals(visuals: VisualsConfiguration | undefined): Visua
     merged.inventoryLayout = normalizeInventoryLayout(merged.inventoryLayout);
     if (typeof merged.inventoryCustomCss !== 'string') merged.inventoryCustomCss = '';
     merged.linkCategories = normalizeLinkCategories(merged.linkCategories);
+    merged.linkDefaults = normalizeLinkDefaults(merged.linkDefaults);
     if (typeof merged.customCss !== 'string') merged.customCss = '';
     return merged;
 }
@@ -210,6 +241,30 @@ export function linkCategoryClass(category: LinkCategory): string {
     return `dialog-button--category-${category}`;
 }
 
+/** Always emitted, styled or not, so custom CSS can target what a link does. */
+export function linkTypeClass(linkType: LinkType): string {
+    return `dialog-button--type-${linkType}`;
+}
+
+export function resolveLinkTypeStyle(
+    visuals: VisualsConfiguration,
+    linkType: LinkType,
+): LinkCategoryStyle {
+    return visuals.linkDefaults?.directionTypes?.[linkType] ?? {};
+}
+
+/** Dimming (and optional recolouring) of a link whose target the player has seen. */
+export function linkVisitedCssVars(defaults: LinkDefaultsConfiguration): CSSProperties {
+    const vars: Record<string, string> = {
+        '--link-opacity': `${defaults.visitedOpacity / 100}`,
+    };
+    if (defaults.visitedTextColor) {
+        vars['--link-text-color'] = defaults.visitedTextColor;
+        vars['--link-text-color-hover'] = lightenCssColor(defaults.visitedTextColor, 70);
+    }
+    return vars as CSSProperties;
+}
+
 /** Which icon a link actually shows: its own always wins over the category's. */
 export function resolveLinkIcon(
     link: DialogLink,
@@ -267,16 +322,42 @@ export function linkCategoryCssVars(
     return vars as CSSProperties;
 }
 
-/** Everything a link button needs to paint itself, resolved in one place. */
-export function resolveLinkAppearance(link: DialogLink, visuals: VisualsConfiguration) {
+/**
+ * Everything a link button needs to paint itself, resolved in one place.
+ *
+ * Three layers, each one only overriding the fields it actually sets:
+ *   1. the category style (an explicit category always wins over the direction type)
+ *   2. the direction-type style, for links left in the "default" category
+ *   3. the visited modifier, on top of whatever the first two produced
+ */
+export function resolveLinkAppearance(
+    link: DialogLink,
+    visuals: VisualsConfiguration,
+    visited = false,
+) {
     const category = resolveLinkCategory(link);
-    const style = resolveLinkCategoryStyle(visuals, category);
+    const linkType = link.mainDirection.type;
+    const defaults = visuals.linkDefaults ?? createDefaultLinkDefaults();
+    const categoryStyle = resolveLinkCategoryStyle(visuals, category);
+    const style = category === 'default' && defaults.byDirectionType
+        ? { ...categoryStyle, ...resolveLinkTypeStyle(visuals, linkType) }
+        : categoryStyle;
     const textColor = resolveLinkTextColor(link, category, style);
+    const isVisited = visited && defaults.markVisited;
     return {
         category,
+        linkType,
         style,
-        className: linkCategoryClass(category),
-        cssVars: linkCategoryCssVars(style, textColor),
+        visited: isVisited,
+        className: [
+            linkCategoryClass(category),
+            linkTypeClass(linkType),
+            isVisited ? 'dialog-button--visited' : '',
+        ].filter(Boolean).join(' '),
+        cssVars: {
+            ...linkCategoryCssVars(style, textColor),
+            ...(isVisited ? linkVisitedCssVars(defaults) : {}),
+        },
         icon: resolveLinkIcon(link, style),
     };
 }

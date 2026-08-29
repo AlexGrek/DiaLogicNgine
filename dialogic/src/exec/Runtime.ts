@@ -5,7 +5,7 @@ import { GameDescription, GeneralGameInfo } from "../game/GameDescription";
 import QuestLine, { Quest, Task } from "../game/Objectives";
 import Prop from "../game/Prop";
 import { GameExecManager } from "./GameExecutor";
-import { CarriedItem, State, createInGameNotification, getVisitedDialogNames, getVisitedDialogs, isDialogVisited } from "./GameState";
+import { CarriedItem, State, createInGameNotification, getVisitedDialogNames, getVisitedDialogs, getVisitedLocations, isDialogVisited, isLocationVisited } from "./GameState";
 import { ObjectiveStatus } from "./QuestProcessor";
 import { getItemByIdOrNull } from "../game/Items";
 import { isValidFunctionName } from "../game/ScriptFunction";
@@ -177,6 +177,19 @@ export class RuntimeHistoryAccessManager {
     /** Every visited dialog window as a "dialog::window" key, in first-visit order. */
     public get visitedDialogWindows(): string[] {
         return [...getVisitedDialogs(this._stateProvider())]
+    }
+
+    /**
+     * Has the player ever stood in this location? Stricter than `knownPlaces`,
+     * which also holds places only seen as a route from somewhere else.
+     */
+    public locationVisited(loc: string) {
+        return isLocationVisited(this._stateProvider(), loc)
+    }
+
+    /** All visited locations, in first-visit order. */
+    public get visitedLocations(): string[] {
+        return [...getVisitedLocations(this._stateProvider())]
     }
 }
 

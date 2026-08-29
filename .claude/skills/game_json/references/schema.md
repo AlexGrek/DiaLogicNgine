@@ -56,6 +56,7 @@ Source: `dialogic/src/game/*.ts`.
 | `inventoryLayout` | `"matrix"` | `matrix` \| `list` \| `popup` \| `subwindow` \| `scroll` |
 | `inventoryCustomCss` | `""` | CSS scoped to the inventory menu |
 | `linkCategories` | all 10 empty | `Record<LinkCategory, LinkCategoryStyle>` — see below |
+| `linkDefaults` | see below | look of uncategorized links + the visited-link modifier |
 | `customCss` | `""` | CSS injected into the player |
 
 #### `linkCategories` — look of link buttons per category
@@ -77,6 +78,26 @@ keeps the stock button look.
 Each button also carries the class `dialog-button--category-<category>` and a
 `data-link-category` attribute, so `customCss` can target a category directly —
 which is what `class_a` … `class_e` exist for.
+
+#### `linkDefaults` — uncategorized links, and links you have already followed
+
+| Field | Default | Meaning |
+|---|---|---|
+| `byDirectionType` | `false` | Style links that have **no** `category` by their direction type. A link with a category always keeps that category's look. |
+| `directionTypes` | all 9 empty | `Record<LinkType, LinkCategoryStyle>` — same fields as a category style, keyed by `local`, `push`, `pop`, `jump`, `resetjump`, `tolocation`, `toperson`, `reply`, `return`. |
+| `markVisited` | `false` | Restyle a link whose target the player has already seen. |
+| `visitedOpacity` | `55` | 0–100 opacity of a visited link button. |
+| `visitedTextColor` | unset | Label colour of a visited link; unset keeps the colour it would otherwise have. |
+
+"Visited" means: for `local` / `push` / `jump` / `resetjump` the target window is in
+`state.visitedDialogs`; for `tolocation` the location is in `state.visitedLocations`;
+for `toperson` the character is in `state.knownPeople`. `pop`, `return` and `reply`
+have no target and are never visited. Only the **main** direction is checked — an
+alternative direction never changes the look.
+
+Every button also carries `dialog-button--type-<linkType>` / `data-link-type` (always,
+styled or not) and, when the modifier applies, `dialog-button--visited` /
+`data-link-visited`, so `customCss` can target either.
 
 ### `translations` — keys seeded by `createTranslations()`
 

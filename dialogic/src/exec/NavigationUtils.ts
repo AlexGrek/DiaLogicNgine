@@ -1,8 +1,8 @@
 import Character, { getChar } from "../game/Character"
-import Dialog, { DialogWindow } from "../game/Dialog"
+import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog"
 import { GameDescription } from "../game/GameDescription"
 import Loc from "../game/Loc"
-import { UiObjectId } from "./GameState"
+import { State, UiObjectId, isDialogVisited, isLocationVisited } from "./GameState"
 
 
 export function tryGetDialogWindowById(game: GameDescription, uid: UiObjectId):Readonly<[Dialog, DialogWindow]> | null {
@@ -44,4 +44,40 @@ export function tryGetCharById(game: GameDescription, uid: UiObjectId): Characte
         return found || null
     }
     return null
+}
+
+/**
+ * Does this link point at something the player has already seen — a dialog window
+ * they have been in, a character they have talked to, a location they have stood in?
+ *
+ * Only the main direction is inspected: resolving an alternative direction means
+ * running `useAlternativeWhen`, which may mutate state, and this is asked once per
+ * link on every render.
+ *
+ * `Pop` / `Return` / `QuickReply` have no target to speak of and are never "visited".
+ */
+export function linkTargetVisited(state: State, link: DialogLink): boolean {
+    const direction = link.mainDirection
+    switch (direction.type) {
+        case LinkType.Local: {
+            // a local link stays in the dialog we are currently in
+            if (state.position.kind !== "window" || !direction.direction) {
+                return false
+            }
+            return isDialogVisited(state, state.position.dialog, direction.direction)
+        }
+        case LinkType.Push:
+        case LinkType.Jump:
+        case LinkType.ResetJump: {
+            const target = direction.qualifiedDirection
+            return target ? isDialogVisited(state, target.dialog, target.window) : false
+        }
+        case LinkType.NavigateToLocation:
+            return direction.direction ? isLocationVisited(state, direction.direction) : false
+        case LinkType.TalkToPerson:
+            // knownPeople is filled on entering a character dialog, never before
+            return direction.direction ? state.knownPeople.includes(direction.direction) : false
+        default:
+            return false
+    }
 }

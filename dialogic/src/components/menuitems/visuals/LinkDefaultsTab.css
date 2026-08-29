@@ -1,0 +1,28 @@
+.link-defaults-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 8px;
+}
+
+.link-defaults-toggle-row span {
+    font-size: smaller;
+    opacity: 0.75;
+}
+
+/* The section stays readable and reachable while its switch is off — it just
+   stops claiming to affect anything. */
+.link-defaults-disabled-section {
+    opacity: 0.5;
+}
+
+.link-defaults-separator {
+    height: 1px;
+    margin: 8px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.link-defaults-preview-pair {
+    gap: 16px;
+    flex-wrap: wrap;
+}

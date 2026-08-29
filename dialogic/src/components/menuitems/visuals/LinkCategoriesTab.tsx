@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import lodash from 'lodash';
-import { Button, ButtonGroup, Slider, Toggle } from 'rsuite';
+import { Button } from 'rsuite';
 import {
-    FONT_SIZE_LABELS,
-    FontSizeId,
     LinkCategoryStyle,
     VisualsConfiguration,
 } from '../../../game/GameDescription';
@@ -13,10 +10,8 @@ import {
     LinkCategory,
 } from '../../../game/Dialog';
 import { linkCategoryCssVars, playerVisualsCssVars } from '../../player/visualsClasses';
-import { parseCssColor, toCssColor } from '../../../lib/color';
-import FontPicker from '../../common/FontPicker';
-import IconPicker from '../../common/IconPicker';
 import IconSvg from '../../common/IconSvg';
+import LinkStyleForm from './LinkStyleForm';
 import '../../player/player.css';
 import './LinkCategoriesTab.css';
 
@@ -26,7 +21,7 @@ interface LinkCategoriesTabProps {
 }
 
 const CATEGORY_HINTS: Record<LinkCategory, string> = {
-    default: 'Every link that has no category set. Leave it untouched to keep the stock button look.',
+    default: 'Every link that has no category set. Leave it untouched to keep the stock button look — or let the direction type style it, in the Link defaults tab.',
     action: 'For links that do something — attack, open, take, use.',
     question: 'For links that ask something of the speaker.',
     special_icon: 'Icon-driven. Each link in this category shows its own icon (set in the link editor); the icon below is only the fallback.',
@@ -52,9 +47,6 @@ const PREVIEW_LABELS: Record<LinkCategory, string> = {
     class_e: 'Class E button',
 };
 
-const DEFAULT_TEXT_COLOR = '#ffffff';
-const DEFAULT_BG_COLOR = '#141414';
-
 const LinkCategoriesTab: React.FC<LinkCategoriesTabProps> = ({ visuals, updateVisuals }) => {
     const [selected, setSelected] = useState<LinkCategory>('default');
     const style: LinkCategoryStyle = visuals.linkCategories[selected] ?? {};
@@ -63,57 +55,7 @@ const LinkCategoriesTab: React.FC<LinkCategoriesTabProps> = ({ visuals, updateVi
         updateVisuals({ linkCategories: { ...visuals.linkCategories, [selected]: next } });
     };
 
-    const patchStyle = (patch: Partial<LinkCategoryStyle>) => writeStyle({ ...style, ...patch });
-
-    const dropField = (...fields: (keyof LinkCategoryStyle)[]) =>
-        writeStyle(lodash.omit(style, fields) as LinkCategoryStyle);
-
     const isCustomized = Object.keys(style).length > 0;
-
-    const textColor = parseCssColor(style.textColor);
-    const background = parseCssColor(style.backgroundColor);
-
-    const colorRow = (
-        label: string,
-        testId: string,
-        current: { hex: string; alpha: number } | null,
-        fallbackHex: string,
-        onChange: (value: string) => void,
-        onClear: () => void,
-        withOpacity: boolean,
-    ) => (
-        <div>
-            <p className="editor-label">{label}</p>
-            <div className="link-category-color-row">
-                <input
-                    type="color"
-                    data-testid={testId}
-                    value={current?.hex ?? fallbackHex}
-                    onChange={(e) => onChange(toCssColor(e.target.value, current?.alpha ?? 1))}
-                />
-                {withOpacity && (
-                    <Slider
-                        className="link-category-alpha-slider"
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={Math.round((current?.alpha ?? 1) * 100)}
-                        onChange={(v) => onChange(toCssColor(current?.hex ?? fallbackHex, Number(v) / 100))}
-                    />
-                )}
-                {withOpacity && (
-                    <span className="link-category-alpha-value">
-                        {Math.round((current?.alpha ?? 1) * 100)}%
-                    </span>
-                )}
-                {current ? (
-                    <Button size="xs" appearance="subtle" onClick={onClear}>Clear</Button>
-                ) : (
-                    <span className="visuals-property-hint link-category-inherit-note">inherits default</span>
-                )}
-            </div>
-        </div>
-    );
 
     const previewVars = {
         ...playerVisualsCssVars(visuals),
@@ -160,108 +102,12 @@ const LinkCategoriesTab: React.FC<LinkCategoriesTabProps> = ({ visuals, updateVi
                 </div>
             </div>
 
-            <div>
-                <IconPicker
-                    optional
-                    value={style.iconId}
-                    onChange={(iconId) => patchStyle({ iconId })}
-                    onClear={() => dropField('iconId')}
-                >
-                    Icon
-                </IconPicker>
-                <p className="visuals-property-hint">
-                    Shown before the label on every link in this category. A link that carries its own icon
-                    overrides it.
-                </p>
-            </div>
-
-            {colorRow(
-                'Text color',
-                'link-category-text-color',
-                textColor,
-                DEFAULT_TEXT_COLOR,
-                (textColor) => patchStyle({ textColor }),
-                () => dropField('textColor'),
-                false,
-            )}
-
-            {colorRow(
-                'Background color',
-                'link-category-bg-color',
-                background,
-                DEFAULT_BG_COLOR,
-                (backgroundColor) => patchStyle({ backgroundColor }),
-                () => dropField('backgroundColor'),
-                true,
-            )}
-
-            <div>
-                <FontPicker
-                    optional
-                    value={style.fontId}
-                    onChange={(fontId) => patchStyle({ fontId })}
-                    onClear={() => dropField('fontId')}
-                >
-                    Font
-                </FontPicker>
-                <p className="visuals-property-hint">
-                    Unset inherits the global responses font from the Typography tab.
-                </p>
-            </div>
-
-            <div>
-                <p className="editor-label">Font size</p>
-                <p className="visuals-property-hint">
-                    Relative to the responses size, so a player who enlarges text in the in-game settings still gets
-                    a proportionally bigger button.
-                </p>
-                <ButtonGroup>
-                    <Button
-                        active={style.fontSize === undefined}
-                        onClick={() => dropField('fontSize')}
-                        data-testid="link-category-font-size-inherit"
-                    >
-                        Inherit
-                    </Button>
-                    {FONT_SIZE_LABELS.map((item) => (
-                        <Button
-                            key={item.value}
-                            active={style.fontSize === item.value}
-                            onClick={() => patchStyle({ fontSize: item.value as FontSizeId })}
-                            data-testid={`link-category-font-size-${item.value}`}
-                        >
-                            {item.label}
-                        </Button>
-                    ))}
-                </ButtonGroup>
-            </div>
-
-            <div>
-                <p className="editor-label">Font style</p>
-                <div className="link-category-toggles">
-                    <label>
-                        <Toggle
-                            checked={Boolean(style.bold)}
-                            onChange={(bold) => (bold ? patchStyle({ bold: true }) : dropField('bold'))}
-                        />
-                        <span>Bold</span>
-                    </label>
-                    <label>
-                        <Toggle
-                            checked={Boolean(style.italic)}
-                            onChange={(italic) => (italic ? patchStyle({ italic: true }) : dropField('italic'))}
-                        />
-                        <span>Italic</span>
-                    </label>
-                    <label>
-                        <Toggle
-                            checked={Boolean(style.uppercase)}
-                            onChange={(uppercase) => (uppercase ? patchStyle({ uppercase: true }) : dropField('uppercase'))}
-                        />
-                        <span>Uppercase</span>
-                    </label>
-                </div>
-            </div>
+            <LinkStyleForm
+                style={style}
+                onChange={writeStyle}
+                testIdPrefix="link-category"
+                iconHint="Shown before the label on every link in this category. A link that carries its own icon overrides it."
+            />
 
             <div>
                 <Button

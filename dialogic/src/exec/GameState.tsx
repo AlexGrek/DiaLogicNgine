@@ -87,6 +87,11 @@ export interface State {
      * run, so a script can check whether it has been here BEFORE.
      */
     visitedDialogs: string[]
+    /**
+     * Locations the player actually stood in, in first-visit order. Unlike
+     * `knownPlaces` this never includes places merely seen as a route.
+     */
+    visitedLocations: string[]
     dialogPage: number
 }
 
@@ -122,6 +127,16 @@ export function isDialogVisited(state: State, dialog: string, window?: string): 
     return visited.some(key => key.startsWith(prefix))
 }
 
+/** Visited locations of a state; savegames made before visit tracking have none. */
+export function getVisitedLocations(state: State): string[] {
+    return state.visitedLocations ?? []
+}
+
+/** Has the player ever stood in this location? */
+export function isLocationVisited(state: State, loc: string): boolean {
+    return getVisitedLocations(state).includes(loc)
+}
+
 export function createInitialState(game: GameDescription): State {
     return {
         position: game.startupDialog,
@@ -144,6 +159,7 @@ export function createInitialState(game: GameDescription): State {
         carriedItems: [],
         happenedEvents: [],
         visitedDialogs: [],
+        visitedLocations: [],
         dialogPage: 0
     }
 }
@@ -164,7 +180,7 @@ export function safeStateUpdate(safeState: State, upd: State): State {
     safeState.carriedItems = upd.carriedItems
 
     // UI stack and position is NOT UPDATED
-    // same for short history and the visited dialogs log (both engine-owned)
+    // same for short history and the visited dialogs/locations logs (all engine-owned)
 
     return safeState
 }

@@ -1,7 +1,7 @@
 import { createDialogWindowId, DialogWindowId } from "../exec/GameState";
 import { createTranslations, Translations } from "../exec/Localization";
 import Character, { Role, createCharacterDialog } from "./Character";
-import Dialog, { LINK_CATEGORIES, LinkCategory, LinkType } from "./Dialog";
+import Dialog, { LINK_CATEGORIES, LINK_TYPES, LinkCategory, LinkType } from "./Dialog";
 import GameEvent, { EventHost } from "./Events";
 import Fact from "./Fact";
 import GameUiElementDescr, { initGameUiElementMeter, initMeterProgressBar } from "./GameUiElementDescr";
@@ -113,6 +113,42 @@ export function createDefaultLinkCategoryStyles(): LinkCategoryStyles {
     return Object.fromEntries(LINK_CATEGORIES.map((c) => [c, {}])) as LinkCategoryStyles
 }
 
+/** Same look description as a category, but keyed by what the link *does*. */
+export type LinkTypeStyles = Record<LinkType, LinkCategoryStyle>
+
+export function createDefaultLinkTypeStyles(): LinkTypeStyles {
+    return Object.fromEntries(LINK_TYPES.map((t) => [t, {}])) as LinkTypeStyles
+}
+
+/** Opacity of a link button whose target the player has already seen. */
+export const DEFAULT_VISITED_LINK_OPACITY = 55
+
+/**
+ * What happens to a link button that carries no category of its own, plus the
+ * "you have been there" modifier that is layered on top of any category.
+ */
+export interface LinkDefaultsConfiguration {
+    /** Style uncategorized links by their direction type. Off = stock default look. */
+    byDirectionType: boolean
+    /** Per-direction-type look, used only while `byDirectionType` is on. */
+    directionTypes: LinkTypeStyles
+    /** Restyle links whose target the player has already visited. */
+    markVisited: boolean
+    /** 0-100 opacity of a visited link button. */
+    visitedOpacity: number
+    /** Label colour of a visited link; unset keeps the colour it would have had. */
+    visitedTextColor?: string
+}
+
+export function createDefaultLinkDefaults(): LinkDefaultsConfiguration {
+    return {
+        byDirectionType: false,
+        directionTypes: createDefaultLinkTypeStyles(),
+        markVisited: false,
+        visitedOpacity: DEFAULT_VISITED_LINK_OPACITY,
+    }
+}
+
 export interface VisualsConfiguration {
     dialogTextAlignment: DialogTextAlignment
     responseAlignment: ResponseAlignment
@@ -138,6 +174,8 @@ export interface VisualsConfiguration {
     inventoryCustomCss: string
     /** Per-category look of dialog link buttons, keyed by `LinkCategory`. */
     linkCategories: LinkCategoryStyles
+    /** Look of links with no category, and of links pointing at visited targets. */
+    linkDefaults: LinkDefaultsConfiguration
     customCss: string
 }
 
@@ -163,6 +201,7 @@ export function createDefaultVisuals(): VisualsConfiguration {
         inventoryLayout: "matrix",
         inventoryCustomCss: "",
         linkCategories: createDefaultLinkCategoryStyles(),
+        linkDefaults: createDefaultLinkDefaults(),
         customCss: "",
     }
 }

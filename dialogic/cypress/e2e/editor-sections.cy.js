@@ -56,6 +56,33 @@ describe("Editor section content", () => {
       .should("not.have.attr", "style", "--link-font-size");
   });
 
+  it("visuals page configures link defaults and the visited look", () => {
+    cy.visit("/visuals");
+    cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");
+    cy.getByTestId("pill-tabs").contains("Link defaults").click();
+    cy.getByTestId("link-type-tabs").should("be.visible");
+    cy.getByTestId("link-defaults-visited-preview").should("be.visible");
+
+    // Styling a direction type must show up on its preview button right away.
+    cy.getByTestId("link-type-tab-tolocation").click();
+    cy.getByTestId("link-type-font-size-large").click();
+    cy.getByTestId("link-type-preview")
+      .find("button")
+      .should("have.attr", "style")
+      .and("include", "--link-font-size");
+
+    cy.getByTestId("link-type-reset").should("not.be.disabled").click();
+    cy.getByTestId("link-type-preview")
+      .find("button")
+      .should("not.have.attr", "style", "--link-font-size");
+
+    // The visited preview button always carries the dimming variable.
+    cy.getByTestId("link-defaults-visited-preview")
+      .find("button.dialog-button--visited")
+      .should("have.attr", "style")
+      .and("include", "--link-opacity");
+  });
+
   it("save/load page shows the current project panel", () => {
     cy.visit("/saveload");
     cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");

@@ -505,6 +505,10 @@ const StateEditor: React.FC<StateEditorProps> = ({ state, game, onStateChange })
                     <TagPicker block creatable data={dialogWindowOptions(game)} value={state.visitedDialogs ?? []}
                         onChange={(v) => update({ visitedDialogs: v ?? [] })} />
                 </Field>
+                <Field label='Visited locations' hint='Locations actually entered, unlike known places'>
+                    <TagPicker block data={locOptions(game)} value={state.visitedLocations ?? []}
+                        onChange={(v) => update({ visitedLocations: v ?? [] })} />
+                </Field>
             </Panel>
 
             <Panel header='Inventory' bordered collapsible>

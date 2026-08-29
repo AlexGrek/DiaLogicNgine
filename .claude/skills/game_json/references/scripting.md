@@ -98,6 +98,8 @@ rt.history.dialogVisited('tavern', 'entrance')    // has the player been in this
 rt.history.dialogVisited('tavern')                // …in any window of the dialog?
 rt.history.visitedDialogs                         // ['intro', 'tavern', …] (read-only)
 rt.history.visitedDialogWindows                   // ['tavern::entrance', …] in visit order
+rt.history.locationVisited('harbour')             // has the player stood there?
+rt.history.visitedLocations                       // ['town_square', 'harbour', …]
 rt.step                                           // choices made so far (read-only)
 ```
 

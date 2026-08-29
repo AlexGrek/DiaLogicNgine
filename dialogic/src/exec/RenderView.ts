@@ -8,6 +8,7 @@ import { PointAndClick, PointAndClickZone } from "../game/PointAndClick"
 import { TextList, chooseText, splitTextPages } from "../game/TextList"
 import { GameExecManager } from "./GameExecutor"
 import { State } from "./GameState"
+import { linkTargetVisited } from "./NavigationUtils"
 import { UiElementRenderView } from "./GameUiElementsProcessor"
 import { ObjectiveStatus } from "./QuestProcessor"
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor } from "./Runtime"
@@ -50,6 +51,8 @@ export interface RenderLink {
     disabledReason: string
     link: DialogLink
     index: number
+    /** Target already seen by the player — drives the visited link look. */
+    visited: boolean
 }
 
 export interface DialogRenderView {
@@ -181,6 +184,7 @@ export class RenderViewGenerator {
                 link: link,
                 disabledReason: reason,
                 disabled: disabled,
+                visited: linkTargetVisited(instate, link),
                 text: link.text // TODO: support text procesing code
             }
         })
