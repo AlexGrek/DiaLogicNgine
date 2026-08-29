@@ -61,7 +61,6 @@ describe("Editor section content", () => {
     cy.getByTestId("editor-layout", { timeout: 20000 }).should("be.visible");
     cy.getByTestId("pill-tabs").contains("Link defaults").click();
     cy.getByTestId("link-type-tabs").should("be.visible");
-    cy.getByTestId("link-defaults-visited-preview").should("be.visible");
 
     // Styling a direction type must show up on its preview button right away.
     cy.getByTestId("link-type-tab-tolocation").click();
@@ -76,7 +75,8 @@ describe("Editor section content", () => {
       .find("button")
       .should("not.have.attr", "style", "--link-font-size");
 
-    // The visited preview button always carries the dimming variable.
+    // The visited section sits below the fold of the scrollable tab.
+    cy.getByTestId("link-defaults-visited-preview").scrollIntoView().should("be.visible");
     cy.getByTestId("link-defaults-visited-preview")
       .find("button.dialog-button--visited")
       .should("have.attr", "style")
