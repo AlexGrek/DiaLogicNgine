@@ -497,7 +497,7 @@ function evaluate(game: GameDescription, s: string, execManager: GameExecManager
     const stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
     rt.contextVars = contextVars;
-    const returned = (window as any).eval.call(window, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
+    const returned = (globalThis as any).eval.call(globalThis, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
     return [returned, stateCopy]
 }
 

@@ -1,0 +1,11 @@
+{
+  "name": "dialogic-player-runner",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Headless isolated Deno game engine runner for DiaLogicNgine Player MCP",
+  "scripts": {
+    "build": "../dialogic/node_modules/.bin/esbuild src/main.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=dist/runner.mjs --define:process.env.NODE_ENV='\"production\"'",
+    "typecheck": "../dialogic/node_modules/.bin/tsc --noEmit"
+  }
+}

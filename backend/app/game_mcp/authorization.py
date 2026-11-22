@@ -72,6 +72,14 @@ PRIVATE = {
 }
 
 
+def play_resource() -> str:
+    return ORIGIN + "/play-mcp"
+
+
+def valid_resources() -> set[str]:
+    return {RESOURCE, play_resource()}
+
+
 def digest(value):
     return hashlib.sha256(value.encode()).hexdigest()
 
@@ -122,8 +130,15 @@ def issue(db, kind, ttl, **payload):
     return token
 
 
-def active(grant):
-    if not grant or grant["resource"] != RESOURCE:
+def active(grant, expected_resource: str | None = None):
+    if not grant:
+        return False
+    resource_ok = (
+        grant["resource"] == expected_resource
+        if expected_resource is not None
+        else grant["resource"] in valid_resources()
+    )
+    if not resource_ok:
         return False
     user, fingerprint = grant["subject"], grant["fingerprint"]
     if fingerprint.startswith("account:"):
@@ -131,12 +146,12 @@ def active(grant):
     return user in KEYS and fingerprint == digest(KEYS[user]) and auth.user_exists(user)
 
 
-def bearer_owner(token):
+def bearer_owner(token, resource: str | None = None):
     owner = key_owner(token)
     if owner:
         return owner
     grant = read_grant("access", token)
-    return grant["subject"] if active(grant) else None
+    return grant["subject"] if active(grant, expected_resource=resource or RESOURCE) else None
 
 
 class Registration(BaseModel):
@@ -198,7 +213,7 @@ class Provider:
             return None
 
     async def authorize(self, client, params):
-        if params.resource not in (None, RESOURCE) or not re.fullmatch(
+        if (params.resource is not None and params.resource not in valid_resources()) or not re.fullmatch(
             r"[A-Za-z0-9_-]{43}", params.code_challenge
         ):
             raise AuthorizeError("invalid_request", "Invalid resource or S256 challenge")
@@ -251,6 +266,16 @@ async def resource_metadata():
     }
 
 
+@router.get("/.well-known/oauth-protected-resource/play-mcp")
+async def play_resource_metadata():
+    return {
+        "resource": play_resource(),
+        "authorization_servers": [ORIGIN],
+        "scopes_supported": ["mcp"],
+        "bearer_methods_supported": ["header"],
+    }
+
+
 @router.get("/.well-known/oauth-authorization-server")
 async def server_metadata():
     return {
@@ -295,12 +320,24 @@ async def consent(ticket: str, request: Request):
         identity = """<p>Sign in with your DiaLogicNgine account.</p>
         <p><label>Username <input name="username" autocomplete="username" required></label></p>
         <p><label>Password <input type="password" name="password" autocomplete="current-password" required></label></p>"""
+    is_player = pending.get("resource") == play_resource()
+    title = "Connect to DiaLogicNgine Player" if is_player else "Connect to DiaLogicNgine Editor"
+    heading = (
+        f"Allow {html.escape(client.client_name)} to play games and manage your saves?"
+        if is_player
+        else f"Allow {html.escape(client.client_name)} to edit your games?"
+    )
+    description = (
+        "This grants access to play published games and your own games, and to manage your saved play sessions."
+        if is_player
+        else "This grants access to read and change your saved projects and their images."
+    )
     return HTMLResponse(
         f"""<!doctype html><html lang="en"><meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Connect to DiaLogicNgine Editor</title><main>
-        <h1>Allow {html.escape(client.client_name)} to edit your games?</h1>
-        <p>This grants access to read and change your saved projects and their images.</p>
+        <title>{title}</title><main>
+        <h1>{heading}</h1>
+        <p>{description}</p>
         <p>Return address: <code>{html.escape(pending["redirect_uri"])}</code></p>
         <form method="post">{identity}
         <button name="decision" value="allow">Allow access</button>
@@ -336,9 +373,12 @@ def decide(ticket: str, request: Request, decision: str = Form(), key: str = For
         pending = consume(db, "consent", ticket)
         if not pending:
             raise HTTPException(400, "Approval expired")
+        target_resource = pending.get("resource") or RESOURCE
+        if target_resource not in valid_resources():
+            raise HTTPException(400, "Invalid resource")
         state = pending.pop("state")
         pending.pop("expires_at")
-        pending.update(scopes=["mcp"], resource=RESOURCE)
+        pending.update(scopes=["mcp"], resource=target_resource)
         result = (
             {"code": issue(db, "code", 120, subject=user, fingerprint=fingerprint, **pending)}
             if user
@@ -354,7 +394,8 @@ def decide(ticket: str, request: Request, decision: str = Form(), key: str = For
 @router.post("/oauth/token")
 async def token(request: Request):
     form = await request.form()
-    if form.get("resource") not in (None, RESOURCE):
+    requested_resource = form.get("resource")
+    if requested_resource is not None and requested_resource not in valid_resources():
         return JSONResponse({"error": "invalid_target"}, 400)
     return await TokenHandler(provider, ClientAuthenticator(provider)).handle(request)
 
