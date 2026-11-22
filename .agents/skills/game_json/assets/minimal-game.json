@@ -1,0 +1,108 @@
+{
+  "engineVersion": "0.21",
+  "buildVersion": 1,
+  "general": {
+    "name": "New game",
+    "version": "0.1.0",
+    "authors": [],
+    "description": "",
+    "extras": {}
+  },
+  "startupDialog": { "kind": "window", "dialog": "main", "window": "start" },
+  "startMenu": {},
+  "config": { "assetsPath": "" },
+  "dev": { "basicPromptSuffix": "" },
+  "visuals": {
+    "dialogTextAlignment": "right",
+    "responseAlignment": "column",
+    "shortHistoryVisible": true,
+    "menuFontId": "involve",
+    "textFontId": "palanquin",
+    "responsesFontId": "palanquin",
+    "textFontSize": "normal",
+    "responsesFontSize": "normal",
+    "dialogTextBackgroundOpacity": 27,
+    "notificationBackgroundOpacity": 72,
+    "notificationBorderRadius": 0,
+    "notificationBorderOpacity": 0,
+    "typewriterEnabled": true,
+    "typewriterSpeedMs": 12,
+    "menuPanelOpacity": 45,
+    "menuPanelBorderRadius": 14,
+    "inventoryLayout": "matrix",
+    "inventoryCustomCss": "",
+    "customCss": ""
+  },
+  "translations": {
+    "Discuss...": "",
+    "Facts": "",
+    "Knowledge": "",
+    "Inventory": "",
+    "Menu": "",
+    "Journal": "",
+    "Known people": "",
+    "People": "",
+    "Items": "",
+    "Places": "",
+    "Cancel": "",
+    "Open": "",
+    "Failed": "",
+    "Completed": "",
+    "Create new save": "",
+    "Save": "",
+    "About": "",
+    "New game": "",
+    "Load": "",
+    "Start new game": "",
+    "Confirm restart": ""
+  },
+  "dialogs": [
+    {
+      "name": "main",
+      "windows": [
+        {
+          "uid": "start",
+          "text": { "main": "The story begins here.", "list": [] },
+          "backgrounds": { "list": [] },
+          "links": [
+            {
+              "mainDirection": { "type": "local", "direction": "end" },
+              "text": "Continue",
+              "alternativeDirections": []
+            }
+          ],
+          "tags": [],
+          "specialWidget": null
+        },
+        {
+          "uid": "end",
+          "text": { "main": "The end.", "list": [] },
+          "backgrounds": { "list": [] },
+          "links": [
+            {
+              "mainDirection": { "type": "local", "direction": "start" },
+              "text": "Back to the beginning",
+              "alternativeDirections": []
+            }
+          ],
+          "tags": [],
+          "specialWidget": null
+        }
+      ]
+    }
+  ],
+  "chars": [],
+  "roles": [],
+  "locs": [],
+  "props": [],
+  "facts": [],
+  "items": [],
+  "objectives": [],
+  "events": [],
+  "eventHosts": [],
+  "situations": [],
+  "pacWidgets": [],
+  "uiElements": { "meters": [] },
+  "hooks": [],
+  "functions": []
+}

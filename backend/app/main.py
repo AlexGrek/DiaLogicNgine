@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import os
 from pathlib import Path
 
@@ -6,7 +7,17 @@ from fastapi.responses import FileResponse
 from app import auth
 from app.api.v1.router import router
 
-app = FastAPI(title="DiaLogicNgine API")
+from app.game_mcp import server as game_mcp
+
+
+@asynccontextmanager
+async def lifespan(app):
+    async with game_mcp.mcp.session_manager.run():
+        yield
+
+
+app = FastAPI(title="DiaLogicNgine API", lifespan=lifespan)
+game_mcp.install(app)
 
 # Create the root user (password 000000) and assign all pre-existing projects to
 # it. Idempotent — safe to run on every startup.

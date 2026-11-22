@@ -5,7 +5,11 @@ game JSON, so it survives every save). A published project is listed by the
 public gallery endpoint and its ``game.json`` may be fetched without an account;
 an unpublished one is private to its owner.
 """
+from contextlib import contextmanager
+import fcntl
 import json
+import os
+import tempfile
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,9 +27,6 @@ METADATA_FILENAME = ".metadata"
 PAGE_SIZE = 10
 
 router = APIRouter(tags=["projects"])
-
-# In-memory metadata cache: project_name -> metadata dict
-_metadata_cache: dict[str, dict] = {}
 
 
 class PublishRequest(BaseModel):
@@ -59,31 +60,43 @@ def _extract_metadata(game: dict) -> dict:
     }
 
 
-def _get_metadata(project_name: str, project_dir: Path) -> dict:
-    """Return metadata from cache, falling back to disk, then empty dict."""
-    if project_name in _metadata_cache:
-        return _metadata_cache[project_name]
+def _get_metadata(project_dir: Path) -> dict:
+    """Read the latest metadata, including writes by other workers."""
     meta_file = project_dir / METADATA_FILENAME
     if meta_file.exists():
         try:
             meta = json.loads(meta_file.read_text(encoding="utf-8"))
-            _metadata_cache[project_name] = meta
             return meta
         except Exception:
             pass
     return {}
 
 
-def _set_metadata(project_name: str, project_dir: Path, metadata: dict) -> None:
-    """Write metadata to disk and update the cache."""
-    (project_dir / METADATA_FILENAME).write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    _metadata_cache[project_name] = metadata
+def _set_metadata(project_dir: Path, metadata: dict) -> None:
+    _atomic_write(project_dir / METADATA_FILENAME, json.dumps(metadata, ensure_ascii=False, indent=2).encode())
 
 
-def _evict_metadata(project_name: str) -> None:
-    _metadata_cache.pop(project_name, None)
+def _atomic_write(path: Path, contents: bytes):
+    with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as tmp:
+        try:
+            tmp.write(contents)
+            tmp.close()
+            os.replace(tmp.name, path)
+        finally:
+            Path(tmp.name).unlink(missing_ok=True)
+
+
+@contextmanager
+def project_write_lock():
+    # Lock the stable parent directory, which survives project deletion/recreation.
+    base = _projects_base()
+    base.mkdir(parents=True, exist_ok=True)
+    fd = os.open(base, os.O_RDONLY)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        os.close(fd)
 
 
 def _public_entry(name: str, meta: dict) -> dict:
@@ -137,7 +150,7 @@ async def list_projects(
         for d in base.iterdir()
         if d.is_dir()
         and (d / "game.json").exists()
-        and _get_metadata(d.name, d).get("owner") == user
+        and _get_metadata(d).get("owner") == user
     )
     total = len(dirs)
     start = (page - 1) * PAGE_SIZE
@@ -145,7 +158,7 @@ async def list_projects(
 
     projects = []
     for d in page_dirs:
-        meta = _get_metadata(d.name, d)
+        meta = _get_metadata(d)
         if "lastModified" not in meta:
             # Projects saved before lastModified was tracked: derive it from
             # the game.json file's modification time so the UI still has a date.
@@ -181,7 +194,7 @@ async def list_published_projects(
         for d in base.iterdir()
         if d.is_dir()
         and (d / "game.json").exists()
-        and (meta := _get_metadata(d.name, d)).get("published")
+        and (meta := _get_metadata(d)).get("published")
     ]
     if needle:
         entries = [e for e in entries if _matches_search(e, needle)]
@@ -205,17 +218,25 @@ async def save_game(
     request: Request,
     user: str = Depends(auth.get_current_user),
 ):
-    require_owner(project_name, user)  # 403 if the project belongs to someone else
+    require_owner(project_name, user)
     body = await request.body()
     try:
         game = json.loads(body)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Body must be valid JSON")
+    with project_write_lock():
+        require_owner(project_name, user)
+        persist_game(project_name, user, game, body)
+    return {"status": "ok"}
+
+
+def persist_game(project_name: str, user: str, game: dict, body: bytes):
+    """Save while holding project_write_lock; shared by REST and MCP."""
     project_dir = _safe_project_dir(project_name)
-    previous = _get_metadata(project_name, project_dir)
+    previous = _get_metadata(project_dir)
     project_dir.mkdir(parents=True, exist_ok=True)
-    (project_dir / "game.json").write_bytes(body)
     metadata = _extract_metadata(game)
+    _atomic_write(project_dir / "game.json", body)
     metadata["owner"] = user
     # Publication state is not part of the game JSON, so carry it over: saving a
     # published game must not silently unpublish it.
@@ -223,8 +244,7 @@ async def save_game(
         metadata["published"] = True
         metadata["publishedAt"] = previous.get("publishedAt")
     metadata["lastModified"] = datetime.now(timezone.utc).isoformat()
-    _set_metadata(project_name, project_dir, metadata)
-    return {"status": "ok"}
+    _set_metadata(project_dir, metadata)
 
 
 @router.post("/projects/{project_name}/publish")
@@ -238,23 +258,24 @@ async def set_published(
     Publishing lists the game in the public gallery and opens its game.json to
     anonymous players; unpublishing takes both away again.
     """
-    require_owner(project_name, user)
-    project_dir = _safe_project_dir(project_name)
-    if not (project_dir / "game.json").exists():
-        raise HTTPException(status_code=404, detail="Game not found")
+    with project_write_lock():
+        require_owner(project_name, user)
+        project_dir = _safe_project_dir(project_name)
+        if not (project_dir / "game.json").exists():
+            raise HTTPException(status_code=404, detail="Game not found")
 
-    metadata = dict(_get_metadata(project_name, project_dir))  # copy: don't mutate cache
-    metadata["owner"] = metadata.get("owner") or user
-    metadata["published"] = body.published
-    metadata["publishedAt"] = (
-        datetime.now(timezone.utc).isoformat() if body.published else None
-    )
-    _set_metadata(project_name, project_dir, metadata)
-    return {
-        "name": project_name,
-        "published": metadata["published"],
-        "publishedAt": metadata["publishedAt"],
-    }
+        metadata = _get_metadata(project_dir)
+        metadata["owner"] = metadata.get("owner") or user
+        metadata["published"] = body.published
+        metadata["publishedAt"] = (
+            datetime.now(timezone.utc).isoformat() if body.published else None
+        )
+        _set_metadata(project_dir, metadata)
+        return {
+            "name": project_name,
+            "published": metadata["published"],
+            "publishedAt": metadata["publishedAt"],
+        }
 
 
 @router.get("/projects/{project_name}/game")
@@ -266,7 +287,7 @@ async def load_game(project_name: str, request: Request):
     game_file = project_dir / "game.json"
     if not game_file.exists():
         raise HTTPException(status_code=404, detail="Game not found")
-    meta = _get_metadata(project_name, project_dir)
+    meta = _get_metadata(project_dir)
     if not meta.get("published"):
         owner: Optional[str] = meta.get("owner")
         if owner is not None and auth.get_optional_user(request) != owner:
@@ -281,11 +302,11 @@ async def delete_project(
     project_name: str,
     user: str = Depends(auth.get_current_user),
 ):
-    require_owner(project_name, user)
-    project_dir = _safe_project_dir(project_name)
-    if not project_dir.exists():
-        raise HTTPException(status_code=404, detail="Project not found")
-    shutil.rmtree(project_dir)  # removes game.json, images/ and image_thumbs/
-    _evict_metadata(project_name)
-    prompt_history.clear_project(project_name)  # drop host-DB prompt history
-    return {"status": "ok"}
+    with project_write_lock():
+        require_owner(project_name, user)
+        project_dir = _safe_project_dir(project_name)
+        if not project_dir.exists():
+            raise HTTPException(status_code=404, detail="Project not found")
+        shutil.rmtree(project_dir)  # removes game.json, images/ and image_thumbs/
+        prompt_history.clear_project(project_name)  # drop host-DB prompt history
+        return {"status": "ok"}

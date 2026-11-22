@@ -1,0 +1,1900 @@
+{
+  "$ref": "#/definitions/GameDescription",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Actor": {
+      "additionalProperties": false,
+      "properties": {
+        "avatar": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "character": {
+          "type": "string"
+        },
+        "currentCharacter": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "character",
+        "currentCharacter"
+      ],
+      "type": "object"
+    },
+    "AspectRatioId": {
+      "description": "Shape of the player stage: landscape 16:9 or portrait 9:16.",
+      "enum": [
+        "16:9",
+        "9:16"
+      ],
+      "type": "string"
+    },
+    "Behavior": {
+      "additionalProperties": false,
+      "properties": {
+        "reactions": {
+          "items": {
+            "$ref": "#/definitions/Reaction"
+          },
+          "type": "array"
+        },
+        "speakingModel": {
+          "$ref": "#/definitions/SpeakingModel"
+        }
+      },
+      "required": [
+        "speakingModel",
+        "reactions"
+      ],
+      "type": "object"
+    },
+    "BoolProp": {
+      "additionalProperties": false,
+      "properties": {
+        "datatype": {
+          "const": "boolean",
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "datatype",
+        "name",
+        "defaultValue"
+      ],
+      "type": "object"
+    },
+    "Character": {
+      "additionalProperties": false,
+      "properties": {
+        "avatar": {
+          "$ref": "#/definitions/ImageList"
+        },
+        "chooseAvatarScript": {
+          "type": "string"
+        },
+        "chooseDescriptionScript": {
+          "type": "string"
+        },
+        "chooseNameScript": {
+          "type": "string"
+        },
+        "description": {
+          "$ref": "#/definitions/TextList"
+        },
+        "dialog": {
+          "$ref": "#/definitions/CharacterDialog"
+        },
+        "discussable": {
+          "type": "boolean"
+        },
+        "displayName": {
+          "$ref": "#/definitions/TextList"
+        },
+        "overrideProps": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/NumberProp"
+              },
+              {
+                "$ref": "#/definitions/BoolProp"
+              },
+              {
+                "$ref": "#/definitions/StringProp"
+              },
+              {
+                "$ref": "#/definitions/VariantProp"
+              },
+              {
+                "$ref": "#/definitions/LocProp"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "props": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/NumberProp"
+              },
+              {
+                "$ref": "#/definitions/BoolProp"
+              },
+              {
+                "$ref": "#/definitions/StringProp"
+              },
+              {
+                "$ref": "#/definitions/VariantProp"
+              },
+              {
+                "$ref": "#/definitions/LocProp"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "traits": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "traits",
+        "props",
+        "overrideProps",
+        "roles",
+        "avatar",
+        "description",
+        "discussable"
+      ],
+      "type": "object"
+    },
+    "CharacterDialog": {
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "$ref": "#/definitions/ImageList"
+        },
+        "behavior": {
+          "$ref": "#/definitions/Behavior"
+        },
+        "canHostEventsScript": {
+          "type": "string"
+        },
+        "chooseBgScript": {
+          "type": "string"
+        },
+        "chooseTextScript": {
+          "type": "string"
+        },
+        "eventHosts": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "links": {
+          "items": {
+            "$ref": "#/definitions/DialogLink"
+          },
+          "type": "array"
+        },
+        "text": {
+          "$ref": "#/definitions/TextList"
+        }
+      },
+      "required": [
+        "behavior",
+        "links",
+        "background",
+        "text",
+        "eventHosts"
+      ],
+      "type": "object"
+    },
+    "Config": {
+      "additionalProperties": false,
+      "properties": {
+        "assetsPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "assetsPath"
+      ],
+      "type": "object"
+    },
+    "DevConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "basicPromptSuffix": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "basicPromptSuffix"
+      ],
+      "type": "object"
+    },
+    "Dialog": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "windows": {
+          "items": {
+            "$ref": "#/definitions/DialogWindow"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "windows"
+      ],
+      "type": "object"
+    },
+    "DialogLink": {
+      "additionalProperties": false,
+      "properties": {
+        "actionCode": {
+          "type": "string"
+        },
+        "alternativeDirections": {
+          "items": {
+            "$ref": "#/definitions/DialogLinkDirection"
+          },
+          "type": "array"
+        },
+        "category": {
+          "$ref": "#/definitions/LinkCategory",
+          "description": "Visual bucket; styled in Visuals → Link buttons. Absent means \"default\"."
+        },
+        "categoryColor": {
+          "description": "Per-link colour, honoured only by the `special_color` category.",
+          "type": "string"
+        },
+        "changeLocationInBg": {
+          "type": "string"
+        },
+        "iconId": {
+          "type": "string"
+        },
+        "iconPlacement": {
+          "$ref": "#/definitions/LinkIconPlacement"
+        },
+        "isAlternativeLink": {
+          "type": "boolean"
+        },
+        "isEnabled": {
+          "type": "string"
+        },
+        "isVisible": {
+          "type": "string"
+        },
+        "mainDirection": {
+          "$ref": "#/definitions/DialogLinkDirection"
+        },
+        "text": {
+          "type": "string"
+        },
+        "textProcessingCode": {
+          "type": "string"
+        },
+        "useAlternativeWhen": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mainDirection",
+        "alternativeDirections",
+        "text"
+      ],
+      "type": "object"
+    },
+    "DialogLinkDirection": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "type": "string"
+        },
+        "qualifiedDirection": {
+          "$ref": "#/definitions/DialogWindowId"
+        },
+        "replyText": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/LinkType"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "DialogTextAlignment": {
+      "enum": [
+        "left",
+        "right",
+        "full"
+      ],
+      "type": "string"
+    },
+    "DialogWindow": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "$ref": "#/definitions/Actor"
+        },
+        "backgrounds": {
+          "$ref": "#/definitions/ImageList"
+        },
+        "changeLocationInBg": {
+          "type": "string"
+        },
+        "changeSituation": {
+          "type": "string"
+        },
+        "chooseBackgroundScript": {
+          "type": "string"
+        },
+        "chooseTextScript": {
+          "type": "string"
+        },
+        "entryScript": {
+          "type": "string"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/definitions/DialogLink"
+          },
+          "type": "array"
+        },
+        "specialWidget": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "text": {
+          "$ref": "#/definitions/TextList"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "uid",
+        "links",
+        "backgrounds",
+        "tags",
+        "specialWidget"
+      ],
+      "type": "object"
+    },
+    "DialogWindowId": {
+      "additionalProperties": false,
+      "properties": {
+        "dialog": {
+          "type": "string"
+        },
+        "kind": {
+          "const": "window",
+          "type": "string"
+        },
+        "window": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "dialog",
+        "window"
+      ],
+      "type": "object"
+    },
+    "EventHost": {
+      "type": "string"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "discussable": {
+          "type": "boolean"
+        },
+        "full": {
+          "type": "string"
+        },
+        "short": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "short",
+        "full",
+        "discussable"
+      ],
+      "type": "object"
+    },
+    "FontId": {
+      "type": "string"
+    },
+    "FontSizeId": {
+      "enum": [
+        "xsmall",
+        "small",
+        "normal",
+        "large",
+        "huge"
+      ],
+      "type": "string"
+    },
+    "GameDescription": {
+      "additionalProperties": false,
+      "properties": {
+        "buildVersion": {
+          "type": "number"
+        },
+        "chars": {
+          "items": {
+            "$ref": "#/definitions/Character"
+          },
+          "type": "array"
+        },
+        "config": {
+          "$ref": "#/definitions/Config"
+        },
+        "dev": {
+          "$ref": "#/definitions/DevConfig"
+        },
+        "dialogs": {
+          "items": {
+            "$ref": "#/definitions/Dialog"
+          },
+          "type": "array"
+        },
+        "engineVersion": {
+          "type": "string"
+        },
+        "eventHosts": {
+          "items": {
+            "$ref": "#/definitions/EventHost"
+          },
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/definitions/GameEvent"
+          },
+          "type": "array"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/definitions/Fact"
+          },
+          "type": "array"
+        },
+        "functions": {
+          "items": {
+            "$ref": "#/definitions/ScriptFunction"
+          },
+          "type": "array"
+        },
+        "general": {
+          "$ref": "#/definitions/GeneralGameInfo"
+        },
+        "hooks": {
+          "items": {
+            "$ref": "#/definitions/HookScript"
+          },
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/definitions/Item"
+          },
+          "type": "array"
+        },
+        "locs": {
+          "items": {
+            "$ref": "#/definitions/Loc"
+          },
+          "type": "array"
+        },
+        "objectives": {
+          "items": {
+            "$ref": "#/definitions/QuestLine"
+          },
+          "type": "array"
+        },
+        "pacWidgets": {
+          "items": {
+            "$ref": "#/definitions/PointAndClick"
+          },
+          "type": "array"
+        },
+        "props": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/NumberProp"
+              },
+              {
+                "$ref": "#/definitions/BoolProp"
+              },
+              {
+                "$ref": "#/definitions/StringProp"
+              },
+              {
+                "$ref": "#/definitions/VariantProp"
+              },
+              {
+                "$ref": "#/definitions/LocProp"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/definitions/Role"
+          },
+          "type": "array"
+        },
+        "situations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "startMenu": {
+          "$ref": "#/definitions/StartMenuConfiguration"
+        },
+        "startupDialog": {
+          "$ref": "#/definitions/DialogWindowId"
+        },
+        "translations": {
+          "$ref": "#/definitions/Translations"
+        },
+        "uiElements": {
+          "$ref": "#/definitions/GameUiElementDescr"
+        },
+        "visuals": {
+          "$ref": "#/definitions/VisualsConfiguration"
+        }
+      },
+      "required": [
+        "dialogs",
+        "facts",
+        "chars",
+        "roles",
+        "locs",
+        "props",
+        "items",
+        "eventHosts",
+        "events",
+        "buildVersion",
+        "startupDialog",
+        "engineVersion",
+        "startMenu",
+        "general",
+        "config",
+        "objectives",
+        "situations",
+        "translations",
+        "uiElements",
+        "pacWidgets",
+        "visuals",
+        "hooks",
+        "functions",
+        "dev"
+      ],
+      "type": "object"
+    },
+    "GameEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "canHappenScript": {
+          "type": "string"
+        },
+        "highPriority": {
+          "type": "boolean"
+        },
+        "link": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/DialogWindowId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "onEventActionScript": {
+          "type": "string"
+        },
+        "probability": {
+          "type": "number"
+        },
+        "targets": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "highPriority",
+        "probability",
+        "targets",
+        "link"
+      ],
+      "type": "object"
+    },
+    "GameUiElementDescr": {
+      "additionalProperties": false,
+      "properties": {
+        "meters": {
+          "items": {
+            "$ref": "#/definitions/GameUiElementMeter"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "meters"
+      ],
+      "type": "object"
+    },
+    "GameUiElementMeter": {
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "fontId": {
+          "$ref": "#/definitions/FontId"
+        },
+        "iconId": {
+          "type": "string"
+        },
+        "layout": {
+          "$ref": "#/definitions/MeterLayout"
+        },
+        "name": {
+          "type": "string"
+        },
+        "progressBar": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/MeterProgressBar"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uid": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "visibleIf": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "layout",
+        "value",
+        "uid",
+        "name",
+        "progressBar"
+      ],
+      "type": "object"
+    },
+    "GeneralGameInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "authors": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "description": {
+          "type": "string"
+        },
+        "extras": {
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number"
+            ]
+          },
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "authors",
+        "extras",
+        "description"
+      ],
+      "type": "object"
+    },
+    "HookScript": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "hook": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "hook",
+        "body"
+      ],
+      "type": "object"
+    },
+    "ImageList": {
+      "additionalProperties": false,
+      "properties": {
+        "list": {
+          "items": {
+            "$ref": "#/definitions/ImageListEntry"
+          },
+          "type": "array"
+        },
+        "main": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "list"
+      ],
+      "type": "object"
+    },
+    "ImageListEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "InventoryLayout": {
+      "description": "Layout variant for the in-game inventory / item picker menu.",
+      "enum": [
+        "matrix",
+        "list",
+        "popup",
+        "subwindow",
+        "scroll"
+      ],
+      "type": "string"
+    },
+    "Item": {
+      "additionalProperties": false,
+      "properties": {
+        "canGive": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "discussable": {
+          "type": "boolean"
+        },
+        "image": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "stackable": {
+          "type": "boolean"
+        },
+        "stats": {
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "type": "object"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "thumbnail": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        },
+        "unique": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "uid",
+        "name",
+        "description",
+        "discussable",
+        "unique",
+        "tags",
+        "stats",
+        "canGive",
+        "stackable"
+      ],
+      "type": "object"
+    },
+    "LinkCategory": {
+      "description": "Presentation bucket of a link button. Purely visual: the engine never branches on it — the look of each category is authored once in Visuals → Link buttons.\n\n`special_icon` and `special_color` are the two parametrized categories: the former takes its icon from the link's own `iconId`, the latter its colour from the link's own `categoryColor`, so links inside them can differ from each other.",
+      "enum": [
+        "default",
+        "action",
+        "question",
+        "special_icon",
+        "special_color",
+        "class_a",
+        "class_b",
+        "class_c",
+        "class_d",
+        "class_e"
+      ],
+      "type": "string"
+    },
+    "LinkCategoryStyle": {
+      "additionalProperties": false,
+      "description": "Look of one link-button category. Every field is optional — an unset field means \"inherit the stock button look / the global responses font\".",
+      "properties": {
+        "backgroundColor": {
+          "description": "CSS colour for the button background (may be `rgba(...)` for translucency).",
+          "type": "string"
+        },
+        "bold": {
+          "type": "boolean"
+        },
+        "fontId": {
+          "$ref": "#/definitions/FontId",
+          "description": "Font family; unset inherits the global responses font."
+        },
+        "fontSize": {
+          "$ref": "#/definitions/FontSizeId",
+          "description": "Size tier, applied as a ratio of the player's current responses size."
+        },
+        "iconId": {
+          "description": "Icon rendered before the label. A link's own `iconId` wins over this.",
+          "type": "string"
+        },
+        "italic": {
+          "type": "boolean"
+        },
+        "textColor": {
+          "description": "CSS colour for the label.",
+          "type": "string"
+        },
+        "uppercase": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "LinkCategoryStyles": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "class_a": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "class_b": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "class_c": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "class_d": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "class_e": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "default": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "question": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "special_color": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "special_icon": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        }
+      },
+      "required": [
+        "default",
+        "action",
+        "question",
+        "special_icon",
+        "special_color",
+        "class_a",
+        "class_b",
+        "class_c",
+        "class_d",
+        "class_e"
+      ],
+      "type": "object"
+    },
+    "LinkDefaultsConfiguration": {
+      "additionalProperties": false,
+      "description": "What happens to a link button that carries no category of its own, plus the \"you have been there\" modifier that is layered on top of any category.",
+      "properties": {
+        "byDirectionType": {
+          "description": "Style uncategorized links by their direction type. Off = stock default look.",
+          "type": "boolean"
+        },
+        "directionTypes": {
+          "$ref": "#/definitions/LinkTypeStyles",
+          "description": "Per-direction-type look, used only while `byDirectionType` is on."
+        },
+        "markVisited": {
+          "description": "Restyle links whose target the player has already visited.",
+          "type": "boolean"
+        },
+        "visitedOpacity": {
+          "description": "0-100 opacity of a visited link button.",
+          "type": "number"
+        },
+        "visitedTextColor": {
+          "description": "Label colour of a visited link; unset keeps the colour it would have had.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "byDirectionType",
+        "directionTypes",
+        "markVisited",
+        "visitedOpacity"
+      ],
+      "type": "object"
+    },
+    "LinkIconPlacement": {
+      "enum": [
+        "before",
+        "after"
+      ],
+      "type": "string"
+    },
+    "LinkType": {
+      "enum": [
+        "local",
+        "push",
+        "pop",
+        "jump",
+        "resetjump",
+        "tolocation",
+        "toperson",
+        "reply",
+        "return"
+      ],
+      "type": "string"
+    },
+    "LinkTypeStyles": {
+      "additionalProperties": false,
+      "description": "Same look description as a category, but keyed by what the link *does*.",
+      "properties": {
+        "jump": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "local": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "pop": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "push": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "reply": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "resetjump": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "return": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "tolocation": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        },
+        "toperson": {
+          "$ref": "#/definitions/LinkCategoryStyle"
+        }
+      },
+      "required": [
+        "local",
+        "push",
+        "pop",
+        "jump",
+        "resetjump",
+        "tolocation",
+        "toperson",
+        "reply",
+        "return"
+      ],
+      "type": "object"
+    },
+    "Loc": {
+      "additionalProperties": false,
+      "properties": {
+        "backgrounds": {
+          "$ref": "#/definitions/ImageList"
+        },
+        "canHostEventsScript": {
+          "type": "string"
+        },
+        "chooseTextScript": {
+          "type": "string"
+        },
+        "choosebackgroundScript": {
+          "type": "string"
+        },
+        "discussable": {
+          "type": "boolean"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "eventHosts": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "goto": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "isAccessibleScript": {
+          "type": "string"
+        },
+        "isVisibleScript": {
+          "type": "string"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/definitions/DialogLink"
+          },
+          "type": "array"
+        },
+        "onEntryScript": {
+          "type": "string"
+        },
+        "routes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "text": {
+          "$ref": "#/definitions/TextList"
+        },
+        "thumbnail": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "displayName",
+        "uid",
+        "backgrounds",
+        "goto",
+        "text",
+        "links",
+        "routes",
+        "discussable",
+        "eventHosts"
+      ],
+      "type": "object"
+    },
+    "LocProp": {
+      "additionalProperties": false,
+      "properties": {
+        "datatype": {
+          "const": "location",
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "datatype",
+        "name",
+        "defaultValue"
+      ],
+      "type": "object"
+    },
+    "MainMenuLayout": {
+      "description": "Layout variant for the start (main) menu shown before the game begins.",
+      "enum": [
+        "classic",
+        "mobile"
+      ],
+      "type": "string"
+    },
+    "MeterLayout": {
+      "additionalProperties": false,
+      "properties": {
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "opacity"
+      ],
+      "type": "object"
+    },
+    "MeterProgressBar": {
+      "additionalProperties": false,
+      "properties": {
+        "colors": {
+          "type": "boolean"
+        },
+        "max": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "redLevel": {
+          "type": "number"
+        },
+        "yellowLevel": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "max",
+        "min",
+        "colors",
+        "yellowLevel",
+        "redLevel"
+      ],
+      "type": "object"
+    },
+    "NumberProp": {
+      "additionalProperties": false,
+      "properties": {
+        "datatype": {
+          "const": "number",
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "datatype",
+        "defaultValue"
+      ],
+      "type": "object"
+    },
+    "PointAndClick": {
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "type": "string"
+        },
+        "canHostEventsScript": {
+          "type": "string"
+        },
+        "eventHosts": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "zones": {
+          "items": {
+            "$ref": "#/definitions/PointAndClickZone"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "background",
+        "zones",
+        "eventHosts"
+      ],
+      "type": "object"
+    },
+    "PointAndClickZone": {
+      "additionalProperties": false,
+      "properties": {
+        "alternativeDirections": {
+          "items": {
+            "$ref": "#/definitions/DialogLinkDirection"
+          },
+          "type": "array"
+        },
+        "height": {
+          "type": "number"
+        },
+        "hoverOpacity": {
+          "type": "number"
+        },
+        "id": {
+          "type": "string"
+        },
+        "idleOpacity": {
+          "type": "number"
+        },
+        "image": {
+          "type": "string"
+        },
+        "isDisabledIfScript": {
+          "type": "string"
+        },
+        "isVisibleIfScript": {
+          "type": "string"
+        },
+        "mainDirection": {
+          "$ref": "#/definitions/DialogLinkDirection"
+        },
+        "name": {
+          "type": "string"
+        },
+        "onClickScript": {
+          "type": "string"
+        },
+        "useAlternativeWhen": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number"
+        },
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "type": "object"
+    },
+    "Quest": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "onComplete": {
+          "type": "string"
+        },
+        "onFail": {
+          "type": "string"
+        },
+        "onOpen": {
+          "type": "string"
+        },
+        "ordered": {
+          "const": true,
+          "type": "boolean"
+        },
+        "path": {
+          "$ref": "#/definitions/QuestPath"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tasks": {
+          "items": {
+            "$ref": "#/definitions/Task"
+          },
+          "type": "array"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "path",
+        "tasks",
+        "name",
+        "tags",
+        "ordered"
+      ],
+      "type": "object"
+    },
+    "QuestLine": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "quests": {
+          "items": {
+            "$ref": "#/definitions/Quest"
+          },
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "name",
+        "quests",
+        "tags"
+      ],
+      "type": "object"
+    },
+    "QuestPath": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "Reaction": {
+      "additionalProperties": false,
+      "properties": {
+        "actionScript": {
+          "type": "string"
+        },
+        "dialogWindow": {
+          "$ref": "#/definitions/DialogWindowId"
+        },
+        "isEnabled": {
+          "type": "string"
+        },
+        "reply": {
+          "type": "string"
+        },
+        "trigger": {
+          "$ref": "#/definitions/ReactionTrigger"
+        }
+      },
+      "required": [
+        "trigger",
+        "reply"
+      ],
+      "type": "object"
+    },
+    "ReactionTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "chars": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "facts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "places": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "facts",
+        "chars",
+        "items",
+        "places"
+      ],
+      "type": "object"
+    },
+    "ResponseAlignment": {
+      "enum": [
+        "column",
+        "row",
+        "flexible"
+      ],
+      "type": "string"
+    },
+    "Role": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "props": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/NumberProp"
+              },
+              {
+                "$ref": "#/definitions/BoolProp"
+              },
+              {
+                "$ref": "#/definitions/StringProp"
+              },
+              {
+                "$ref": "#/definitions/VariantProp"
+              },
+              {
+                "$ref": "#/definitions/LocProp"
+              }
+            ]
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "props"
+      ],
+      "type": "object"
+    },
+    "ScriptFunction": {
+      "additionalProperties": false,
+      "description": "A reusable function authored in the Scripting tab. Its body is injected into the scope of every user script, so any script (entry/action/visibility/hook/…) can call it by name. Inside the body the usual script context is available via closure: rt, state, props, ch, facts, objectives, situation, items, context.",
+      "properties": {
+        "args": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "args",
+        "body",
+        "description"
+      ],
+      "type": "object"
+    },
+    "SpeakingModel": {
+      "additionalProperties": false,
+      "properties": {
+        "agree": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "bye": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "deny": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dontKnowChar": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dontKnowObject": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "hello": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "agree",
+        "deny",
+        "bye",
+        "hello",
+        "dontKnowObject",
+        "dontKnowChar"
+      ],
+      "type": "object"
+    },
+    "StartMenuConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "layout": {
+          "$ref": "#/definitions/MainMenuLayout",
+          "description": "Which start-menu design to render. Defaults to \"classic\" when absent."
+        },
+        "menuBackground": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "StringProp": {
+      "additionalProperties": false,
+      "properties": {
+        "datatype": {
+          "const": "string",
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "datatype",
+        "name",
+        "defaultValue"
+      ],
+      "type": "object"
+    },
+    "Task": {
+      "additionalProperties": false,
+      "properties": {
+        "autoCheckScript": {
+          "type": "string"
+        },
+        "critical": {
+          "type": "boolean"
+        },
+        "onComplete": {
+          "type": "string"
+        },
+        "onFail": {
+          "type": "string"
+        },
+        "path": {
+          "$ref": "#/definitions/TaskPath"
+        },
+        "text": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "uid",
+        "text",
+        "critical"
+      ],
+      "type": "object"
+    },
+    "TaskPath": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "type": "array"
+    },
+    "TextList": {
+      "additionalProperties": false,
+      "properties": {
+        "list": {
+          "items": {
+            "$ref": "#/definitions/TextListEntry"
+          },
+          "type": "array"
+        },
+        "main": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "main",
+        "list"
+      ],
+      "type": "object"
+    },
+    "TextListEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "type": "object"
+    },
+    "Translations": {
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number"
+        ]
+      },
+      "type": "object"
+    },
+    "VariantProp": {
+      "additionalProperties": false,
+      "properties": {
+        "datatype": {
+          "const": "variant",
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "variants": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "datatype",
+        "name",
+        "defaultValue",
+        "variants"
+      ],
+      "type": "object"
+    },
+    "VisualsConfiguration": {
+      "additionalProperties": false,
+      "properties": {
+        "aspectRatio": {
+          "$ref": "#/definitions/AspectRatioId",
+          "description": "Shape of the player stage — landscape 16:9 or portrait 9:16 (mobile)."
+        },
+        "customCss": {
+          "type": "string"
+        },
+        "dialogTextAlignment": {
+          "$ref": "#/definitions/DialogTextAlignment"
+        },
+        "dialogTextBackgroundOpacity": {
+          "type": "number"
+        },
+        "inventoryCustomCss": {
+          "description": "Custom CSS injected at runtime, scoped to the inventory / item picker menu.",
+          "type": "string"
+        },
+        "inventoryLayout": {
+          "$ref": "#/definitions/InventoryLayout",
+          "description": "Layout variant for the in-game inventory / item picker menu."
+        },
+        "linkCategories": {
+          "$ref": "#/definitions/LinkCategoryStyles",
+          "description": "Per-category look of dialog link buttons, keyed by `LinkCategory`."
+        },
+        "linkDefaults": {
+          "$ref": "#/definitions/LinkDefaultsConfiguration",
+          "description": "Look of links with no category, and of links pointing at visited targets."
+        },
+        "menuFontId": {
+          "$ref": "#/definitions/FontId"
+        },
+        "menuPanelBorderRadius": {
+          "type": "number"
+        },
+        "menuPanelOpacity": {
+          "type": "number"
+        },
+        "notificationBackgroundOpacity": {
+          "type": "number"
+        },
+        "notificationBorderOpacity": {
+          "type": "number"
+        },
+        "notificationBorderRadius": {
+          "type": "number"
+        },
+        "responseAlignment": {
+          "$ref": "#/definitions/ResponseAlignment"
+        },
+        "responsesFontId": {
+          "$ref": "#/definitions/FontId"
+        },
+        "responsesFontSize": {
+          "$ref": "#/definitions/FontSizeId"
+        },
+        "shortHistoryVisible": {
+          "type": "boolean"
+        },
+        "textFontId": {
+          "$ref": "#/definitions/FontId"
+        },
+        "textFontSize": {
+          "$ref": "#/definitions/FontSizeId"
+        },
+        "typewriterEnabled": {
+          "type": "boolean"
+        },
+        "typewriterSpeedMs": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "dialogTextAlignment",
+        "responseAlignment",
+        "shortHistoryVisible",
+        "menuFontId",
+        "textFontId",
+        "responsesFontId",
+        "textFontSize",
+        "responsesFontSize",
+        "dialogTextBackgroundOpacity",
+        "notificationBackgroundOpacity",
+        "notificationBorderRadius",
+        "notificationBorderOpacity",
+        "typewriterEnabled",
+        "typewriterSpeedMs",
+        "menuPanelOpacity",
+        "menuPanelBorderRadius",
+        "aspectRatio",
+        "inventoryLayout",
+        "inventoryCustomCss",
+        "linkCategories",
+        "linkDefaults",
+        "customCss"
+      ],
+      "type": "object"
+    }
+  }
+}

@@ -6,7 +6,7 @@ a **login/password system** with per-user project ownership, with an opt-in
 **publishing** flag that exposes a game to anonymous players.
 
 - **Stack:** Python ≥ 3.14, FastAPI, uvicorn, Pillow, managed with **uv**
-- **All routes** live under `/api/v1/`
+- The browser REST API lives under `/api/v1/`. MCP clients connect to `/mcp`.
 - **Storage root:** `backend/storage/` (never write outside this tree)
 
 ## Running
@@ -19,6 +19,52 @@ uv run python main.py          # reload mode, port 4267 (HOST/PORT env override)
 On startup the app runs `auth.ensure_root_and_migrate()` (see [Migration](#migration)).
 
 ---
+
+## Editor MCP
+
+Connect a Streamable HTTP client to `http://localhost:4267/mcp` for local development. For a deployment, set `MCP_PUBLIC_URL` to the external HTTPS origin (for example, `https://editor.example.org`) and preserve its Host header at the reverse proxy. The backend serves MCP, OAuth and discovery on that origin.
+
+Configure `MCP_API_KEYS` in the backend environment or `backend/.env` as a JSON object mapping **existing editor usernames** to separate random secrets. Generate a key with `openssl rand -hex 32`, then set the variable and restart the backend. For example, the value has the shape `{"alice":"<generated secret>"}`. Each key grants editing access to the projects owned by that account.
+
+Clients can send `X-API-Key` or `Authorization: Bearer <key>`. Clients using OAuth discover the authorization server from the 401 challenge, register a public client, and open the approval page. Enter the account's MCP key there to approve the displayed client and callback. The client exchanges its single-use code with S256 PKCE and receives an hour-long access token and a rotating 30-day refresh token. Grant records live in `storage/auth/mcp.sqlite`. Removing or changing an account's key and restarting the backend invalidates its outstanding grants.
+
+### Edit a saved project
+
+1. Call `list_projects` to select a saved game. Call `editor_planes` to discover sections and fields using the editor's organization.
+2. Call `browse_field` with a project, plane and field. It returns immediate child pointers, short labels, a count and a revision. Supply a child path to drill down, or use `offset` and `limit` to page.
+3. Call `read_fragment` with a selected pointer, for example `/0/windows/0/text/main` in the `dialog` plane's `dialogs` field. Reads are limited to 12 KB. Long strings support paging with `text_offset`.
+4. Pass the field revision and RFC 6902 operations to `patch_field`. Both `path` and `from` start at the field root. On a revision conflict, browse again before applying the edit.
+
+For example, after reading the first window in the selected dialog:
+
+```json
+{
+  "project": "demo",
+  "plane": "dialog",
+  "field": "dialogs",
+  "revision": "<revision from browse_field or read_fragment>",
+  "operations": [
+    {"op": "test", "path": "/0/windows/0/uid", "value": "start"},
+    {"op": "replace", "path": "/0/windows/0/text/main", "value": "The shop opens at dawn."}
+  ]
+}
+```
+
+A successful patch persists the game and refreshes its project metadata. A failed operation or new schema violation rejects the batch. The browser editor still saves whole snapshots. Reload a previously opened project before making further browser edits to pick up MCP changes. The editor's sanity check can verify references across fields after a series of patches.
+
+Use `editor_help` with group `schema`, `link` or `script`. Omit `topic` for the index, then request one entry, such as `DialogWindow`, `push` or `isVisible`. Scripts are edited as text.
+
+Use `list_images` to browse filenames and `preview_image` for a single thumbnail. `upload_image` accepts a base64-encoded PNG, JPEG, WebP or GIF and returns a reference suitable for an image field. Uploading to an existing filename replaces the asset. Update references before using `delete_image` to remove an asset.
+
+### Verification and schema maintenance
+
+Run `uv run python -m unittest discover -s tests` from `backend/`. The integration tests start a loopback server with temporary project and credential storage and exercise the REST editor, OAuth and MCP clients.
+
+The validation schema is generated from the editor's TypeScript model. After changing its types, run the following command from `dialogic/` and review any affected field or help entries.
+
+```bash
+npx --yes ts-json-schema-generator@2.4.0 --path src/game/GameDescription.ts --tsconfig tsconfig.json --type GameDescription --no-type-check --out ../backend/app/game_mcp/schema.json
+```
 
 ## Authentication
 
