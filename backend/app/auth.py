@@ -102,6 +102,13 @@ def user_exists(username: str) -> bool:
         return username in _read_users()
 
 
+def account_grant_version(username: str) -> str | None:
+    """Stable across restarts, changes when the account password is reset."""
+    with _lock:
+        account = _read_users().get(username)
+        return "account:" + account["pw_salt"] if account else None
+
+
 def create_user(username: str, password: str) -> None:
     """Create a user. Raises HTTPException(409) if it already exists."""
     if not password:

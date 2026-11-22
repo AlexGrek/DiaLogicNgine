@@ -14,17 +14,17 @@ POST /llm/generate-dialog      — submit urgent LLM task, return parsed dialog 
 import json
 import os
 import re
-from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from app.config import ENV_FILE
 from app import auth, prompt_history
 from app.ownership import require_owner
 
-load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
+load_dotenv(ENV_FILE)
 
 OFFLOADMQ_URL = os.getenv("OFFLOADMQ_URL", "").rstrip("/")
 OFFLOADMQ_API_KEY = os.getenv("OFFLOADMQ_API_KEY", "")

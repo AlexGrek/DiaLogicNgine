@@ -1,4 +1,4 @@
-"""Lifeline-style public clients, key-backed approval, and MCP-only credentials."""
+"""Public OAuth clients, account consent, and MCP-only credentials."""
 
 import base64
 import hashlib
@@ -123,13 +123,12 @@ def issue(db, kind, ttl, **payload):
 
 
 def active(grant):
-    return (
-        grant
-        and grant["resource"] == RESOURCE
-        and grant["subject"] in KEYS
-        and grant["fingerprint"] == digest(KEYS[grant["subject"]])
-        and auth.user_exists(grant["subject"])
-    )
+    if not grant or grant["resource"] != RESOURCE:
+        return False
+    user, fingerprint = grant["subject"], grant["fingerprint"]
+    if fingerprint.startswith("account:"):
+        return fingerprint == auth.account_grant_version(user)
+    return user in KEYS and fingerprint == digest(KEYS[user]) and auth.user_exists(user)
 
 
 def bearer_owner(token):
@@ -284,30 +283,55 @@ async def authorize(request: Request):
 
 
 @router.get("/oauth/consent/{ticket}")
-async def consent(ticket: str):
+async def consent(ticket: str, request: Request):
     pending = read_grant("consent", ticket)
     if not pending:
         raise HTTPException(400, "Approval expired")
     client = await provider.get_client(pending["client_id"])
+    user = auth.get_optional_user(request)
+    if user and auth.user_exists(user):
+        identity = f'<p>Signed in as <strong>{html.escape(user)}</strong>.</p><input type="hidden" name="account" value="{html.escape(user)}">'
+    else:
+        identity = """<p>Sign in with your DiaLogicNgine account.</p>
+        <p><label>Username <input name="username" autocomplete="username" required></label></p>
+        <p><label>Password <input type="password" name="password" autocomplete="current-password" required></label></p>"""
     return HTMLResponse(
-        f"""<!doctype html><title>DiaLogicNgine access</title>
-    <h1>Allow {html.escape(client.client_name)} to edit your games?</h1>
-    <p>This includes all projects and images owned by the account for your MCP key.</p>
-    <p>Callback <code>{html.escape(pending["redirect_uri"])}</code></p>
-    <form method="post"><label>MCP API key <input type="password" name="key"></label>
-    <button name="decision" value="allow">Allow</button>
-    <button name="decision" value="deny">Deny</button></form>""",
+        f"""<!doctype html><html lang="en"><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Connect to DiaLogicNgine Editor</title><main>
+        <h1>Allow {html.escape(client.client_name)} to edit your games?</h1>
+        <p>This grants access to read and change your saved projects and their images.</p>
+        <p>Return address: <code>{html.escape(pending["redirect_uri"])}</code></p>
+        <form method="post">{identity}
+        <button name="decision" value="allow">Allow access</button>
+        <button name="decision" value="deny" formnovalidate>Deny</button></form></main></html>""",
         headers=PRIVATE,
     )
 
 
 @router.post("/oauth/consent/{ticket}")
-async def decide(ticket: str, request: Request, decision: str = Form(), key: str = Form("")):
-    if request.headers.get("origin", ORIGIN) != ORIGIN or decision not in {"allow", "deny"}:
+def decide(ticket: str, request: Request, decision: str = Form(), key: str = Form(""),
+           account: str = Form(""), username: str = Form(""), password: str = Form("")):
+    origin = request.headers.get("origin")
+    if origin not in {None, ORIGIN} or decision not in {"allow", "deny"}:
         raise HTTPException(400, "Invalid consent request")
-    user = key_owner(key) if decision == "allow" else None
-    if decision == "allow" and not user:
-        raise HTTPException(401, "Invalid MCP key")
+    user = fingerprint = None
+    if decision == "allow":
+        if key:
+            user = key_owner(key)
+            fingerprint = digest(key)
+        elif account:
+            if origin != ORIGIN or account != auth.get_optional_user(request):
+                raise HTTPException(403, "Sign-in session changed. Reopen the approval page.")
+            user = account
+            fingerprint = auth.account_grant_version(user)
+        elif username and password:
+            username = auth.validate_username(username)
+            if auth.authenticate(username, password):
+                user = username
+                fingerprint = auth.account_grant_version(user)
+        if not user or not fingerprint:
+            raise HTTPException(401, "Sign-in failed. Go back and check your credentials.")
     with database() as db:
         pending = consume(db, "consent", ticket)
         if not pending:
@@ -316,7 +340,7 @@ async def decide(ticket: str, request: Request, decision: str = Form(), key: str
         pending.pop("expires_at")
         pending.update(scopes=["mcp"], resource=RESOURCE)
         result = (
-            {"code": issue(db, "code", 120, subject=user, fingerprint=digest(key), **pending)}
+            {"code": issue(db, "code", 120, subject=user, fingerprint=fingerprint, **pending)}
             if user
             else {"error": "access_denied"}
         )

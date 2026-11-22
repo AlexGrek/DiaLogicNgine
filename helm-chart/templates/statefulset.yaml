@@ -44,6 +44,17 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: {{ .Values.web.service.port | quote }}
+            {{- if or .Values.web.mcp.publicUrl .Values.ingress.enabled }}
+            - name: MCP_PUBLIC_URL
+              value: {{ default (printf "https://%s" .Values.ingress.host) .Values.web.mcp.publicUrl | quote }}
+            {{- end }}
+            {{- if .Values.web.mcp.existingSecret }}
+            - name: MCP_API_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.web.mcp.existingSecret | quote }}
+                  key: MCP_API_KEYS
+            {{- end }}
             - name: STATIC_DIR
               value: /app/static
             {{- if and .Values.web.offloadmq.url .Values.web.offloadmq.apiKey }}

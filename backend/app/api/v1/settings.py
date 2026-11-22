@@ -1,16 +1,15 @@
 """Settings API: read/write OffloadMQ runtime configuration."""
-from pathlib import Path
 
 from dotenv import set_key
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from app.config import ENV_FILE
 from app import auth
 from app.api.v1 import offloadmq as mq_module
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
-ENV_FILE = Path(__file__).parent.parent.parent.parent / ".env"
 
 
 def _masked(key: str) -> str:

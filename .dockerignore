@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!backend/
+!backend/pyproject.toml
+!backend/uv.lock
+!backend/app/
+!backend/app/**/
+!backend/app/**/*.py
+!backend/app/game_mcp/schema.json
+!dialogic/
+!dialogic/dist/
+!dialogic/dist/**

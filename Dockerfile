@@ -15,7 +15,7 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen --no-cache
 
 # Copy backend source
-COPY backend/ ./
+COPY backend/app/ ./app/
 
 # Copy pre-built frontend (built on host via: cd dialogic && npm run build)
 COPY dialogic/dist/ ./static/
@@ -24,5 +24,6 @@ EXPOSE 8000
 ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV STATIC_DIR=/app/static
+ENV DIALOGIC_ENV_FILE=/app/storage/backend.env
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
