@@ -6,6 +6,7 @@ vars:
   CHART: ./helm-chart
   FRONTEND_DIR: ./dialogic
   BACKEND_DIR: ./backend
+  RUNNER_DIR: ./player-runner
   IMAGE: grekodocker/dialogic-bundle
   BUILDX_LOCAL_CACHE: ./.buildx-cache
   BUILDX_LOCAL_CACHE_NEW: ./.buildx-cache-new
@@ -40,12 +41,18 @@ tasks:
     dir: "{{.FRONTEND_DIR}}"
     cmd: npm install
 
+  runner:build:
+    desc: Build the headless Deno player runner bundle (output → player-runner/dist/runner.mjs)
+    dir: "{{.RUNNER_DIR}}"
+    cmd: npm run build
+
   # ── Docker ───────────────────────────────────────────────────────────────────
 
   docker:build:
-    desc: Build frontend (host), then build linux/amd64 image with local buildx cache
+    desc: Build frontend and player-runner (host), then build linux/amd64 image with local buildx cache
     cmds:
       - task: frontend:build
+      - task: runner:build
       - mkdir -p {{.BUILDX_LOCAL_CACHE}}
       - rm -rf {{.BUILDX_LOCAL_CACHE_NEW}}
       - docker buildx build --builder {{.BUILDX_BUILDER}} --platform linux/amd64 --load
@@ -55,9 +62,10 @@ tasks:
       - rm -rf {{.BUILDX_LOCAL_CACHE}} && mv {{.BUILDX_LOCAL_CACHE_NEW}} {{.BUILDX_LOCAL_CACHE}}
 
   docker:release:
-    desc: Build frontend (host), then build + push linux/amd64 image
+    desc: Build frontend and player-runner (host), then build + push linux/amd64 image
     cmds:
       - task: frontend:build
+      - task: runner:build
       - mkdir -p {{.BUILDX_LOCAL_CACHE}}
       - rm -rf {{.BUILDX_LOCAL_CACHE_NEW}}
       - docker buildx build --builder {{.BUILDX_BUILDER}} --platform linux/amd64 --push

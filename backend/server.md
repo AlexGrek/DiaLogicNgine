@@ -6,7 +6,7 @@ a **login/password system** with per-user project ownership, with an opt-in
 **publishing** flag that exposes a game to anonymous players.
 
 - **Stack:** Python ≥ 3.14, FastAPI, uvicorn, Pillow, managed with **uv**
-- The browser REST API lives under `/api/v1/`. MCP clients connect to `/mcp`.
+- The browser REST API lives under `/api/v1/`. MCP clients connect to `/mcp` (Editor MCP) or `/play-mcp` (Player MCP).
 - **Storage root:** `backend/storage/` (never write outside this tree)
 
 ## Running
@@ -65,6 +65,47 @@ The validation schema is generated from the editor's TypeScript model. After cha
 ```bash
 npx --yes ts-json-schema-generator@2.4.0 --path src/game/GameDescription.ts --tsconfig tsconfig.json --type GameDescription --no-type-check --out ../backend/app/game_mcp/schema.json
 ```
+
+---
+
+## Player MCP
+
+Connect a Streamable HTTP client to `http://localhost:4267/play-mcp` for local development (or `${MCP_PUBLIC_URL}/play-mcp` in deployment). It shares the same authentication stack as Editor MCP (`X-API-Key`, `Authorization: Bearer <key>`, or OAuth 2.0 S256 PKCE with resource metadata at `/.well-known/oauth-protected-resource/play-mcp`). OAuth tokens are resource-scoped, so an Editor MCP token cannot access `/play-mcp` and vice versa.
+
+### Playable scope & isolation
+
+- **Playable games:** every **published** game plus the caller's own **unpublished** games.
+- **Session isolation:** each active session runs the game engine (`player-runner/dist/runner.mjs`, bundled from `dialogic/src/exec` and `dialogic/src/game`) in its own **Deno** subprocess launched with zero permissions (`--no-prompt --no-remote --no-npm`, V8 heap cap, `globalThis.Deno` removed before user script execution). Sessions are addressable only by their owning account + `session_code`.
+- **Persistence:** serialized engine state is saved to `storage/play_mcp/sessions.sqlite` (WAL mode) after every turn alongside a 1-step previous autosave and optional named manual checkpoints. Idle workers are evicted on TTL or LRU cap and transparently rehydrated from SQLite on the next call.
+- **Multimodal turns:** `start_game`, `resume_session`, `get_state`, `act`, and `load_checkpoint` return the structured turn state (scene text, speaker/location, HUD meters, new notifications, available links/routes/zones/topics/usable items) plus the current scene image (or an annotated 960×540 Point-and-Click composite with numbered zone boxes) as native MCP image content.
+
+### Tools
+
+- **Discovery & library:** `list_available_games`, `list_saved_games`, `list_recently_played`, `list_sessions`
+- **Session & saves:** `start_game`, `resume_session`, `delete_session`, `save_checkpoint`, `list_checkpoints`, `load_checkpoint`, `delete_checkpoint`
+- **Gameplay & inspection:** `get_state`, `act` (`choose_link` | `continue` | `travel` | `click_zone` | `discuss` | `use_item`), `inspect` (`inventory` | `facts` | `people` | `places` | `objectives` | `history` | `summary`), `view_image` (`scene` | `avatar` | `item` | `route` | `pac_annotated`)
+
+### Building the runner & configuration
+
+Build the headless JS runner after changing `dialogic/src/exec`, `dialogic/src/game`, or `player-runner/src/`:
+
+```bash
+task runner:build              # or: cd player-runner && npm run typecheck && npm run build
+```
+
+Optional environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PLAY_MCP_RUNNER_PATH` | auto-detected `player-runner/dist/runner.mjs` | Path to the bundled headless runner |
+| `PLAY_MCP_DENO_BIN` | `deno` on `PATH` | Path to the Deno executable |
+| `PLAY_MCP_TURN_TIMEOUT` | `5.0` | Per-turn execution timeout in seconds (kills hung worker) |
+| `PLAY_MCP_IDLE_TTL` | `600.0` | Idle worker eviction timeout in seconds |
+| `PLAY_MCP_MAX_WORKERS` | `16` | Maximum concurrent Deno workers (LRU eviction) |
+| `PLAY_MCP_V8_MAX_MB` | `64` | `--max-old-space-size` limit per worker in MB |
+| `PLAY_MCP_IMAGE_MAX_PX` | `1024` | Max image dimension returned to MCP clients |
+
+---
 
 ## Authentication
 
@@ -209,6 +250,9 @@ backend/storage/
   auth/
     users.json            # username → {pw_salt, pw_hash, created}
     secret                # HMAC signing secret (generated once)
+    mcp.sqlite            # MCP OAuth clients, codes, and token grants
+  play_mcp/
+    sessions.sqlite       # Player MCP sessions, autosaves, and manual checkpoints
   projects/
     {project}/
       .metadata           # {owner, displayName, lastModified, counts, …}
