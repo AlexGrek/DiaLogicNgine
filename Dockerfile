@@ -17,7 +17,7 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen --no-cache
 
 # Copy backend source
-COPY backend/ ./
+COPY backend/app/ ./app/
 
 # Copy pre-built headless Deno player runner (built on host via: cd player-runner && npm run build)
 COPY player-runner/dist/runner.mjs ./player-runner/dist/runner.mjs
@@ -29,6 +29,7 @@ EXPOSE 8000
 ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV STATIC_DIR=/app/static
+ENV DIALOGIC_ENV_FILE=/app/storage/backend.env
 ENV PLAY_MCP_RUNNER_PATH=/app/player-runner/dist/runner.mjs
 
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

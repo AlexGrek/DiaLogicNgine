@@ -10,3 +10,6 @@
 !dialogic/
 !dialogic/dist/
 !dialogic/dist/**
+!player-runner/
+!player-runner/dist/
+!player-runner/dist/runner.mjs
