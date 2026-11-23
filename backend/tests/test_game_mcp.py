@@ -143,6 +143,30 @@ class GameEditingTest(unittest.TestCase):
             "qualifiedDirection", self.tool("editor_help", group="link", topic="push")["decoded"]["result"]
         )
 
+    def test_create_project(self):
+        self.rpc(
+            "initialize",
+            {
+                "protocolVersion": "2025-11-25",
+                "capabilities": {},
+                "clientInfo": {"name": "test", "version": "1"},
+            },
+        )
+        made = self.tool("create_project", project="fresh", title="Fresh Game")
+        self.assertEqual(made["decoded"], {"project": "fresh"})
+        self.assertIn("fresh", self.tool("list_projects")["decoded"]["projects"])
+        game = self.http.get("/api/v1/projects/fresh/game").json()
+        self.assertEqual(game["general"]["name"], "Fresh Game")
+        self.assertEqual(game["dialogs"], [])
+        # Editable straight away through the normal patch flow.
+        args = {"project": "fresh", "plane": "dialog", "field": "dialogs"}
+        rev = self.tool("browse_field", **args)["decoded"]["revision"]
+        add = {"op": "add", "path": "/-", "value": {"name": "main", "windows": []}}
+        self.assertFalse(self.tool("patch_field", **args, revision=rev, operations=[add])["isError"])
+        # Existing, traversal and dotfile names are refused.
+        for bad in ("fresh", "../x", "a/b", ".hidden", "  "):
+            self.assertTrue(self.tool("create_project", project=bad)["isError"], bad)
+
     def test_dialog_authoring(self):
         game = {
             "dialogs": [
@@ -212,6 +236,7 @@ class GameEditingTest(unittest.TestCase):
                     {tool.name for tool in catalog.tools},
                     {
                         "list_projects",
+                        "create_project",
                         "editor_planes",
                         "browse_field",
                         "read_fragment",

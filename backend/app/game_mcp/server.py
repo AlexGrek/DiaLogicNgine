@@ -29,7 +29,7 @@ security = TransportSecuritySettings(
 )
 mcp = FastMCP(
     "DiaLogicNgine Editor",
-    instructions="List your projects and editor planes. Browse a field, read a narrow JSON Pointer, then patch using the returned revision. Ask editor_help for individual schema, link or script topics.",
+    instructions="List your projects (or create_project a new empty one) and editor planes. Browse a field, read a narrow JSON Pointer, then patch using the returned revision. Ask editor_help for individual schema, link or script topics.",
     stateless_http=True,
     json_response=True,
     transport_security=security,
@@ -44,6 +44,14 @@ async def list_projects(page: Annotated[int, Field(ge=1)] = 1) -> dict:
     """List names of saved games owned by this account, ten per page."""
     result = await projects.list_projects(page, principal.get())
     return {"projects": [p["name"] for p in result["projects"]], "total": result["total"], "page": page}
+
+
+@mcp.tool()
+def create_project(
+    project: Annotated[str, Field(min_length=1, max_length=64)], title: str = "", description: str = ""
+) -> dict:
+    """Create a new empty game owned by this account. Fails if the name is taken. Then patch dialogs, locs, chars, startupDialog etc. to fill it."""
+    return editor.create_game(project, principal.get(), title, description)
 
 
 @mcp.tool()

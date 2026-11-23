@@ -49,6 +49,51 @@ def owned_game(project, user):
     return path
 
 
+def create_game(project, user, title="", description=""):
+    """Create an empty owned project; refuses to touch an existing one."""
+    name = component(project).strip()
+    if not name or name != project or name.startswith(".") or len(name) > 64:
+        raise ValueError("Project name must be 1-64 characters, trimmed, and not start with a dot")
+    with projects.project_write_lock():
+        directory = projects._safe_project_dir(name)
+        if directory.exists() or ownership.get_owner(name) is not None:
+            raise ValueError("A project with this name already exists")
+        game = {
+            "engineVersion": "0.21",
+            "buildVersion": 1,
+            "general": {
+                "name": title or name,
+                "version": "0.1.0",
+                "authors": [user],
+                "extras": {},
+                "description": description,
+            },
+            "startMenu": {},
+            "dialogs": [],
+            "facts": [],
+            "chars": [],
+            "roles": [],
+            "locs": [],
+            "props": [],
+            "items": [],
+            "events": [],
+            "eventHosts": [],
+            "objectives": [],
+            "situations": [],
+            "pacWidgets": [],
+            "hooks": [],
+            "functions": [],
+            "uiElements": {"meters": []},
+            "translations": {},
+            "visuals": {},
+            "config": {"assetsPath": ""},
+            "dev": {"basicPromptSuffix": ""},
+            "startupDialog": {"dialogName": "", "windowUid": ""},
+        }
+        projects.persist_game(name, user, game, encoded(game))
+    return {"project": name}
+
+
 def encoded(value):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode()
 

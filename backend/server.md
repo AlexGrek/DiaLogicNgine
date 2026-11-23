@@ -30,7 +30,7 @@ Clients can send `X-API-Key` or `Authorization: Bearer <key>`. Clients using OAu
 
 ### Edit a saved project
 
-1. Call `list_projects` to select a saved game. Call `editor_planes` to discover sections and fields using the editor's organization.
+1. Call `list_projects` to select a saved game, or `create_project` to start a new empty one (fails if the name is taken). Call `editor_planes` to discover sections and fields using the editor's organization.
 2. Call `browse_field` with a project, plane and field. It returns immediate child pointers, short labels, a count and a revision. Supply a child path to drill down, or use `offset` and `limit` to page.
 3. Call `read_fragment` with a selected pointer, for example `/0/windows/0/text/main` in the `dialog` plane's `dialogs` field. Reads are limited to 12 KB. Long strings support paging with `text_offset`.
 4. Pass the field revision and RFC 6902 operations to `patch_field`. Both `path` and `from` start at the field root. On a revision conflict, browse again before applying the edit.
