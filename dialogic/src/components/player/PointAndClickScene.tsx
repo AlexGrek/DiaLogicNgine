@@ -2,7 +2,9 @@ import { PointAndClickZoneRenderView } from "../../exec/RenderView";
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PointAndClickZone } from "../../game/PointAndClick";
-import { generateImageUrlCss } from "../../Utils";
+import { styleWithImage } from "../UiUtils";
+import { useProjectImages } from "../common/ProjectImagesContext";
+import { resolveImageProject } from "../common/projectImages";
 
 interface PointAndClickSceneProps {
     backgroundImage: string;
@@ -15,6 +17,7 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
     zones,
     onZoneClick
 }) => {
+    const project = resolveImageProject(useProjectImages());
     const [hoveredZone, setHoveredZone] = useState<string | null>(null);
 
     const handleZoneClick = (zone: PointAndClickZoneRenderView) => {
@@ -34,9 +37,7 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                     <div
                         style={{
                             ...styles.backgroundLayer,
-                            backgroundImage: backgroundImage?.trim()
-                                ? generateImageUrlCss(backgroundImage)
-                                : undefined,
+                            ...styleWithImage(backgroundImage, project),
                             backgroundColor: backgroundImage?.trim() ? undefined : '#2a2a2c',
                         }}
                     />
@@ -62,7 +63,7 @@ const PointAndClickScene: React.FC<PointAndClickSceneProps> = ({
                                         top: `${zone.zone.y}%`,
                                         width: `${zone.zone.width}%`,
                                         height: `${zone.zone.height}%`,
-                                        backgroundImage: zone.zone.image ? generateImageUrlCss(zone.zone.image) : 'none',
+                                        ...styleWithImage(zone.zone.image, project),
                                         backgroundColor: zone.zone.image ? 'transparent' : 'rgba(255, 255, 100, 0.5)',
                                         cursor: zone.disabled ? 'not-allowed' : 'pointer',
                                         filter: zone.disabled ? 'grayscale(0.8)' : undefined,

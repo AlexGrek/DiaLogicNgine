@@ -145,7 +145,7 @@ export default class QuestProcessor {
         const [, q, tsk] = found
 
         // task passed - so quest may be completed
-        const indexOfTask = q.tasks.findIndex((task) => task.uid = tsk.uid)
+        const indexOfTask = q.tasks.findIndex((task) => task.uid === tsk.uid)
         if (indexOfTask === q.tasks.length - 1) {
             // this task is last
             trace("Last task processing: " + tsk.path.toString())

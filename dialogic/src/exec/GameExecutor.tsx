@@ -5,7 +5,7 @@ import { GameDescription } from "../game/GameDescription";
 import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
 import { DialogWindowId, HistoryRecord, State, dialogWindowKey, getVisitedDialogs, getVisitedLocations } from "./GameState";
-import { tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
+import { backDestination, tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
 import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
 import EventsProcessor from "./EventsProcessor";
@@ -109,98 +109,16 @@ export class GameExecManager {
         }
     }
 
-    private cutToLastDialog(state: State, kind = 'chardialog'): State | null {
-        if (state.positionStack.length === 0) {
-            return null
+    private goBack(state: State, type: LinkType.Pop | LinkType.Return) {
+        const next = lodash.cloneDeep(state)
+        const target = backDestination(next, type)
+        if (!target) throw new Error("Attempt to pop while UI stack is empty: " + state.position)
+        next.positionStack.length = target.stackLength
+        next.position = target.position
+        if (type === LinkType.Return) {
+            next.charDialog = target.position.kind === "chardialog" ? target.position.char : null
         }
-        const foundIndex = state.positionStack.findLastIndex((id) => id.kind === kind)
-        if (foundIndex < 0) {
-            return null
-        }
-
-        // we know that we have found some expected UI widget
-        const newState = lodash.cloneDeep(state)
-        const newPositions = state.positionStack.slice(0, foundIndex) // exclude foundIndex
-        newState.positionStack = newPositions
-        newState.position = state.positionStack[foundIndex]
-        if (newState.position.kind === 'chardialog') {
-            newState.charDialog = newState.position.char
-        } else if (newState.position.kind === 'location') {
-            newState.location = newState.position.location
-        }
-        return newState
-    }
-
-    private returnLink(prevState: State) {
-        const newState = lodash.cloneDeep(prevState)
-        const currentPosition = prevState.position
-        if (currentPosition.kind === 'chardialog' || prevState.charDialog === null) {
-            // if we are in char dialog - we have get back to current location or prev dialog
-            // same if we are not in dialog
-            const stateWithFoundDialog = this.cutToLastDialog(newState, 'chardialog')
-            if (stateWithFoundDialog != null) {
-                // go to some previous dialog, we found one
-                return stateWithFoundDialog
-            }
-
-            if (prevState.location) {
-                newState.position = {
-                    location: prevState.location,
-                    kind: "location"
-                }
-                newState.charDialog = null
-                newState.positionStack = [] // reset position stack when we are going there
-                return newState
-            } else {
-                throw new Error("Attempt to pop while UI stack is empty: " + prevState.position)
-            }
-        }
-
-        const stateWithFoundDialog = this.cutToLastDialog(newState)
-        if (stateWithFoundDialog != null) {
-            return stateWithFoundDialog
-        }
-
-        if (prevState.charDialog) {
-            newState.position = {
-                char: prevState.charDialog,
-                kind: "chardialog"
-            }
-            newState.positionStack = []
-            return newState
-        } else if (prevState.location) {
-            newState.position = {
-                location: prevState.location,
-                kind: "location"
-            }
-            newState.positionStack = []
-            return newState
-        } else {
-            throw new Error("Attempt to pop while UI stack is empty: " + newState.position)
-        }
-    }
-
-    private popLink(prevState: State) {
-        const newState = lodash.cloneDeep(prevState)
-        const prevPosition = newState.positionStack.pop()
-        if (prevPosition) {
-            newState.position = prevPosition
-            return newState
-        } else if (prevState.charDialog) {
-            newState.position = {
-                char: prevState.charDialog,
-                kind: "chardialog"
-            }
-            return newState
-        } else if (prevState.location) {
-            newState.position = {
-                location: prevState.location,
-                kind: "location"
-            }
-            return newState
-        } else {
-            throw new Error("Attempt to pop while UI stack is empty: " + newState.position)
-        }
+        return next
     }
 
     private goToLocation(prevState: State, direction?: string | Loc) {
@@ -382,7 +300,7 @@ export class GameExecManager {
                 else
                     return newState
             case (LinkType.Pop):
-                return this.popLink(newState)
+                return this.goBack(newState, LinkType.Pop)
             case (LinkType.QuickReply):
                 if (directionFromLink.replyText !== undefined) {
                     return this.quickReply(newState, directionFromLink.replyText)
@@ -390,7 +308,7 @@ export class GameExecManager {
                 else
                     return newState
             case (LinkType.Return):
-                return this.returnLink(newState)
+                return this.goBack(newState, LinkType.Return)
             case (LinkType.NavigateToLocation):
                 return this.goToLocation(newState, directionFromLink.direction)
             case (LinkType.TalkToPerson):

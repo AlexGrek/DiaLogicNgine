@@ -46,6 +46,23 @@ export function tryGetCharById(game: GameDescription, uid: UiObjectId): Characte
     return null
 }
 
+/** Resolve back navigation without running scripts or changing the state. */
+export function backDestination(state: State, type: LinkType.Pop | LinkType.Return) {
+    const stack = state.positionStack
+    const index = type === LinkType.Pop
+        ? stack.length - 1
+        : stack.findLastIndex(position => position.kind === "chardialog")
+    if (index >= 0) return { position: stack[index], stackLength: index }
+
+    if (state.charDialog && (type === LinkType.Pop || state.position.kind !== "chardialog")) {
+        return { position: { kind: "chardialog", char: state.charDialog } as const, stackLength: 0 }
+    }
+    if (state.location) {
+        return { position: { kind: "location", location: state.location } as const, stackLength: 0 }
+    }
+    return null
+}
+
 /**
  * Does this link point at something the player has already seen — a dialog window
  * they have been in, a character they have talked to, a location they have stood in?

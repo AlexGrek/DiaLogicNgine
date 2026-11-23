@@ -4,9 +4,9 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { InGameNotificationType, State } from '../../exec/GameState';
 import { RenderView } from '../../exec/RenderView';
 import { styleWithImage } from '../UiUtils';
-import { generateImageUrl } from '../../Utils';
+import { PlayerImagePreloader } from './PlayerImagePreloader';
 import { resolveImageProject } from '../common/projectImages';
-import { getListForPrealoading } from '../../exec/Preloader';
+import { sceneImages, upcomingImages } from '../../exec/Preloader';
 import { useProjectImages } from '../common/ProjectImagesContext';
 import GameMenuPanel from './GameMenuPanel';
 import GameUiWidgetDisplay from './GameUiWidgetDisplay';
@@ -29,8 +29,12 @@ interface PlayerCoreProps {
 const INPUT_LOCK_MS = 130
 
 const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
-    const [currentView, setCurrentView] = React.useState<RenderView | null>(null)
-    const [background, setBackground] = React.useState<string | null>(null)
+    const [frame, setFrame] = React.useState<{
+        state: State, view: RenderView, game: GameExecManager, project: string, background: string | null
+    } | null>(null)
+    const logInput = useRef<HTMLInputElement>(null)
+    const preloader = useRef<PlayerImagePreloader | null>(null)
+    const lastBackground = useRef<string | null>(null)
     const [menuOpen, setMenuOpen] = React.useState<boolean>(false);
     const [widgetRequest, setWidgetRequest] = React.useState<{ name: string } | null>(null);
     const [playerSettings, setPlayerSettings] = React.useState<PlayerSettings>(() => {
@@ -53,29 +57,30 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     }, [game.game])
 
     useEffect(() => {
-        const view = game.renderer.render(state, background)
-        setCurrentView(view)
-        if (view.backgroundChange) {
-            setBackground(view.backgroundChange.nextbg)
-        }
-    // Only re-render view when game state changes; background is read for transition logic.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [state])
+        const session = new PlayerImagePreloader(storageProject, logInput.current!)
+        preloader.current = session
+        lastBackground.current = null
+        return () => session.dispose()
+    }, [game.game, storageProject])
 
     useEffect(() => {
-        getListForPrealoading(game.game, state).forEach(uri => {
-            const img = new Image()
-            img.src = generateImageUrl(uri, storageProject)
+        const view = game.renderer.render(state, lastBackground.current)
+        const background = view.backgroundChange?.nextbg ?? lastBackground.current
+        let current = true
+        preloader.current!.prepare(sceneImages(background, view.uiWidgetView), upcomingImages(game.game, state)).then(() => {
+            if (current) {
+                lastBackground.current = background
+                setFrame({ state, view, game, project: storageProject, background })
+            }
         })
-    // storageProject is stable per session; game.game changes only on full reload
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [state])
+        return () => { current = false }
+    }, [game, state, storageProject])
 
     const onFullScreen = () => { }
 
     const handleStateUpd = (newState: State) => {
         const now = Date.now()
-        if (now - lastAcceptedRef.current < INPUT_LOCK_MS) {
+        if (frame?.state !== state || now - lastAcceptedRef.current < INPUT_LOCK_MS) {
             return;
         }
         lastAcceptedRef.current = now
@@ -100,7 +105,11 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
         setWidgetRequest({ name: widget })
     }
 
-    if (currentView) {
+    const renderScene = () => {
+        if (!frame || frame.game.game !== game.game || frame.project !== storageProject) {
+            return <div role="status">Loading scene…</div>
+        }
+        const { view: currentView, state: displayedState, background } = frame
         const aspectRatio = resolveVisuals(game.game.visuals).aspectRatio;
         const portrait = aspectRatio === '9:16';
         // The player's own size preference is scaled the same way the author's is.
@@ -113,6 +122,8 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
             <div
                 className={`player-core-container${portrait ? ' player-core-container--portrait' : ''}`}
                 id='player-core'
+                aria-busy={displayedState !== state}
+                ref={node => { if (node) node.inert = displayedState !== state }}
                 style={fontSizeStyle}
             >
                 <div className={`player-bg-stage${menuOpen ? ' menu-open' : ''}`}>
@@ -128,14 +139,14 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         />
                     </AnimatePresence>
                 </div>
-                <GameNotificationsView state={state} game={game} onNotificationClick={handleNotificationClick} />
+                <GameNotificationsView state={displayedState} game={game} onNotificationClick={handleNotificationClick} />
                 <div className='player-core-widget-container' id='player-current-widget-host'>
                     <div className="player-top-panel-row">
                         <InGameControlPad onFullscreen={() => onFullScreen()} uiElements={currentView?.uiElements || []}></InGameControlPad>
                         <GameUiElementsView elements={currentView?.uiElements || []}/>
                     </div>
                     <div className='player-core-ingame-menu'>
-                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={state} view={currentView} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd} playerSettings={playerSettings} onPlayerSettingsChange={handlePlayerSettingsChange}/>
+                        <GameMenuPanel savesManager={savesManager.current} executor={game} game={game.game} state={displayedState} view={currentView} open={menuOpen} widgetRequest={widgetRequest} onOpenClose={handleMenuPanelOpen} onStateChange={handleStateUpd} playerSettings={playerSettings} onPlayerSettingsChange={handlePlayerSettingsChange}/>
                     </div>
                     <motion.div
                         className='player-core-uiwidget-container'
@@ -143,7 +154,7 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
                         transition={{ duration: 0.2 }}
                         style={menuOpen ? { pointerEvents: 'none' } : undefined}
                     >
-                        <GameUiWidgetDisplay view={currentView} game={game} state={state} onStateUpd={handleStateUpd} playerSettings={playerSettings} />
+                        <GameUiWidgetDisplay view={currentView} game={game} state={displayedState} onStateUpd={handleStateUpd} playerSettings={playerSettings} />
                     </motion.div>
                 </div>
             </div>
@@ -151,9 +162,10 @@ const PlayerCore: React.FC<PlayerCoreProps> = ({ game, state, onStateUpd }) => {
     }
 
     return (
-        <div className="game-ui-widget-unknown">
-            <h2>No UI widget</h2>
-        </div>
+        <>
+            <input type="hidden" id="player-preloader-log" data-testid="player-preloader-log" ref={logInput} />
+            {renderScene()}
+        </>
     );
 };
 

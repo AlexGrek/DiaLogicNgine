@@ -166,7 +166,7 @@ export function createInitialState(game: GameDescription): State {
 
 export function safeStateUpdate(safeState: State, upd: State): State {
     safeState.knownFacts = upd.knownFacts
-    safeState.knownPeople = upd.knownFacts
+    safeState.knownPeople = upd.knownPeople
     safeState.knownPlaces = upd.knownPlaces
     safeState.progress = upd.progress
     safeState.notifications = upd.notifications

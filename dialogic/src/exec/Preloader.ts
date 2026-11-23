@@ -1,129 +1,128 @@
-import { getChar } from "../game/Character";
-import { DialogLink, DialogLinkDirection, DialogWindow, LinkType } from "../game/Dialog";
-import { GameDescription } from "../game/GameDescription";
-import { ImageList } from "../game/ImageList";
-import { getLoc } from "../game/Loc";
-import { State, UiObjectId } from "./GameState";
+import { getChar } from "../game/Character"
+import { DialogLink, DialogLinkDirection, LinkType } from "../game/Dialog"
+import { GameDescription } from "../game/GameDescription"
+import { ImageList } from "../game/ImageList"
+import { getLoc, getLocEventHosts } from "../game/Loc"
+import { zoneAsDialogLink, zoneHasNavigation } from "../game/PointAndClick"
+import { State, UiObjectId } from "./GameState"
+import { backDestination, tryGetDialogWindowById } from "./NavigationUtils"
+import { RenderWidget } from "./RenderView"
 
-/**
- * Returns every image URI worth preloading from the current position: the
- * backgrounds AND character avatars of all dialogs / locations / characters
- * reachable in one navigation step from where the player is now. Background and
- * avatar *variants* (the whole ImageList) are included so script-chosen images
- * are ready too. Results are de-duplicated.
- */
-export function getListForPrealoading(game: GameDescription, state: State): string[] {
-    const out: string[] = []
+type ImageUri = string | null | undefined
+
+/** Only the assets actually selected by the renderer may delay a scene change. */
+export function sceneImages(background: ImageUri, widget: RenderWidget): ImageUri[] {
+    switch (widget.widget) {
+        case "dialog": return [background, widget.actor?.avatar]
+        case "pac": return [background, widget.pac.background, ...widget.items.map(({ zone }) => zone.image)]
+        case "location": return [background, ...widget.routes.map(route => route.thumbnail)]
+        case "char": return [background]
+        case "error": return []
+    }
+}
+
+/** Inspect declared destinations and variants without evaluating any author scripts. */
+export function upcomingImages(game: GameDescription, state: State): ImageUri[] {
+    const images: ImageUri[] = [game.startMenu?.menuBackground]
     const current = state.position
 
+    function imageList(list?: ImageList) {
+        if (list) images.push(list.main, ...(list.list ?? []).map(entry => entry.uri))
+    }
+
+    function windowImages(position: UiObjectId) {
+        const window = tryGetDialogWindowById(game, position)?.[1]
+        if (!window) return
+        imageList(window.backgrounds)
+        const actor = window.actor
+        if (actor) {
+            const uid = actor.currentCharacter ? state.charDialog : actor.character
+            if (uid) imageList(getChar(game, uid)?.avatar)
+        }
+        if (window.specialWidget?.startsWith("pac::")) {
+            const pac = game.pacWidgets?.find(p => p.id === window.specialWidget?.slice(5))
+            if (pac) images.push(pac.background, ...pac.zones.map(zone => zone.image))
+        }
+    }
+
+    function destination(pos: UiObjectId | undefined, enteringLocation = false) {
+        if (!pos) return
+        if (pos.kind === "window") return windowImages(pos)
+        if (pos.kind === "chardialog") {
+            const char = getChar(game, pos.char)
+            imageList(char?.avatar)
+            imageList(char?.dialog?.background)
+            return
+        }
+        const loc = getLoc(game, pos.location)
+        if (!loc) return
+        imageList(loc.backgrounds)
+        images.push(loc.thumbnail)
+        for (const uid of loc.routes ?? []) images.push(getLoc(game, uid)?.thumbnail)
+        if (enteringLocation && loc.eventHosts != null) {
+            const hosts = getLocEventHosts(loc)
+            for (const event of game.events ?? []) {
+                if (event.link && event.targets.some(host => hosts.includes(host))) windowImages(event.link)
+            }
+        }
+    }
+
+    function direction(dir: DialogLinkDirection) {
+        switch (dir.type) {
+            case LinkType.Local:
+                if (current.kind === "window" && dir.direction) destination({ ...current, window: dir.direction })
+                break
+            case LinkType.Jump:
+            case LinkType.Push:
+            case LinkType.ResetJump:
+                destination(dir.qualifiedDirection)
+                break
+            case LinkType.TalkToPerson:
+                if (dir.direction) destination({ kind: "chardialog", char: dir.direction })
+                break
+            case LinkType.NavigateToLocation:
+                if (dir.direction) destination({ kind: "location", location: dir.direction }, true)
+                break
+            case LinkType.Pop:
+            case LinkType.Return:
+                destination(backDestination(state, dir.type)?.position)
+                break
+        }
+    }
+
+    function links(list: DialogLink[] = []) {
+        for (const link of list) {
+            direction(link.mainDirection)
+            link.alternativeDirections?.forEach(direction)
+        }
+    }
+
     if (current.kind === "window") {
-        const dialog = game.dialogs.find(d => d.name === current.dialog)
-        const window = dialog?.windows.find(w => w.uid === current.window)
-        if (window) collectFromLinks(game, state, window.links, current.dialog, out)
+        const window = tryGetDialogWindowById(game, current)?.[1]
+        links(window?.links)
+        if (window?.specialWidget?.startsWith("pac::")) {
+            const pac = game.pacWidgets?.find(p => p.id === window.specialWidget?.slice(5))
+            for (const zone of pac?.zones ?? []) {
+                if (zoneHasNavigation(zone)) links([zoneAsDialogLink(zone)])
+            }
+        }
     } else if (current.kind === "location") {
         const loc = getLoc(game, current.location)
-        if (loc) {
-            for (const routeUid of loc.routes) {
-                const target = getLoc(game, routeUid)
-                if (target) {
-                    collectImageList(target.backgrounds, out)
-                    if (target.thumbnail) out.push(target.thumbnail)
-                }
-            }
-            collectFromLinks(game, state, loc.links, "", out)
-        }
+        links(loc?.links)
+        for (const uid of loc?.routes ?? []) destination({ kind: "location", location: uid }, true)
     } else if (current.kind === "chardialog") {
-        const char = getChar(game, current.char)
-        if (char?.dialog) collectFromLinks(game, state, char.dialog.links, char.uid, out)
-    }
-
-    return [...new Set(out.filter(Boolean))]
-}
-
-function collectFromLinks(game: GameDescription, state: State, links: DialogLink[], currentDialog: string, out: string[]) {
-    for (const link of links) {
-        collectFromDirection(game, state, link.mainDirection, currentDialog, out)
-        for (const alt of link.alternativeDirections) {
-            collectFromDirection(game, state, alt, currentDialog, out)
+        const dialog = getChar(game, current.char)?.dialog
+        links(dialog?.links)
+        for (const reaction of dialog?.behavior?.reactions ?? []) {
+            if (reaction.dialogWindow) windowImages(reaction.dialogWindow)
         }
     }
-}
 
-function collectFromDirection(game: GameDescription, state: State, dir: DialogLinkDirection, currentDialog: string, out: string[]) {
-    switch (dir.type) {
-        case LinkType.Local: {
-            const dialog = game.dialogs.find(d => d.name === currentDialog)
-            const target = dialog?.windows.find(w => w.uid === dir.direction)
-            if (target) collectWindowImages(game, state, target, out)
-            break
-        }
-        case LinkType.Push:
-        case LinkType.Jump:
-        case LinkType.ResetJump: {
-            const qd = dir.qualifiedDirection
-            if (qd) {
-                const dialog = game.dialogs.find(d => d.name === qd.dialog)
-                const target = dialog?.windows.find(w => w.uid === qd.window)
-                if (target) collectWindowImages(game, state, target, out)
-            }
-            break
-        }
-        case LinkType.NavigateToLocation: {
-            const loc = getLoc(game, dir.direction ?? "")
-            if (loc) {
-                collectImageList(loc.backgrounds, out)
-                if (loc.thumbnail) out.push(loc.thumbnail)
-            }
-            break
-        }
-        case LinkType.TalkToPerson: {
-            collectCharImages(game, dir.direction ?? "", out)
-            break
-        }
-        case LinkType.Pop:
-        case LinkType.Return: {
-            // best-effort: preload the position we'd return to (top of the stack)
-            const top = state.positionStack[state.positionStack.length - 1]
-            if (top) collectPositionImages(game, state, top, out)
-            break
-        }
+    const inventory = new Set((state.carriedItems ?? []).map(item => item.item))
+    const latestItem = state.notifications?.at(-1)?.item
+    if (latestItem) inventory.add(latestItem)
+    for (const item of game.items ?? []) {
+        if (inventory.has(item.uid)) images.push(item.thumbnail, item.image)
     }
-}
-
-function collectPositionImages(game: GameDescription, state: State, pos: UiObjectId, out: string[]) {
-    if (pos.kind === "window") {
-        const dialog = game.dialogs.find(d => d.name === pos.dialog)
-        const target = dialog?.windows.find(w => w.uid === pos.window)
-        if (target) collectWindowImages(game, state, target, out)
-    } else if (pos.kind === "location") {
-        const loc = getLoc(game, pos.location)
-        if (loc) collectImageList(loc.backgrounds, out)
-    } else if (pos.kind === "chardialog") {
-        collectCharImages(game, pos.char, out)
-    }
-}
-
-function collectWindowImages(game: GameDescription, state: State, window: DialogWindow, out: string[]) {
-    collectImageList(window.backgrounds, out)
-    const actor = window.actor
-    if (actor) {
-        const charUid = actor.currentCharacter ? (state.charDialog ?? "") : actor.character
-        const char = getChar(game, charUid)
-        if (char) collectImageList(char.avatar, out)
-    }
-}
-
-function collectCharImages(game: GameDescription, charUid: string, out: string[]) {
-    const char = getChar(game, charUid)
-    if (!char) return
-    collectImageList(char.avatar, out)
-    if (char.dialog) collectImageList(char.dialog.background, out)
-}
-
-function collectImageList(list: ImageList | undefined, out: string[]) {
-    if (!list) return
-    if (list.main) out.push(list.main)
-    for (const entry of list.list) {
-        if (entry.uri) out.push(entry.uri)
-    }
+    return images
 }

@@ -1,0 +1,388 @@
+{
+  "engineVersion": "0.21",
+  "buildVersion": 1,
+  "general": {
+    "name": "Town example",
+    "version": "0.1.0",
+    "authors": [
+      "docs"
+    ],
+    "extras": {},
+    "description": "Example for the game-creator-docs: locations and characters end to end."
+  },
+  "startMenu": {},
+  "dialogs": [
+    {
+      "name": "main",
+      "windows": [
+        {
+          "uid": "start",
+          "text": {
+            "main": "You wake up in a small town with an empty pocket and a curious mind.\n---\nThe square is just outside.",
+            "list": []
+          },
+          "links": [
+            {
+              "mainDirection": {
+                "type": "tolocation",
+                "direction": "square"
+              },
+              "alternativeDirections": [],
+              "text": "Step into the square"
+            }
+          ],
+          "backgrounds": {
+            "list": []
+          },
+          "tags": [],
+          "specialWidget": null,
+          "entryScript": "rt.props.hasKey = false; rt.props.visits = 0"
+        },
+        {
+          "uid": "pigeons",
+          "text": {
+            "main": "A cloud of pigeons erupts from the fountain and the whole square forgets what it was doing.",
+            "list": []
+          },
+          "links": [
+            {
+              "mainDirection": {
+                "type": "pop",
+                "direction": ""
+              },
+              "alternativeDirections": [],
+              "text": "Carry on"
+            }
+          ],
+          "backgrounds": {
+            "list": []
+          },
+          "tags": [],
+          "specialWidget": null
+        },
+        {
+          "uid": "gate_story",
+          "text": {
+            "main": "The baker lowers her voice. \"The old gate? My brother kept the key under the third loaf.\"\n\nShe slides a small iron key across the counter.",
+            "list": []
+          },
+          "links": [
+            {
+              "mainDirection": {
+                "type": "pop",
+                "direction": ""
+              },
+              "alternativeDirections": [],
+              "text": "Take the key",
+              "actionCode": "rt.props.hasKey = true"
+            }
+          ],
+          "backgrounds": {
+            "list": []
+          },
+          "tags": [],
+          "specialWidget": null
+        },
+        {
+          "uid": "the_end",
+          "text": {
+            "main": "The gate swings open on a quiet road that goes somewhere else.\n\nTHE END",
+            "list": []
+          },
+          "links": [
+            {
+              "mainDirection": {
+                "type": "resetjump",
+                "qualifiedDirection": {
+                  "kind": "window",
+                  "dialog": "main",
+                  "window": "start"
+                }
+              },
+              "alternativeDirections": [],
+              "text": "Play again"
+            }
+          ],
+          "backgrounds": {
+            "list": []
+          },
+          "tags": [],
+          "specialWidget": null
+        }
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "uid": "bread_rumour",
+      "short": "The bakery's bread is famous",
+      "full": "People say the bakery's bread beats the capital's.",
+      "discussable": true
+    }
+  ],
+  "chars": [
+    {
+      "uid": "baker",
+      "displayName": {
+        "main": "Baker",
+        "list": []
+      },
+      "description": {
+        "main": "Bakes before sunrise and knows everyone's business.",
+        "list": []
+      },
+      "traits": [],
+      "props": [
+        {
+          "name": "mood",
+          "datatype": "string",
+          "defaultValue": "cheerful"
+        }
+      ],
+      "overrideProps": [],
+      "roles": [
+        "shopkeeper"
+      ],
+      "avatar": {
+        "list": []
+      },
+      "discussable": true,
+      "dialog": {
+        "text": {
+          "main": "\"Fresh today,\" says the baker. \"What'll it be?\"",
+          "list": [
+            {
+              "name": "again",
+              "text": "\"You again,\" says the baker, not unkindly."
+            }
+          ]
+        },
+        "chooseTextScript": "return rt.props.talked ? 'again' : null",
+        "background": {
+          "list": []
+        },
+        "eventHosts": null,
+        "behavior": {
+          "speakingModel": {
+            "agree": [
+              "ok"
+            ],
+            "deny": [
+              "no"
+            ],
+            "bye": [
+              "bye"
+            ],
+            "hello": [
+              "hello"
+            ],
+            "dontKnowObject": [
+              "\"Never heard of it.\"",
+              "\"Ask someone else.\""
+            ],
+            "dontKnowChar": [
+              "\"Don't know them.\""
+            ]
+          },
+          "reactions": [
+            {
+              "trigger": {
+                "facts": [
+                  "bread_rumour"
+                ],
+                "chars": [],
+                "items": [],
+                "places": []
+              },
+              "reply": "\"Ha! Everybody says that, nobody pays for it.\""
+            },
+            {
+              "trigger": {
+                "facts": [],
+                "chars": [],
+                "items": [],
+                "places": [
+                  "gate"
+                ]
+              },
+              "reply": "",
+              "dialogWindow": {
+                "kind": "window",
+                "dialog": "main",
+                "window": "gate_story"
+              }
+            }
+          ]
+        },
+        "links": [
+          {
+            "mainDirection": {
+              "type": "reply",
+              "replyText": "\"They say the bread here is better than in the capital.\""
+            },
+            "alternativeDirections": [],
+            "text": "Listen to the gossip",
+            "actionCode": "rt.facts.bread_rumour.know(); rt.props.talked = true"
+          },
+          {
+            "mainDirection": {
+              "type": "return",
+              "direction": ""
+            },
+            "alternativeDirections": [],
+            "text": "Leave"
+          }
+        ]
+      }
+    }
+  ],
+  "roles": [
+    {
+      "name": "shopkeeper",
+      "description": "Sells things",
+      "props": [
+        {
+          "name": "openHours",
+          "datatype": "string",
+          "defaultValue": "6-18"
+        }
+      ]
+    }
+  ],
+  "locs": [
+    {
+      "uid": "square",
+      "displayName": "Town square",
+      "backgrounds": {
+        "list": []
+      },
+      "text": {
+        "main": "A fountain, a bakery with a warm window, and an iron gate at the far end.",
+        "list": []
+      },
+      "goto": [],
+      "routes": [
+        "bakery",
+        "gate"
+      ],
+      "links": [],
+      "discussable": true,
+      "eventHosts": [],
+      "onEntryScript": "rt.props.visits += 1"
+    },
+    {
+      "uid": "bakery",
+      "displayName": "Bakery",
+      "backgrounds": {
+        "list": []
+      },
+      "text": {
+        "main": "Warm air, flour on every surface.",
+        "list": []
+      },
+      "goto": [],
+      "routes": [
+        "square"
+      ],
+      "links": [
+        {
+          "mainDirection": {
+            "type": "toperson",
+            "direction": "baker"
+          },
+          "alternativeDirections": [],
+          "text": "Talk to the baker"
+        }
+      ],
+      "discussable": true,
+      "eventHosts": []
+    },
+    {
+      "uid": "gate",
+      "displayName": "Old gate",
+      "backgrounds": {
+        "list": []
+      },
+      "text": {
+        "main": "A rusted gate with a keyhole.",
+        "list": []
+      },
+      "goto": [],
+      "routes": [
+        "square"
+      ],
+      "links": [
+        {
+          "mainDirection": {
+            "type": "jump",
+            "qualifiedDirection": {
+              "kind": "window",
+              "dialog": "main",
+              "window": "the_end"
+            }
+          },
+          "alternativeDirections": [],
+          "text": "Unlock the gate"
+        }
+      ],
+      "discussable": true,
+      "eventHosts": [],
+      "isAccessibleScript": "return rt.props.hasKey"
+    }
+  ],
+  "props": [
+    {
+      "name": "hasKey",
+      "datatype": "boolean",
+      "defaultValue": false
+    },
+    {
+      "name": "visits",
+      "datatype": "number",
+      "defaultValue": 0
+    },
+    {
+      "name": "talked",
+      "datatype": "boolean",
+      "defaultValue": false
+    }
+  ],
+  "items": [],
+  "events": [
+    {
+      "name": "pigeons",
+      "highPriority": false,
+      "probability": 15,
+      "targets": [
+        "loc:square"
+      ],
+      "link": {
+        "kind": "window",
+        "dialog": "main",
+        "window": "pigeons"
+      }
+    }
+  ],
+  "eventHosts": [],
+  "objectives": [],
+  "situations": [],
+  "pacWidgets": [],
+  "hooks": [],
+  "functions": [],
+  "uiElements": {
+    "meters": []
+  },
+  "translations": {},
+  "visuals": {},
+  "config": {
+    "assetsPath": ""
+  },
+  "dev": {
+    "basicPromptSuffix": ""
+  },
+  "startupDialog": {
+    "kind": "window",
+    "dialog": "main",
+    "window": "start"
+  }
+}
