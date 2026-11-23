@@ -163,6 +163,14 @@ class GameEditingTest(unittest.TestCase):
         rev = self.tool("browse_field", **args)["decoded"]["revision"]
         add = {"op": "add", "path": "/-", "value": {"name": "main", "windows": []}}
         self.assertFalse(self.tool("patch_field", **args, revision=rev, operations=[add])["isError"])
+        # startupDialog is seeded in the engine's DialogWindowId shape and stays strict.
+        self.assertEqual(game["startupDialog"], {"kind": "window", "dialog": "", "window": ""})
+        args = {"project": "fresh", "plane": "config", "field": "startupDialog"}
+        rev = self.tool("browse_field", **args)["decoded"]["revision"]
+        legacy = {"op": "replace", "path": "", "value": {"dialogName": "main", "windowUid": "start"}}
+        self.assertTrue(self.tool("patch_field", **args, revision=rev, operations=[legacy])["isError"])
+        good = {"op": "replace", "path": "", "value": {"kind": "window", "dialog": "main", "window": "start"}}
+        self.assertFalse(self.tool("patch_field", **args, revision=rev, operations=[good])["isError"])
         # Existing, traversal and dotfile names are refused.
         for bad in ("fresh", "../x", "a/b", ".hidden", "  "):
             self.assertTrue(self.tool("create_project", project=bad)["isError"], bad)

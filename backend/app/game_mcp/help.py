@@ -80,10 +80,21 @@ SCRIPTS.update(
 )
 
 
+_WINDOW_ID_NOTE = (
+    "Write exactly {kind:'window', dialog:<dialog name>, window:<window uid>}. "
+    "Never {dialogName, windowUid}: older games may still hold that legacy shape, which fails to start "
+    "with 'Cannot find UI widget'. patch_field rejects it; replace the whole startupDialog field (path '') "
+    "and start_game once to verify."
+)
+SCHEMA_NOTES = {"startupDialog": _WINDOW_ID_NOTE, "DialogWindowId": _WINDOW_ID_NOTE}
+
+
 def help_entry(group, topic):
     entries = {"link": LINKS, "script": SCRIPTS, "schema": {**FIELDS, **DEFINITIONS}}[group]
     if not topic:
         return sorted(k for k in entries if k != "GameDescription")
     if topic not in entries or topic == "GameDescription":
         raise ValueError("Unknown topic. Omit topic for the index.")
+    if group == "schema" and topic in SCHEMA_NOTES:
+        return {**entries[topic], "note": SCHEMA_NOTES[topic]}
     return entries[topic]

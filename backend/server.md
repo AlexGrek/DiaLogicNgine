@@ -22,7 +22,7 @@ On startup the app runs `auth.ensure_root_and_migrate()` (see [Migration](#migra
 
 ## Editor MCP
 
-Connect a Streamable HTTP client to `http://localhost:4267/mcp` for local development. For a deployment, set `MCP_PUBLIC_URL` to the external HTTPS origin (for example, `https://editor.example.org`) and preserve its Host header at the reverse proxy. The backend serves MCP, OAuth and discovery on that origin.
+The repo's `.mcp.json` connects Claude Code to the deployed servers only (`${DIALOGIC_MCP_URL}/mcp` for editing, `${DIALOGIC_MCP_URL}/play-mcp` for playing) via OAuth; set `DIALOGIC_MCP_URL` to the deployment origin (no trailing slash) in your shell environment. There are no localhost MCP entries. Connect a Streamable HTTP client to `http://localhost:4267/mcp` for local development. For a deployment, set `MCP_PUBLIC_URL` to the external HTTPS origin (for example, `https://editor.example.org`) and preserve its Host header at the reverse proxy. The backend serves MCP, OAuth and discovery on that origin.
 
 Configure `MCP_API_KEYS` in the backend environment or `backend/.env` as a JSON object mapping **existing editor usernames** to separate random secrets. Generate a key with `openssl rand -hex 32`, then set the variable and restart the backend. For example, the value has the shape `{"alice":"<generated secret>"}`. Each key grants editing access to the projects owned by that account.
 
@@ -84,6 +84,7 @@ Connect a Streamable HTTP client to `http://localhost:4267/play-mcp` for local d
 - **Discovery & library:** `list_available_games`, `list_saved_games`, `list_recently_played`, `list_sessions`
 - **Session & saves:** `start_game`, `resume_session`, `delete_session`, `save_checkpoint`, `list_checkpoints`, `load_checkpoint`, `delete_checkpoint`
 - **Gameplay & inspection:** `get_state`, `act` (`choose_link` | `continue` | `travel` | `click_zone` | `discuss` | `use_item`), `inspect` (`inventory` | `facts` | `people` | `places` | `objectives` | `history` | `summary`), `view_image` (`scene` | `avatar` | `item` | `route` | `pac_annotated`)
+- **Developer debug (owner-only; the caller must own the project, even if it is published):** `debug_start_game` (new session at any `position` — `{kind:"window",dialog,window}` / `{kind:"location",location}` / `{kind:"chardialog",char}` — skipping the startup entry, then RFC 6902 `operations` on the raw engine `State`, then an `rt` `script`, then the position's entry), `debug_read_state` (any raw `State` value by JSON Pointer, read from the persisted session), `debug_edit_state` (same `operations` → `position` → `script` → `run_entry` pipeline on an existing session; the runner validates state shape and position and throws instead of persisting a broken state, and `load_checkpoint(use_previous_autosave=True)` undoes one edit). Raw `operations` bypass hooks and notifications; `script` goes through the normal runtime and fires them.
 
 ### Building the runner & configuration
 

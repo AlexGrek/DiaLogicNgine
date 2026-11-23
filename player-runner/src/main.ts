@@ -75,6 +75,10 @@ function handleRequest(req: RpcRequest): RpcResponse {
         return { id: req.id, ok: true, result: runner.inspect(req.section) };
       case "load_state":
         return { id: req.id, ok: true, result: runner.loadState(req.state) };
+      case "debug_init":
+        return { id: req.id, ok: true, result: runner.debugInit(req.game, req.position ?? null) };
+      case "debug_apply":
+        return { id: req.id, ok: true, result: runner.debugApply(req.state, req.options ?? {}) };
       default:
         return {
           id: (req as { id?: number }).id ?? 0,

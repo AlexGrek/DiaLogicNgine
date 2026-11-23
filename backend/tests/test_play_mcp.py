@@ -475,6 +475,9 @@ class PlayerMcpTest(unittest.TestCase):
                         "act",
                         "inspect",
                         "view_image",
+                        "debug_start_game",
+                        "debug_read_state",
+                        "debug_edit_state",
                     },
                 )
 
@@ -745,3 +748,88 @@ class PlayerMcpTest(unittest.TestCase):
         recovered = self.tool("act", session_code=code, action="choose_link", index=1, include_image=False)
         self.assertFalse(recovered.get("isError"), recovered)
         self.assertEqual(recovered["decoded"]["scene"]["text"], "Escaped safely")
+
+    def test_debug_tools(self):
+        project = "reactor_debug"
+        game = _rich_adventure_game()
+        game["chars"][0]["dialog"]["behavior"]["speakingModel"] = {
+            "agree": ["Yes."], "deny": ["No."], "bye": ["Bye."], "hello": ["Hi."],
+            "dontKnowObject": ["Never seen it."], "dontKnowChar": ["Who?"],
+        }
+        self.alice_http.put(f"/api/v1/projects/{project}/game", json=game).raise_for_status()
+        self.alice_http.post(f"/api/v1/projects/{project}/publish", json={"published": True}).raise_for_status()
+
+        # Start straight in the lab with a prepared state; the startup entry (key/clue/quest) is skipped.
+        started = self.tool(
+            "debug_start_game",
+            project=project,
+            position={"kind": "location", "location": "lab"},
+            operations=[
+                {"op": "add", "path": "/props/energy", "value": 5},
+                {"op": "add", "path": "/carriedItems/-", "value": {"item": "key", "quantity": 2}},
+            ],
+            script="rt.facts.clue.know()",
+            include_image=False,
+        )
+        self.assertFalse(started.get("isError"), started)
+        turn = started["decoded"]
+        code = turn["session_code"]
+        self.assertEqual(turn["widget"], "location")
+        self.assertEqual(turn["scene"]["location"]["uid"], "lab")
+        self.assertEqual(turn["hud"][0]["value"], 5)
+        self.assertEqual(turn["counts"]["items"], 1)
+        self.assertEqual(turn["counts"]["facts"], 1)
+        self.assertEqual(turn["counts"]["open_quests"], 0)  # startup entry never ran
+
+        read = lambda path: self.tool("debug_read_state", session_code=code, path=path)  # noqa: E731
+        self.assertEqual(read("/props/energy")["decoded"]["value"], 5)
+        self.assertEqual(read("/carriedItems/0/quantity")["decoded"]["value"], 2)
+        self.assertEqual(read("/knownPlaces")["decoded"]["value"], ["lab", "square"])
+        self.assertTrue(read("/nope/deeper")["isError"])
+
+        # Edit any value, then teleport into the character conversation.
+        edited = self.tool(
+            "debug_edit_state",
+            session_code=code,
+            operations=[{"op": "replace", "path": "/props/energy", "value": 42}],
+            position={"kind": "chardialog", "char": "guide"},
+            include_image=False,
+        )
+        self.assertFalse(edited.get("isError"), edited)
+        self.assertEqual(edited["decoded"]["widget"], "char")
+        self.assertEqual(edited["decoded"]["hud"][0]["value"], 42)
+
+        # No reaction for a place: the character's own speakingModel line, not "No reaction".
+        reply = self.tool(
+            "act", session_code=code, action="discuss", topic_type="loc", target_id="lab", include_image=False
+        )
+        self.assertFalse(reply.get("isError"), reply)
+        self.assertEqual(reply["decoded"]["scene"]["text"], "Never seen it.")
+
+        # Bad edits fail loudly and leave the saved state untouched.
+        for bad in (
+            {"position": {"kind": "window", "dialog": "intro", "window": "missing"}},
+            {"position": {"dialogName": "intro", "windowUid": "start"}},
+            {"script": "throw new Error('boom')"},
+            {"operations": [{"op": "replace", "path": "/carriedItems", "value": "junk"}]},
+            {"operations": [{"op": "remove", "path": "/missing"}]},
+            {},
+        ):
+            self.assertTrue(self.tool("debug_edit_state", session_code=code, **bad)["isError"], bad)
+        self.assertEqual(read("/props/energy")["decoded"]["value"], 42)
+        self.assertEqual(read("/position/kind")["decoded"]["value"], "chardialog")
+
+        # Undo the last successful edit via the 1-step autosave.
+        undone = self.tool("load_checkpoint", session_code=code, use_previous_autosave=True, include_image=False)
+        self.assertFalse(undone.get("isError"), undone)
+
+        # Owner-only: Boris can play Alice's published game but cannot debug it.
+        self.assertTrue(self.tool("debug_start_game", headers=self.boris_headers, project=project)["isError"])
+        boris = self.tool("start_game", headers=self.boris_headers, project=project, include_image=False)
+        self.assertFalse(boris.get("isError"), boris)
+        boris_code = boris["decoded"]["session_code"]
+        for name, args in (
+            ("debug_read_state", {"path": "/props"}),
+            ("debug_edit_state", {"script": "rt.props.energy = 100"}),
+        ):
+            self.assertTrue(self.tool(name, headers=self.boris_headers, session_code=boris_code, **args)["isError"])

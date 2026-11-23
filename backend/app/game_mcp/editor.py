@@ -26,6 +26,9 @@ PLANES = {
 }
 DEFINITIONS = json.loads(Path(__file__).with_name("schema.json").read_text())["definitions"]
 FIELDS = DEFINITIONS["GameDescription"]["properties"]
+# Small atomic fields that must always be fully valid: no grandfathering of legacy
+# shapes (a legacy {dialogName, windowUid} startupDialog stops the game from starting).
+STRICT_FIELDS = {"startupDialog"}
 MAX_FRAGMENT = 12000
 
 
@@ -88,7 +91,7 @@ def create_game(project, user, title="", description=""):
             "visuals": {},
             "config": {"assetsPath": ""},
             "dev": {"basicPromptSuffix": ""},
-            "startupDialog": {"dialogName": "", "windowUid": ""},
+            "startupDialog": {"kind": "window", "dialog": "", "window": ""},
         }
         projects.persist_game(name, user, game, encoded(game))
     return {"project": name}
@@ -158,7 +161,9 @@ def patch(project, user, plane, field, expected_revision, operations):
         def diagnostic(error):
             return (error.json_path, tuple(error.absolute_schema_path), error.message)
 
-        previous_errors = {diagnostic(err) for err in validator.iter_errors(value)}
+        previous_errors = (
+            set() if field in STRICT_FIELDS else {diagnostic(err) for err in validator.iter_errors(value)}
+        )
         # Work only on this in-memory field. Discard it if any operation fails.
         for i, op in enumerate(operations):
             if op.get("op") not in ("add", "remove", "replace", "move", "copy", "test"):

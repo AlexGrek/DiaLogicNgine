@@ -213,14 +213,22 @@ class SessionProcessPool:
         for worker in evicted:
             await worker.close()
 
-    async def spawn_new(self, project: str, game: dict) -> tuple[DenoWorker, dict]:
-        """Spawn and initialize a brand-new Deno worker before persisting its session."""
+    async def spawn_new(
+        self, project: str, game: dict, *, op: str = "init", **params
+    ) -> tuple[DenoWorker, dict]:
+        """Spawn and initialize a brand-new Deno worker before persisting its session.
+
+        ``op`` is ``init`` for a normal start, or ``debug_init`` for a developer start
+        (initial state without running the startup entry).
+        """
         await self.evict_idle()
         await self._evict_if_full()
         worker = DenoWorker(project)
         await worker.start()
         try:
-            result = await worker.call("init", game=game, state=None)
+            if op == "init":
+                params.setdefault("state", None)
+            result = await worker.call(op, game=game, **params)
         except Exception:
             await worker.close(force=True)
             raise

@@ -2,7 +2,7 @@ import { trace } from "../Trace";
 import { CharacterDialog, Reaction } from "../game/Character";
 import { LinkType, createDialogLink } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
-import { GameExecManager } from "./GameExecutor";
+import { DiscussionTopicType, GameExecManager } from "./GameExecutor";
 import { State } from "./GameState";
 
 export default class DiscussionProcessor {
@@ -14,10 +14,20 @@ export default class DiscussionProcessor {
         this.game = exec.game
     }
 
-    unknownReaction() {
+    /**
+     * Fallback reply when no reaction matches: one of the character's own
+     * speakingModel "don't know" lines (dontKnowChar for people, dontKnowObject
+     * for facts/items/places), or "No reaction" if the model has none.
+     */
+    unknownReaction(char?: CharacterDialog, category?: DiscussionTopicType) {
+        const model = char?.behavior?.speakingModel
+        const variants = (category === "char" ? model?.dontKnowChar : model?.dontKnowObject) ?? []
+        const lines = variants.filter(v => v && v.trim())
         const link = createDialogLink()
         link.mainDirection.type = LinkType.QuickReply
-        link.mainDirection.replyText = "No reaction"
+        link.mainDirection.replyText = lines.length > 0
+            ? lines[Math.floor(Math.random() * lines.length)]
+            : "No reaction"
         return link
     }
 
@@ -63,7 +73,7 @@ export default class DiscussionProcessor {
         }, reacts, state)
 
         if (!reaction)
-            return this.unknownReaction();
+            return this.unknownReaction(char, "char");
 
         return this.returnReaction(reaction)
     }
@@ -75,7 +85,7 @@ export default class DiscussionProcessor {
         }, reacts, state)
 
         if (!reaction)
-            return this.unknownReaction();
+            return this.unknownReaction(char, "fact");
 
         return this.returnReaction(reaction)
     }
@@ -87,7 +97,7 @@ export default class DiscussionProcessor {
         }, reacts, state)
 
         if (!reaction)
-            return this.unknownReaction();
+            return this.unknownReaction(char, "loc");
 
         return this.returnReaction(reaction)
     }
@@ -99,7 +109,7 @@ export default class DiscussionProcessor {
         }, reacts, state)
 
         if (!reaction)
-            return this.unknownReaction();
+            return this.unknownReaction(char, "item");
 
         return this.returnReaction(reaction)
     }

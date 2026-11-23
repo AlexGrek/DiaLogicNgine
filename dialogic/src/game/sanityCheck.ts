@@ -239,8 +239,18 @@ export function runSanityCheck(
     }
 
     // ── Startup dialog ──
-    if (game.startupDialog) {
-        checkWindowTarget(game.startupDialog.dialog, game.startupDialog.window, "Startup dialog", "Startup dialog");
+    // The engine only renders {kind: "window", dialog, window}; anything else
+    // (e.g. a legacy {dialogName, windowUid}) makes the game fail on start.
+    const startup = game.startupDialog as Partial<typeof game.startupDialog> | undefined;
+    if (!startup || startup.kind !== "window") {
+        add({
+            category: "link",
+            severity: "error",
+            message: `Startup dialog is malformed (expected {kind: "window", dialog, window}, got ${JSON.stringify(startup ?? null)}); the game cannot start`,
+            location: "Startup dialog",
+        });
+    } else {
+        checkWindowTarget(startup.dialog, startup.window, "Startup dialog", "Startup dialog");
     }
 
     // ── Events ──

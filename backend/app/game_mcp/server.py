@@ -29,7 +29,7 @@ security = TransportSecuritySettings(
 )
 mcp = FastMCP(
     "DiaLogicNgine Editor",
-    instructions="List your projects (or create_project a new empty one) and editor planes. Browse a field, read a narrow JSON Pointer, then patch using the returned revision. Ask editor_help for individual schema, link or script topics.",
+    instructions="List your projects (or create_project a new empty one) and editor planes. Browse a field, read a narrow JSON Pointer, then patch using the returned revision. Ask editor_help for individual schema, link or script topics. startupDialog must be {kind:'window', dialog, window} - never {dialogName, windowUid}.",
     stateless_http=True,
     json_response=True,
     transport_security=security,
@@ -50,7 +50,7 @@ async def list_projects(page: Annotated[int, Field(ge=1)] = 1) -> dict:
 def create_project(
     project: Annotated[str, Field(min_length=1, max_length=64)], title: str = "", description: str = ""
 ) -> dict:
-    """Create a new empty game owned by this account. Fails if the name is taken. Then patch dialogs, locs, chars, startupDialog etc. to fill it."""
+    """Create a new empty game owned by this account. Fails if the name is taken. Then patch dialogs, locs, chars, startupDialog etc. to fill it. Point startupDialog at a real window: replace path "" with {"kind":"window","dialog":<dialog name>,"window":<window uid>}."""
     return editor.create_game(project, principal.get(), title, description)
 
 

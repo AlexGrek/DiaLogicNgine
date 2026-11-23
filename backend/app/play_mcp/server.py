@@ -6,6 +6,8 @@ from typing import Annotated, Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI
+from jsonpatch import JsonPatch, JsonPatchException
+from jsonpointer import JsonPointer, JsonPointerException
 from mcp.server.fastmcp import FastMCP, Image
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ImageContent, TextContent
@@ -31,7 +33,9 @@ mcp = FastMCP(
         "or continue an existing one with resume_session using its session_code. Read the returned scene "
         "text, image, HUD, and action variants, then advance the game with act. Every turn is automatically "
         "saved; use save_checkpoint/load_checkpoint for named save slots and inspect for inventory, facts, "
-        "people, places, and quests."
+        "people, places, and quests. For developing your OWN games: debug_start_game starts at any "
+        "window/location/character with a prepared state, debug_read_state reads any raw engine state "
+        "value, and debug_edit_state patches any state value, runs an rt script or teleports."
     ),
     streamable_http_path="/play-mcp",
     stateless_http=True,
@@ -476,6 +480,139 @@ async def view_image(
     if img is None:
         raise ValueError("Image asset could not be loaded")
     return img
+
+
+# ── Developer debug tools (owner-only) ───────────────────────────────────────
+
+Position = dict | None
+MAX_DEBUG_READ = 24_000
+MAX_DEBUG_OPS = 64
+
+
+def _patched_state(state: dict, operations: list[dict]) -> dict:
+    """Apply an RFC 6902 batch to a raw engine State; all-or-nothing."""
+    if not operations:
+        return state
+    if len(operations) > MAX_DEBUG_OPS:
+        raise ValueError(f"Send at most {MAX_DEBUG_OPS} operations")
+    for i, op in enumerate(operations):
+        if not isinstance(op, dict) or op.get("op") not in ("add", "remove", "replace", "move", "copy", "test"):
+            raise ValueError(f"Operation {i} is not a valid JSON Patch operation")
+        try:
+            state = JsonPatch([op]).apply(state, in_place=False)
+        except (JsonPatchException, JsonPointerException, TypeError, KeyError, IndexError) as exc:
+            raise ValueError(f"Operation {i} failed ({exc}). Read the state with debug_read_state first.") from None
+    if not isinstance(state, dict):
+        raise ValueError("The patched state must stay an object")
+    return state
+
+
+def _owned_session(owner: str, session_code: str) -> dict:
+    session = store.require_session(owner, session_code)
+    catalog.load_owned_game(session["project"], owner)
+    return session
+
+
+@mcp.tool(structured_output=False)
+async def debug_start_game(
+    project: str,
+    position: Position = None,
+    operations: list[dict] | None = None,
+    script: str = "",
+    run_entry: bool = True,
+    title: str = "",
+    include_image: bool = True,
+) -> list[TextContent | ImageContent]:
+    """DEV/DEBUG, own games only. Start a new session at any place with a prepared state, skipping the startup entry.
+
+    Order: fresh initial state at `position` -> JSON Patch `operations` on the raw State
+    -> `script` (JS body with rt, fires hooks/notifications) -> enter `position` (its entry
+    script/background) if run_entry. The result is an ordinary session: play it with act.
+
+    - position: {"kind":"window","dialog":..,"window":..} | {"kind":"location","location":uid}
+      | {"kind":"chardialog","char":uid}. Omit for the game's startupDialog.
+    - operations: RFC 6902 on the State, e.g. {"op":"add","path":"/props/gold","value":50},
+      {"op":"add","path":"/carriedItems/-","value":{"item":"key","quantity":1}},
+      {"op":"add","path":"/knownFacts/-","value":"clue"}. Raw edits bypass hooks.
+    - script: e.g. "rt.items.add('key', 1); rt.facts.clue.know(); rt.objectives.main.q.t.open()".
+    """
+    owner = principal.get()
+    game = catalog.load_owned_game(project, owner)
+    worker, init = await pool.spawn_new(project, game, op="debug_init", position=position)
+    try:
+        state = _patched_state(init["state"], operations or [])
+        result = await worker.call(
+            "debug_apply", state=state, options={"script": script, "run_entry": run_entry}
+        )
+        record = store.create_session(
+            owner, project, title or f"[debug] {project}", result["state"], result["turn"]
+        )
+    except Exception:
+        await worker.close(force=True)
+        raise
+    await pool.register(owner, record["session_code"], worker)
+    return _turn_content(
+        record["session_code"], project, result["turn"], include_image=include_image, title=record["title"]
+    )
+
+
+@mcp.tool()
+def debug_read_state(session_code: str, path: str = "") -> dict:
+    """DEV/DEBUG, own games only. Read any raw engine State value by JSON Pointer ("" = whole state).
+
+    Useful paths: /position, /props, /props/<name>, /carriedItems, /knownFacts, /knownPeople,
+    /knownPlaces, /progress, /positionStack, /situation, /stepCount, /happenedEvents,
+    /visitedDialogs, /visitedLocations, /shortHistory, /fatalError.
+    """
+    owner = principal.get()
+    session = _owned_session(owner, session_code)
+    state = json.loads(session["state_json"])
+    try:
+        value = JsonPointer(path).resolve(state) if path else state
+    except JsonPointerException:
+        raise ValueError(f"No state value at '{path}'. Read '' or a parent path to see what exists.") from None
+    encoded = json.dumps(value, ensure_ascii=False)
+    if len(encoded) > MAX_DEBUG_READ:
+        keys = sorted(value.keys()) if isinstance(value, dict) else f"array of {len(value)}"
+        raise ValueError(f"Value at '{path or '/'}' is too large ({len(encoded)} chars). Read a child path; children: {keys}")
+    return {"session_code": session_code, "path": path, "value": value}
+
+
+@mcp.tool(structured_output=False)
+async def debug_edit_state(
+    session_code: str,
+    operations: list[dict] | None = None,
+    script: str = "",
+    position: Position = None,
+    run_entry: bool | None = None,
+    include_image: bool = True,
+) -> list[TextContent | ImageContent]:
+    """DEV/DEBUG, own games only. Edit any state value of a session, run a script, or teleport.
+
+    Order: JSON Patch `operations` on the raw State -> move to `position` -> `script`
+    (JS body with rt, fires hooks) -> run the position's entry if run_entry (default: only
+    when position is given). The previous state stays available via
+    load_checkpoint(use_previous_autosave=True) to undo one edit.
+    """
+    owner = principal.get()
+    if not operations and not script.strip() and position is None and not run_entry:
+        raise ValueError("Nothing to do: pass operations, script, position or run_entry=True")
+    async with pool.session_lock(owner, session_code):
+        session = _owned_session(owner, session_code)
+        state = _patched_state(json.loads(session["state_json"]), operations or [])
+        worker, _ = await _ensure_session_worker(owner, session)
+        options = {"position": position, "script": script}
+        if run_entry is not None:
+            options["run_entry"] = run_entry
+        try:
+            result = await worker.call("debug_apply", state=state, options=options)
+        except Exception:
+            await pool.drop_if_dead(owner, session_code, worker)
+            raise
+        store.update_session_turn(owner, session_code, result["state"], result["turn"])
+    return _turn_content(
+        session_code, session["project"], result["turn"], include_image=include_image, title=session["title"]
+    )
 
 
 # ── Authenticated ASGI mount ─────────────────────────────────────────────────

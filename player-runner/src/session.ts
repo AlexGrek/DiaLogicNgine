@@ -3,6 +3,7 @@ import {
   HistoryRecord,
   InGameNotification,
   State,
+  UiObjectId,
   createInitialState,
   getVisitedLocations,
 } from "../../dialogic/src/exec/GameState";
@@ -28,6 +29,7 @@ import { loadJsonStringAndPatch } from "../../dialogic/src/game/Patches";
 import { createTranslations } from "../../dialogic/src/exec/Localization";
 import type {
   ActPayload,
+  DebugApplyOptions,
   DiscussTopicItem,
   InspectFactItem,
   InspectInventoryItem,
@@ -98,6 +100,49 @@ function serializeLinks(links: RenderLink[]): TurnLink[] {
   }));
 }
 
+const STATE_ARRAYS = [
+  "positionStack",
+  "positionHistory",
+  "shortHistory",
+  "knownFacts",
+  "knownPeople",
+  "knownPlaces",
+  "notifications",
+  "carriedItems",
+  "happenedEvents",
+] as const;
+
+/** Cheap structural guard so a bad debug patch fails loudly instead of corrupting a session. */
+function validateStateShape(state: unknown): asserts state is State {
+  if (!state || typeof state !== "object" || Array.isArray(state)) {
+    throw new Error("State must be an object");
+  }
+  const s = state as Record<string, unknown>;
+  if (!s.position || typeof s.position !== "object") {
+    throw new Error("State.position must be an object");
+  }
+  if (!s.props || typeof s.props !== "object" || Array.isArray(s.props)) {
+    throw new Error("State.props must be an object");
+  }
+  if (!s.progress || typeof s.progress !== "object") {
+    throw new Error("State.progress must be an object");
+  }
+  if (typeof s.stepCount !== "number") {
+    throw new Error("State.stepCount must be a number");
+  }
+  for (const key of STATE_ARRAYS) {
+    if (!Array.isArray(s[key])) {
+      throw new Error(`State.${key} must be an array`);
+    }
+  }
+  for (const c of s.carriedItems as unknown[]) {
+    const item = c as Record<string, unknown>;
+    if (!item || typeof item.item !== "string" || typeof item.quantity !== "number") {
+      throw new Error("State.carriedItems entries must be {item: string, quantity: number}");
+    }
+  }
+}
+
 export class GameSessionRunner {
   private game: GameDescription | null = null;
   private exec: GameExecManager | null = null;
@@ -136,6 +181,89 @@ export class GameSessionRunner {
     this.state = savedState;
     this.lastBg = null;
     return { state: this.state, turn: this.buildTurn(null, []) };
+  }
+
+  /**
+   * Developer-only: load the game and build a fresh, NOT yet entered initial
+   * state (startup entry scripts are skipped). The caller then patches it and
+   * finishes with debugApply.
+   */
+  public debugInit(rawGame: unknown, position: UiObjectId | null): { state: State } {
+    this.game = normalizeAndPatchGame(rawGame);
+    this.exec = new GameExecManager(this.game);
+    const initial = createInitialState(this.game);
+    if (position) {
+      initial.position = position;
+    }
+    this.state = initial;
+    this.lastBg = null;
+    return { state: initial };
+  }
+
+  /**
+   * Developer-only: replace the session state with `base` (already patched by
+   * the caller), optionally move to `position`, run `script`, then (optionally)
+   * enter the current position. Throws instead of persisting a broken state.
+   */
+  public debugApply(base: State, options: DebugApplyOptions): TurnResult {
+    const { exec } = this.mustReady();
+    validateStateShape(base);
+    let state: State = JSON.parse(JSON.stringify(base));
+    const prevNotifLen = state.notifications.length;
+    const hadError = Boolean(state.fatalError);
+
+    if (options.position) {
+      state.position = options.position;
+      state.dialogPage = 0;
+      state.quickReplyText = null;
+    }
+    this.requireValidPosition(state);
+    if (state.position.kind === "location") {
+      state.location = state.position.location;
+    } else if (state.position.kind === "chardialog") {
+      state.charDialog = state.position.char;
+    }
+
+    if (options.script && options.script.trim()) {
+      state = exec.modifyStateScript(state, options.script);
+      if (state.fatalError && !hadError) {
+        throw new Error(`Debug script failed: ${state.fatalError.message}`);
+      }
+    }
+    const runEntry = options.run_entry ?? Boolean(options.position);
+    if (runEntry) {
+      state = exec.executeEntry(state);
+      if (state.fatalError && !hadError) {
+        throw new Error(`Entry of ${JSON.stringify(state.position)} failed: ${state.fatalError.message}`);
+      }
+    }
+
+    const newNotifications =
+      state.notifications.length > prevNotifLen ? state.notifications.slice(prevNotifLen) : [];
+    this.state = state;
+    this.lastBg = null;
+    return { state, turn: this.buildTurn(null, newNotifications) };
+  }
+
+  private requireValidPosition(state: State): void {
+    const { exec } = this.mustReady();
+    const pos = state.position as Partial<UiObjectId> & Record<string, unknown>;
+    const shape = JSON.stringify(pos);
+    if (pos.kind === "window") {
+      if (!exec.getCurrentDialogWindow(state)) {
+        throw new Error(`No dialog window ${shape}; expected {kind:'window', dialog, window} of an existing window`);
+      }
+    } else if (pos.kind === "location") {
+      if (!exec.getCurrentLocation(state)) {
+        throw new Error(`No location ${shape}; expected {kind:'location', location:<loc uid>}`);
+      }
+    } else if (pos.kind === "chardialog") {
+      if (!exec.getCurrentCharDialog(state)) {
+        throw new Error(`No character conversation ${shape}; expected {kind:'chardialog', char:<char uid with a dialog>}`);
+      }
+    } else {
+      throw new Error(`Invalid position ${shape}; kind must be 'window', 'location' or 'chardialog'`);
+    }
   }
 
   private getDiscussTopics(state: State, view: CharDialogRenderView): TurnDiscussTopics {

@@ -526,7 +526,7 @@ export class GameExecManager {
         if (!char.dialog) {
             return this.stateError(state, `Error: char ${charUid} has no dialog`)
         }
-        let link = disc.unknownReaction()
+        let link = disc.unknownReaction(char.dialog, category)
         if (category === "char") {
             link = disc.ofChar(id, char.dialog, state)
         }

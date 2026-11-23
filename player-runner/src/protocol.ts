@@ -1,4 +1,4 @@
-import type { InGameNotification, State } from "../../dialogic/src/exec/GameState";
+import type { InGameNotification, State, UiObjectId } from "../../dialogic/src/exec/GameState";
 import type { DiscussionTopicType } from "../../dialogic/src/exec/GameExecutor";
 import type { ProgressRenderView } from "../../dialogic/src/exec/RenderView";
 
@@ -32,7 +32,19 @@ export type RpcRequest =
   | { id: number; op: "render" }
   | { id: number; op: "act"; payload: ActPayload }
   | { id: number; op: "inspect"; section: InspectSection }
-  | { id: number; op: "load_state"; state: State };
+  | { id: number; op: "load_state"; state: State }
+  | { id: number; op: "debug_init"; game: unknown; position?: UiObjectId | null }
+  | { id: number; op: "debug_apply"; state: State; options: DebugApplyOptions };
+
+/** Developer-only state surgery: see GameSessionRunner.debugApply. */
+export interface DebugApplyOptions {
+  /** Move here before the script/entry run; validated against the game. */
+  position?: UiObjectId | null;
+  /** JS body run with the usual (rt, state, ...) runtime; fires hooks/notifications. */
+  script?: string | null;
+  /** Run the current position's entry (entryScript/onEntryScript, background, known places). */
+  run_entry?: boolean;
+}
 
 export interface TurnLink {
   index: number;

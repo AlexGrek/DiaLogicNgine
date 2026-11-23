@@ -51,6 +51,15 @@ def load_playable_game(project: str, user: str) -> tuple[dict, dict]:
     return json.loads(game_path.read_bytes()), meta
 
 
+def load_owned_game(project: str, user: str) -> dict:
+    """Return the game dict only if the caller OWNS the project (debug tools are owner-only)."""
+    game, meta = load_playable_game(project, user)
+    owner = meta.get("owner") or ownership.get_owner(project)
+    if owner != user:
+        raise ValueError(f"Debug tools are limited to games you own; '{project}' is not yours")
+    return game
+
+
 def game_entry(project: str, directory: Path, meta: dict, user: str) -> dict:
     last_modified = meta.get("lastModified")
     if not last_modified and (directory / "game.json").exists():

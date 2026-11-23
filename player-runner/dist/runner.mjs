@@ -9170,10 +9170,18 @@ var DiscussionProcessor = class {
     this.exec = exec;
     this.game = exec.game;
   }
-  unknownReaction() {
+  /**
+   * Fallback reply when no reaction matches: one of the character's own
+   * speakingModel "don't know" lines (dontKnowChar for people, dontKnowObject
+   * for facts/items/places), or "No reaction" if the model has none.
+   */
+  unknownReaction(char, category) {
+    const model = char?.behavior?.speakingModel;
+    const variants = (category === "char" ? model?.dontKnowChar : model?.dontKnowObject) ?? [];
+    const lines = variants.filter((v) => v && v.trim());
     const link = createDialogLink();
     link.mainDirection.type = "reply" /* QuickReply */;
-    link.mainDirection.replyText = "No reaction";
+    link.mainDirection.replyText = lines.length > 0 ? lines[Math.floor(Math.random() * lines.length)] : "No reaction";
     return link;
   }
   isEnabledReaction(r2, state) {
@@ -9212,7 +9220,7 @@ var DiscussionProcessor = class {
       return r2.trigger.chars.includes(id);
     }, reacts, state);
     if (!reaction)
-      return this.unknownReaction();
+      return this.unknownReaction(char, "char");
     return this.returnReaction(reaction);
   }
   ofFact(id, char, state) {
@@ -9221,7 +9229,7 @@ var DiscussionProcessor = class {
       return r2.trigger.facts.includes(id);
     }, reacts, state);
     if (!reaction)
-      return this.unknownReaction();
+      return this.unknownReaction(char, "fact");
     return this.returnReaction(reaction);
   }
   ofLoc(id, char, state) {
@@ -9230,7 +9238,7 @@ var DiscussionProcessor = class {
       return r2.trigger.places.includes(id);
     }, reacts, state);
     if (!reaction)
-      return this.unknownReaction();
+      return this.unknownReaction(char, "loc");
     return this.returnReaction(reaction);
   }
   ofItem(id, char, state) {
@@ -9239,7 +9247,7 @@ var DiscussionProcessor = class {
       return r2.trigger.items.includes(id);
     }, reacts, state);
     if (!reaction)
-      return this.unknownReaction();
+      return this.unknownReaction(char, "item");
     return this.returnReaction(reaction);
   }
 };
@@ -9987,7 +9995,7 @@ var GameExecManager = class {
     if (!char.dialog) {
       return this.stateError(state, `Error: char ${charUid} has no dialog`);
     }
-    let link = disc.unknownReaction();
+    let link = disc.unknownReaction(char.dialog, category);
     if (category === "char") {
       link = disc.ofChar(id, char.dialog, state);
     }
@@ -10661,6 +10669,46 @@ function serializeLinks(links) {
     visited: l2.visited
   }));
 }
+var STATE_ARRAYS = [
+  "positionStack",
+  "positionHistory",
+  "shortHistory",
+  "knownFacts",
+  "knownPeople",
+  "knownPlaces",
+  "notifications",
+  "carriedItems",
+  "happenedEvents"
+];
+function validateStateShape(state) {
+  if (!state || typeof state !== "object" || Array.isArray(state)) {
+    throw new Error("State must be an object");
+  }
+  const s = state;
+  if (!s.position || typeof s.position !== "object") {
+    throw new Error("State.position must be an object");
+  }
+  if (!s.props || typeof s.props !== "object" || Array.isArray(s.props)) {
+    throw new Error("State.props must be an object");
+  }
+  if (!s.progress || typeof s.progress !== "object") {
+    throw new Error("State.progress must be an object");
+  }
+  if (typeof s.stepCount !== "number") {
+    throw new Error("State.stepCount must be a number");
+  }
+  for (const key of STATE_ARRAYS) {
+    if (!Array.isArray(s[key])) {
+      throw new Error(`State.${key} must be an array`);
+    }
+  }
+  for (const c of s.carriedItems) {
+    const item = c;
+    if (!item || typeof item.item !== "string" || typeof item.quantity !== "number") {
+      throw new Error("State.carriedItems entries must be {item: string, quantity: number}");
+    }
+  }
+}
 var GameSessionRunner = class {
   game = null;
   exec = null;
@@ -10695,6 +10743,82 @@ var GameSessionRunner = class {
     this.state = savedState;
     this.lastBg = null;
     return { state: this.state, turn: this.buildTurn(null, []) };
+  }
+  /**
+   * Developer-only: load the game and build a fresh, NOT yet entered initial
+   * state (startup entry scripts are skipped). The caller then patches it and
+   * finishes with debugApply.
+   */
+  debugInit(rawGame, position) {
+    this.game = normalizeAndPatchGame(rawGame);
+    this.exec = new GameExecManager(this.game);
+    const initial = createInitialState(this.game);
+    if (position) {
+      initial.position = position;
+    }
+    this.state = initial;
+    this.lastBg = null;
+    return { state: initial };
+  }
+  /**
+   * Developer-only: replace the session state with `base` (already patched by
+   * the caller), optionally move to `position`, run `script`, then (optionally)
+   * enter the current position. Throws instead of persisting a broken state.
+   */
+  debugApply(base, options) {
+    const { exec } = this.mustReady();
+    validateStateShape(base);
+    let state = JSON.parse(JSON.stringify(base));
+    const prevNotifLen = state.notifications.length;
+    const hadError = Boolean(state.fatalError);
+    if (options.position) {
+      state.position = options.position;
+      state.dialogPage = 0;
+      state.quickReplyText = null;
+    }
+    this.requireValidPosition(state);
+    if (state.position.kind === "location") {
+      state.location = state.position.location;
+    } else if (state.position.kind === "chardialog") {
+      state.charDialog = state.position.char;
+    }
+    if (options.script && options.script.trim()) {
+      state = exec.modifyStateScript(state, options.script);
+      if (state.fatalError && !hadError) {
+        throw new Error(`Debug script failed: ${state.fatalError.message}`);
+      }
+    }
+    const runEntry = options.run_entry ?? Boolean(options.position);
+    if (runEntry) {
+      state = exec.executeEntry(state);
+      if (state.fatalError && !hadError) {
+        throw new Error(`Entry of ${JSON.stringify(state.position)} failed: ${state.fatalError.message}`);
+      }
+    }
+    const newNotifications = state.notifications.length > prevNotifLen ? state.notifications.slice(prevNotifLen) : [];
+    this.state = state;
+    this.lastBg = null;
+    return { state, turn: this.buildTurn(null, newNotifications) };
+  }
+  requireValidPosition(state) {
+    const { exec } = this.mustReady();
+    const pos = state.position;
+    const shape = JSON.stringify(pos);
+    if (pos.kind === "window") {
+      if (!exec.getCurrentDialogWindow(state)) {
+        throw new Error(`No dialog window ${shape}; expected {kind:'window', dialog, window} of an existing window`);
+      }
+    } else if (pos.kind === "location") {
+      if (!exec.getCurrentLocation(state)) {
+        throw new Error(`No location ${shape}; expected {kind:'location', location:<loc uid>}`);
+      }
+    } else if (pos.kind === "chardialog") {
+      if (!exec.getCurrentCharDialog(state)) {
+        throw new Error(`No character conversation ${shape}; expected {kind:'chardialog', char:<char uid with a dialog>}`);
+      }
+    } else {
+      throw new Error(`Invalid position ${shape}; kind must be 'window', 'location' or 'chardialog'`);
+    }
   }
   getDiscussTopics(state, view) {
     const { game, exec } = this.mustReady();
@@ -11196,6 +11320,10 @@ function handleRequest(req) {
         return { id: req.id, ok: true, result: runner.inspect(req.section) };
       case "load_state":
         return { id: req.id, ok: true, result: runner.loadState(req.state) };
+      case "debug_init":
+        return { id: req.id, ok: true, result: runner.debugInit(req.game, req.position ?? null) };
+      case "debug_apply":
+        return { id: req.id, ok: true, result: runner.debugApply(req.state, req.options ?? {}) };
       default:
         return {
           id: req.id ?? 0,
