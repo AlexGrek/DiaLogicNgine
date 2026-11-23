@@ -67,7 +67,9 @@ if len(set(KEYS.values())) != len(KEYS):
 router = APIRouter(include_in_schema=False)
 PRIVATE = {
     "Cache-Control": "no-store",
-    "Referrer-Policy": "no-referrer",
+    # "no-referrer" makes Firefox send `Origin: null` on the form POST, which decide() rejects.
+    # "same-origin" still never leaks the ticket URL cross-origin but keeps a real Origin header.
+    "Referrer-Policy": "same-origin",
     "Content-Security-Policy": "default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
 }
 

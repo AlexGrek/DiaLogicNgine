@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "dialogic-editor": {
+      "type": "http",
+      "url": "http://localhost:4267/mcp",
+      "headers": {
+        "X-API-Key": "${DIALOGIC_MCP_KEY}"
+      }
+    },
+    "dialogic-play": {
+      "type": "http",
+      "url": "http://localhost:4267/play-mcp",
+      "headers": {
+        "X-API-Key": "${DIALOGIC_MCP_KEY}"
+      }
+    }
+  }
+}
