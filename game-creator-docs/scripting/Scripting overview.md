@@ -29,6 +29,9 @@ function (rt, state, props, ch, facts, objectives, situation, items, context) {
 So `return` is allowed at the top level, newlines in the JSON string are `\n`, and the nine names above are in scope.
 Write everything through **`rt`** (see [[The rt object]]); the other names are shortcuts to parts of it.
 
+`context` is always an object: `{ usedItem }` when the player uses an item ([[Items and inventory]]), `{ thisEvent }` in an event's
+`canHappenScript` ([[Random events]]), and `{}` everywhere else. So `context.usedItem` never throws.
+
 ## The three kinds of script
 
 What a script may do depends on its **kind**, which is fixed by the property it is attached to. This table is the
@@ -76,7 +79,7 @@ labels, text, pictures, meters) is recomputed from the state, possibly many time
 
 * In the editor: the [[Script editor]] popup, with autocomplete-style object lists and snippet generators.
 * As JSON: `game.json` strings.
-* As files: the `dialogic` CLI can dump every script to a `.js` file, check its syntax with `node --check`, and push the
+* As files: the `dialogic` CLI can dump every script to a `.js` file, check its syntax, and push the
   edits back (`dialogic scripts dump | push`; see the `cli/` README).
 
 ## Gotchas

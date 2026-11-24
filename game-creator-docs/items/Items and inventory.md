@@ -88,12 +88,13 @@ The **Use** button is always shown, but it only does something when the player i
 
 In a location, a character dialog, or a window without an entry script, **Use** does nothing.
 
-So a window that reacts to items needs an entry script that branches on `context`. On a normal entry **`context` is `undefined`**, so
-`context.usedItem` **throws**; always write `context?.usedItem` (verified):
+So a window that reacts to items needs an entry script that branches on `context.usedItem`. On a normal entry `context` is an empty
+object, so `context.usedItem` is simply `undefined` (verified 2026-11-24; older engine builds left `context` undefined and the read threw,
+which is why older games write `context?.usedItem` — both forms work):
 
 ```js
 // entryScript of the window "locked_door"
-if (context?.usedItem) {
+if (context.usedItem) {
   if (context.usedItem === 'rusty_key') {
     rt.items.remove('rusty_key')
     rt.props.door_open = true          // e.g. makes an "Enter" link visible

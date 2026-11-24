@@ -38,7 +38,7 @@ The game-wide script pieces live under one menu with four tabs:
 
 * Use **Smart generators** to avoid typos in uids: a wrong fact or item uid is not caught until the script runs.
 * The editor does **not** syntax-check. To check scripts before publishing, dump them with
-  `dialogic scripts dump` and push with `dialogic scripts push` (it runs `node --check` on every edited script).
+  `dialogic scripts dump` and push with `dialogic scripts push` (it syntax-checks every edited script first).
 * The objects list reflects the game as saved, so declare a prop *first*, then script with it.
 
 See also: [[Scripting overview]], [[The rt object]].

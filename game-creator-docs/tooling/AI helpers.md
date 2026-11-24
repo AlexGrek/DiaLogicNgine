@@ -48,7 +48,7 @@ Every image picker (backgrounds, avatars, item images, location thumbnails, PAC 
 |---|---|
 | **Server Uploads** | images already in this project; **Upload image** adds files |
 | **Local Assets** | images bundled with the editor (stored as `game_assets/<file>`) |
-| **Other Projects** | browse your other projects' images. **Careful:** only the file name is stored and nothing is copied, so the picture is missing in this project unless a file of that name exists here (from source); the [[Sanity check]] reports it. Download and re-upload instead (`dialogic assets pull` / `push`). |
+| **Other Projects** | browse your other projects' images. **Select** copies the picked file into this project first (the footer says *will be copied here*); if this project already has a file of that name, the copy is saved as `name-2.png`, `name-3.png`, … so nothing is overwritten (verified 2026-11-24). |
 | **Generate** | text-to-image: **Model**, **Prompt**, **Negative prompt**, **Size** / **Width** / **Height**, **Seed (optional)**, optional **Input image**, plus advanced options |
 | **From source** | make an image from another one: resize or crop, or image-to-image with a **Prompt**. Typical use: a square thumbnail from a big picture. |
 

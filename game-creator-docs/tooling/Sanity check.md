@@ -1,7 +1,7 @@
 ---
 tags: [tooling, validation]
 verified: 2026-11-24
-sources: dialogic/src/game/sanityCheck.ts, dialogic/src/components/menuitems/configuration/SanityCheckPanel.tsx, .claude/skills/game_json/scripts/validate_game.py
+sources: dialogic/src/game/sanityCheck.ts, dialogic/src/game/verify.ts, dialogic/src/components/menuitems/configuration/SanityCheckPanel.tsx, .claude/skills/game_json/scripts/validate_game.py
 ---
 # Sanity check
 
@@ -47,15 +47,17 @@ The sanity check does not read scripts. It also skips some references (from sour
 * **character roles**, **quest `path`s**, **hook** strings;
 * unreachable windows, and dead ends (windows with no way out).
 
-For those, run the repo's validator on the JSON:
+For those, use the `dialogic` CLI ([[Dialogic CLI]]) on a local file, a pulled folder or a server project:
 
 ```sh
-dialogic game get my_game -o game.json
-python3 .claude/skills/game_json/scripts/validate_game.py game.json          # errors and warnings
-python3 .claude/skills/game_json/scripts/validate_game.py --strict game.json # fail on warnings too
+dialogic verify my_game -text           # errors and warnings; exit 1 on errors
+dialogic verify my_game -strict         # fail on warnings too
+dialogic explore my_game -text          # play random walks: runtime script errors, dead ends, unreached windows
 ```
 
-It mirrors the sanity check's link rules and adds the checks above, except image files.
+`verify` runs the checks above plus the JSON schema, the image files (the server's list, or the `images/` folder next to a local
+`game.json`) and a syntax check of every script. Without the CLI, `python3 .claude/skills/game_json/scripts/validate_game.py game.json`
+runs the same static checks except images, schema and syntax.
 
 ## Gotchas
 

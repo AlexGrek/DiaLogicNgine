@@ -53,9 +53,9 @@ overwrite your change.
 * New files: `"engineVersion": "0.21"`. **Do not raise the version of an old file by hand**; that skips the migrations it needs.
 * Everything is linked by **uid strings**. A typo is not caught on import, only when a player walks into it. Validate before importing:
   ```sh
-  python3 .claude/skills/game_json/scripts/validate_game.py game.json
+  dialogic verify game.json -text
   ```
-  then run the in-editor [[Sanity check]], which also checks image files.
+  (it also checks the schema, script syntax and, for a folder with `images/`, image files).
 * The exhaustive field reference is the repo skill `game_json` (`references/schema.md`); this vault explains how each field is used.
 
 See also: [[Game structure]], [[Saving and loading]], [[Localization]] (translating a copy).

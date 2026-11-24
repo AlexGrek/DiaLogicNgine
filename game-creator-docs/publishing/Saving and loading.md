@@ -1,7 +1,7 @@
 ---
 tags: [publishing, saves]
 verified: 2026-11-24
-sources: dialogic/src/components/menuitems/SaveLoadMenu.tsx, SaveLoadJsonDrawer.tsx, dialogic/src/api/projectsApi.ts, dialogic/src/savegame/LocalStorageSavesManager.ts, dialogic/src/components/player/PlayerCore.tsx, MenuTab.tsx, dialogic/src/components/SidePanel.tsx
+sources: dialogic/src/components/menuitems/SaveLoadMenu.tsx, dialogic/src/api/projectsApi.ts, dialogic/src/savegame/LocalStorageSavesManager.ts, dialogic/src/components/player/PlayerCore.tsx, MenuTab.tsx, dialogic/src/components/SidePanel.tsx
 ---
 # Saving and loading
 
@@ -43,9 +43,8 @@ Players save from **Menu → Menu** in the game ([[In-game menu and notification
 | manual | **Save** with an optional name (default: today's date) | all, newest first |
 
 Each save card shows its name, how long ago it was made and the step number, with **Load** and **Delete** (delete asks to confirm).
-**New game** restarts from the startup window, but **without running that window's entry script** (from source; the start menu and
-the editor's **Restart** do run it). If your opening `entryScript` sets things up (props, quests, items), a player who restarts from the
-in-game menu misses them. Keep opening set-up in prop defaults, or move it to the second window.
+**New game** restarts from the startup window and runs its entry script, exactly like starting from the main menu (verified
+2026-11-24; earlier builds skipped the entry script here, so a restart missed any set-up done in the opening `entryScript`).
 
 Where saves live **(from source)**:
 
