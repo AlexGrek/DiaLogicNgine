@@ -23,8 +23,8 @@ The game keeps **one current background**. It stays on screen until something *r
    returns `"night"`, the window shows the image named `night` in `list` (see [[Variants]]); returning `null`
    shows `main`.
 
-Locations and character dialogs apply **their own** background whenever they are entered **(from source)**, so
-a window that follows a location does not inherit the location's picture unless it sets its own.
+Locations and character dialogs apply **their own** background whenever they are entered (verified). One that has **no** background leaves the state
+with no background (verified) while the picture already on screen stays **(from source)**. See [[Locations]] and [[Character dialogs]].
 
 ## In the editor
 
@@ -78,7 +78,7 @@ shrink images until they look blurry.
 | window `chooseBackgroundScript` | picker | when the window is entered, **only if `backgrounds.main` is set** | variant name, index, or `null` (= `main`) | no |
 
 A window's `entryScript` runs **after** the background is updated, so it can read the new picture in `state.background`
-(verified). Location and character-dialog pickers are documented with those features (planned). See [[Order of execution]].
+(verified). Location and character-dialog pickers are documented with those features ([[Locations]], [[Character dialogs]]). See [[Order of execution]].
 
 ## Gotchas
 

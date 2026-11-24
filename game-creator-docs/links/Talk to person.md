@@ -7,8 +7,7 @@ sources: dialogic/src/exec/GameExecutor.tsx (goToCharDialog)
 
 ## What it is
 
-Open a **character's dialog** — the conversation screen of an NPC. Characters and their dialogs are documented in
-their own notes (planned, see [[Home]]).
+Open a **character's dialog** — the conversation screen of an NPC. See [[Characters]] and [[Character dialogs]].
 
 ## In the JSON
 
@@ -28,7 +27,7 @@ their own notes (planned, see [[Home]]).
 
 ## Gotchas
 
-* A character with no `dialog` logs an error and the click does nothing **(from source)**.
+* A character with no `dialog`: the click does nothing except advance the step counter — no error is shown to the player (verified).
 * Every character dialog needs at least one link out.
 * In a game without locations, [[Return]] on the character's "Goodbye" fails; use [[Pop]].
 

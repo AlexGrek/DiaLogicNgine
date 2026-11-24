@@ -22,7 +22,7 @@ order. Each link opens an editor with:
 | Part | What it does |
 |---|---|
 | **Answer text** | The button label. |
-| **Category**, **Icon**, **Icon placement**, **Link color** | How the button looks ([[Home|visual styling is documented later]]). |
+| **Category**, **Icon**, **Icon placement**, **Link color** | How the button looks (styled per category in [[Visuals]]). |
 | **Direction** | The [[Link types|link type]] and its target. "Go to link" jumps to a local target. |
 | **Scripting** | `actionCode`, `isVisible`, `isEnabled`. |
 | **Misc** | *Change location* (background/context). |

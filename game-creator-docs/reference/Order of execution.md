@@ -64,8 +64,8 @@ By a [[To location]] link or a route from another location:
 
 **Rolling events** *(from source)*:
 
-* Only locations with a non-empty `eventHosts` list can host events; its `canHostEventsScript` (predicate) can veto it.
-* Events whose `targets` include one of the location's hosts are candidates: **priority events first, in ascending probability**, then the rest
+* A location hosts events unless its `eventHosts` is `null`; every hosting location is automatically its own host `loc:<uid>` in addition to any named hosts (verified). Its `canHostEventsScript` (predicate) can veto hosting (verified). Details: [[Locations]].
+* Events whose `targets` include one of the location's hosts (named or `loc:<uid>`) are candidates: **priority events first, in ascending probability**, then the rest
   in **descending** probability.
 * For each candidate in that order: its `canHappenScript` (predicate, `context.thisEvent` = its name; changes discarded *(verified: a log written there never appeared)*), then a roll of 0–100 against `probability` (roll ≤ probability passes, so even `0` has a 1-in-101 chance).
 * **The first event that passes wins** — at most one event per arrival. Its window is entered through a [[Push]]-like step, so [[Pop]] returns to the location.

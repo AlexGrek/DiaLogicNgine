@@ -13,7 +13,7 @@ write `rt.…` and you never need to think about them. What changes *stick* depe
 | Member | What it is | Read | Write |
 |---|---|---|---|
 | `rt.props.<name>` | your game variables — [[Props]] | value, or the default if never set | `rt.props.gold += 5` |
-| `rt.ch.<char>.<prop>` | per-character variables (character props and role props) | same | same |
+| `rt.ch.<char>.<prop>` | per-character variables — [[Roles and character props]] | same | same |
 | `rt.facts.<uid>` | a fact | `.known` → true/false | `.know()` learns it (no-op if already known) |
 | `rt.items` | the inventory | `has(uid)`, `count(uid)`, `countTotal()`, `list()`, `listWithTag(tag)` | `add(uid, n=1)`, `remove(uid, n=1)` |
 | `rt.objectives.<line>.<quest>.<task>` | quests | `.status`, tasks also `.isOpen` / `.isCompleted` / `.isFailed` | `.open()`, `.complete()`, `.fail()` (lines: `open()`/`close()`) |

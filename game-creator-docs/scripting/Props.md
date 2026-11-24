@@ -78,12 +78,12 @@ but is **not stored**, so the next script sees `undefined` (verified). Declare f
 ## Per-character props
 
 Characters (and the roles they use) can have their own props, read as `rt.ch.<character>.<prop>`. Documented with
-characters (planned in [[Home]]).
+characters ([[Roles and character props]]).
 
 ## Gotchas
 
 * Scripts refer to props by name only. If you change a prop's name, update every script that uses it — nothing checks this for you.
-* A variable shown in text never updates by itself: show it with a HUD meter (planned) or pick a [[Variants|text variant]].
+* A variable shown in text never updates by itself: show it with a [[HUD meters|HUD meter]] or pick a [[Variants|text variant]].
 * Props are global; prefix related ones (`shop_open`, `shop_gold`) to keep a growing list readable.
 
 See also: [[The rt object]], [[Scripting overview]].

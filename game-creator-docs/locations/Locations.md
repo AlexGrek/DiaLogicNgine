@@ -9,7 +9,7 @@ sources: dialogic/src/game/Loc.ts, dialogic/src/exec/GameExecutor.tsx (goToLocat
 
 A **location** is a *place* the player can be in — a market, a cellar, a bridge. Like a [[Windows|window]] it has text, a [[Backgrounds|background]] and
 [[Links|links]]; unlike a window it also has **routes** to other locations ([[Routes and travel]]), is tracked as *known* and *visited*
-([[Known and visited]]), can host random events, and can be a topic of conversation ([[Discussion and reactions]]).
+([[Known and visited]]), can host [[Random events|random events]], and can be a topic of conversation ([[Discussion and reactions]]).
 
 Use windows for **scenes** (a story told in order) and locations for **places** (a map the player moves around and returns to). Most games mix both: a
 window can send the player to a location with a [[To location]] link, and a location can open a window with a [[Push]] link.

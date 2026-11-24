@@ -8,7 +8,7 @@ sources: dialogic/src/exec/GameExecutor.tsx (goToLocation)
 ## What it is
 
 Travel to a **location** — a place with its own text, background, exits and links — instead of a window. Locations are
-documented in their own notes (planned, see [[Home]]); this note covers only the link.
+documented in [[Locations]] and [[Routes and travel]]; this note covers only the link.
 
 ## In the JSON
 

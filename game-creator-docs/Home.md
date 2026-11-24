@@ -11,7 +11,12 @@ New here? Read in this order:
 4. [[Backgrounds]] — pictures behind the text, and how they persist and change.
 5. [[Turn lifecycle]] — exactly what happens, in order, when the player clicks a link.
 6. The game as a whole: [[Game configuration menu]] → [[Game metadata]] → [[Localization]]; and [[Situations]] (modes you can react to).
-7. Scripting: [[Scripting overview]] → [[Script editor]] → [[The rt object]] → [[Props]] → [[Functions]] → [[Hooks]], then [[Order of execution]] for the whole engine.
+7. The world: [[Locations]] → [[Routes and travel]] → [[Characters]] → [[Character dialogs]] → [[Discussion and reactions]] → [[Roles and character props]] → [[Actors]]; see it all together in [[Town example walkthrough]].
+8. Scripting: [[Scripting overview]] → [[Script editor]] → [[The rt object]] → [[Props]] → [[Functions]] → [[Hooks]], then [[Order of execution]] for the whole engine.
+9. Game systems: [[Facts]] → [[Items and inventory]] → [[Quests]] → [[Random events]] → [[Point-and-click scenes]].
+10. What the player sees: [[In-game menu and notifications]] → [[HUD meters]] → [[Visuals]].
+11. Shipping it: [[Saving and loading]] → [[Publishing and sharing]] → [[Playtesting]] → [[Sanity check]].
+12. Tools: [[JSON import and export]] → [[Dialogic CLI]] → [[MCP servers]] → [[AI helpers]].
 
 ## Coverage map
 
@@ -37,18 +42,26 @@ New here? Read in this order:
 | Game configuration page | done | [[Game configuration menu]] |
 | Game metadata (title, version, authors, saves, gallery) | done | [[Game metadata]] |
 | Localization (interface table, translating a story, fonts) | done | [[Localization]] |
-| Actors & avatars on a window | planned | |
-| Characters, roles, character dialogs, reactions, discussion | planned | (their scripts are already listed in [[Scripting overview]]) |
-| Locations, routes, travel | planned | |
-| Facts & knowledge | planned | |
-| Items & inventory | planned | |
-| Quests (objectives) | planned | |
-| Random events | planned | |
-| Point-and-click scenes | planned | |
-| HUD meters (UI elements) | planned | |
-| Visuals: fonts, link button styles, aspect ratio | planned | |
-| Start menu design (layout, background) | partly | [[Game metadata]] |
-| Saving, loading, sharing, publishing | planned | |
-| AI helpers (text & image generation) | planned | |
-| Sanity check | planned | |
-| Tooling: the `dialogic` CLI, MCP servers, JSON import/export | planned | |
+| Actors & avatars on a window | done | [[Actors]] |
+| Characters | done | [[Characters]] |
+| Character dialogs (talking) | done | [[Character dialogs]] |
+| Discussion & reactions | done | [[Discussion and reactions]] |
+| Roles & character props | done | [[Roles and character props]] |
+| Known / visited tracking (+ a fixed engine issue) | done | [[Known and visited]] |
+| End-to-end example game | done | [[Town example walkthrough]] |
+| Locations | done | [[Locations]] |
+| Routes & travel | done | [[Routes and travel]] |
+| Facts & knowledge | done | [[Facts]] |
+| Items & inventory (incl. using items on windows) | done | [[Items and inventory]] |
+| Quests (objectives) | done | [[Quests]] |
+| Random events | done | [[Random events]] |
+| Point-and-click scenes | done | [[Point-and-click scenes]] |
+| HUD meters (UI elements) | done | [[HUD meters]] |
+| In-game menu, settings, notifications | done | [[In-game menu and notifications]] |
+| Visuals: fonts, link button styles, aspect ratio, inventory layout | done | [[Visuals]] |
+| Start menu design (layout, background) | done | [[Game metadata]], [[Visuals]] |
+| Saving, loading, sharing, publishing | done | [[Saving and loading]], [[Publishing and sharing]] |
+| AI helpers (text & image generation) | done | [[AI helpers]] |
+| Sanity check (+ the JSON validator) | done | [[Sanity check]] |
+| Playtesting (editor Play page, debug tools) | done | [[Playtesting]] |
+| Tooling: the `dialogic` CLI, MCP servers, JSON import/export | done | [[Dialogic CLI]], [[MCP servers]], [[JSON import and export]] |

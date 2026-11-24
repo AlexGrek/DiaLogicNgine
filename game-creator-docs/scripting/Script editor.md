@@ -31,7 +31,7 @@ The game-wide script pieces live under one menu with four tabs:
 |---|---|---|
 | **Props** | the game's variables | [[Props]] |
 | **Scripting** | reusable functions | [[Functions]] |
-| **Events** | random events | planned |
+| **Events** | random events | [[Random events]] |
 | **Hooks** | lifecycle scripts | [[Hooks]] |
 
 ## Tips

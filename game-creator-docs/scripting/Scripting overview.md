@@ -60,13 +60,13 @@ labels, text, pictures, meters) is recomputed from the state, possibly many time
 | **Dialog window** | `entryScript`, `chooseTextScript`, `chooseBackgroundScript` | [[Windows]] |
 | **Link** | `actionCode`, `isVisible`, `isEnabled`, `useAlternativeWhen` | [[Links]] |
 | **Whole game** | reusable functions, lifecycle hooks, props | [[Functions]], [[Hooks]], [[Props]] |
-| Location | `onEntryScript`, `chooseTextScript`, `choosebackgroundScript` (sic: lowercase *b*), `isVisibleScript`, `isAccessibleScript`, `canHostEventsScript` | planned |
-| Character dialog | `chooseTextScript`, `chooseBgScript`, `canHostEventsScript` | planned |
-| Character | `chooseNameScript`, `chooseDescriptionScript`, `chooseAvatarScript`; reaction `isEnabled` | planned |
-| Random event | `canHappenScript` (gets `context.thisEvent`) | planned |
-| Quest / task | `onOpen`, `onComplete`, `onFail` | planned |
-| Point-and-click zone | `onClickScript`, `isVisibleIfScript`, `isDisabledIfScript`, `useAlternativeWhen` | planned |
-| HUD meter | `value`, `visibleIf` | planned |
+| Location | `onEntryScript`, `chooseTextScript`, `choosebackgroundScript` (sic: lowercase *b*), `isVisibleScript`, `isAccessibleScript`, `canHostEventsScript` | [[Locations]] |
+| Character dialog | `chooseTextScript`, `chooseBgScript`, `canHostEventsScript` | [[Character dialogs]] |
+| Character | `chooseNameScript`, `chooseDescriptionScript`, `chooseAvatarScript`; reaction `isEnabled` | [[Characters]], [[Discussion and reactions]] |
+| Random event | `canHappenScript` (gets `context.thisEvent`) | [[Random events]] |
+| Quest / task | `onOpen`, `onComplete`, `onFail` | [[Quests]] |
+| Point-and-click zone | `onClickScript`, `isVisibleIfScript`, `isDisabledIfScript`, `useAlternativeWhen` | [[Point-and-click scenes]] |
+| HUD meter | `value`, `visibleIf` | [[HUD meters]] |
 
 **Declared but never run** (the editor may store them, the engine ignores them): link `textProcessingCode`, reaction
 `actionScript`, event `onEventActionScript`, task `autoCheckScript`, and the proxy `proxyRouterScript`. Window

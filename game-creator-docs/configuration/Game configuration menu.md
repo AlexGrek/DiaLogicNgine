@@ -16,10 +16,10 @@ or location. It is a row of tabs:
 | **Situations** | the list of situation names | [[Situations]] |
 | **Main menu** | menu layout (*Classic* or *Mobile*) and the menu background picture | [[Game metadata]], [[Backgrounds]] |
 | **Localization** | the interface-translation table | [[Localization]] |
-| **Developer / AI** | a text suffix appended to quick AI image prompts (e.g. "fantasy RPG style, pixel art") | [[Game metadata]] |
-| **Sanity check** | a list of dangling references and missing image files | [[Game structure]] |
+| **Developer / AI** | a text suffix appended to quick AI image prompts (e.g. "fantasy RPG style, pixel art") | [[Game metadata]], [[AI helpers]] |
+| **Sanity check** | a list of dangling references and missing image files | [[Sanity check]] |
 
-Visual styling (fonts, aspect ratio, link-button looks) lives in a separate **Visuals** area (planned in [[Home]]).
+Visual styling (fonts, aspect ratio, link-button looks) lives in a separate **Visuals** area: [[Visuals]].
 
 ## In the JSON
 

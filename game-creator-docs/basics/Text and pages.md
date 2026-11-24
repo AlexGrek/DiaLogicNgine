@@ -57,4 +57,4 @@ tabs ([[Variants]]).
 * The separator must be alone on its line. `Wait --- what` does not split.
 * Don't end a window with `---` and nothing after it expecting an empty last page: empty pages are dropped.
 * Numbers in text are plain text. If the text shows a variable (rubles, days), the number will not update when the
-  variable changes. Use a [[Variants|variant]] picked by a script, or the HUD meters (planned in [[Home]]).
+  variable changes. Use a [[Variants|variant]] picked by a script, or a [[HUD meters|HUD meter]].

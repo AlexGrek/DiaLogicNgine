@@ -5745,7 +5745,7 @@ function createInitialState(game) {
 }
 function safeStateUpdate(safeState, upd) {
   safeState.knownFacts = upd.knownFacts;
-  safeState.knownPeople = upd.knownFacts;
+  safeState.knownPeople = upd.knownPeople;
   safeState.knownPlaces = upd.knownPlaces;
   safeState.progress = upd.progress;
   safeState.notifications = upd.notifications;
@@ -5796,6 +5796,18 @@ function tryGetCharById(game, uid) {
       return null;
     }
     return found || null;
+  }
+  return null;
+}
+function backDestination(state, type) {
+  const stack = state.positionStack;
+  const index = type === "pop" /* Pop */ ? stack.length - 1 : stack.findLastIndex((position) => position.kind === "chardialog");
+  if (index >= 0) return { position: stack[index], stackLength: index };
+  if (state.charDialog && (type === "pop" /* Pop */ || state.position.kind !== "chardialog")) {
+    return { position: { kind: "chardialog", char: state.charDialog }, stackLength: 0 };
+  }
+  if (state.location) {
+    return { position: { kind: "location", location: state.location }, stackLength: 0 };
   }
   return null;
 }
@@ -9373,7 +9385,7 @@ var QuestProcessor = class {
     if (!found)
       return;
     const [, q, tsk] = found;
-    const indexOfTask = q.tasks.findIndex((task2) => task2.uid = tsk.uid);
+    const indexOfTask = q.tasks.findIndex((task2) => task2.uid === tsk.uid);
     if (indexOfTask === q.tasks.length - 1) {
       trace("Last task processing: " + tsk.path.toString());
       if (isQuestCompleted(state.progress, q)) {
@@ -9647,88 +9659,16 @@ var GameExecManager = class {
       return defaultVal;
     }
   }
-  cutToLastDialog(state, kind = "chardialog") {
-    if (state.positionStack.length === 0) {
-      return null;
+  goBack(state, type) {
+    const next = import_lodash6.default.cloneDeep(state);
+    const target = backDestination(next, type);
+    if (!target) throw new Error("Attempt to pop while UI stack is empty: " + state.position);
+    next.positionStack.length = target.stackLength;
+    next.position = target.position;
+    if (type === "return" /* Return */) {
+      next.charDialog = target.position.kind === "chardialog" ? target.position.char : null;
     }
-    const foundIndex = state.positionStack.findLastIndex((id) => id.kind === kind);
-    if (foundIndex < 0) {
-      return null;
-    }
-    const newState = import_lodash6.default.cloneDeep(state);
-    const newPositions = state.positionStack.slice(0, foundIndex);
-    newState.positionStack = newPositions;
-    newState.position = state.positionStack[foundIndex];
-    if (newState.position.kind === "chardialog") {
-      newState.charDialog = newState.position.char;
-    } else if (newState.position.kind === "location") {
-      newState.location = newState.position.location;
-    }
-    return newState;
-  }
-  returnLink(prevState) {
-    const newState = import_lodash6.default.cloneDeep(prevState);
-    const currentPosition = prevState.position;
-    if (currentPosition.kind === "chardialog" || prevState.charDialog === null) {
-      const stateWithFoundDialog2 = this.cutToLastDialog(newState, "chardialog");
-      if (stateWithFoundDialog2 != null) {
-        return stateWithFoundDialog2;
-      }
-      if (prevState.location) {
-        newState.position = {
-          location: prevState.location,
-          kind: "location"
-        };
-        newState.charDialog = null;
-        newState.positionStack = [];
-        return newState;
-      } else {
-        throw new Error("Attempt to pop while UI stack is empty: " + prevState.position);
-      }
-    }
-    const stateWithFoundDialog = this.cutToLastDialog(newState);
-    if (stateWithFoundDialog != null) {
-      return stateWithFoundDialog;
-    }
-    if (prevState.charDialog) {
-      newState.position = {
-        char: prevState.charDialog,
-        kind: "chardialog"
-      };
-      newState.positionStack = [];
-      return newState;
-    } else if (prevState.location) {
-      newState.position = {
-        location: prevState.location,
-        kind: "location"
-      };
-      newState.positionStack = [];
-      return newState;
-    } else {
-      throw new Error("Attempt to pop while UI stack is empty: " + newState.position);
-    }
-  }
-  popLink(prevState) {
-    const newState = import_lodash6.default.cloneDeep(prevState);
-    const prevPosition = newState.positionStack.pop();
-    if (prevPosition) {
-      newState.position = prevPosition;
-      return newState;
-    } else if (prevState.charDialog) {
-      newState.position = {
-        char: prevState.charDialog,
-        kind: "chardialog"
-      };
-      return newState;
-    } else if (prevState.location) {
-      newState.position = {
-        location: prevState.location,
-        kind: "location"
-      };
-      return newState;
-    } else {
-      throw new Error("Attempt to pop while UI stack is empty: " + newState.position);
-    }
+    return next;
   }
   goToLocation(prevState, direction) {
     const newState = import_lodash6.default.cloneDeep(prevState);
@@ -9881,14 +9821,14 @@ var GameExecManager = class {
         else
           return newState;
       case "pop" /* Pop */:
-        return this.popLink(newState);
+        return this.goBack(newState, "pop" /* Pop */);
       case "reply" /* QuickReply */:
         if (directionFromLink.replyText !== void 0) {
           return this.quickReply(newState, directionFromLink.replyText);
         } else
           return newState;
       case "return" /* Return */:
-        return this.returnLink(newState);
+        return this.goBack(newState, "return" /* Return */);
       case "tolocation" /* NavigateToLocation */:
         return this.goToLocation(newState, directionFromLink.direction);
       case "toperson" /* TalkToPerson */:

@@ -51,8 +51,8 @@ At the top of the drawer, **Special display widget** swaps the text view for a p
 | `entryScript` | no | Script run **every time the window is entered**. |
 | `chooseTextScript` | no | Picks which text variant to show — see [[Variants]]. |
 | `chooseBackgroundScript` | no | Picks which background variant to show — see [[Backgrounds]]. |
-| `actor` | no | `{ "character": "<char uid>", "currentCharacter": false }` — who is speaking. |
-| `changeLocationInBg` | no | A location uid that becomes the "current location" without moving the player there. |
+| `actor` | no | `{ "character": "<char uid>", "currentCharacter": false }` — who is speaking ([[Actors]]). |
+| `changeLocationInBg` | no | A location uid that becomes the "current location" without moving the player there ([[Locations]]). |
 | `changeSituation` | no | Stored by the editor but **not applied by the engine** — set `state.situation` from a script instead ([[Situations]]). |
 
 ## At play time

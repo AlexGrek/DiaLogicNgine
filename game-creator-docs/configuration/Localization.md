@@ -66,13 +66,14 @@ extras and notification labels — work the same; just add them yourself.
 
 ### What stays English
 
-* A few strings are not routed through the table, for example the hint `Choose item below` in the item picker.
+* A few strings are not routed through the table, for example the hint `Choose item below` in the item picker and the inventory's
+  **Use** button ([[Items and inventory]]).
 * The **Restart / State / Go to** bar is a developer tool of the editor preview; it is hidden when a game is opened through its public play link.
 * Engine error text such as `! ERROR: …` ([[Variants]]).
 
 ## 2. Translating the story
 
-Link labels, HUD meter names and similar strings are **plain text with no variant mechanism**, so one game cannot switch language in place
+Link labels, HUD meter values ([[HUD meters]]) and similar strings are **plain text with no variant mechanism**, so one game cannot switch language in place
 (window text could, via [[Variants]] and a script, but the buttons could not). The practical approach is **one game per language**.
 
 ### Recommended: a copy per language
