@@ -19,10 +19,16 @@ src/exec/
   DiscussionProcessor.ts — NPC discussion reaction lookup
   QuestProcessor.ts      — task/quest/questline open/complete/fail with notifications
   GameUiElementsProcessor.ts — visible HUD meter computation
+  PlayerTurn.ts          — player-agnostic turn logic shared by ALL players (web, MCP runner, CLI):
+                           newGame, availableActions, applyAction (+ PlayerActionError), discussTopics,
+                           canUseItems, inspect lists, debugApply / validateStateShape
 
 src/components/player/
   Player.tsx             — React FC: creates GameExecManager + State; renders shell
   PlayerCore.tsx         — React FC: calls render(), routes to view components, transitions
+  playerActions.ts       — playAction(): UI clicks → PlayerTurn.applyAction (ignores impossible moves)
+
+player-runner/src/session.ts — Player MCP (Deno) and `dialogic debug` (node:vm): TurnPayload JSON over PlayerTurn
 
 src/AppGameRuntime.tsx   — Standalone player entry point (no editor chrome)
 ```
@@ -129,7 +135,15 @@ Evaluates `link.useAlternativeWhen` script first (if `isAlternativeLink`). Then 
 2. Call `followLink` → new position
 3. Call `withUpdatedHistory` (appends `HistoryRecord`, increments step, clears quickReply)
 
-### `dialogVariantApply(state, link, clickData)` — called by player on link click
+### Player moves go through `PlayerTurn.applyAction`
+
+Views never call the methods below directly. They call `applyAction(exec, state, action, view)`
+(`{type:'continue'|'link'|'route'|'zone'|'discuss'|'useItem'}`). It validates the move against the
+rendered view, builds the history record (with the speaker's name), and calls the right method. Change
+turn rules there, and all three players (web, MCP, CLI) follow. A new game is `exec.newGameState()`
+(initial state + startup entry script).
+
+### `dialogVariantApply(state, link, clickData)` — the link step behind applyAction
 
 1. `applyLink` (action + navigation)
 2. `executeEntry` (run entry scripts / update background for the new position)

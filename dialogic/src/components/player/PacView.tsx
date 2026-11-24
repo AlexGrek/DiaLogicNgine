@@ -5,6 +5,7 @@ import { State } from '../../exec/GameState';
 import { PacRenderView } from '../../exec/RenderView';
 import "./player.css";
 import PointAndClickScene from './PointAndClickScene';
+import { playAction } from './playerActions';
 import { PointAndClickZone } from '../../game/PointAndClick';
 
 interface PacViewProps {
@@ -15,11 +16,10 @@ interface PacViewProps {
     onStateUpd: (newState: State) => void
 }
 
-const PacView: React.FC<PacViewProps> = ({ game, state, step, onStateUpd, view }) => {
+const PacView: React.FC<PacViewProps> = ({ game, state, onStateUpd, view }) => {
     const handleZoneClick = useCallback((zone: PointAndClickZone) => {
-        const clickData = { actor: null, text: '', answer: zone.name, step }
-        onStateUpd(game.pacZoneApply(state, zone, clickData))
-    }, [game, state, step, onStateUpd])
+        playAction(game, state, view, { type: 'zone', id: zone.id }, onStateUpd)
+    }, [game, state, view, onStateUpd])
 
     return (
         <motion.div

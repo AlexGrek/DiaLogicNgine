@@ -2,40 +2,51 @@ version: '3'
 
 vars:
   BINARY: dialogic
+  # Same place the Go CLI was installed to, so PATH and skills keep working.
   INSTALL_DIR:
-    sh: echo "$(go env GOPATH)/bin"
+    sh: 'if command -v go >/dev/null 2>&1; then echo "$(go env GOPATH)/bin"; else echo "$HOME/.local/bin"; fi'
 
 tasks:
-  build:
-    desc: Build an optimized dialogic binary (static, stripped, reproducible paths)
-    sources:
-      - '**/*.go'
-      - go.mod
-      - go.sum
-    generates:
-      - '{{.BINARY}}'
-    env:
-      CGO_ENABLED: '0'
+  deps:
+    desc: Install npm dependencies (the engine's own deps come from ../dialogic/node_modules)
+    sources: [package.json, package-lock.json]
     cmds:
-      - go build -trimpath -ldflags="-s -w" -o {{.BINARY}} .
+      - npm install --no-audit --no-fund
+      - test -d ../dialogic/node_modules || (cd ../dialogic && npm install)
+
+  build:
+    desc: Bundle dist/dialogic.mjs (one executable file, needs Node >= 22)
+    deps: [deps]
+    sources:
+      - src/**/*.ts
+      - build.mjs
+      - ../dialogic/src/game/**/*
+      - ../dialogic/src/exec/**/*
+      - ../player-runner/src/**/*
+      - ../backend/app/game_mcp/schema.json
+    generates: [dist/dialogic.mjs]
+    cmds:
+      - node build.mjs
 
   test:
-    desc: Run the unit tests
+    desc: Typecheck and run the unit tests
+    deps: [deps]
     cmds:
-      - go vet ./...
-      - go test ./...
+      - npx tsc --noEmit
+      - npx vitest run
 
   install:
-    desc: Build and install dialogic to $(go env GOPATH)/bin (on PATH)
+    desc: Build and install dialogic to {{.INSTALL_DIR}} (on PATH)
     deps: [build]
     cmds:
-      # Remove first: overwriting a signed binary in place makes macOS kill it (SIGKILL).
-      - rm -f {{.INSTALL_DIR}}/{{.BINARY}}
       - mkdir -p {{.INSTALL_DIR}}
-      - cp {{.BINARY}} {{.INSTALL_DIR}}/{{.BINARY}}
+      # Remove first: overwriting a file another process has open can kill it on macOS.
+      - rm -f {{.INSTALL_DIR}}/{{.BINARY}}
+      - cp dist/dialogic.mjs {{.INSTALL_DIR}}/{{.BINARY}}
+      - chmod 755 {{.INSTALL_DIR}}/{{.BINARY}}
       - 'echo "Installed {{.INSTALL_DIR}}/{{.BINARY}}"'
 
   clean:
-    desc: Remove the built binary and Task's checksum cache
+    desc: Remove the build and Task's checksum cache
     cmds:
-      - rm -rf {{.BINARY}} .task
+      - rm -rf dist .task

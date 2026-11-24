@@ -1,5 +1,5 @@
-import { GameDescription, ENGINE_VERSION } from '../game/GameDescription';
-import { loadJsonStringAndPatch } from '../game/Patches';
+import { GameDescription } from '../game/GameDescription';
+import { normalizeGame } from '../game/Patches';
 
 const BASE = '/api/v1';
 
@@ -80,7 +80,7 @@ export async function loadProjectFromServer(name: string): Promise<GameDescripti
   const res = await fetch(`${BASE}/projects/${encodeURIComponent(name)}/game`);
   if (!res.ok) throw new ProjectRequestError(res.status, `Failed to load project: ${res.status}`);
   const json = await res.json();
-  return loadJsonStringAndPatch(JSON.stringify(json), ENGINE_VERSION);
+  return normalizeGame(json);
 }
 
 export async function deleteProjectFromServer(name: string): Promise<void> {

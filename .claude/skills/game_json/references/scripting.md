@@ -25,7 +25,7 @@ Source: `dialogic/src/exec/Runtime.ts`. Engine-side details live in the `game_en
 |---|---|---|
 | **State processor** | `entryScript`, `onEntryScript`, link `actionCode`, zone `onClickScript`, hook `body`, quest/task `onOpen`/`onComplete`/`onFail` | Return nothing. Mutations you made via `rt.*` are kept automatically. (Returning a full `State` object replaces the state; almost never what you want.) |
 | **Bool processor** | `isVisible`, `isEnabled`, `useAlternativeWhen`, `isVisibleIfScript`, `isDisabledIfScript`, `isAccessibleScript`, `isVisibleScript`, `canHappenScript`, `canHostEventsScript`, reaction `isEnabled`, meter `visibleIf` | **Must `return` a boolean.** No return ⇒ `undefined` ⇒ falsy ⇒ hidden/disabled. State changes made here *are* kept — don't mutate in a predicate. |
-| **Any processor** | `chooseTextScript`, `chooseBackgroundScript`, `chooseBgScript`, `chooseNameScript`, `chooseDescriptionScript`, `chooseAvatarScript`, meter `value` | Return the selected variant (`"name"`, index, or `null` for `main`) or, for meters, the value to display. **State changes are discarded** for the text/background/avatar pickers. |
+| **Any processor** | `chooseTextScript`, `chooseBackgroundScript`, `chooseBgScript`, `chooseNameScript`, `chooseDescriptionScript`, `chooseAvatarScript`, `chooseLookScript`, `chooseStageScript`, meter `value` | Return the selected variant (`"name"`, index, or `null` for `main`) or, for meters, the value to display. **State changes are discarded** for the text/background/avatar pickers. |
 
 Exceptions never crash the game: they are caught, logged, and set `state.fatalError`,
 which renders the error view. A failing bool script yields `false`.
@@ -123,7 +123,13 @@ state.situation = undefined    // end the current situation
 
 ### `context` — extra variables from the engine
 
-Currently only `{ thisEvent: "<event name>" }`, passed to `canHappenScript`.
+Always an object (never `undefined`), so `context.usedItem` is safe without `?.`:
+
+| Script | `context` |
+|---|---|
+| a window's `entryScript` re-run by **using an item** | `{ usedItem: "<item uid>" }` |
+| an event's `canHappenScript` | `{ thisEvent: "<event name>" }` |
+| everything else | `{}` |
 
 ---
 
@@ -175,12 +181,13 @@ item's `ACQUIRED` hook.
 |---|---|---|
 | `dialogs[].windows[]` | `entryScript` | state |
 | | `chooseTextScript`, `chooseBackgroundScript` | any (state discarded) |
+| `dialogs[].windows[]` | `chooseStageScript` | any (array of stage persons, or `null`) |
 | `…windows[].links[]` | `actionCode` | state |
 | | `isVisible`, `isEnabled`, `useAlternativeWhen` | bool |
 | `locs[]` | `onEntryScript` | state |
 | | `isVisibleScript`, `isAccessibleScript`, `canHostEventsScript` | bool |
 | | `chooseTextScript`, `choosebackgroundScript` | any |
-| `chars[]` | `chooseNameScript`, `chooseDescriptionScript`, `chooseAvatarScript` | any |
+| `chars[]` | `chooseNameScript`, `chooseDescriptionScript`, `chooseAvatarScript`, `chooseLookScript` | any |
 | `chars[].dialog` | `chooseTextScript`, `chooseBgScript` | any |
 | | `canHostEventsScript` | bool |
 | `chars[].dialog.behavior.reactions[]` | `isEnabled` | bool |

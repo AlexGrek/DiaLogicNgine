@@ -21,7 +21,7 @@ means, how the pieces reference each other, and how to verify the result.
 | `references/scripting.md` | You are writing any script string (`entryScript`, `actionCode`, `isVisible`, hooks, functions, meter `value`) |
 | `references/recipes.md` | You are adding a concrete thing — a dialog chain, an NPC, a reaction, a quest, a shop, a PAC scene |
 | `assets/minimal-game.json` | You are starting a brand-new game file — copy this skeleton |
-| `scripts/validate_game.py` | Always, before declaring a hand-edited game done |
+| `scripts/validate_game.py` | Before declaring a hand-edited game done, if the `dialogic` CLI is not available (`dialogic verify` runs the same checks plus schema, images and script syntax) |
 
 ---
 
@@ -32,7 +32,7 @@ means, how the pieces reference each other, and how to verify the result.
 | Server project | `backend/storage/projects/<project>/game.json` (plus `.metadata`, `images/`, `image_thumbs/`) |
 | Load (public, no auth) | `GET /api/v1/projects/<project>/game` |
 | Save (owner only) | `PUT /api/v1/projects/<project>/game` with the raw JSON body |
-| Editor UI | Save/Load menu → JSON import/export drawer (`SaveLoadJsonDrawer`) — paste the whole game and press *Import JSON* |
+| Editor UI | Save/Load menu → Import / Export JSON: *Download JSON*, or upload a `.json` file (replaces the game in the editor; then Save) |
 | Play it | `/play/<project>` |
 
 Editing the file on disk under `backend/storage/projects/<project>/` is the fastest loop:
@@ -223,11 +223,15 @@ are in `references/schema.md`.
 4. **Add locations and characters**, then wire `tolocation` / `toperson` links to them.
 5. **Layer scripting on top** — `entryScript`, `actionCode`, `isVisible`/`isEnabled`,
    quests, hooks (`references/scripting.md`).
-6. **Validate**: `python3 .claude/skills/game_json/scripts/validate_game.py <file.json>` —
-   catches every dangling UID, malformed quest path, unreachable window and undeclared
-   prop/fact/item/quest reference in scripts. Errors are things that will break in play;
-   warnings are suspicious but sometimes intentional. Add `--strict` to fail on warnings.
-7. **Load it** in the editor (JSON drawer or `PUT`) and play through the new path.
+6. **Validate**: `dialogic verify <file.json|folder|project> -text` (or, without the CLI,
+   `python3 .claude/skills/game_json/scripts/validate_game.py <file.json>`). It catches every
+   dangling UID, malformed quest path, unreachable window and undeclared prop/fact/item/quest
+   reference in scripts. `dialogic verify` also checks the JSON schema, image files and
+   script syntax. Errors will break in play; warnings are suspicious but sometimes
+   intentional. Add `-strict` / `--strict` to fail on warnings. Then `dialogic explore`
+   plays random walks to find script errors and dead ends at runtime, and
+   `dialogic debug` plays the game locally (`dialogic_cli` skill).
+7. **Load it** in the editor (Save/Load → upload the `.json`, `PUT`, or `dialogic game put`) and play through the new path.
    The editor's **Game configuration → Sanity check** tab runs the in-app checker
    (`runSanityCheck`), which additionally verifies that every referenced image file
    exists on the server.
@@ -297,6 +301,7 @@ not a required table.
 
 The JSON format is the literal serialization of `dialogic/src/game/*.ts`. When that model
 changes — a new field, a new link type, a new hook prefix, a new `ENGINE_VERSION` and patch
-— update `references/schema.md` and `scripts/validate_game.py` alongside
+— update `references/schema.md`, `scripts/validate_game.py` and its TS port
+`dialogic/src/game/verify.ts` alongside
 `runSanityCheck` (see the compliance rule in CLAUDE.md). The validator deliberately mirrors
 `game/sanityCheck.ts` so both catch the same dangling pointers.

@@ -6745,7 +6745,7 @@ var require_loader = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     simpleEscapeCheck[i2] = simpleEscapeSequence(i2) ? 1 : 0;
     simpleEscapeMap[i2] = simpleEscapeSequence(i2);
   }
-  function State6(input, options) {
+  function State7(input, options) {
     this.input = input;
     this.filename = options["filename"] || null;
     this.schema = options["schema"] || DEFAULT_SCHEMA2;
@@ -7645,7 +7645,7 @@ var require_loader = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       if (input.charCodeAt(input.length - 1) !== 10 && input.charCodeAt(input.length - 1) !== 13) input += "\n";
       if (input.charCodeAt(0) === 65279) input = input.slice(1);
     }
-    const state = new State6(input, options);
+    const state = new State7(input, options);
     const nullpos = input.indexOf("\0");
     if (nullpos !== -1) {
       state.position = nullpos;
@@ -7775,7 +7775,7 @@ var require_dumper = /* @__PURE__ */ __commonJSMin(((exports, module) => {
   }
   var QUOTING_TYPE_SINGLE = 1;
   var QUOTING_TYPE_DOUBLE = 2;
-  function State6(options) {
+  function State7(options) {
     this.schema = options["schema"] || DEFAULT_SCHEMA2;
     this.indent = Math.max(1, options["indent"] || 2);
     this.noArrayIndent = options["noArrayIndent"] || false;
@@ -8166,7 +8166,7 @@ var require_dumper = /* @__PURE__ */ __commonJSMin(((exports, module) => {
   }
   function dump2(input, options) {
     options = options || {};
-    const state = new State6(options);
+    const state = new State7(options);
     if (!state.noRefs) getDuplicateReferences(input, state);
     let value = input;
     if (state.replacer) value = state.replacer.call({ "": value }, "", value);
@@ -8690,7 +8690,7 @@ function evaluate(game, s, execManager, prevState, contextVars) {
   const body = makeFunctionBody(s, buildFunctionsPreamble(game));
   const stateCopy = import_lodash4.default.cloneDeep(prevState);
   const rt = createRtObject(game, execManager, stateCopy);
-  rt.contextVars = contextVars;
+  rt.contextVars = contextVars ?? {};
   const returned = globalThis.eval.call(globalThis, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
   return [returned, stateCopy];
 }
@@ -8884,6 +8884,7 @@ var RenderViewGenerator = class {
       if (image === void 0 && lookRef !== void 0 && lookRef !== null) {
         console.warn(`Stage: character ${char.uid} has no look ${JSON.stringify(lookRef)}; default look used`);
         image = resolveLookImage(char, void 0);
+        lookRef = void 0;
       }
       if (!image) continue;
       let name = char.displayName.main;
@@ -9829,6 +9830,10 @@ var GameExecManager = class {
       return state;
     }
   }
+  /** A fresh game: the initial state with the startup position's entry script applied. */
+  newGameState() {
+    return this.executeEntry(createInitialState(this.game));
+  }
   applyEntry(state) {
     return this.executeEntry(import_lodash6.default.cloneDeep(state));
   }
@@ -10059,6 +10064,372 @@ function getFact(game, uid) {
   return factOrnull || null;
 }
 
+// ../dialogic/src/exec/PlayerTurn.ts
+var PlayerActionError = class extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "PlayerActionError";
+  }
+};
+function newGame(exec) {
+  return exec.newGameState();
+}
+function newNotifications(prev, next) {
+  const before = prev.notifications?.length ?? 0;
+  return next.notifications && next.notifications.length > before ? next.notifications.slice(before) : [];
+}
+function currentView(exec, state) {
+  return exec.renderer.render(state, null).uiWidgetView;
+}
+function continueModeOf(view) {
+  if (view.pageIndex < view.pageCount - 1) return "next_page";
+  if (view.continueLink != null) return "continue_link";
+  return null;
+}
+function discussTopics(exec, state, view) {
+  const game = exec.game;
+  const opts = view.dialogOptions;
+  const people = opts.canDiscussChars ? state.knownPeople.map((uid) => ({ uid, descr: exec.renderer.getCharInfoDescription(state, uid) })).filter((x) => x.descr.charObject.discussable).map(({ uid, descr }) => ({ uid, name: descr.name })) : [];
+  const facts = opts.canDiscussFacts ? state.knownFacts.map((uid) => getFact(game, uid) ?? { ...createEmptyFact(uid), short: `Error fact ${uid}` }).filter((fact) => fact.discussable).map((fact) => ({ uid: fact.uid, name: fact.short || fact.uid })) : [];
+  const items = opts.canDiscussItems ? state.carriedItems.map((carried) => ({ uid: carried.item, name: getItemByIdOrUnknown(game.items, carried.item).name })) : [];
+  const places = opts.canDiscussLocations ? state.knownPlaces.map((uid) => ({ uid, loc: getLoc(game, uid) })).filter(({ loc }) => !loc || loc.discussable).map(({ uid, loc }) => ({ uid, name: loc ? loc.displayName || uid : `No location found <${uid}>` })) : [];
+  return { people, facts, items, places };
+}
+function canUseItems(state, view) {
+  return view.widget === "dialog" && state.position.kind === "window";
+}
+function usableItems(exec, state, view) {
+  if (!canUseItems(state, view)) return [];
+  return state.carriedItems.map((carried) => ({
+    uid: carried.item,
+    name: getItemByIdOrUnknown(exec.game.items, carried.item).name,
+    quantity: carried.quantity
+  }));
+}
+function availableActions(exec, state, view = currentView(exec, state)) {
+  const result = {
+    widget: view.widget,
+    continueMode: null,
+    continueDisabled: false,
+    links: [],
+    routes: [],
+    zones: [],
+    discussTopics: null,
+    usableItems: usableItems(exec, state, view)
+  };
+  if (view.widget === "dialog" || view.widget === "char") {
+    result.continueMode = continueModeOf(view);
+    if (result.continueMode === "continue_link") {
+      result.continueDisabled = Boolean(view.continueLink?.disabled);
+    } else if (result.continueMode === null) {
+      result.links = view.links;
+      if (view.widget === "char") {
+        result.discussTopics = discussTopics(exec, state, view);
+      }
+    }
+  } else if (view.widget === "location") {
+    result.links = view.links;
+    result.routes = view.routes;
+  } else if (view.widget === "pac") {
+    result.zones = view.items;
+  }
+  return result;
+}
+function speakerName(exec, state, view) {
+  if (view.widget === "dialog") return view.actor?.name ?? null;
+  if (view.widget === "char") return exec.renderer.getCharInfoDescription(state, view.char.uid).name;
+  return null;
+}
+function historyRecord(exec, state, view, text, answer) {
+  return { actor: speakerName(exec, state, view), text, answer, step: state.stepCount };
+}
+function hasValue(v) {
+  return v !== void 0 && v !== null;
+}
+function applyAction(exec, state, action, view = currentView(exec, state)) {
+  if (view.widget === "error") {
+    throw new PlayerActionError(`Game is in an error state: ${view.errorText}`);
+  }
+  switch (action.type) {
+    case "continue": {
+      if (view.widget !== "dialog" && view.widget !== "char") {
+        throw new PlayerActionError(`'continue' is only available on dialog or character screens (current: ${view.widget})`);
+      }
+      const mode = continueModeOf(view);
+      if (mode === "next_page") {
+        return exec.advanceDialogPage(state, view.text);
+      }
+      if (mode === "continue_link" && view.continueLink) {
+        if (view.continueLink.disabled) {
+          throw new PlayerActionError(`Continue link is disabled: ${view.continueLink.disabledReason}`);
+        }
+        const record = historyRecord(exec, state, view, view.text, view.continueLink.text);
+        return exec.dialogVariantApply(state, view.continueLink.link, record);
+      }
+      throw new PlayerActionError("Nothing to continue on this screen; choose one of the available links or actions");
+    }
+    case "link": {
+      if (view.widget !== "dialog" && view.widget !== "char" && view.widget !== "location") {
+        throw new PlayerActionError(`'choose_link' is not available on '${view.widget}' screens`);
+      }
+      if ((view.widget === "dialog" || view.widget === "char") && continueModeOf(view) !== null) {
+        throw new PlayerActionError("Use action='continue' to advance the current text before choosing a link");
+      }
+      if (!hasValue(action.index)) {
+        throw new PlayerActionError("'choose_link' requires 'index'");
+      }
+      const chosen = view.links.find((l2) => l2.index === action.index);
+      if (!chosen) {
+        throw new PlayerActionError(`Link index ${action.index} is not available (valid: 0..${Math.max(0, view.links.length - 1)})`);
+      }
+      if (chosen.disabled) {
+        throw new PlayerActionError(`Link ${action.index} ('${chosen.text}') is disabled`);
+      }
+      const text = view.widget === "location" ? "" : view.text;
+      return exec.dialogVariantApply(state, chosen.link, historyRecord(exec, state, view, text, chosen.text));
+    }
+    case "route": {
+      if (view.widget !== "location") {
+        throw new PlayerActionError(`'travel' is only available on location screens (current: ${view.widget})`);
+      }
+      const route = hasValue(action.uid) && action.uid !== "" ? view.routes.find((r2) => r2.destination.uid === action.uid) : hasValue(action.index) ? view.routes.find((r2) => r2.index === action.index) : void 0;
+      if (!route) {
+        throw new PlayerActionError("Matching location route not found; pass a valid route 'index' or 'target_id'");
+      }
+      if (route.disabled) {
+        throw new PlayerActionError(`Route to '${route.name}' (${route.destination.uid}) is disabled`);
+      }
+      return exec.locRouteApply(state, route);
+    }
+    case "zone": {
+      if (view.widget !== "pac") {
+        throw new PlayerActionError(`'click_zone' is only available on point-and-click screens (current: ${view.widget})`);
+      }
+      const zone = hasValue(action.id) && action.id !== "" ? view.items.find((z) => z.zone.id === action.id) : hasValue(action.index) ? view.items[action.index] : void 0;
+      if (!zone) {
+        throw new PlayerActionError("Matching scene zone not found; pass a valid zone 'target_id' or 'index'");
+      }
+      if (zone.disabled) {
+        throw new PlayerActionError(`Zone '${zone.zone.name || zone.zone.id}' is disabled`);
+      }
+      const record = historyRecord(exec, state, view, "", zone.zone.name || zone.zone.id);
+      return exec.pacZoneApply(state, zone.zone, record);
+    }
+    case "discuss": {
+      if (view.widget !== "char") {
+        throw new PlayerActionError(`'discuss' is only available in character conversations (current: ${view.widget})`);
+      }
+      if (continueModeOf(view) !== null) {
+        throw new PlayerActionError("Use action='continue' before starting a discussion topic");
+      }
+      if (!action.topicType || !action.id) {
+        throw new PlayerActionError("'discuss' requires both 'topic_type' ('char'|'fact'|'item'|'loc') and 'target_id'");
+      }
+      const topics = discussTopics(exec, state, view);
+      const pool = { char: topics.people, fact: topics.facts, item: topics.items, loc: topics.places };
+      const list = pool[action.topicType];
+      if (!list) {
+        throw new PlayerActionError(`Unknown topic_type '${action.topicType}'`);
+      }
+      if (!list.some((t) => t.uid === action.id)) {
+        throw new PlayerActionError(`Topic '${action.id}' is not currently discussable under '${action.topicType}'`);
+      }
+      return exec.discuss(state, action.topicType, action.id, view.char.uid);
+    }
+    case "useItem": {
+      if (!canUseItems(state, view)) {
+        throw new PlayerActionError(`'use_item' is only available on dialog screens (current: ${view.widget})`);
+      }
+      if (!action.uid) {
+        throw new PlayerActionError("'use_item' requires 'target_id' (item uid)");
+      }
+      if (!state.carriedItems.some((c) => c.item === action.uid)) {
+        throw new PlayerActionError(`Item '${action.uid}' is not in inventory`);
+      }
+      return exec.useItemInDialog(state, action.uid);
+    }
+    default:
+      throw new PlayerActionError(`Unknown action '${String(action.type)}'`);
+  }
+}
+function inventoryList(exec, state) {
+  return state.carriedItems.map((carried) => {
+    const item = getItemByIdOrUnknown(exec.game.items, carried.item);
+    return {
+      uid: carried.item,
+      name: item.name,
+      description: item.description,
+      quantity: carried.quantity,
+      tags: item.tags ?? [],
+      stats: item.stats ?? {},
+      has_image: Boolean((item.image || item.thumbnail || "").trim())
+    };
+  });
+}
+function factList(exec, state) {
+  return state.knownFacts.map((uid) => {
+    const fact = getFact(exec.game, uid) ?? createEmptyFact(uid);
+    return { uid: fact.uid, short: fact.short, full: fact.full, discussable: fact.discussable };
+  });
+}
+function peopleList(exec, state) {
+  return state.knownPeople.map((uid) => {
+    const descr = exec.renderer.getCharInfoDescription(state, uid);
+    return {
+      uid,
+      name: descr.name,
+      description: descr.description,
+      has_avatar: Boolean(descr.avatar?.trim()),
+      discussable: descr.charObject.discussable
+    };
+  });
+}
+function placeList(exec, state) {
+  const visited = new Set(getVisitedLocations(state));
+  return state.knownPlaces.map((uid) => {
+    const loc = getLoc(exec.game, uid);
+    return { uid, name: loc?.displayName || uid, discussable: loc?.discussable ?? true, visited: visited.has(uid) };
+  });
+}
+var STATE_ARRAYS = [
+  "positionStack",
+  "positionHistory",
+  "shortHistory",
+  "knownFacts",
+  "knownPeople",
+  "knownPlaces",
+  "notifications",
+  "carriedItems",
+  "happenedEvents"
+];
+function validateStateShape(state) {
+  if (!state || typeof state !== "object" || Array.isArray(state)) {
+    throw new Error("State must be an object");
+  }
+  const s = state;
+  if (!s.position || typeof s.position !== "object") {
+    throw new Error("State.position must be an object");
+  }
+  if (!s.props || typeof s.props !== "object" || Array.isArray(s.props)) {
+    throw new Error("State.props must be an object");
+  }
+  if (!s.progress || typeof s.progress !== "object") {
+    throw new Error("State.progress must be an object");
+  }
+  if (typeof s.stepCount !== "number") {
+    throw new Error("State.stepCount must be a number");
+  }
+  for (const key of STATE_ARRAYS) {
+    if (!Array.isArray(s[key])) {
+      throw new Error(`State.${key} must be an array`);
+    }
+  }
+  for (const c of s.carriedItems) {
+    const item = c;
+    if (!item || typeof item.item !== "string" || typeof item.quantity !== "number") {
+      throw new Error("State.carriedItems entries must be {item: string, quantity: number}");
+    }
+  }
+}
+function requireValidPosition(exec, state) {
+  const pos = state.position;
+  const shape = JSON.stringify(pos);
+  if (pos.kind === "window") {
+    if (!exec.getCurrentDialogWindow(state)) {
+      throw new Error(`No dialog window ${shape}; expected {kind:'window', dialog, window} of an existing window`);
+    }
+  } else if (pos.kind === "location") {
+    if (!exec.getCurrentLocation(state)) {
+      throw new Error(`No location ${shape}; expected {kind:'location', location:<loc uid>}`);
+    }
+  } else if (pos.kind === "chardialog") {
+    if (!exec.getCurrentCharDialog(state)) {
+      throw new Error(`No character conversation ${shape}; expected {kind:'chardialog', char:<char uid with a dialog>}`);
+    }
+  } else {
+    throw new Error(`Invalid position ${shape}; kind must be 'window', 'location' or 'chardialog'`);
+  }
+}
+function debugApply(exec, base, options) {
+  validateStateShape(base);
+  let state = JSON.parse(JSON.stringify(base));
+  const hadError = Boolean(state.fatalError);
+  if (options.position) {
+    state.position = options.position;
+    state.dialogPage = 0;
+    state.quickReplyText = null;
+  }
+  requireValidPosition(exec, state);
+  if (state.position.kind === "location") {
+    state.location = state.position.location;
+  } else if (state.position.kind === "chardialog") {
+    state.charDialog = state.position.char;
+  }
+  if (options.script && options.script.trim()) {
+    state = exec.modifyStateScript(state, options.script);
+    if (state.fatalError && !hadError) {
+      throw new Error(`Debug script failed: ${state.fatalError.message}`);
+    }
+  }
+  const runEntry = options.run_entry ?? Boolean(options.position);
+  if (runEntry) {
+    state = exec.executeEntry(state);
+    if (state.fatalError && !hadError) {
+      throw new Error(`Entry of ${JSON.stringify(state.position)} failed: ${state.fatalError.message}`);
+    }
+  }
+  return state;
+}
+
+// ../dialogic/src/game/Patches.ts
+var import_lodash8 = __toESM(require_lodash(), 1);
+
+// ../dialogic/node_modules/unique-names-generator/dist/index.m.js
+var a = (a2) => {
+  a2 = 1831565813 + (a2 |= 0) | 0;
+  let e2 = Math.imul(a2 ^ a2 >>> 15, 1 | a2);
+  return e2 = e2 + Math.imul(e2 ^ e2 >>> 7, 61 | e2) ^ e2, ((e2 ^ e2 >>> 14) >>> 0) / 4294967296;
+};
+var e = class {
+  constructor(a2) {
+    this.dictionaries = void 0, this.length = void 0, this.separator = void 0, this.style = void 0, this.seed = void 0;
+    const { length: e2, separator: i2, dictionaries: n2, style: l2, seed: r2 } = a2;
+    this.dictionaries = n2, this.separator = i2, this.length = e2, this.style = l2, this.seed = r2;
+  }
+  generate() {
+    if (!this.dictionaries) throw new Error('Cannot find any dictionary. Please provide at least one, or leave the "dictionary" field empty in the config object');
+    if (this.length <= 0) throw new Error("Invalid length provided");
+    if (this.length > this.dictionaries.length) throw new Error(`The length cannot be bigger than the number of dictionaries.
+Length provided: ${this.length}. Number of dictionaries provided: ${this.dictionaries.length}`);
+    let e2 = this.seed;
+    return this.dictionaries.slice(0, this.length).reduce((i2, n2) => {
+      let l2;
+      e2 ? (l2 = ((e3) => {
+        if ("string" == typeof e3) {
+          const i3 = e3.split("").map((a2) => a2.charCodeAt(0)).reduce((a2, e4) => a2 + e4, 1), n3 = Math.floor(Number(i3));
+          return a(n3);
+        }
+        return a(e3);
+      })(e2), e2 = 4294967296 * l2) : l2 = Math.random();
+      let r2 = n2[Math.floor(l2 * n2.length)] || "";
+      if ("lowerCase" === this.style) r2 = r2.toLowerCase();
+      else if ("capital" === this.style) {
+        const [a2, ...e3] = r2.split("");
+        r2 = a2.toUpperCase() + e3.join("");
+      } else "upperCase" === this.style && (r2 = r2.toUpperCase());
+      return i2 ? `${i2}${this.separator}${r2}` : `${r2}`;
+    }, "");
+  }
+};
+var i = { separator: "_", dictionaries: [] };
+var n = (a2) => {
+  const n2 = [...a2 && a2.dictionaries || i.dictionaries], l2 = { ...i, ...a2, length: a2 && a2.length || n2.length, dictionaries: n2 };
+  if (!a2 || !a2.dictionaries || !a2.dictionaries.length) throw new Error('A "dictionaries" array must be provided. This is a breaking change introduced starting from Unique Name Generator v4. Read more about the breaking change here: https://github.com/andreasonny83/unique-names-generator#migration-guide');
+  return new e(l2).generate();
+};
+var l = ["able", "above", "absent", "absolute", "abstract", "abundant", "academic", "acceptable", "accepted", "accessible", "accurate", "accused", "active", "actual", "acute", "added", "additional", "adequate", "adjacent", "administrative", "adorable", "advanced", "adverse", "advisory", "aesthetic", "afraid", "aggregate", "aggressive", "agreeable", "agreed", "agricultural", "alert", "alive", "alleged", "allied", "alone", "alright", "alternative", "amateur", "amazing", "ambitious", "amused", "ancient", "angry", "annoyed", "annual", "anonymous", "anxious", "appalling", "apparent", "applicable", "appropriate", "arbitrary", "architectural", "armed", "arrogant", "artificial", "artistic", "ashamed", "asleep", "assistant", "associated", "atomic", "attractive", "automatic", "autonomous", "available", "average", "awake", "aware", "awful", "awkward", "back", "bad", "balanced", "bare", "basic", "beautiful", "beneficial", "better", "bewildered", "big", "binding", "biological", "bitter", "bizarre", "blank", "blind", "blonde", "bloody", "blushing", "boiling", "bold", "bored", "boring", "bottom", "brainy", "brave", "breakable", "breezy", "brief", "bright", "brilliant", "broad", "broken", "bumpy", "burning", "busy", "calm", "capable", "capitalist", "careful", "casual", "causal", "cautious", "central", "certain", "changing", "characteristic", "charming", "cheap", "cheerful", "chemical", "chief", "chilly", "chosen", "christian", "chronic", "chubby", "circular", "civic", "civil", "civilian", "classic", "classical", "clean", "clear", "clever", "clinical", "close", "closed", "cloudy", "clumsy", "coastal", "cognitive", "coherent", "cold", "collective", "colonial", "colorful", "colossal", "coloured", "colourful", "combative", "combined", "comfortable", "coming", "commercial", "common", "communist", "compact", "comparable", "comparative", "compatible", "competent", "competitive", "complete", "complex", "complicated", "comprehensive", "compulsory", "conceptual", "concerned", "concrete", "condemned", "confident", "confidential", "confused", "conscious", "conservation", "conservative", "considerable", "consistent", "constant", "constitutional", "contemporary", "content", "continental", "continued", "continuing", "continuous", "controlled", "controversial", "convenient", "conventional", "convinced", "convincing", "cooing", "cool", "cooperative", "corporate", "correct", "corresponding", "costly", "courageous", "crazy", "creative", "creepy", "criminal", "critical", "crooked", "crowded", "crucial", "crude", "cruel", "cuddly", "cultural", "curious", "curly", "current", "curved", "cute", "daily", "damaged", "damp", "dangerous", "dark", "dead", "deaf", "deafening", "dear", "decent", "decisive", "deep", "defeated", "defensive", "defiant", "definite", "deliberate", "delicate", "delicious", "delighted", "delightful", "democratic", "dependent", "depressed", "desirable", "desperate", "detailed", "determined", "developed", "developing", "devoted", "different", "difficult", "digital", "diplomatic", "direct", "dirty", "disabled", "disappointed", "disastrous", "disciplinary", "disgusted", "distant", "distinct", "distinctive", "distinguished", "disturbed", "disturbing", "diverse", "divine", "dizzy", "domestic", "dominant", "double", "doubtful", "drab", "dramatic", "dreadful", "driving", "drunk", "dry", "dual", "due", "dull", "dusty", "dutch", "dying", "dynamic", "eager", "early", "eastern", "easy", "economic", "educational", "eerie", "effective", "efficient", "elaborate", "elated", "elderly", "eldest", "electoral", "electric", "electrical", "electronic", "elegant", "eligible", "embarrassed", "embarrassing", "emotional", "empirical", "empty", "enchanting", "encouraging", "endless", "energetic", "enormous", "enthusiastic", "entire", "entitled", "envious", "environmental", "equal", "equivalent", "essential", "established", "estimated", "ethical", "ethnic", "eventual", "everyday", "evident", "evil", "evolutionary", "exact", "excellent", "exceptional", "excess", "excessive", "excited", "exciting", "exclusive", "existing", "exotic", "expected", "expensive", "experienced", "experimental", "explicit", "extended", "extensive", "external", "extra", "extraordinary", "extreme", "exuberant", "faint", "fair", "faithful", "familiar", "famous", "fancy", "fantastic", "far", "fascinating", "fashionable", "fast", "fat", "fatal", "favourable", "favourite", "federal", "fellow", "female", "feminist", "few", "fierce", "filthy", "final", "financial", "fine", "firm", "fiscal", "fit", "fixed", "flaky", "flat", "flexible", "fluffy", "fluttering", "flying", "following", "fond", "foolish", "foreign", "formal", "formidable", "forthcoming", "fortunate", "forward", "fragile", "frail", "frantic", "free", "frequent", "fresh", "friendly", "frightened", "front", "frozen", "full", "fun", "functional", "fundamental", "funny", "furious", "future", "fuzzy", "gastric", "gay", "general", "generous", "genetic", "gentle", "genuine", "geographical", "giant", "gigantic", "given", "glad", "glamorous", "gleaming", "global", "glorious", "golden", "good", "gorgeous", "gothic", "governing", "graceful", "gradual", "grand", "grateful", "greasy", "great", "grieving", "grim", "gross", "grotesque", "growing", "grubby", "grumpy", "guilty", "handicapped", "handsome", "happy", "hard", "harsh", "head", "healthy", "heavy", "helpful", "helpless", "hidden", "high", "hilarious", "hissing", "historic", "historical", "hollow", "holy", "homeless", "homely", "hon", "honest", "horizontal", "horrible", "hostile", "hot", "huge", "human", "hungry", "hurt", "hushed", "husky", "icy", "ideal", "identical", "ideological", "ill", "illegal", "imaginative", "immediate", "immense", "imperial", "implicit", "important", "impossible", "impressed", "impressive", "improved", "inadequate", "inappropriate", "inc", "inclined", "increased", "increasing", "incredible", "independent", "indirect", "individual", "industrial", "inevitable", "influential", "informal", "inherent", "initial", "injured", "inland", "inner", "innocent", "innovative", "inquisitive", "instant", "institutional", "insufficient", "intact", "integral", "integrated", "intellectual", "intelligent", "intense", "intensive", "interested", "interesting", "interim", "interior", "intermediate", "internal", "international", "intimate", "invisible", "involved", "irrelevant", "isolated", "itchy", "jealous", "jittery", "joint", "jolly", "joyous", "judicial", "juicy", "junior", "just", "keen", "key", "kind", "known", "labour", "large", "late", "latin", "lazy", "leading", "left", "legal", "legislative", "legitimate", "lengthy", "lesser", "level", "lexical", "liable", "liberal", "light", "like", "likely", "limited", "linear", "linguistic", "liquid", "literary", "little", "live", "lively", "living", "local", "logical", "lonely", "long", "loose", "lost", "loud", "lovely", "low", "loyal", "ltd", "lucky", "mad", "magic", "magnetic", "magnificent", "main", "major", "male", "mammoth", "managerial", "managing", "manual", "many", "marginal", "marine", "marked", "married", "marvellous", "marxist", "mass", "massive", "mathematical", "mature", "maximum", "mean", "meaningful", "mechanical", "medical", "medieval", "melodic", "melted", "mental", "mere", "metropolitan", "mid", "middle", "mighty", "mild", "military", "miniature", "minimal", "minimum", "ministerial", "minor", "miserable", "misleading", "missing", "misty", "mixed", "moaning", "mobile", "moderate", "modern", "modest", "molecular", "monetary", "monthly", "moral", "motionless", "muddy", "multiple", "mushy", "musical", "mute", "mutual", "mysterious", "naked", "narrow", "nasty", "national", "native", "natural", "naughty", "naval", "near", "nearby", "neat", "necessary", "negative", "neighbouring", "nervous", "net", "neutral", "new", "nice", "noble", "noisy", "normal", "northern", "nosy", "notable", "novel", "nuclear", "numerous", "nursing", "nutritious", "nutty", "obedient", "objective", "obliged", "obnoxious", "obvious", "occasional", "occupational", "odd", "official", "ok", "okay", "old", "olympic", "only", "open", "operational", "opposite", "optimistic", "oral", "ordinary", "organic", "organisational", "original", "orthodox", "other", "outdoor", "outer", "outrageous", "outside", "outstanding", "overall", "overseas", "overwhelming", "painful", "pale", "panicky", "parallel", "parental", "parliamentary", "partial", "particular", "passing", "passive", "past", "patient", "payable", "peaceful", "peculiar", "perfect", "permanent", "persistent", "personal", "petite", "philosophical", "physical", "plain", "planned", "plastic", "pleasant", "pleased", "poised", "polite", "political", "poor", "popular", "positive", "possible", "potential", "powerful", "practical", "precious", "precise", "preferred", "pregnant", "preliminary", "premier", "prepared", "present", "presidential", "pretty", "previous", "prickly", "primary", "prime", "primitive", "principal", "printed", "prior", "private", "probable", "productive", "professional", "profitable", "profound", "progressive", "prominent", "promising", "proper", "proposed", "prospective", "protective", "protestant", "proud", "provincial", "psychiatric", "psychological", "public", "puny", "pure", "purring", "puzzled", "quaint", "qualified", "quarrelsome", "querulous", "quick", "quickest", "quiet", "quintessential", "quixotic", "racial", "radical", "rainy", "random", "rapid", "rare", "raspy", "rational", "ratty", "raw", "ready", "real", "realistic", "rear", "reasonable", "recent", "reduced", "redundant", "regional", "registered", "regular", "regulatory", "related", "relative", "relaxed", "relevant", "reliable", "relieved", "religious", "reluctant", "remaining", "remarkable", "remote", "renewed", "representative", "repulsive", "required", "resident", "residential", "resonant", "respectable", "respective", "responsible", "resulting", "retail", "retired", "revolutionary", "rich", "ridiculous", "right", "rigid", "ripe", "rising", "rival", "roasted", "robust", "rolling", "romantic", "rotten", "rough", "round", "royal", "rubber", "rude", "ruling", "running", "rural", "sacred", "sad", "safe", "salty", "satisfactory", "satisfied", "scared", "scary", "scattered", "scientific", "scornful", "scrawny", "screeching", "secondary", "secret", "secure", "select", "selected", "selective", "selfish", "semantic", "senior", "sensible", "sensitive", "separate", "serious", "severe", "sexual", "shaggy", "shaky", "shallow", "shared", "sharp", "sheer", "shiny", "shivering", "shocked", "short", "shrill", "shy", "sick", "significant", "silent", "silky", "silly", "similar", "simple", "single", "skilled", "skinny", "sleepy", "slight", "slim", "slimy", "slippery", "slow", "small", "smart", "smiling", "smoggy", "smooth", "social", "socialist", "soft", "solar", "sole", "solid", "sophisticated", "sore", "sorry", "sound", "sour", "southern", "soviet", "spare", "sparkling", "spatial", "special", "specific", "specified", "spectacular", "spicy", "spiritual", "splendid", "spontaneous", "sporting", "spotless", "spotty", "square", "squealing", "stable", "stale", "standard", "static", "statistical", "statutory", "steady", "steep", "sticky", "stiff", "still", "stingy", "stormy", "straight", "straightforward", "strange", "strategic", "strict", "striking", "striped", "strong", "structural", "stuck", "stupid", "subjective", "subsequent", "substantial", "subtle", "successful", "successive", "sudden", "sufficient", "suitable", "sunny", "super", "superb", "superior", "supporting", "supposed", "supreme", "sure", "surprised", "surprising", "surrounding", "surviving", "suspicious", "sweet", "swift", "symbolic", "sympathetic", "systematic", "tall", "tame", "tart", "tasteless", "tasty", "technical", "technological", "teenage", "temporary", "tender", "tense", "terrible", "territorial", "testy", "then", "theoretical", "thick", "thin", "thirsty", "thorough", "thoughtful", "thoughtless", "thundering", "tight", "tiny", "tired", "top", "tory", "total", "tough", "toxic", "traditional", "tragic", "tremendous", "tricky", "tropical", "troubled", "typical", "ugliest", "ugly", "ultimate", "unable", "unacceptable", "unaware", "uncertain", "unchanged", "uncomfortable", "unconscious", "underground", "underlying", "unemployed", "uneven", "unexpected", "unfair", "unfortunate", "unhappy", "uniform", "uninterested", "unique", "united", "universal", "unknown", "unlikely", "unnecessary", "unpleasant", "unsightly", "unusual", "unwilling", "upper", "upset", "uptight", "urban", "urgent", "used", "useful", "useless", "usual", "vague", "valid", "valuable", "variable", "varied", "various", "varying", "vast", "verbal", "vertical", "very", "vicarious", "vicious", "victorious", "violent", "visible", "visiting", "visual", "vital", "vitreous", "vivacious", "vivid", "vocal", "vocational", "voiceless", "voluminous", "voluntary", "vulnerable", "wandering", "warm", "wasteful", "watery", "weak", "wealthy", "weary", "wee", "weekly", "weird", "welcome", "well", "western", "wet", "whispering", "whole", "wicked", "wide", "widespread", "wild", "wilful", "willing", "willowy", "wily", "wise", "wispy", "wittering", "witty", "wonderful", "wooden", "working", "worldwide", "worried", "worrying", "worthwhile", "worthy", "written", "wrong", "xenacious", "xenial", "xenogeneic", "xenophobic", "xeric", "xerothermic", "yabbering", "yammering", "yappiest", "yappy", "yawning", "yearling", "yearning", "yeasty", "yelling", "yelping", "yielding", "yodelling", "young", "youngest", "youthful", "ytterbic", "yucky", "yummy", "zany", "zealous", "zeroth", "zestful", "zesty", "zippy", "zonal", "zoophagous", "zygomorphic", "zygotic"];
+var r = ["aardvark", "aardwolf", "albatross", "alligator", "alpaca", "amphibian", "anaconda", "angelfish", "anglerfish", "ant", "anteater", "antelope", "antlion", "ape", "aphid", "armadillo", "asp", "baboon", "badger", "bandicoot", "barnacle", "barracuda", "basilisk", "bass", "bat", "bear", "beaver", "bedbug", "bee", "beetle", "bird", "bison", "blackbird", "boa", "boar", "bobcat", "bobolink", "bonobo", "booby", "bovid", "bug", "butterfly", "buzzard", "camel", "canid", "canidae", "capybara", "cardinal", "caribou", "carp", "cat", "caterpillar", "catfish", "catshark", "cattle", "centipede", "cephalopod", "chameleon", "cheetah", "chickadee", "chicken", "chimpanzee", "chinchilla", "chipmunk", "cicada", "clam", "clownfish", "cobra", "cockroach", "cod", "condor", "constrictor", "coral", "cougar", "cow", "coyote", "crab", "crane", "crawdad", "crayfish", "cricket", "crocodile", "crow", "cuckoo", "damselfly", "deer", "dingo", "dinosaur", "dog", "dolphin", "donkey", "dormouse", "dove", "dragon", "dragonfly", "duck", "eagle", "earthworm", "earwig", "echidna", "eel", "egret", "elephant", "elk", "emu", "ermine", "falcon", "felidae", "ferret", "finch", "firefly", "fish", "flamingo", "flea", "fly", "flyingfish", "fowl", "fox", "frog", "galliform", "gamefowl", "gayal", "gazelle", "gecko", "gerbil", "gibbon", "giraffe", "goat", "goldfish", "goose", "gopher", "gorilla", "grasshopper", "grouse", "guan", "guanaco", "guineafowl", "gull", "guppy", "haddock", "halibut", "hamster", "hare", "harrier", "hawk", "hedgehog", "heron", "herring", "hippopotamus", "hookworm", "hornet", "horse", "hoverfly", "hummingbird", "hyena", "iguana", "impala", "jackal", "jaguar", "jay", "jellyfish", "junglefowl", "kangaroo", "kingfisher", "kite", "kiwi", "koala", "koi", "krill", "ladybug", "lamprey", "landfowl", "lark", "leech", "lemming", "lemur", "leopard", "leopon", "limpet", "lion", "lizard", "llama", "lobster", "locust", "loon", "louse", "lungfish", "lynx", "macaw", "mackerel", "magpie", "mammal", "manatee", "mandrill", "marlin", "marmoset", "marmot", "marsupial", "marten", "mastodon", "meadowlark", "meerkat", "mink", "minnow", "mite", "mockingbird", "mole", "mollusk", "mongoose", "monkey", "moose", "mosquito", "moth", "mouse", "mule", "muskox", "narwhal", "newt", "nightingale", "ocelot", "octopus", "opossum", "orangutan", "orca", "ostrich", "otter", "owl", "ox", "panda", "panther", "parakeet", "parrot", "parrotfish", "partridge", "peacock", "peafowl", "pelican", "penguin", "perch", "pheasant", "pig", "pigeon", "pike", "pinniped", "piranha", "planarian", "platypus", "pony", "porcupine", "porpoise", "possum", "prawn", "primate", "ptarmigan", "puffin", "puma", "python", "quail", "quelea", "quokka", "rabbit", "raccoon", "rat", "rattlesnake", "raven", "reindeer", "reptile", "rhinoceros", "roadrunner", "rodent", "rook", "rooster", "roundworm", "sailfish", "salamander", "salmon", "sawfish", "scallop", "scorpion", "seahorse", "shark", "sheep", "shrew", "shrimp", "silkworm", "silverfish", "skink", "skunk", "sloth", "slug", "smelt", "snail", "snake", "snipe", "sole", "sparrow", "spider", "spoonbill", "squid", "squirrel", "starfish", "stingray", "stoat", "stork", "sturgeon", "swallow", "swan", "swift", "swordfish", "swordtail", "tahr", "takin", "tapir", "tarantula", "tarsier", "termite", "tern", "thrush", "tick", "tiger", "tiglon", "toad", "tortoise", "toucan", "trout", "tuna", "turkey", "turtle", "tyrannosaurus", "unicorn", "urial", "vicuna", "viper", "vole", "vulture", "wallaby", "walrus", "warbler", "wasp", "weasel", "whale", "whippet", "whitefish", "wildcat", "wildebeest", "wildfowl", "wolf", "wolverine", "wombat", "woodpecker", "worm", "wren", "xerinae", "yak", "zebra"];
+
 // ../dialogic/src/exec/Localization.ts
 var import_lodash7 = __toESM(require_lodash(), 1);
 function createTranslations() {
@@ -10255,55 +10626,6 @@ function createDefaultDevConfig() {
     basicPromptSuffix: ""
   };
 }
-
-// ../dialogic/src/game/Patches.ts
-var import_lodash8 = __toESM(require_lodash(), 1);
-
-// ../dialogic/node_modules/unique-names-generator/dist/index.m.js
-var a = (a2) => {
-  a2 = 1831565813 + (a2 |= 0) | 0;
-  let e2 = Math.imul(a2 ^ a2 >>> 15, 1 | a2);
-  return e2 = e2 + Math.imul(e2 ^ e2 >>> 7, 61 | e2) ^ e2, ((e2 ^ e2 >>> 14) >>> 0) / 4294967296;
-};
-var e = class {
-  constructor(a2) {
-    this.dictionaries = void 0, this.length = void 0, this.separator = void 0, this.style = void 0, this.seed = void 0;
-    const { length: e2, separator: i2, dictionaries: n2, style: l2, seed: r2 } = a2;
-    this.dictionaries = n2, this.separator = i2, this.length = e2, this.style = l2, this.seed = r2;
-  }
-  generate() {
-    if (!this.dictionaries) throw new Error('Cannot find any dictionary. Please provide at least one, or leave the "dictionary" field empty in the config object');
-    if (this.length <= 0) throw new Error("Invalid length provided");
-    if (this.length > this.dictionaries.length) throw new Error(`The length cannot be bigger than the number of dictionaries.
-Length provided: ${this.length}. Number of dictionaries provided: ${this.dictionaries.length}`);
-    let e2 = this.seed;
-    return this.dictionaries.slice(0, this.length).reduce((i2, n2) => {
-      let l2;
-      e2 ? (l2 = ((e3) => {
-        if ("string" == typeof e3) {
-          const i3 = e3.split("").map((a2) => a2.charCodeAt(0)).reduce((a2, e4) => a2 + e4, 1), n3 = Math.floor(Number(i3));
-          return a(n3);
-        }
-        return a(e3);
-      })(e2), e2 = 4294967296 * l2) : l2 = Math.random();
-      let r2 = n2[Math.floor(l2 * n2.length)] || "";
-      if ("lowerCase" === this.style) r2 = r2.toLowerCase();
-      else if ("capital" === this.style) {
-        const [a2, ...e3] = r2.split("");
-        r2 = a2.toUpperCase() + e3.join("");
-      } else "upperCase" === this.style && (r2 = r2.toUpperCase());
-      return i2 ? `${i2}${this.separator}${r2}` : `${r2}`;
-    }, "");
-  }
-};
-var i = { separator: "_", dictionaries: [] };
-var n = (a2) => {
-  const n2 = [...a2 && a2.dictionaries || i.dictionaries], l2 = { ...i, ...a2, length: a2 && a2.length || n2.length, dictionaries: n2 };
-  if (!a2 || !a2.dictionaries || !a2.dictionaries.length) throw new Error('A "dictionaries" array must be provided. This is a breaking change introduced starting from Unique Name Generator v4. Read more about the breaking change here: https://github.com/andreasonny83/unique-names-generator#migration-guide');
-  return new e(l2).generate();
-};
-var l = ["able", "above", "absent", "absolute", "abstract", "abundant", "academic", "acceptable", "accepted", "accessible", "accurate", "accused", "active", "actual", "acute", "added", "additional", "adequate", "adjacent", "administrative", "adorable", "advanced", "adverse", "advisory", "aesthetic", "afraid", "aggregate", "aggressive", "agreeable", "agreed", "agricultural", "alert", "alive", "alleged", "allied", "alone", "alright", "alternative", "amateur", "amazing", "ambitious", "amused", "ancient", "angry", "annoyed", "annual", "anonymous", "anxious", "appalling", "apparent", "applicable", "appropriate", "arbitrary", "architectural", "armed", "arrogant", "artificial", "artistic", "ashamed", "asleep", "assistant", "associated", "atomic", "attractive", "automatic", "autonomous", "available", "average", "awake", "aware", "awful", "awkward", "back", "bad", "balanced", "bare", "basic", "beautiful", "beneficial", "better", "bewildered", "big", "binding", "biological", "bitter", "bizarre", "blank", "blind", "blonde", "bloody", "blushing", "boiling", "bold", "bored", "boring", "bottom", "brainy", "brave", "breakable", "breezy", "brief", "bright", "brilliant", "broad", "broken", "bumpy", "burning", "busy", "calm", "capable", "capitalist", "careful", "casual", "causal", "cautious", "central", "certain", "changing", "characteristic", "charming", "cheap", "cheerful", "chemical", "chief", "chilly", "chosen", "christian", "chronic", "chubby", "circular", "civic", "civil", "civilian", "classic", "classical", "clean", "clear", "clever", "clinical", "close", "closed", "cloudy", "clumsy", "coastal", "cognitive", "coherent", "cold", "collective", "colonial", "colorful", "colossal", "coloured", "colourful", "combative", "combined", "comfortable", "coming", "commercial", "common", "communist", "compact", "comparable", "comparative", "compatible", "competent", "competitive", "complete", "complex", "complicated", "comprehensive", "compulsory", "conceptual", "concerned", "concrete", "condemned", "confident", "confidential", "confused", "conscious", "conservation", "conservative", "considerable", "consistent", "constant", "constitutional", "contemporary", "content", "continental", "continued", "continuing", "continuous", "controlled", "controversial", "convenient", "conventional", "convinced", "convincing", "cooing", "cool", "cooperative", "corporate", "correct", "corresponding", "costly", "courageous", "crazy", "creative", "creepy", "criminal", "critical", "crooked", "crowded", "crucial", "crude", "cruel", "cuddly", "cultural", "curious", "curly", "current", "curved", "cute", "daily", "damaged", "damp", "dangerous", "dark", "dead", "deaf", "deafening", "dear", "decent", "decisive", "deep", "defeated", "defensive", "defiant", "definite", "deliberate", "delicate", "delicious", "delighted", "delightful", "democratic", "dependent", "depressed", "desirable", "desperate", "detailed", "determined", "developed", "developing", "devoted", "different", "difficult", "digital", "diplomatic", "direct", "dirty", "disabled", "disappointed", "disastrous", "disciplinary", "disgusted", "distant", "distinct", "distinctive", "distinguished", "disturbed", "disturbing", "diverse", "divine", "dizzy", "domestic", "dominant", "double", "doubtful", "drab", "dramatic", "dreadful", "driving", "drunk", "dry", "dual", "due", "dull", "dusty", "dutch", "dying", "dynamic", "eager", "early", "eastern", "easy", "economic", "educational", "eerie", "effective", "efficient", "elaborate", "elated", "elderly", "eldest", "electoral", "electric", "electrical", "electronic", "elegant", "eligible", "embarrassed", "embarrassing", "emotional", "empirical", "empty", "enchanting", "encouraging", "endless", "energetic", "enormous", "enthusiastic", "entire", "entitled", "envious", "environmental", "equal", "equivalent", "essential", "established", "estimated", "ethical", "ethnic", "eventual", "everyday", "evident", "evil", "evolutionary", "exact", "excellent", "exceptional", "excess", "excessive", "excited", "exciting", "exclusive", "existing", "exotic", "expected", "expensive", "experienced", "experimental", "explicit", "extended", "extensive", "external", "extra", "extraordinary", "extreme", "exuberant", "faint", "fair", "faithful", "familiar", "famous", "fancy", "fantastic", "far", "fascinating", "fashionable", "fast", "fat", "fatal", "favourable", "favourite", "federal", "fellow", "female", "feminist", "few", "fierce", "filthy", "final", "financial", "fine", "firm", "fiscal", "fit", "fixed", "flaky", "flat", "flexible", "fluffy", "fluttering", "flying", "following", "fond", "foolish", "foreign", "formal", "formidable", "forthcoming", "fortunate", "forward", "fragile", "frail", "frantic", "free", "frequent", "fresh", "friendly", "frightened", "front", "frozen", "full", "fun", "functional", "fundamental", "funny", "furious", "future", "fuzzy", "gastric", "gay", "general", "generous", "genetic", "gentle", "genuine", "geographical", "giant", "gigantic", "given", "glad", "glamorous", "gleaming", "global", "glorious", "golden", "good", "gorgeous", "gothic", "governing", "graceful", "gradual", "grand", "grateful", "greasy", "great", "grieving", "grim", "gross", "grotesque", "growing", "grubby", "grumpy", "guilty", "handicapped", "handsome", "happy", "hard", "harsh", "head", "healthy", "heavy", "helpful", "helpless", "hidden", "high", "hilarious", "hissing", "historic", "historical", "hollow", "holy", "homeless", "homely", "hon", "honest", "horizontal", "horrible", "hostile", "hot", "huge", "human", "hungry", "hurt", "hushed", "husky", "icy", "ideal", "identical", "ideological", "ill", "illegal", "imaginative", "immediate", "immense", "imperial", "implicit", "important", "impossible", "impressed", "impressive", "improved", "inadequate", "inappropriate", "inc", "inclined", "increased", "increasing", "incredible", "independent", "indirect", "individual", "industrial", "inevitable", "influential", "informal", "inherent", "initial", "injured", "inland", "inner", "innocent", "innovative", "inquisitive", "instant", "institutional", "insufficient", "intact", "integral", "integrated", "intellectual", "intelligent", "intense", "intensive", "interested", "interesting", "interim", "interior", "intermediate", "internal", "international", "intimate", "invisible", "involved", "irrelevant", "isolated", "itchy", "jealous", "jittery", "joint", "jolly", "joyous", "judicial", "juicy", "junior", "just", "keen", "key", "kind", "known", "labour", "large", "late", "latin", "lazy", "leading", "left", "legal", "legislative", "legitimate", "lengthy", "lesser", "level", "lexical", "liable", "liberal", "light", "like", "likely", "limited", "linear", "linguistic", "liquid", "literary", "little", "live", "lively", "living", "local", "logical", "lonely", "long", "loose", "lost", "loud", "lovely", "low", "loyal", "ltd", "lucky", "mad", "magic", "magnetic", "magnificent", "main", "major", "male", "mammoth", "managerial", "managing", "manual", "many", "marginal", "marine", "marked", "married", "marvellous", "marxist", "mass", "massive", "mathematical", "mature", "maximum", "mean", "meaningful", "mechanical", "medical", "medieval", "melodic", "melted", "mental", "mere", "metropolitan", "mid", "middle", "mighty", "mild", "military", "miniature", "minimal", "minimum", "ministerial", "minor", "miserable", "misleading", "missing", "misty", "mixed", "moaning", "mobile", "moderate", "modern", "modest", "molecular", "monetary", "monthly", "moral", "motionless", "muddy", "multiple", "mushy", "musical", "mute", "mutual", "mysterious", "naked", "narrow", "nasty", "national", "native", "natural", "naughty", "naval", "near", "nearby", "neat", "necessary", "negative", "neighbouring", "nervous", "net", "neutral", "new", "nice", "noble", "noisy", "normal", "northern", "nosy", "notable", "novel", "nuclear", "numerous", "nursing", "nutritious", "nutty", "obedient", "objective", "obliged", "obnoxious", "obvious", "occasional", "occupational", "odd", "official", "ok", "okay", "old", "olympic", "only", "open", "operational", "opposite", "optimistic", "oral", "ordinary", "organic", "organisational", "original", "orthodox", "other", "outdoor", "outer", "outrageous", "outside", "outstanding", "overall", "overseas", "overwhelming", "painful", "pale", "panicky", "parallel", "parental", "parliamentary", "partial", "particular", "passing", "passive", "past", "patient", "payable", "peaceful", "peculiar", "perfect", "permanent", "persistent", "personal", "petite", "philosophical", "physical", "plain", "planned", "plastic", "pleasant", "pleased", "poised", "polite", "political", "poor", "popular", "positive", "possible", "potential", "powerful", "practical", "precious", "precise", "preferred", "pregnant", "preliminary", "premier", "prepared", "present", "presidential", "pretty", "previous", "prickly", "primary", "prime", "primitive", "principal", "printed", "prior", "private", "probable", "productive", "professional", "profitable", "profound", "progressive", "prominent", "promising", "proper", "proposed", "prospective", "protective", "protestant", "proud", "provincial", "psychiatric", "psychological", "public", "puny", "pure", "purring", "puzzled", "quaint", "qualified", "quarrelsome", "querulous", "quick", "quickest", "quiet", "quintessential", "quixotic", "racial", "radical", "rainy", "random", "rapid", "rare", "raspy", "rational", "ratty", "raw", "ready", "real", "realistic", "rear", "reasonable", "recent", "reduced", "redundant", "regional", "registered", "regular", "regulatory", "related", "relative", "relaxed", "relevant", "reliable", "relieved", "religious", "reluctant", "remaining", "remarkable", "remote", "renewed", "representative", "repulsive", "required", "resident", "residential", "resonant", "respectable", "respective", "responsible", "resulting", "retail", "retired", "revolutionary", "rich", "ridiculous", "right", "rigid", "ripe", "rising", "rival", "roasted", "robust", "rolling", "romantic", "rotten", "rough", "round", "royal", "rubber", "rude", "ruling", "running", "rural", "sacred", "sad", "safe", "salty", "satisfactory", "satisfied", "scared", "scary", "scattered", "scientific", "scornful", "scrawny", "screeching", "secondary", "secret", "secure", "select", "selected", "selective", "selfish", "semantic", "senior", "sensible", "sensitive", "separate", "serious", "severe", "sexual", "shaggy", "shaky", "shallow", "shared", "sharp", "sheer", "shiny", "shivering", "shocked", "short", "shrill", "shy", "sick", "significant", "silent", "silky", "silly", "similar", "simple", "single", "skilled", "skinny", "sleepy", "slight", "slim", "slimy", "slippery", "slow", "small", "smart", "smiling", "smoggy", "smooth", "social", "socialist", "soft", "solar", "sole", "solid", "sophisticated", "sore", "sorry", "sound", "sour", "southern", "soviet", "spare", "sparkling", "spatial", "special", "specific", "specified", "spectacular", "spicy", "spiritual", "splendid", "spontaneous", "sporting", "spotless", "spotty", "square", "squealing", "stable", "stale", "standard", "static", "statistical", "statutory", "steady", "steep", "sticky", "stiff", "still", "stingy", "stormy", "straight", "straightforward", "strange", "strategic", "strict", "striking", "striped", "strong", "structural", "stuck", "stupid", "subjective", "subsequent", "substantial", "subtle", "successful", "successive", "sudden", "sufficient", "suitable", "sunny", "super", "superb", "superior", "supporting", "supposed", "supreme", "sure", "surprised", "surprising", "surrounding", "surviving", "suspicious", "sweet", "swift", "symbolic", "sympathetic", "systematic", "tall", "tame", "tart", "tasteless", "tasty", "technical", "technological", "teenage", "temporary", "tender", "tense", "terrible", "territorial", "testy", "then", "theoretical", "thick", "thin", "thirsty", "thorough", "thoughtful", "thoughtless", "thundering", "tight", "tiny", "tired", "top", "tory", "total", "tough", "toxic", "traditional", "tragic", "tremendous", "tricky", "tropical", "troubled", "typical", "ugliest", "ugly", "ultimate", "unable", "unacceptable", "unaware", "uncertain", "unchanged", "uncomfortable", "unconscious", "underground", "underlying", "unemployed", "uneven", "unexpected", "unfair", "unfortunate", "unhappy", "uniform", "uninterested", "unique", "united", "universal", "unknown", "unlikely", "unnecessary", "unpleasant", "unsightly", "unusual", "unwilling", "upper", "upset", "uptight", "urban", "urgent", "used", "useful", "useless", "usual", "vague", "valid", "valuable", "variable", "varied", "various", "varying", "vast", "verbal", "vertical", "very", "vicarious", "vicious", "victorious", "violent", "visible", "visiting", "visual", "vital", "vitreous", "vivacious", "vivid", "vocal", "vocational", "voiceless", "voluminous", "voluntary", "vulnerable", "wandering", "warm", "wasteful", "watery", "weak", "wealthy", "weary", "wee", "weekly", "weird", "welcome", "well", "western", "wet", "whispering", "whole", "wicked", "wide", "widespread", "wild", "wilful", "willing", "willowy", "wily", "wise", "wispy", "wittering", "witty", "wonderful", "wooden", "working", "worldwide", "worried", "worrying", "worthwhile", "worthy", "written", "wrong", "xenacious", "xenial", "xenogeneic", "xenophobic", "xeric", "xerothermic", "yabbering", "yammering", "yappiest", "yappy", "yawning", "yearling", "yearning", "yeasty", "yelling", "yelping", "yielding", "yodelling", "young", "youngest", "youthful", "ytterbic", "yucky", "yummy", "zany", "zealous", "zeroth", "zestful", "zesty", "zippy", "zonal", "zoophagous", "zygomorphic", "zygotic"];
-var r = ["aardvark", "aardwolf", "albatross", "alligator", "alpaca", "amphibian", "anaconda", "angelfish", "anglerfish", "ant", "anteater", "antelope", "antlion", "ape", "aphid", "armadillo", "asp", "baboon", "badger", "bandicoot", "barnacle", "barracuda", "basilisk", "bass", "bat", "bear", "beaver", "bedbug", "bee", "beetle", "bird", "bison", "blackbird", "boa", "boar", "bobcat", "bobolink", "bonobo", "booby", "bovid", "bug", "butterfly", "buzzard", "camel", "canid", "canidae", "capybara", "cardinal", "caribou", "carp", "cat", "caterpillar", "catfish", "catshark", "cattle", "centipede", "cephalopod", "chameleon", "cheetah", "chickadee", "chicken", "chimpanzee", "chinchilla", "chipmunk", "cicada", "clam", "clownfish", "cobra", "cockroach", "cod", "condor", "constrictor", "coral", "cougar", "cow", "coyote", "crab", "crane", "crawdad", "crayfish", "cricket", "crocodile", "crow", "cuckoo", "damselfly", "deer", "dingo", "dinosaur", "dog", "dolphin", "donkey", "dormouse", "dove", "dragon", "dragonfly", "duck", "eagle", "earthworm", "earwig", "echidna", "eel", "egret", "elephant", "elk", "emu", "ermine", "falcon", "felidae", "ferret", "finch", "firefly", "fish", "flamingo", "flea", "fly", "flyingfish", "fowl", "fox", "frog", "galliform", "gamefowl", "gayal", "gazelle", "gecko", "gerbil", "gibbon", "giraffe", "goat", "goldfish", "goose", "gopher", "gorilla", "grasshopper", "grouse", "guan", "guanaco", "guineafowl", "gull", "guppy", "haddock", "halibut", "hamster", "hare", "harrier", "hawk", "hedgehog", "heron", "herring", "hippopotamus", "hookworm", "hornet", "horse", "hoverfly", "hummingbird", "hyena", "iguana", "impala", "jackal", "jaguar", "jay", "jellyfish", "junglefowl", "kangaroo", "kingfisher", "kite", "kiwi", "koala", "koi", "krill", "ladybug", "lamprey", "landfowl", "lark", "leech", "lemming", "lemur", "leopard", "leopon", "limpet", "lion", "lizard", "llama", "lobster", "locust", "loon", "louse", "lungfish", "lynx", "macaw", "mackerel", "magpie", "mammal", "manatee", "mandrill", "marlin", "marmoset", "marmot", "marsupial", "marten", "mastodon", "meadowlark", "meerkat", "mink", "minnow", "mite", "mockingbird", "mole", "mollusk", "mongoose", "monkey", "moose", "mosquito", "moth", "mouse", "mule", "muskox", "narwhal", "newt", "nightingale", "ocelot", "octopus", "opossum", "orangutan", "orca", "ostrich", "otter", "owl", "ox", "panda", "panther", "parakeet", "parrot", "parrotfish", "partridge", "peacock", "peafowl", "pelican", "penguin", "perch", "pheasant", "pig", "pigeon", "pike", "pinniped", "piranha", "planarian", "platypus", "pony", "porcupine", "porpoise", "possum", "prawn", "primate", "ptarmigan", "puffin", "puma", "python", "quail", "quelea", "quokka", "rabbit", "raccoon", "rat", "rattlesnake", "raven", "reindeer", "reptile", "rhinoceros", "roadrunner", "rodent", "rook", "rooster", "roundworm", "sailfish", "salamander", "salmon", "sawfish", "scallop", "scorpion", "seahorse", "shark", "sheep", "shrew", "shrimp", "silkworm", "silverfish", "skink", "skunk", "sloth", "slug", "smelt", "snail", "snake", "snipe", "sole", "sparrow", "spider", "spoonbill", "squid", "squirrel", "starfish", "stingray", "stoat", "stork", "sturgeon", "swallow", "swan", "swift", "swordfish", "swordtail", "tahr", "takin", "tapir", "tarantula", "tarsier", "termite", "tern", "thrush", "tick", "tiger", "tiglon", "toad", "tortoise", "toucan", "trout", "tuna", "turkey", "turtle", "tyrannosaurus", "unicorn", "urial", "vicuna", "viper", "vole", "vulture", "wallaby", "walrus", "warbler", "wasp", "weasel", "whale", "whippet", "whitefish", "wildcat", "wildebeest", "wildfowl", "wolf", "wolverine", "wombat", "woodpecker", "worm", "wren", "xerinae", "yak", "zebra"];
 
 // ../dialogic/src/game/Patches.ts
 var PatchFrom04To05 = class {
@@ -10619,6 +10941,46 @@ function loadJsonStringAndPatch(json, currentEngine) {
   }
   return result;
 }
+function normalizeGame(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("Game JSON must be an object");
+  }
+  const obj = { ...raw };
+  if (typeof obj.engineVersion !== "string" || !obj.engineVersion) {
+    obj.engineVersion = ENGINE_VERSION;
+  }
+  const game = loadJsonStringAndPatch(JSON.stringify(obj), ENGINE_VERSION);
+  if (!game.general) {
+    game.general = { name: "Untitled", version: "1.0", description: "", authors: [], extras: {} };
+  }
+  if (!game.general.extras) game.general.extras = {};
+  const g = game;
+  for (const key of [
+    "dialogs",
+    "chars",
+    "roles",
+    "locs",
+    "props",
+    "facts",
+    "items",
+    "events",
+    "eventHosts",
+    "objectives",
+    "situations",
+    "pacWidgets",
+    "functions",
+    "hooks"
+  ]) {
+    if (!Array.isArray(g[key])) g[key] = [];
+  }
+  if (!game.uiElements) game.uiElements = initGameUiElementDescr();
+  if (!Array.isArray(game.uiElements.meters)) game.uiElements.meters = [];
+  if (!game.translations) game.translations = createTranslations();
+  if (!game.config) game.config = createDefaultConfig();
+  if (!game.dev) game.dev = createDefaultDevConfig();
+  if (!game.visuals) game.visuals = createDefaultVisuals();
+  return game;
+}
 function patchGame(parsed, version, currentEngine) {
   const patch = PATCHES.filter((p) => p.from() === version);
   if (patch.length < 1) {
@@ -10641,43 +11003,6 @@ function patchGame(parsed, version, currentEngine) {
 }
 
 // src/session.ts
-function normalizeAndPatchGame(raw) {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("Game JSON must be an object");
-  }
-  const obj = { ...raw };
-  if (typeof obj.engineVersion !== "string" || !obj.engineVersion) {
-    obj.engineVersion = ENGINE_VERSION;
-  }
-  const patched = loadJsonStringAndPatch(JSON.stringify(obj), ENGINE_VERSION);
-  if (!patched.general) {
-    patched.general = { name: "Untitled", version: "1.0", description: "", authors: [], extras: {} };
-  }
-  if (!patched.general.extras) {
-    patched.general.extras = {};
-  }
-  if (!Array.isArray(patched.dialogs)) patched.dialogs = [];
-  if (!Array.isArray(patched.chars)) patched.chars = [];
-  if (!Array.isArray(patched.roles)) patched.roles = [];
-  if (!Array.isArray(patched.locs)) patched.locs = [];
-  if (!Array.isArray(patched.props)) patched.props = [];
-  if (!Array.isArray(patched.facts)) patched.facts = [];
-  if (!Array.isArray(patched.items)) patched.items = [];
-  if (!Array.isArray(patched.events)) patched.events = [];
-  if (!Array.isArray(patched.eventHosts)) patched.eventHosts = [];
-  if (!Array.isArray(patched.objectives)) patched.objectives = [];
-  if (!Array.isArray(patched.situations)) patched.situations = [];
-  if (!Array.isArray(patched.pacWidgets)) patched.pacWidgets = [];
-  if (!Array.isArray(patched.functions)) patched.functions = [];
-  if (!Array.isArray(patched.hooks)) patched.hooks = [];
-  if (!patched.uiElements) patched.uiElements = initGameUiElementDescr();
-  if (!Array.isArray(patched.uiElements.meters)) patched.uiElements.meters = [];
-  if (!patched.translations) patched.translations = createTranslations();
-  if (!patched.config) patched.config = createDefaultConfig();
-  if (!patched.dev) patched.dev = createDefaultDevConfig();
-  if (!patched.visuals) patched.visuals = createDefaultVisuals();
-  return patched;
-}
 function serializeLinks(links) {
   return links.map((l2) => ({
     index: l2.index,
@@ -10686,46 +11011,6 @@ function serializeLinks(links) {
     disabled_reason: l2.disabled ? l2.disabledReason : "",
     visited: l2.visited
   }));
-}
-var STATE_ARRAYS = [
-  "positionStack",
-  "positionHistory",
-  "shortHistory",
-  "knownFacts",
-  "knownPeople",
-  "knownPlaces",
-  "notifications",
-  "carriedItems",
-  "happenedEvents"
-];
-function validateStateShape(state) {
-  if (!state || typeof state !== "object" || Array.isArray(state)) {
-    throw new Error("State must be an object");
-  }
-  const s = state;
-  if (!s.position || typeof s.position !== "object") {
-    throw new Error("State.position must be an object");
-  }
-  if (!s.props || typeof s.props !== "object" || Array.isArray(s.props)) {
-    throw new Error("State.props must be an object");
-  }
-  if (!s.progress || typeof s.progress !== "object") {
-    throw new Error("State.progress must be an object");
-  }
-  if (typeof s.stepCount !== "number") {
-    throw new Error("State.stepCount must be a number");
-  }
-  for (const key of STATE_ARRAYS) {
-    if (!Array.isArray(s[key])) {
-      throw new Error(`State.${key} must be an array`);
-    }
-  }
-  for (const c of s.carriedItems) {
-    const item = c;
-    if (!item || typeof item.item !== "string" || typeof item.quantity !== "number") {
-      throw new Error("State.carriedItems entries must be {item: string, quantity: number}");
-    }
-  }
 }
 var GameSessionRunner = class {
   game = null;
@@ -10739,15 +11024,14 @@ var GameSessionRunner = class {
     return { game: this.game, exec: this.exec, state: this.state };
   }
   init(rawGame, savedState) {
-    this.game = normalizeAndPatchGame(rawGame);
+    this.game = normalizeGame(rawGame);
     this.exec = new GameExecManager(this.game);
     if (savedState) {
       this.state = savedState;
       this.lastBg = savedState.background ?? null;
       return { state: this.state, turn: this.buildTurn(null, []) };
     }
-    const initial = createInitialState(this.game);
-    this.state = this.exec.executeEntry(initial);
+    this.state = newGame(this.exec);
     this.lastBg = null;
     const initialNotifs = this.state.notifications ? [...this.state.notifications] : [];
     return { state: this.state, turn: this.buildTurn(null, initialNotifs) };
@@ -10768,7 +11052,7 @@ var GameSessionRunner = class {
    * finishes with debugApply.
    */
   debugInit(rawGame, position) {
-    this.game = normalizeAndPatchGame(rawGame);
+    this.game = normalizeGame(rawGame);
     this.exec = new GameExecManager(this.game);
     const initial = createInitialState(this.game);
     if (position) {
@@ -10785,93 +11069,15 @@ var GameSessionRunner = class {
    */
   debugApply(base, options) {
     const { exec } = this.mustReady();
-    validateStateShape(base);
-    let state = JSON.parse(JSON.stringify(base));
-    const prevNotifLen = state.notifications.length;
-    const hadError = Boolean(state.fatalError);
-    if (options.position) {
-      state.position = options.position;
-      state.dialogPage = 0;
-      state.quickReplyText = null;
-    }
-    this.requireValidPosition(state);
-    if (state.position.kind === "location") {
-      state.location = state.position.location;
-    } else if (state.position.kind === "chardialog") {
-      state.charDialog = state.position.char;
-    }
-    if (options.script && options.script.trim()) {
-      state = exec.modifyStateScript(state, options.script);
-      if (state.fatalError && !hadError) {
-        throw new Error(`Debug script failed: ${state.fatalError.message}`);
-      }
-    }
-    const runEntry = options.run_entry ?? Boolean(options.position);
-    if (runEntry) {
-      state = exec.executeEntry(state);
-      if (state.fatalError && !hadError) {
-        throw new Error(`Entry of ${JSON.stringify(state.position)} failed: ${state.fatalError.message}`);
-      }
-    }
-    const newNotifications = state.notifications.length > prevNotifLen ? state.notifications.slice(prevNotifLen) : [];
+    const state = debugApply(exec, base, options);
+    const notifs = newNotifications(base, state);
     this.state = state;
     this.lastBg = null;
-    return { state, turn: this.buildTurn(null, newNotifications) };
-  }
-  requireValidPosition(state) {
-    const { exec } = this.mustReady();
-    const pos = state.position;
-    const shape = JSON.stringify(pos);
-    if (pos.kind === "window") {
-      if (!exec.getCurrentDialogWindow(state)) {
-        throw new Error(`No dialog window ${shape}; expected {kind:'window', dialog, window} of an existing window`);
-      }
-    } else if (pos.kind === "location") {
-      if (!exec.getCurrentLocation(state)) {
-        throw new Error(`No location ${shape}; expected {kind:'location', location:<loc uid>}`);
-      }
-    } else if (pos.kind === "chardialog") {
-      if (!exec.getCurrentCharDialog(state)) {
-        throw new Error(`No character conversation ${shape}; expected {kind:'chardialog', char:<char uid with a dialog>}`);
-      }
-    } else {
-      throw new Error(`Invalid position ${shape}; kind must be 'window', 'location' or 'chardialog'`);
-    }
+    return { state, turn: this.buildTurn(null, notifs) };
   }
   getDiscussTopics(state, view) {
-    const { game, exec } = this.mustReady();
-    const people = view.dialogOptions.canDiscussChars ? state.knownPeople.map((uid) => {
-      const descr = exec.renderer.getCharInfoDescription(state, uid);
-      return { uid, name: descr.name, visible: descr.charObject.discussable };
-    }).filter((x) => x.visible).map(({ uid, name }) => ({ uid, name })) : [];
-    const facts = view.dialogOptions.canDiscussFacts ? state.knownFacts.map((uid) => {
-      const fact = getFact(game, uid) ?? createEmptyFact(uid);
-      return { uid: fact.uid, name: fact.short || uid, visible: fact.discussable };
-    }).filter((x) => x.visible).map(({ uid, name }) => ({ uid, name })) : [];
-    const items = view.dialogOptions.canDiscussItems ? state.carriedItems.map((carried) => {
-      const item = getItemByIdOrUnknown(game.items, carried.item);
-      return { uid: carried.item, name: item.name };
-    }) : [];
-    const places = view.dialogOptions.canDiscussLocations ? state.knownPlaces.map((uid) => {
-      const loc = getLoc(game, uid);
-      if (!loc) return { uid, name: uid, visible: true };
-      return { uid, name: loc.displayName || uid, visible: loc.discussable };
-    }).filter((x) => x.visible).map(({ uid, name }) => ({ uid, name })) : [];
-    return { people, facts, items, places };
-  }
-  getUsableItems(state, widget) {
-    if (widget !== "dialog" || state.position.kind !== "window") {
-      return [];
-    }
-    const { game } = this.mustReady();
-    return state.carriedItems.map((carried) => {
-      const item = getItemByIdOrUnknown(game.items, carried.item);
-      return {
-        uid: carried.item,
-        name: item.name,
-        quantity: carried.quantity
-      };
-    });
+    const topics = availableActions(this.mustReady().exec, state, view).discussTopics;
+    return topics ?? { people: [], facts: [], items: [], places: [] };
   }
   collectItemImages(state) {
     const { game } = this.mustReady();
@@ -10885,7 +11091,7 @@ var GameSessionRunner = class {
     }
     return out;
   }
-  buildTurn(prevBg, newNotifications) {
+  buildTurn(prevBg, newNotifications2) {
     const { game, exec, state } = this.mustReady();
     const rendered = exec.renderer.render(state, prevBg);
     const w = rendered.uiWidgetView;
@@ -10904,7 +11110,7 @@ var GameSessionRunner = class {
     let links = [];
     let routes = [];
     let zones = [];
-    let discussTopics = null;
+    let discussTopics2 = null;
     const routeImages = {};
     let effectiveBg = state.background?.trim() ? state.background.trim() : null;
     let positionSummary = "";
@@ -10959,7 +11165,7 @@ var GameSessionRunner = class {
         continueMode = "continue_link";
       } else {
         links = serializeLinks(cw.links);
-        discussTopics = this.getDiscussTopics(state, cw);
+        discussTopics2 = this.getDiscussTopics(state, cw);
       }
       positionSummary = `Talking with ${charInfo.name}`;
     } else if (w.widget === "location") {
@@ -11056,11 +11262,11 @@ var GameSessionRunner = class {
         links,
         routes,
         zones,
-        discuss_topics: discussTopics,
-        usable_items: this.getUsableItems(state, w.widget)
+        discuss_topics: discussTopics2,
+        usable_items: availableActions(exec, state, w).usableItems
       },
       hud,
-      new_notifications: newNotifications,
+      new_notifications: newNotifications2,
       counts: {
         items: state.carriedItems.length,
         facts: state.knownFacts.length,
@@ -11076,191 +11282,17 @@ var GameSessionRunner = class {
   act(payload) {
     const { exec, state } = this.mustReady();
     const prevBg = this.lastBg;
-    const prevNotifLen = state.notifications.length;
-    const currentView = exec.renderer.render(state, prevBg);
-    const w = currentView.uiWidgetView;
-    if (w.widget === "error") {
-      throw new Error(`Game is in an error state: ${w.errorText}`);
-    }
-    let nextState;
-    switch (payload.action) {
-      case "continue": {
-        if (w.widget !== "dialog" && w.widget !== "char") {
-          throw new Error(`'continue' is only available on dialog or character screens (current: ${w.widget})`);
-        }
-        if (w.pageIndex < w.pageCount - 1) {
-          nextState = exec.advanceDialogPage(state, w.text);
-        } else if (w.continueLink != null) {
-          if (w.continueLink.disabled) {
-            throw new Error(`Continue link is disabled: ${w.continueLink.disabledReason}`);
-          }
-          const clickData = {
-            actor: w.widget === "dialog" ? w.actor?.name ?? null : null,
-            text: w.text,
-            answer: w.continueLink.text,
-            step: currentView.step
-          };
-          nextState = exec.dialogVariantApply(state, w.continueLink.link, clickData);
-        } else {
-          throw new Error("Nothing to continue on this screen; choose one of the available links or actions");
-        }
-        break;
-      }
-      case "choose_link": {
-        if (w.widget !== "dialog" && w.widget !== "char" && w.widget !== "location") {
-          throw new Error(`'choose_link' is not available on '${w.widget}' screens`);
-        }
-        if ((w.widget === "dialog" || w.widget === "char") && (w.pageIndex < w.pageCount - 1 || w.continueLink != null)) {
-          throw new Error("Use action='continue' to advance the current text before choosing a link");
-        }
-        if (payload.index === void 0 || payload.index === null) {
-          throw new Error("'choose_link' requires 'index'");
-        }
-        const chosen = w.links.find((l2) => l2.index === payload.index);
-        if (!chosen) {
-          throw new Error(`Link index ${payload.index} is not available (valid: 0..${Math.max(0, w.links.length - 1)})`);
-        }
-        if (chosen.disabled) {
-          throw new Error(`Link ${payload.index} ('${chosen.text}') is disabled`);
-        }
-        const clickData = {
-          actor: w.widget === "dialog" ? w.actor?.name ?? null : null,
-          text: w.text,
-          answer: chosen.text,
-          step: currentView.step
-        };
-        nextState = exec.dialogVariantApply(state, chosen.link, clickData);
-        break;
-      }
-      case "travel": {
-        if (w.widget !== "location") {
-          throw new Error(`'travel' is only available on location screens (current: ${w.widget})`);
-        }
-        const route = payload.target_id != null && payload.target_id !== "" ? w.routes.find((r2) => r2.destination.uid === payload.target_id) : payload.index !== void 0 && payload.index !== null ? w.routes.find((r2) => r2.index === payload.index) : void 0;
-        if (!route) {
-          throw new Error("Matching location route not found; pass a valid route 'index' or 'target_id'");
-        }
-        if (route.disabled) {
-          throw new Error(`Route to '${route.name}' (${route.destination.uid}) is disabled`);
-        }
-        nextState = exec.locRouteApply(state, route);
-        break;
-      }
-      case "click_zone": {
-        if (w.widget !== "pac") {
-          throw new Error(`'click_zone' is only available on point-and-click screens (current: ${w.widget})`);
-        }
-        const zone = payload.target_id != null && payload.target_id !== "" ? w.items.find((z) => z.zone.id === payload.target_id) : payload.index !== void 0 && payload.index !== null ? w.items[payload.index] : void 0;
-        if (!zone) {
-          throw new Error("Matching scene zone not found; pass a valid zone 'target_id' or 'index'");
-        }
-        if (zone.disabled) {
-          throw new Error(`Zone '${zone.zone.name || zone.zone.id}' is disabled`);
-        }
-        const clickData = {
-          actor: null,
-          text: "",
-          answer: zone.zone.name || zone.zone.id,
-          step: currentView.step
-        };
-        nextState = exec.pacZoneApply(state, zone.zone, clickData);
-        break;
-      }
-      case "discuss": {
-        if (w.widget !== "char") {
-          throw new Error(`'discuss' is only available in character conversations (current: ${w.widget})`);
-        }
-        if (w.pageIndex < w.pageCount - 1 || w.continueLink != null) {
-          throw new Error("Use action='continue' before starting a discussion topic");
-        }
-        const topicType = payload.topic_type;
-        const targetId = payload.target_id;
-        if (!topicType || !targetId) {
-          throw new Error("'discuss' requires both 'topic_type' ('char'|'fact'|'item'|'loc') and 'target_id'");
-        }
-        const topics = this.getDiscussTopics(state, w);
-        const topicPool = {
-          char: topics.people,
-          fact: topics.facts,
-          item: topics.items,
-          loc: topics.places
-        };
-        const list = topicPool[topicType];
-        if (!list) {
-          throw new Error(`Unknown topic_type '${topicType}'`);
-        }
-        if (!list.some((t) => t.uid === targetId)) {
-          throw new Error(`Topic '${targetId}' is not currently discussable under '${topicType}'`);
-        }
-        nextState = exec.discuss(state, topicType, targetId, w.char.uid);
-        break;
-      }
-      case "use_item": {
-        if (w.widget !== "dialog" || state.position.kind !== "window") {
-          throw new Error(`'use_item' is only available on dialog screens (current: ${w.widget})`);
-        }
-        const itemUid = payload.target_id;
-        if (!itemUid) {
-          throw new Error("'use_item' requires 'target_id' (item uid)");
-        }
-        if (!state.carriedItems.some((c) => c.item === itemUid)) {
-          throw new Error(`Item '${itemUid}' is not in inventory`);
-        }
-        nextState = exec.useItemInDialog(state, itemUid);
-        break;
-      }
-      default:
-        throw new Error(`Unknown action '${String(payload.action)}'`);
-    }
-    const newNotifications = nextState.notifications.length > prevNotifLen ? nextState.notifications.slice(prevNotifLen) : [];
+    const view = exec.renderer.render(state, prevBg).uiWidgetView;
+    const nextState = applyAction(exec, state, toPlayerAction(payload), view);
     this.state = nextState;
-    return { state: this.state, turn: this.buildTurn(prevBg, newNotifications) };
+    return { state: nextState, turn: this.buildTurn(prevBg, newNotifications(state, nextState)) };
   }
   inspect(section) {
-    const { game, exec, state } = this.mustReady();
-    const getInventory = () => state.carriedItems.map((carried) => {
-      const item = getItemByIdOrUnknown(game.items, carried.item);
-      return {
-        uid: carried.item,
-        name: item.name,
-        description: item.description,
-        quantity: carried.quantity,
-        tags: item.tags ?? [],
-        stats: item.stats ?? {},
-        has_image: Boolean((item.image || item.thumbnail || "").trim())
-      };
-    });
-    const getFacts = () => state.knownFacts.map((uid) => {
-      const fact = getFact(game, uid) ?? createEmptyFact(uid);
-      return {
-        uid: fact.uid,
-        short: fact.short,
-        full: fact.full,
-        discussable: fact.discussable
-      };
-    });
-    const getPeople = () => state.knownPeople.map((uid) => {
-      const descr = exec.renderer.getCharInfoDescription(state, uid);
-      return {
-        uid,
-        name: descr.name,
-        description: descr.description,
-        has_avatar: Boolean(descr.avatar?.trim()),
-        discussable: descr.charObject.discussable
-      };
-    });
-    const getPlaces = () => {
-      const visited = new Set(getVisitedLocations(state));
-      return state.knownPlaces.map((uid) => {
-        const loc = getLoc(game, uid);
-        return {
-          uid,
-          name: loc?.displayName || uid,
-          discussable: loc?.discussable ?? true,
-          visited: visited.has(uid)
-        };
-      });
-    };
+    const { exec, state } = this.mustReady();
+    const getInventory = () => inventoryList(exec, state);
+    const getFacts = () => factList(exec, state);
+    const getPeople = () => peopleList(exec, state);
+    const getPlaces = () => placeList(exec, state);
     switch (section) {
       case "inventory":
         return { section, data: getInventory() };
@@ -11293,6 +11325,28 @@ var GameSessionRunner = class {
     }
   }
 };
+function toPlayerAction(payload) {
+  switch (payload.action) {
+    case "continue":
+      return { type: "continue" };
+    case "choose_link":
+      return { type: "link", index: payload.index };
+    case "travel":
+      return { type: "route", uid: payload.target_id ?? void 0, index: payload.index ?? void 0 };
+    case "click_zone":
+      return { type: "zone", id: payload.target_id ?? void 0, index: payload.index ?? void 0 };
+    case "discuss":
+      return {
+        type: "discuss",
+        topicType: payload.topic_type,
+        id: payload.target_id ?? ""
+      };
+    case "use_item":
+      return { type: "useItem", uid: payload.target_id ?? "" };
+    default:
+      throw new Error(`Unknown action '${String(payload.action)}'`);
+  }
+}
 
 // src/main.ts
 var denoGlobal = globalThis.Deno;

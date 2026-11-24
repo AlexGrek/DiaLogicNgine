@@ -5,6 +5,8 @@ import './actor.css'
 import { Checkbox, SelectPicker, Toggle } from 'rsuite';
 import lodash from 'lodash';
 import { generateImageUrl } from '../../../Utils';
+import { resolveImageProject } from '../projectImages';
+import { useProjectImages } from '../ProjectImagesContext';
 
 interface ActorEditorProps {
     game: GameDescription;
@@ -13,6 +15,7 @@ interface ActorEditorProps {
 }
 
 const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
+    const storageProject = resolveImageProject(useProjectImages());
 
     const data = game.chars.map(ch => {
         return { value: ch.uid, label: ch.uid }
@@ -86,7 +89,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
             if (value?.character) {
                 const char = game.chars.find(item => item.uid === value.character)
                 if (char && char.avatar.main) {
-                    return { backgroundImage: `url("${generateImageUrl(char.avatar.main)}")` }
+                    return { backgroundImage: `url("${generateImageUrl(char.avatar.main, storageProject)}")` }
                 }
             }
             return {}
@@ -123,7 +126,7 @@ const ActorEditor: React.FC<ActorEditorProps> = ({ game, value, onChange }) => {
         if (!imageUri) {
             return {}
         }
-        return { backgroundImage: `url("${generateImageUrl(imageUri)}")` }
+        return { backgroundImage: `url("${generateImageUrl(imageUri, storageProject)}")` }
     }
 
     const setCurrentChar = (val: boolean) => {

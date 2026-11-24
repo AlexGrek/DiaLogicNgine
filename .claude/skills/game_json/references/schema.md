@@ -128,6 +128,8 @@ Any other key is simply unused; the lookup is by the literal default string.
 | `tags` | R | `string[]` | Author-side labels; no engine behaviour. |
 | `specialWidget` | R | `string \| null` | `"pac::<pac id>"` renders a point-and-click scene instead of the text view. |
 | `actor` | O | `Actor` | `{ "character": "<char uid>", "currentCharacter": false }`. `currentCharacter: true` uses whoever the player is currently talking to (`state.charDialog`) and ignores `character`. `avatar` picks from that char's `ImageList` by name (string) or index (number). |
+| `stage` | O | `StagePerson[]` (≤3) | Full-size persons drawn behind the text: `{ "character": "<char uid>", "look": "<looks name>" (O), "currentCharacter": true (O) }`. Index 0 stands **rightmost**, the next ones to its left, overlapping a little. `look` omitted → the char's `chooseLookScript`, then `looks.main`. When the window `actor` is on stage the other persons are dimmed. Persons whose character has no matching look are skipped. |
+| `chooseStageScript` | O | script | Overrides `stage` at runtime: return an array of `"uid"`, `"uid:look"` or `{character, look?, currentCharacter?}` (right to left, first 3 used), `[]` for nobody, `null` to keep `stage`. |
 | `entryScript` | O | script | Runs on every entry. State processor. |
 | `chooseTextScript` | O | script | Returns a `text.list[].name`, an index, or `null` for `main`. State changes ignored. |
 | `chooseBackgroundScript` | O | script | Same selection rules against `backgrounds`. Only consulted when `backgrounds.main` is set. |
@@ -182,7 +184,9 @@ Any other key is simply unused; the lookup is by the literal default string.
 | `props` | R | `Prop[]` | Per-character variables → `rt.ch.<uid>.<name>` (state key `char:<uid>_<name>`). |
 | `overrideProps` | R | `Prop[]` | Same shape; overrides a role prop of the same name. |
 | `roles` | R | `string[]` | `roles[].name` values; their props are merged into `rt.ch.<uid>`. |
-| `avatar` | R | `ImageList` | |
+| `avatar` | R | `ImageList` | Small portrait next to the speaker's name. |
+| `looks` | O | `ImageList` | Full-size **transparent** person images (WebP/PNG) for window `stage`s. `main` = default look; name the `list` variants (`smile`, `angry`, …). Make them with the editor MCP `remove_background` tool. |
+| `chooseLookScript` | O | script | Picks the default look (`list[].name`, index, or `null` for `main`) when a stage slot names none. |
 | `discussable` | R | bool | Whether this character appears as a discussion topic once known. |
 | `dialog` | O | `CharacterDialog` | Required in practice for `toperson`. |
 | `chooseNameScript` / `chooseDescriptionScript` / `chooseAvatarScript` | O | script | Variant pickers (name/index/`null`). |

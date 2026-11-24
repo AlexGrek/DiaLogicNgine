@@ -109,6 +109,22 @@ also clear the stack (chapter transitions).
 Dynamic portrait/name: add `chooseAvatarScript` / `chooseNameScript` returning a variant
 name from the respective `ImageList` / `TextList`.
 
+## Show persons on stage (full-size looks)
+
+Visual-novel style: up to three full-body characters stand behind the text.
+
+1. Generate a full-body image of the character, then cut it out with the editor MCP
+   `remove_background(project, filename)` (or `dialogic remove_background PROJECT FILE`) —
+   it returns a new transparent, cropped `.webp` reference.
+2. Store it in the character's `looks`: `"looks": { "main": "mira_nobg.webp",
+   "list": [ { "name": "angry", "uri": "mira_angry_nobg.webp" } ] }`.
+3. On the window: `"stage": [ { "character": "mira", "look": "angry" }, { "character": "tom" } ]`
+   — `mira` stands rightmost, `tom` to her left. Set `actor` to one of them to highlight
+   the speaker (the others are dimmed).
+4. Dynamic: `"chooseStageScript": "return rt.facts.betrayal.known ? ['mira:angry'] : ['mira', 'tom']"`.
+   For a mood that follows a variable everywhere, give the character a `chooseLookScript`
+   instead and leave `look` out.
+
 ## Add a role (shared props for a group)
 
 ```jsonc

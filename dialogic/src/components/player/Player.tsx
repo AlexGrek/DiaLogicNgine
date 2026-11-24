@@ -3,7 +3,7 @@ import { Button, ButtonGroup } from 'rsuite';
 import { IUpds } from '../../App';
 import { trace } from '../../Trace';
 import { GameExecManager } from '../../exec/GameExecutor';
-import { State, createInitialState } from '../../exec/GameState';
+import { State } from '../../exec/GameState';
 import { GameDescription } from '../../game/GameDescription';
 import MainMenuView from './MainMenuView';
 import PlayerCore from './PlayerCore';
@@ -23,7 +23,7 @@ interface PlayerProps {
 const Player: React.FC<PlayerProps> = ({ game, playOnly, onExit }) => {
     const [, setGame] = useState<GameDescription>(game);
     const [gameExecutor, setGameExecutor] = useState<GameExecManager>(() => new GameExecManager(game));
-    const [gameState, setGameState] = useState<State>(() => gameExecutor.executeEntry(createInitialState(game)))
+    const [gameState, setGameState] = useState<State>(() => gameExecutor.newGameState())
     const [stateEditorOpen, setStateEditorOpen] = useState<boolean>(false)
     const [goToOpen, setGoToOpen] = useState<boolean>(false)
     const [started, setStarted] = useState<boolean>(false)
@@ -61,7 +61,7 @@ const Player: React.FC<PlayerProps> = ({ game, playOnly, onExit }) => {
     }
 
     const handleRestart = () => {
-        setGameState(gameExecutor.executeEntry(createInitialState(game)));
+        setGameState(gameExecutor.newGameState());
         setStarted(false);
     }
 

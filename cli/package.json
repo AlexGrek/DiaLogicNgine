@@ -1,0 +1,25 @@
+{
+  "name": "dialogic-cli",
+  "private": true,
+  "version": "2.0.0",
+  "description": "dialogic: command-line client, verifier and local debug player for DiaLogicNgine games",
+  "type": "module",
+  "bin": { "dialogic": "dist/dialogic.mjs" },
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "node build.mjs && node dist/dialogic.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "fast-json-patch": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

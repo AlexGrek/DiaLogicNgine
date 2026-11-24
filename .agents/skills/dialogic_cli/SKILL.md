@@ -1,82 +1,117 @@
 ---
 name: dialogic_cli
-description: Use the `dialogic` command-line client (cli/, Go) to drive the DiaLogicNgine editor and player MCPs from a shell, and to pull/push/clone whole games with their original-resolution images. Use when uploading or downloading images or game.json, cloning or translating a game, scripting edits/playtests, or when the MCP's base64 `upload_image` is too small or too slow.
+description: Use the `dialogic` command-line client (cli/, Node/TypeScript) to verify, debug and play DiaLogicNgine games locally with the real engine, inspect and refactor the game model (ls/show/refs/graph/rename/patch), drive the editor and player MCPs from a shell, and pull/push/clone whole games with their original-resolution images. Use when checking a game for errors, playtesting or reproducing a bug without a server, renaming uids safely, uploading or downloading images or game.json, cloning or translating a game, or editing game scripts as .js files.
 ---
 
 # `dialogic` CLI
 
-Go command-line twin of the editor MCP (`/mcp`) and player MCP (`/play-mcp`), plus whole-game
-transfer. Source and full reference: `cli/` → **`cli/README.md`** (read it for flags and examples).
-This skill only says *when* and *how to reach for it*; it does not cover authoring games.
+A TypeScript CLI that imports the real game model, migrations, sanity check and engine from
+`dialogic/src`. It does three jobs:
 
-- Game JSON shape, UID graph, scripting API, validator → skill **`game_json`**.
-- MCP connection / OAuth / troubleshooting and the tool-by-tool workflow → user skill **`dialogic-mcp`**
-  (the CLI mirrors those tool names and parameters 1:1).
-- Backend routes and auth model the CLI talks to → `backend/server.md`.
+1. It knows the game: `verify`, `explore`, `ls`, `show`, `refs`, `graph`, `schema`, `rename`, `patch`.
+2. It plays the game locally: `debug` (a REPL) and `run` (scripted moves). These run the same
+   `GameSessionRunner` as the Player MCP, sandboxed, with no server needed.
+3. It is a twin of the editor MCP (`/mcp`) and player MCP (`/play-mcp`), and it transfers whole games.
+
+Source and the full reference are in `cli/` and **`cli/README.md`**. This skill says when and how
+to reach for the CLI.
+
+- For the game JSON shape, the UID graph and the scripting API, use the skill **`game_json`**.
+- For MCP connection, OAuth and troubleshooting, use the user skill **`dialogic-mcp`**. The CLI
+  mirrors the MCP tool names and parameters 1:1.
+- For engine internals, use the skill **`game_engine`**. `exec/PlayerTurn.ts` is the turn logic
+  shared by all three players.
+
+## GAME arguments
+
+The model commands take `GAME`, which is one of:
+
+- a local `game.json`;
+- a folder holding one (as written by `pull`), whose `images/` folder is used for image checks;
+- a **project name** on the server. Reading it needs `login -user` unless the game is published.
+  Saving it always needs the login.
+
+## Typical loops
+
+```bash
+dialogic verify my_game -text              # static + schema + images; exit 1 on errors
+dialogic explore my_game -runs 50 -text    # random play-throughs: script errors, dead ends, unreached windows
+dialogic run my_game -seed 9 -moves "6; 0; 8; discuss char ada; 1"   # reproduce a finding
+dialogic debug my_game -at lab/vault       # REPL; 'help' lists commands
+```
+
+Edit loop on local files:
+
+```bash
+dialogic pull P -o P
+# edit P/game.json
+dialogic verify P
+dialogic debug P    # then 'reload' in the REPL
+dialogic push P
+```
+
+Refactor safely:
+
+```bash
+dialogic refs P char:ada                   # every place that names it
+dialogic rename P char ada grace           # links, triggers, hooks, quest paths, rt.* in scripts
+dialogic rename P window lab/entrance hall -dry-run
+dialogic patch P ops.json                  # RFC 6902 on the whole game; refused if it adds errors
+```
+
+## Debug REPL in brief
+
+| Group | Commands |
+|---|---|
+| Moves | `N` (link), `c` (continue), `go LOC`, `zone ID`, `discuss TYPE ID`, `use ITEM` |
+| State | `state [/ptr\|PROP]`, `set PTR VALUE` (no hooks fire), `rt <js>` (real runtime, hooks fire), `goto POS [-no-entry]` |
+| Checks and tracing | `expect PTR=VALUE`, `trace on`, `watch gold`, `inspect objectives` |
+| History and files | `undo`, `save`/`load FILE`, `reload` (re-reads the game and keeps the state) |
+
+- When stdin is not a TTY, the REPL reads one command per line and writes one JSON object per line.
+  Pass `-text` for the readable view instead.
+- `POS` is `DIALOG/WINDOW`, `loc:UID` or `char:UID`.
+- Game scripts run in a `node:vm` context with a per-move time limit (`-timeout`). That context is
+  not a security boundary. Use `-deno` (zero permissions, as on the server) for games you do not trust.
 
 ## Use the CLI instead of the MCP when
 
-| Need | Why the MCP is the wrong tool |
+| Need | Why |
 |---|---|
-| Upload/download images | `upload_image` takes inline base64 through the model: retyped, error-prone, forces tiny blurry images. The CLI reads files from disk and keeps originals byte-exact. |
-| Get/replace the whole `game.json` | MCP only exposes 12 KB fragments of one field at a time. |
-| Clone or translate a game | `clone` copies JSON + images; then `game get` → edit → `game put`. |
-| Edit game scripts in an editor / with JS tooling | `scripts dump` → edit `.js` → `scripts push` (syntax-checked, conflict-guarded). |
-| Scripted/repeatable edits or playtests | Shell pipelines, `jq`, stdin/`@file` JSON. |
-
-Keep using the MCP for interactive, schema-validated field edits when no files are involved.
+| Check a whole game | The MCP has no validator. `verify` and `explore` do. |
+| Reproduce or test a scene | `run`/`debug` are instant, local and reproducible (`-seed`). They also cover unpublished local files. |
+| Upload or download images | The MCP's `upload_image` takes inline base64 and forces tiny images. The CLI keeps originals byte-exact. |
+| Get or replace the whole `game.json` | The MCP only exposes 12 KB fragments of one field. |
+| Clone or translate a game | Use `clone`, then `game get`, translate, `game put`. |
+| Edit scripts with an editor | `scripts dump`, edit the `.js` files, `scripts push` (syntax-checked, conflict-guarded). |
 
 ## Install and log in
 
 ```bash
-cd cli && task install        # builds and copies to $(go env GOPATH)/bin/dialogic  (task test for unit tests)
-dialogic login -server <URL> [-key MCP_API_KEY] [-user NAME]     # password is prompted
+cd cli && task install       # npm deps + bundle → $(go env GOPATH)/bin/dialogic (or ~/.local/bin); Node ≥ 22
+cd cli && task test          # tsc + vitest
+dialogic login -server <URL> [-key MCP_API_KEY] [-user NAME]     # the password is prompted
 dialogic whoami
 ```
 
-Two credentials, because the backend has two doors:
+There are two credentials:
 
-- **API key** (`MCP_API_KEYS` on the server) → `editor`, `play`, `call`, `tools`.
-- **Account username + password** → `pull`, `push`, `clone`, `game`, `assets` (REST accepts only the cookie session).
+- The **API key** (`MCP_API_KEYS` on the server) is used by `editor`, `play`, `call` and `tools`.
+- The **account login** is used by `pull`, `push`, `clone`, `game`, `assets` and `scripts`, and by
+  the model commands on server projects.
 
-No built-in host exists, by design (repo rule: no deployment URLs in committed files). Server precedence:
-`-server` → `DIALOGIC_URL` → saved `~/.dialogic-cli.json` → `DIALOGIC_MCP_URL`. Check what `whoami`
-prints before logging in: an ambient env var can point you at the wrong server, and a login sends the password there.
-
-## Commands at a glance
-
-```bash
-# MCP tools: same names/params as the servers; required params positional, the rest -flags
-dialogic editor                         # list tools;  dialogic editor patch_field -h  for one
-dialogic editor browse_field P dialog dialogs
-dialogic editor patch_field P dialog dialogs "$REV" @ops.json     # inline JSON, @file or - (stdin)
-dialogic play start_game P ; dialogic play act SESSION choose_link 0
-dialogic play get_state SESSION -o scene.jpg                      # images only with -image or -o
-dialogic call <editor|play> TOOL '{"k":"v"}'                      # raw call (tools newer than the CLI)
-dialogic tools [editor|play]                                      # live tools/list vs the CLI's table
-
-# whole games (REST)
-dialogic pull P [-o DIR]                # DIR/game.json + DIR/images/*
-dialogic push P [-from DIR] [-prune]    # overwrites the remote game
-dialogic clone SRC DST [-title NAME]    # refuses an existing DST unless -force
-dialogic game get P [-compact] | game put P FILE|-
-dialogic assets list|pull|push|delete P ...    # push FILE -as NAME to rename
-
-# scripts as .js files (see cli/README.md → Scripts)
-dialogic scripts dump P -o DIR | list P | status P -from DIR | push P -from DIR [-dry-run] [-force] | set P PATH FILE|-
-```
-
-stdout is JSON; notices go to stderr; tool errors exit 1.
+No host is built in. The server is chosen in this order: `-server`, then `DIALOGIC_URL`, then the
+saved `~/.dialogic-cli.json`, then `DIALOGIC_MCP_URL`. Check `whoami` before logging in.
 
 ## Gotchas
 
-- `push` / `game put` / `clone -force` **replace** the remote game. Refuses files without `engineVersion`. Pull first if unsure.
-- Image fields in game JSON are bare filenames; upload under the exact name referenced (and extension — it is preserved).
-  Allowed: png, jpg/jpeg, webp, gif (svg via REST only).
-- The player MCP downsizes scene images to 1024 px in its output; `assets pull` returns the true originals.
-- Play tools default to `include_image=false` in the CLI (the MCP default is true).
-- `scripts push` only changes existing script slots, and refuses a script changed remotely since the dump (re-dump or `-force`).
-- `patch_field` needs the field's current `revision`; "Field changed" means re-browse.
-- A game saved with `game put` is not schema-validated by the REST route (the MCP's `patch_field` is). After a hand
-  edit, validate with `game_json`'s `scripts/validate_game.py` and start a game to confirm.
-- When the MCP gains a tool, add it to the table in `cli/tools.go`; `dialogic tools` shows the drift.
+- `push`, `game put`, `clone -force`, and `rename`/`patch` on a server project **replace** the
+  remote game. An open editor tab must be reloaded before it saves.
+- `rename` rewrites `rt.props.X`, `rt.facts.X`, `rt.ch.X`, `rt.items.*('X')`, `rt.objectives.A.B.C`
+  and `state.situation = 'X'` in scripts. It does not rewrite ids that a script builds dynamically
+  (`rt.facts[name]`). Run `verify` and `explore` afterwards.
+- A local link inside a point-and-click zone resolves against the hosting dialog at runtime, so
+  `verify` only warns about it.
+- When the MCP gains a tool, add it to `cli/src/tools.ts`; `dialogic tools` shows the drift.
+- `verify` mirrors `.claude/skills/game_json/scripts/validate_game.py` (port in `dialogic/src/game/verify.ts`);
+  keep both in sync when the model changes.

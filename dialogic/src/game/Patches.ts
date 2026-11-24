@@ -1,6 +1,6 @@
 import lodash from "lodash";
 import { uniqueNamesGenerator, adjectives, animals } from 'unique-names-generator';
-import { GameDescription, createDefaultConfig, createDefaultDevConfig, createDefaultVisuals } from "./GameDescription";
+import { ENGINE_VERSION, GameDescription, createDefaultConfig, createDefaultDevConfig, createDefaultVisuals } from "./GameDescription";
 import { createTranslations } from "../exec/Localization";
 import { initGameUiElementDescr } from "./GameUiElementDescr";
 
@@ -363,6 +363,40 @@ export function loadJsonStringAndPatch(json: string, currentEngine: string) {
     }
 
     return result;
+}
+
+/**
+ * Load a game object from any source (server, MCP runner, CLI, hand-written file):
+ * migrate it to the current engine and back-fill every top-level collection, so the
+ * engine and editor can iterate them without guards. A missing `engineVersion` is
+ * treated as current (sparse hand-made files). Throws on a non-object.
+ */
+export function normalizeGame(raw: unknown): GameDescription {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        throw new Error("Game JSON must be an object")
+    }
+    const obj = { ...(raw as Record<string, unknown>) }
+    if (typeof obj.engineVersion !== "string" || !obj.engineVersion) {
+        obj.engineVersion = ENGINE_VERSION
+    }
+    const game = loadJsonStringAndPatch(JSON.stringify(obj), ENGINE_VERSION)
+
+    if (!game.general) {
+        game.general = { name: "Untitled", version: "1.0", description: "", authors: [], extras: {} }
+    }
+    if (!game.general.extras) game.general.extras = {}
+    const g = game as unknown as Record<string, unknown>
+    for (const key of ["dialogs", "chars", "roles", "locs", "props", "facts", "items", "events", "eventHosts",
+        "objectives", "situations", "pacWidgets", "functions", "hooks"]) {
+        if (!Array.isArray(g[key])) g[key] = []
+    }
+    if (!game.uiElements) game.uiElements = initGameUiElementDescr()
+    if (!Array.isArray(game.uiElements.meters)) game.uiElements.meters = []
+    if (!game.translations) game.translations = createTranslations()
+    if (!game.config) game.config = createDefaultConfig()
+    if (!game.dev) game.dev = createDefaultDevConfig()
+    if (!game.visuals) game.visuals = createDefaultVisuals()
+    return game
 }
 
 function patchGame(parsed: GameDescription, version: string, currentEngine: string): GameDescription {

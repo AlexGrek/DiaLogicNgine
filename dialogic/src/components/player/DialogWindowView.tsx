@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { DialogRenderView } from '../../exec/RenderView';
+import { playAction } from './playerActions';
 import DialogVariants from './DialogVariants';
 import StagePersonsView from './StagePersonsView';
 import DialogTextStage, { StageActor } from './DialogTextStage';
@@ -46,12 +47,8 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
             skip()
             return
         }
-        if (canAdvance) {
-            onStateUpd(game.advanceDialogPage(state, view.text))
-        } else if (view.continueLink) {
-            const link = view.continueLink
-            const clickData = { actor: null, text: view.text, answer: link.text, step }
-            onStateUpd(game.dialogVariantApply(state, link.link, clickData))
+        if (canAdvance || view.continueLink) {
+            playAction(game, state, view, { type: 'continue' }, onStateUpd)
         }
     }
 
@@ -65,8 +62,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
                     state={state}
                     links={view.links}
                     step={step}
-                    onStateUpd={onStateUpd}
-                    text={view.text}
+                    onChoose={(link) => playAction(game, state, view, { type: 'link', index: link.index }, onStateUpd)}
                     responseAlignment={visuals.responseAlignment}
                     interactive={isComplete}
                 />

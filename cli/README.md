@@ -1,25 +1,140 @@
 # dialogic CLI
 
-Command-line twin of the DiaLogicNgine **editor MCP** (`/mcp`) and **player MCP** (`/play-mcp`),
-plus whole-game transfer: download/upload the full `game.json` and the full original-resolution
-image set. Stdlib only (plus `x/term` for the password prompt).
+`dialogic` is the command-line tool for DiaLogicNgine games. It is written in TypeScript and
+imports the real game model, migrations, sanity check and engine from `../dialogic/src`. With it you can:
 
-Why it exists: pushing images through an LLM's `upload_image` call means the model retypes
-megabytes of base64, so assets end up tiny and blurry. The CLI reads files from disk.
+* **verify** a game: static checks, the JSON schema, and missing images;
+* **explore** a game automatically: random play-throughs that find script errors and dead ends;
+* **debug and run** a game locally, with the Player MCP's own engine and no server;
+* **inspect and refactor** the model: `ls`, `show`, `refs`, `graph`, `schema`, `rename`, `patch`;
+* drive the editor and player **MCP tools** from a shell;
+* move **whole games** (JSON and original-resolution images), clone them, and edit their scripts as `.js` files.
+
+`dialogic help` prints the full command list.
 
 ## Build / install
 
+Needs Node ≥ 22. The engine's own dependencies come from `../dialogic/node_modules`.
+
 ```bash
-task install      # → $(go env GOPATH)/bin/dialogic
-task test
+task install      # npm install + bundle → $(go env GOPATH)/bin/dialogic (or ~/.local/bin)
+task test         # tsc + vitest
+npm run build     # just dist/dialogic.mjs: one executable file, engine and schema embedded
 ```
+
+## GAME: a file, a folder or a server project
+
+The commands below take `GAME`, which is one of:
+
+* a local `game.json`;
+* a folder holding one (as written by `pull`). Its `images/` folder is used to check image references;
+* a project name on the server. Reading it needs `login -user` unless the game is published. Saving
+  it (`rename`, `patch`) needs the login.
+
+## Verify
+
+```bash
+dialogic verify my_game.json -text          # human-readable; default output is JSON
+dialogic verify my_game -strict             # exit 1 on warnings too
+```
+
+`verify` runs three groups of checks:
+
+* **verify**: dangling uids in links, actors, stage, routes, reactions, events, zones and hooks;
+  scripts that use undeclared props, facts, items, characters or quests; quest `path`s; duplicate
+  ids; prop types; unreachable windows; dead ends; and a **syntax check of every script**, with the
+  line number. These are ported from `.claude/skills/game_json/scripts/validate_game.py` into
+  `dialogic/src/game/verify.ts`.
+* **schema**: the migrated game against `backend/app/game_mcp/schema.json` (generated from the TS types).
+* **sanity**: the editor's `runSanityCheck`. By default it reports only image files missing on the
+  server or in `images/`; with `-all` it also reports its link checks.
+
+Exit code 1 on errors. Skip parts with `-no-images` or `-no-schema`.
+
+## Explore: automated play-throughs
+
+```bash
+dialogic explore my_game -runs 50 -steps 200 -text
+```
+
+`explore` plays random walks with the real engine (links, continue, routes, zones, discussions and
+item use). It reports:
+
+* script errors, with the moves and seed that reproduce them;
+* dead ends;
+* windows and locations no walk reached.
+
+Reproduce a finding with the command it prints:
+
+```bash
+dialogic run my_game -seed 9 -moves "6; 0; 8; discuss char ada; 1"
+```
+
+## Debug and run locally
+
+```bash
+dialogic debug my_game                     # from the start
+dialogic debug my_game -at loc:market -script "rt.items.add('key')"   # start anywhere with a prepared state
+dialogic debug my_game -state saved.json   # resume a saved state
+```
+
+| Command | Does |
+|---|---|
+| `look` / `l` | show the screen: text, numbered links, routes, zones, topics, usable items, HUD |
+| `N`, `c`, `go LOC`, `zone ID`, `discuss char\|fact\|item\|loc ID`, `use ITEM` | moves, with the same rules and errors as the Player MCP |
+| `state [/ptr\|PROP]`, `set PTR VALUE`, `patch OPS` | read and write raw state (no hooks fire) |
+| `rt <js>` | run a script with the real runtime (hooks and notifications fire) |
+| `goto DIALOG/WINDOW\|loc:UID\|char:UID [-no-entry]` | teleport |
+| `expect PTR=VALUE` | assertion |
+| `trace on`, `watch PROP …`, `inspect SECTION` | see what each move changes |
+| `undo`, `new`, `save FILE`, `load FILE`, `reload` | `reload` re-reads an edited game and keeps the state |
+
+* **Piped input:** the REPL reads one command per line and writes one JSON object per line
+  (`-text` for the readable view). It exits 1 if a command failed.
+* **`run`** is the same thing in one command, for regression tests:
+  ```bash
+  dialogic run my_game -moves @smoke.moves -expect gold=10,/knownFacts/0=\"clue\"
+  ```
+  Moves are separated by `;` or newlines; `#` starts a comment. `run` exits 1 on an impossible
+  move, a game error or a failed `expect`.
+* **Engine:** the engine is the Player MCP's `GameSessionRunner` (`player-runner/src/session.ts`),
+  on top of the shared turn logic in `dialogic/src/exec/PlayerTurn.ts`. The game behaves exactly as
+  it does for the MCP, and almost exactly as in the web player.
+* **Sandbox:** game scripts run in a `node:vm` context with no `require`, `process` or file access,
+  and with a per-move time limit (`-timeout MS`, default 10000). A vm context is **not a security
+  boundary**. For games you do not trust, use `-deno`, which runs the bundled Player MCP runner
+  under Deno with zero permissions, as the server does. `-seed N` makes `Math.random` (events,
+  text variants) reproducible; it works with the vm engine only.
+
+## Inspect and refactor the model
+
+```bash
+dialogic ls my_game                        # name, startup, counts
+dialogic ls my_game windows main -text     # also: dialogs chars locs props facts items quests events pac hooks functions roles meters situations images
+dialogic show my_game char:ada             # definition + what it uses + what uses it
+dialogic refs my_game fact:door_open       # every reference (links, triggers, hooks, quest paths, scripts)
+dialogic graph my_game -dialog main        # mermaid (default), -format dot|json
+dialogic schema Loc                        # fields of a model type; no argument lists the types
+dialogic rename my_game char ada grace     # KIND: dialog window char loc item fact prop role pac situation eventhost questline quest task
+dialogic rename my_game window main/start intro -dry-run
+dialogic patch my_game ops.json            # RFC 6902 on the whole game, or @file / - (stdin)
+```
+
+* **References:** `REF` is `DIALOG/WINDOW`, `KIND:ID` (`char:`, `loc:`, `item:`, `fact:`, `quest:LINE/QUEST`, …),
+  or a bare id when it is unambiguous.
+* **`rename`** rewrites the definition and every reference to it. That includes `rt.props.X`,
+  `rt.facts.X`, `rt.ch.X`, `rt.items.*('X')`, `rt.objectives.L.Q.T` and `state.situation = 'X'`
+  inside scripts. It does not rewrite ids a script builds dynamically.
+* **Saving:** `rename` and `patch` verify before and after, and refuse to save a change that
+  introduces new errors (`-force` overrides; `-dry-run` saves nothing). They save to the file, or
+  upload a server project.
 
 ## Credentials — two, because the backend has two doors
 
 | Credential | Used by | Where it comes from |
 |---|---|---|
 | **MCP API key** | `editor`, `play`, `call`, `tools` | `MCP_API_KEYS` in the backend env (`{"user":"<secret>"}`, see `backend/server.md`) |
-| **Account login** (username + password) | `pull`, `push`, `game`, `assets` | the web account; REST only accepts the session cookie |
+| **Account login** (username + password) | `pull`, `push`, `clone`, `game`, `assets`, `scripts`; the model commands on server projects | the web account; REST only accepts the session cookie |
 
 ```bash
 dialogic login -server https://your-host -key "$KEY" -user alice   # prompts for the password
@@ -94,8 +209,7 @@ dialogic scripts set my_game hooks/Reward/body fix.js     # patch one script (or
 * `push` only touches scripts whose file changed, **refuses to overwrite a script that changed remotely since the
   dump** (`-force` overrides), and replaces nothing but the script strings; the rest of the game is re-saved as is
   (key order may change, content does not).
-* Scripts are syntax-checked with `node --check` before upload (function bodies use their own `args`); line numbers
-  match the file. Skipped with a note when `node` is not installed.
+* Scripts are compiled (not run) before upload (function bodies use their own `args`); line numbers match the file.
 * It edits existing script slots only; to add a new script to a window/link, patch the JSON first.
 
 `push` and `game put` **overwrite** the remote game; they refuse a file without `engineVersion`.

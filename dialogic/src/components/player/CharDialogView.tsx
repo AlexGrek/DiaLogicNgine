@@ -4,6 +4,7 @@ import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { CharDialogRenderView } from '../../exec/RenderView';
+import { playAction } from './playerActions';
 import DialogVariants from './DialogVariants';
 import SpecialDialogVariants from './SpecialDialogVariants';
 import DialogTextStage from './DialogTextStage';
@@ -58,12 +59,8 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
             skip()
             return
         }
-        if (canAdvance) {
-            onStateUpd(game.advanceDialogPage(state, view.text))
-        } else if (view.continueLink) {
-            const link = view.continueLink
-            const clickData = { actor: null, text: view.text, answer: link.text, step }
-            onStateUpd(game.dialogVariantApply(state, link.link, clickData))
+        if (canAdvance || view.continueLink) {
+            playAction(game, state, view, { type: 'continue' }, onStateUpd)
         }
     }
 
@@ -85,13 +82,13 @@ const CharDialogView: React.FC<CharDialogViewProps> = ({ game, state, onStateUpd
     }
 
     const handleDiscussion = (topicType: DiscussionTopicType, topicValue: string) => {
-        onStateUpd(game.discuss(state, topicType, topicValue, view.char.uid))
+        playAction(game, state, view, { type: 'discuss', topicType, id: topicValue }, onStateUpd)
     }
 
     const footer = showOptions ? (
         <div className={dialogResponsesClass(visuals.responseAlignment)}>
             <SpecialDialogVariants game={game} state={state} onClick={handleSpecialDialogClick} links={[discussLink]} responseAlignment={visuals.responseAlignment} nested interactive={isComplete} />
-            <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} text={view.text} responseAlignment={visuals.responseAlignment} nested interactive={isComplete} />
+            <DialogVariants game={game} state={state} links={view.links} step={step} onChoose={(link) => playAction(game, state, view, { type: 'link', index: link.index }, onStateUpd)} responseAlignment={visuals.responseAlignment} nested interactive={isComplete} />
         </div>
     ) : clickToContinue && !state.fatalError && isComplete ? (
         <motion.div className="dialog-continue-hint" data-testid="char-dialog-continue-hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>

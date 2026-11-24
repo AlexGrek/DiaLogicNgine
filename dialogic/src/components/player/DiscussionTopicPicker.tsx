@@ -4,8 +4,7 @@ import { DiscussionTopicType, GameExecManager } from '../../exec/GameExecutor';
 import { CarriedItem, State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { CharDialogRenderView } from '../../exec/RenderView';
-import { createEmptyFact, getFact } from '../../game/Fact';
-import { getLoc } from '../../game/Loc';
+import { TopicItem, discussTopics } from '../../exec/PlayerTurn';
 import "./player.css";
 import InputPickerView from './InputPickerView';
 
@@ -46,49 +45,11 @@ const SimpleTextList: React.FC<{
 };
 
 const DiscussionTopicPicker: React.FC<DiscussionTopicPickerProps> = ({ game, localization, state, view, onTopicSelected, onCancel }) => {
-    const getFacts = () => {
-        return state.knownFacts.map((factid) => {
-            let realFact = getFact(game.game, factid)
-            if (!realFact) {
-                realFact = createEmptyFact('error')
-                realFact.short = `Error fact ${factid}`
-            }
-            return {
-                name: realFact.short,
-                value: realFact.uid,
-                visible: realFact.discussable
-            }
-        }).filter(f => f.visible)
-    }
-
-    const getChars = () => {
-        return state.knownPeople.map((charid) => {
-            const descr = game.renderer.getCharInfoDescription(state, charid)
-            return {
-                name: descr.name,
-                value: charid,
-                visible: descr.charObject.discussable
-            }
-        }).filter(ch => ch.visible)
-    }
-
-    const getLocs = () => {
-        return state.knownPlaces.map((id) => {
-            const loc = getLoc(game.game, id)
-            if (!loc) {
-                return {
-                    name: `No location found <${id}>`,
-                    value: id,
-                    visible: true
-                }
-            }
-            return {
-                name: loc.displayName,
-                value: id,
-                visible: loc.discussable
-            }
-        })
-    }
+    const topics = discussTopics(game, state, view)
+    const asList = (items: TopicItem[]) => items.map((t) => ({ name: t.name, value: t.uid }))
+    const getFacts = () => asList(topics.facts)
+    const getChars = () => asList(topics.people)
+    const getLocs = () => asList(topics.places)
 
     const handleFactSelect = (value: string): void => {
         onTopicSelected("fact", value)

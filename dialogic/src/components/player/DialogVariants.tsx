@@ -3,7 +3,6 @@ import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { RenderLink } from '../../exec/RenderView';
-import { DialogLink } from '../../game/Dialog';
 import { ResponseAlignment } from '../../game/GameDescription';
 import { dialogVariantsClass, resolveLinkAppearance, resolveVisuals } from './visualsClasses';
 import LinkButtonContent from './LinkButtonContent';
@@ -14,8 +13,8 @@ interface DialogVariantsProps {
     state: State
     links: RenderLink[]
     step: number
-    onStateUpd: (newState: State) => void
-    text?: string
+    /** Called with the chosen link; the parent applies it (it knows the rendered view). */
+    onChoose: (link: RenderLink) => void
     responseAlignment: ResponseAlignment
     nested?: boolean
     interactive?: boolean
@@ -32,14 +31,13 @@ const itemVariants: Variants = {
     show: { rotateX: 0, opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onStateUpd, links, step, responseAlignment, nested, interactive = true }) => {
+const DialogVariants: React.FC<DialogVariantsProps> = ({ game, state, onChoose, links, step, responseAlignment, nested, interactive = true }) => {
 
     const visuals = resolveVisuals(game.game.visuals)
 
-    const click = (link: DialogLink, textOfLink: string, ev: React.MouseEvent) => {
+    const click = (link: RenderLink, ev: React.MouseEvent) => {
         ev.stopPropagation()
-        const clickData = { actor: null, text: text || '', answer: textOfLink, step: step } // TODO: add actor
-        onStateUpd(game.dialogVariantApply(state, link, clickData))
+        onChoose(link)
     }
 
     const variantsClass = [
@@ -72,7 +70,7 @@ const DialogVariants: React.FC<DialogVariantsProps> = ({ game, text, state, onSt
                                     data-link-type={appearance.linkType}
                                     data-link-visited={appearance.visited ? 'true' : undefined}
                                     style={appearance.cssVars}
-                                    onClick={interactive ? (ev) => click(link.link, link.text, ev) : undefined}
+                                    onClick={interactive ? (ev) => click(link, ev) : undefined}
                                     whileHover={link.disabled ? undefined : { rotateX: 22, y: '6%' }}
                                     transition={{ duration: 0.12, ease: 'easeOut' }}
                                 >

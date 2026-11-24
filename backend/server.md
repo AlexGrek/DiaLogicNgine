@@ -54,7 +54,7 @@ A successful patch persists the game and refreshes its project metadata. A faile
 
 Use `editor_help` with group `schema`, `link` or `script`. Omit `topic` for the index, then request one entry, such as `DialogWindow`, `push` or `isVisible`. Scripts are edited as text.
 
-Use `list_images` to browse filenames and `preview_image` for a single thumbnail. `upload_image` accepts a base64-encoded PNG, JPEG, WebP or GIF and returns a reference suitable for an image field. Uploading to an existing filename replaces the asset. Update references before using `delete_image` to remove an asset.
+Use `list_images` to browse filenames and `preview_image` for a single thumbnail. `upload_image` accepts a base64-encoded PNG, JPEG, WebP or GIF and returns a reference suitable for an image field. Uploading to an existing filename replaces the asset. Update references before using `delete_image` to remove an asset. `remove_background(project, filename, model?)` cuts the subject out through OffloadMQ (`onnx.bgremove.*`, default `birefnet-general`), waits for it, and returns the new transparent `.webp` reference — use it for character `looks`.
 
 ### Verification and schema maintenance
 
@@ -83,7 +83,7 @@ Connect a Streamable HTTP client to `http://localhost:4267/play-mcp` for local d
 
 - **Discovery & library:** `list_available_games`, `list_saved_games`, `list_recently_played`, `list_sessions`
 - **Session & saves:** `start_game`, `resume_session`, `delete_session`, `save_checkpoint`, `list_checkpoints`, `load_checkpoint`, `delete_checkpoint`
-- **Gameplay & inspection:** `get_state`, `act` (`choose_link` | `continue` | `travel` | `click_zone` | `discuss` | `use_item`), `inspect` (`inventory` | `facts` | `people` | `places` | `objectives` | `history` | `summary`), `view_image` (`scene` | `avatar` | `item` | `route` | `pac_annotated`)
+- **Gameplay & inspection:** `get_state`, `act` (`choose_link` | `continue` | `travel` | `click_zone` | `discuss` | `use_item`), `inspect` (`inventory` | `facts` | `people` | `places` | `objectives` | `history` | `summary`), `view_image` (`scene` | `avatar` | `stage` | `item` | `route` | `pac_annotated`; `stage` takes a character uid from `scene.stage`)
 - **Developer debug (owner-only; the caller must own the project, even if it is published):** `debug_start_game` (new session at any `position` — `{kind:"window",dialog,window}` / `{kind:"location",location}` / `{kind:"chardialog",char}` — skipping the startup entry, then RFC 6902 `operations` on the raw engine `State`, then an `rt` `script`, then the position's entry), `debug_read_state` (any raw `State` value by JSON Pointer, read from the persisted session), `debug_edit_state` (same `operations` → `position` → `script` → `run_entry` pipeline on an existing session; the runner validates state shape and position and throws instead of persisting a broken state, and `load_checkpoint(use_previous_autosave=True)` undoes one edit). Raw `operations` bypass hooks and notifications; `script` goes through the normal runtime and fires them.
 
 ### Building the runner & configuration
@@ -291,6 +291,8 @@ Public = no auth · Auth = valid session · Owner = auth + `require_owner`.
 | GET | `/api/v1/llm/models`, `/imggen/models` | Auth |
 | POST | `/api/v1/llm/generate-dialog`, `/generate-text` | Auth (+ Owner if `project_name` set) |
 | POST | `/api/v1/imggen/generate` | Owner |
+| GET | `/api/v1/imggen/bgremove/models` | Auth |
+| POST | `/api/v1/imggen/bgremove` (background removal → transparent WebP; poll via `/imggen/status`) | Owner |
 | GET | `/api/v1/imggen/status/{p}/…` | Owner |
 | GET/POST/DELETE | `/api/v1/prompts/{p}/…` | Owner |
 | GET/POST | `/api/v1/settings/offloadmq` | Auth |

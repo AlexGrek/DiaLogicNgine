@@ -3,6 +3,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { LocRouteRenderView, LocationRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
+import { playAction } from './playerActions';
 import DialogTextStage from './DialogTextStage';
 import { resolveVisuals } from './visualsClasses';
 import "./player.css";
@@ -21,11 +22,11 @@ const LocView: React.FC<LocViewProps> = ({ game, state, onStateUpd, view, step }
     const text = state.fatalError ? state.fatalError.message : view.text
 
     const clickRoute = (routeView: LocRouteRenderView) => {
-        onStateUpd(game.locRouteApply(state, routeView))
+        playAction(game, state, view, { type: 'route', index: routeView.index }, onStateUpd)
     }
 
     const footer = view.links.length > 0
-        ? <DialogVariants game={game} state={state} links={view.links} step={step} onStateUpd={onStateUpd} responseAlignment={visuals.responseAlignment} />
+        ? <DialogVariants game={game} state={state} links={view.links} step={step} onChoose={(link) => playAction(game, state, view, { type: 'link', index: link.index }, onStateUpd)} responseAlignment={visuals.responseAlignment} />
         : null
 
     // On a portrait stage the routes become a left column and the text stage is

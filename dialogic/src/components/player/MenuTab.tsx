@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { GameExecManager } from '../../exec/GameExecutor';
-import { State, createInitialState } from '../../exec/GameState';
+import { State } from '../../exec/GameState';
 import { LocalizationManager } from '../../exec/Localization';
 import { FONT_SIZE_LABELS, FontSizeId } from '../../game/GameDescription';
 import { resolveVisuals } from './visualsClasses';
@@ -70,8 +70,7 @@ const MenuTab: React.FC<MenuTabProps> = ({ gameExecutor, state, localmanager, on
     }
 
     const handleRestart = () => {
-        const initialState = createInitialState(gameExecutor.game)
-        handleLoad(initialState)
+        handleLoad(gameExecutor.newGameState())
     }
 
     const saveKey = (savegame: SaveGame) => `${savegame.name}|${new Date(savegame.created).getTime()}`

@@ -49,6 +49,10 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     const [source, setSource] = useState<Source>('server');
     const [localFiles, setLocalFiles] = useState<string[]>([]);
     const [selected, setSelected] = useState<string | null>(value ?? null);
+    /** Project the selection was picked from on the "Other Projects" tab; null = this project / local assets. */
+    const [selectedFrom, setSelectedFrom] = useState<string | null>(null);
+    const [copying, setCopying] = useState(false);
+    const [copyError, setCopyError] = useState<string | null>(null);
     const [otherProjects, setOtherProjects] = useState<string[]>([]);
     const [otherProject, setOtherProject] = useState<string | null>(null);
     const [otherImages, setOtherImages] = useState<string[]>([]);
@@ -81,6 +85,8 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     useEffect(() => {
         if (!open) return;
         setSelected(value ?? null);
+        setSelectedFrom(null);
+        setCopyError(null);
         if (initialSource) setSource(initialSource);
         if (initialPrompt) setGen(g => ({ ...g, prompt: initialPrompt }));
         fetchImages();
@@ -152,6 +158,9 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         return `/api/v1/projects/${encodeURIComponent(otherProject ?? '')}/images/${encodeURIComponent(filename)}`;
     };
 
+    const otherImageUrl = (project: string, filename: string) =>
+        `/api/v1/projects/${encodeURIComponent(project)}/images/${encodeURIComponent(filename)}`;
+
     const getStoredValue = (filename: string) => {
         if (source === 'server') return filename;
         if (source === 'local') return `game_assets/${filename}`;
@@ -159,7 +168,9 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
     };
 
     const selectedFullUrl = selected
-        ? getFullUrl(selected.startsWith('game_assets/') ? selected.slice('game_assets/'.length) : selected)
+        ? (selectedFrom
+            ? otherImageUrl(selectedFrom, selected)
+            : getFullUrl(selected.startsWith('game_assets/') ? selected.slice('game_assets/'.length) : selected))
         : null;
 
     const selectedLabel = selected
@@ -174,7 +185,48 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
         : null;
 
     // ── Selection / confirm handlers ──
-    const handleConfirm = () => {
+    /** A name not yet used in this project: "pic.png" → "pic-2.png", "pic-3.png", … */
+    const freeName = (filename: string) => {
+        if (!images.includes(filename)) return filename;
+        const dot = filename.lastIndexOf('.');
+        const base = dot > 0 ? filename.slice(0, dot) : filename;
+        const ext = dot > 0 ? filename.slice(dot) : '';
+        for (let i = 2; ; i++) {
+            const candidate = `${base}-${i}${ext}`;
+            if (!images.includes(candidate)) return candidate;
+        }
+    };
+
+    /**
+     * Image references are bare filenames resolved against THIS project, so an image
+     * picked from another project is copied here first (renamed on a name clash).
+     */
+    const copyFromOtherProject = async (project: string, filename: string): Promise<string> => {
+        const r = await fetch(otherImageUrl(project, filename));
+        if (!r.ok) throw new Error(`Cannot read ${filename} from ${project}: HTTP ${r.status}`);
+        const blob = await r.blob();
+        const name = freeName(filename);
+        let stored = name;
+        await uploadFile(new File([blob], name, { type: blob.type }), (n) => { stored = n; });
+        fetchImages();
+        return stored;
+    };
+
+    const handleConfirm = async () => {
+        if (selected && selectedFrom) {
+            setCopying(true);
+            setCopyError(null);
+            try {
+                const stored = await copyFromOtherProject(selectedFrom, selected);
+                onChange(stored);
+                onClose();
+            } catch (err) {
+                setCopyError(String(err));
+            } finally {
+                setCopying(false);
+            }
+            return;
+        }
         onChange(selected);
         onClose();
     };
@@ -191,6 +243,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
             await uploadFile(file, (name) => {
                 fetchImages();
                 setSelected(name);
+                setSelectedFrom(null);
             });
         } catch (err) {
             setGen(g => ({ ...g, status: 'error', error: String(err) }));
@@ -214,7 +267,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
 
     const handleDeleteServerImage = async (filename: string) => {
         await deleteImage(filename);
-        if (selected === filename) setSelected(null);
+        if (selected === filename && !selectedFrom) setSelected(null);
         fetchImages();
     };
 
@@ -254,8 +307,14 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                         <ImageBrowserGrid
                             items={currentItems}
                             getThumb={getThumb}
-                            isSelected={(filename) => selected === getStoredValue(filename)}
-                            onSelect={(filename) => setSelected(getStoredValue(filename))}
+                            isSelected={(filename) =>
+                                selected === getStoredValue(filename) &&
+                                selectedFrom === (source === 'other' ? otherProject : null)}
+                            onSelect={(filename) => {
+                                setSelected(getStoredValue(filename));
+                                setSelectedFrom(source === 'other' ? otherProject : null);
+                                setCopyError(null);
+                            }}
                         />
                     ) : source === 'fromSource' ? (
                         <FromSourcePanel
@@ -306,7 +365,10 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                             />
                         </>
                     )}
-                    <span className="image-picker-modal-selected-name">{selectedLabel}</span>
+                    <span className="image-picker-modal-selected-name">
+                        {selectedFrom ? `${selectedLabel} (from ${selectedFrom}, will be copied here)` : selectedLabel}
+                        {copyError && <span style={{ color: 'var(--rs-text-error, #f44336)', marginLeft: 8 }}>{copyError}</span>}
+                    </span>
                     <div className="image-picker-modal-actions">
                         <Button onClick={handleClear} appearance="subtle">Clear</Button>
                         <Button onClick={onClose} appearance="subtle">Cancel</Button>
@@ -315,7 +377,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                                 Preview
                             </Button>
                         )}
-                        {source === 'server' && selected && (
+                        {source === 'server' && selected && !selectedFrom && (
                             <Button
                                 onClick={() => handleDeleteServerImage(selected)}
                                 appearance="subtle"
@@ -325,7 +387,7 @@ const ImagePickerModal: React.FC<ImagePickerModalProps> = ({
                             </Button>
                         )}
                         {isBrowsing && (
-                            <Button onClick={handleConfirm} appearance="primary">Select</Button>
+                            <Button onClick={handleConfirm} appearance="primary" loading={copying}>Select</Button>
                         )}
                     </div>
                 </div>

@@ -123,6 +123,7 @@ def validate(game, rep):
                          for d in dialogs}
     dialog_names = set(windows_by_dialog)
     char_uids = {c.get("uid") for c in chars}
+    chars_by_uid = {c.get("uid"): c for c in chars if isinstance(c, dict)}
     chars_with_dialog = {c.get("uid") for c in chars if c.get("dialog")}
     loc_uids = {l.get("uid") for l in locs}
     item_uids = {i.get("uid") for i in items}
@@ -258,6 +259,26 @@ def validate(game, rep):
                     and not actor.get("currentCharacter") \
                     and actor["character"] not in char_uids:
                 rep.error(where, f'actor references missing character "{actor["character"]}"')
+            stage = w.get("stage") or []
+            if len(stage) > 3:
+                rep.warn(where, f"stage lists {len(stage)} persons; only the first 3 are shown")
+            for si, slot in enumerate(stage):
+                if not isinstance(slot, dict) or slot.get("currentCharacter"):
+                    continue
+                cuid = slot.get("character")
+                ch = chars_by_uid.get(cuid)
+                if not cuid:
+                    rep.warn(where, f"stage person {si + 1} has no character")
+                elif ch is None:
+                    rep.error(where, f'stage person {si + 1} references missing character "{cuid}"')
+                else:
+                    looks = ch.get("looks") or {}
+                    look = slot.get("look")
+                    named = {e.get("name") for e in looks.get("list", []) if e.get("uri")}
+                    ok = (look in named) if look and look != "main" else bool(looks.get("main"))
+                    if not ok:
+                        what = f'look "{look}"' if look else "default (main) look"
+                        rep.error(where, f'stage person "{cuid}" has no {what} in `looks`')
             bg = w.get("changeLocationInBg")
             if bg and bg not in loc_uids:
                 rep.error(where, f'changeLocationInBg points to missing location "{bg}"')

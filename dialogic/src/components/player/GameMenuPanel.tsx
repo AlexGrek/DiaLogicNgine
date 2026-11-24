@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { canUseItems } from '../../exec/PlayerTurn';
+import { playAction } from './playerActions';
 import Markdown from 'react-markdown';
 import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
@@ -31,7 +33,7 @@ interface GameMenuPanelProps {
     onPlayerSettingsChange: (s: PlayerSettings) => void
 }
 
-const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose, game, executor, onStateChange, savesManager, widgetRequest, playerSettings, onPlayerSettingsChange }) => {
+const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, view, open, onOpenClose, game, executor, onStateChange, savesManager, widgetRequest, playerSettings, onPlayerSettingsChange }) => {
     const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
     const [selectedWidgetPrev, setSelectedWidgetPrev] = useState<string | null>(null);
 
@@ -163,7 +165,7 @@ const GameMenuPanel: React.FC<GameMenuPanelProps> = ({ state, open, onOpenClose,
             <div className='game-menu-top'>
                 <div className={getClass('game-menu-widget-container')}>
                     {('Inventory' === selectedWidget || 'Inventory' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Inventory')}>
-                        <InventoryTab state={state} game={executor} layout={resolveVisuals(game.visuals).inventoryLayout} onUseItem={(uid) => { onOpenClose(false); onStateChange(executor.useItemInDialog(state, uid)); }} />
+                        <InventoryTab state={state} game={executor} layout={resolveVisuals(game.visuals).inventoryLayout} onUseItem={canUseItems(state, view.uiWidgetView) ? (uid) => { onOpenClose(false); playAction(executor, state, view.uiWidgetView, { type: 'useItem', uid }, onStateChange); } : undefined} />
                     </div>}
                     {('Facts' === selectedWidget || 'Facts' === selectedWidgetPrev) && <div className={getClassWidget('game-menu-widget', 'Facts')}>
                         <TabsUiMenuWidget data={factTabs()} />

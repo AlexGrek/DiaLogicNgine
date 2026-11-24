@@ -496,7 +496,8 @@ function evaluate(game: GameDescription, s: string, execManager: GameExecManager
     const body = makeFunctionBody(s, buildFunctionsPreamble(game))
     const stateCopy = lodash.cloneDeep(prevState)
     const rt = createRtObject(game, execManager, stateCopy)
-    rt.contextVars = contextVars;
+    // always an object, so scripts can read context.usedItem / context.thisEvent without a guard
+    rt.contextVars = contextVars ?? {};
     const returned = (globalThis as any).eval.call(globalThis, body)(rt, stateCopy, rt.props, rt.ch, rt.facts, rt.objectives, rt.situation, rt.items, rt.contextVars);
     return [returned, stateCopy]
 }

@@ -50,7 +50,7 @@ const ConfigurationMenu: React.FC<ConfigurationMenuProps> = ({ game, onSetGame, 
     const renderGeneralProp = (name: keyof GeneralGameInfo) => {
         const prop = game.general[name]
         return <p id={`general-prop-${name}`}>
-            <b>{name}: </b>{prop.toString()}
+            <b>{name}: </b>{prop === undefined || prop === null ? '' : String(prop)}
         </p>
     }
 

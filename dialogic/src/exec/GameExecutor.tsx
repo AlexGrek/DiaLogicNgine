@@ -4,7 +4,7 @@ import Dialog, { DialogLink, DialogWindow, LinkType } from "../game/Dialog";
 import { GameDescription } from "../game/GameDescription";
 import { ImageList, chooseImage } from "../game/ImageList";
 import Loc, { getLoc } from "../game/Loc";
-import { DialogWindowId, HistoryRecord, State, dialogWindowKey, getVisitedDialogs, getVisitedLocations } from "./GameState";
+import { DialogWindowId, HistoryRecord, State, createInitialState, dialogWindowKey, getVisitedDialogs, getVisitedLocations } from "./GameState";
 import { backDestination, tryGetCharById, tryGetDialogWindowById, tryGetLocationById } from "./NavigationUtils";
 import { LocRouteRenderView, RenderViewGenerator } from "./RenderView";
 import { evaluateAsAnyProcessor, evaluateAsBoolProcessor, evaluateAsStateProcessor } from "./Runtime";
@@ -217,6 +217,11 @@ export class GameExecManager {
             state.knownPlaces.push(loc)
             return state
         }
+    }
+
+    /** A fresh game: the initial state with the startup position's entry script applied. */
+    newGameState(): State {
+        return this.executeEntry(createInitialState(this.game))
     }
 
     public applyEntry(state: State): State {
