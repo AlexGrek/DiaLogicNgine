@@ -81,6 +81,7 @@ def _turn_content(
         "page_index": scene.get("page_index", 0),
         "page_count": scene.get("page_count", 1),
         "speaker": scene.get("speaker"),
+        "stage": scene.get("stage") or [],
         "location": scene.get("location"),
         "pac": scene.get("pac"),
         "has_background": bool(avail.get("scene")),
@@ -111,6 +112,7 @@ def _turn_content(
         "viewable_images": {
             "scene": bool(avail.get("scene")),
             "avatar": bool(avail.get("avatar")),
+            "stage": sorted((avail.get("stage") or {}).keys()),
             "pac_annotated": widget == "pac",
             "items": sorted((avail.get("items") or {}).keys()),
             "routes": sorted((avail.get("routes") or {}).keys()),
@@ -439,10 +441,10 @@ async def inspect(
 @mcp.tool()
 async def view_image(
     session_code: str,
-    target: Literal["scene", "avatar", "item", "route", "pac_annotated"] = "scene",
+    target: Literal["scene", "avatar", "stage", "item", "route", "pac_annotated"] = "scene",
     target_id: str = "",
 ) -> Image:
-    """Fetch a game image from the current session context as native MCP image content."""
+    """Fetch a game image from the current session context as native MCP image content. For target=stage pass the character uid as target_id."""
     owner = principal.get()
     async with pool.session_lock(owner, session_code):
         session = store.require_session(owner, session_code)
@@ -467,6 +469,8 @@ async def view_image(
         ref = avail.get("scene")
     elif target == "avatar":
         ref = avail.get("avatar")
+    elif target == "stage":
+        ref = (avail.get("stage") or {}).get(target_id)
     elif target == "item":
         ref = (avail.get("items") or {}).get(target_id)
     elif target == "route":

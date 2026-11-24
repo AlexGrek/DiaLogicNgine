@@ -47,6 +47,14 @@ explain_fields(
     "Select a variant from the corresponding text or image list by name or index. Return null for main.",
 )
 explain_fields(
+    "chooseLookScript",
+    "Character field. Pick the default look (name or index in chars[i].looks) used when a stage slot names no look. Return null for looks.main. Example: return rt.props.mood > 5 ? 'smile' : null",
+)
+explain_fields(
+    "chooseStageScript",
+    "Window field. Return up to 3 stage persons, right to left, replacing the static stage: entries are 'charUid', 'charUid:look' or {character, look?, currentCharacter?}. Return [] for nobody, null to keep window.stage. Example: return rt.facts.betrayal.known ? [{character:'mira', look:'angry'}] : ['mira']",
+)
+explain_fields(
     "canHappenScript",
     "Return true to make an event eligible for its host and probability check. Example: return !rt.history.thisEventHappened(context)",
 )
@@ -74,6 +82,7 @@ SCRIPTS.update(
         "body": "For a reusable function the body returns whatever the caller expects. For a hook the body processes state when its lifecycle key fires. Request functions or hooks for their formats.",
         "rt.history": "Use dialogVisited(dialog, window?), locationVisited(uid), eventHappened(name), or thisEventHappened(context). Entry scripts see visits prior to the current entry.",
         "situation": "Read rt.situation. Set state.situation to a situation name to change it.",
+        "stage": "Full-size persons on a dialog window. chars[i].looks is an ImageList of transparent full-body images (main = default look, list entries named e.g. smile/angry). window.stage is up to 3 StagePerson {character, look?, currentCharacter?}; index 0 stands rightmost, the next ones to its left, overlapping a little; the window actor is highlighted and the others dimmed. window.chooseStageScript overrides it at runtime. Use remove_background to turn a generated image into a transparent look.",
         "functions": "Define {name,args,description,body}. Each JS body can call named game functions. Use a valid JS function name and comma-separated parameters.",
         "hooks": "Define {name,hook,body}. The body runs on the exact lifecycle key, e.g. FACTS::DISCOVERED::<uid>, ITEMS::ACQUIRED::<uid>, ITEMS::LOST::<uid>, SITUATION::STARTED::<name>, SITUATION::ENDED::<name>, QUESTLINE::OPENED::<line>, QUESTLINE::CLOSED::<line>, QUEST::{OPENED|COMPLETED|FAILED}::<line>::<quest>, TASK::{OPENED|COMPLETED|FAILED}::<line>::<quest>::<task>.",
     }

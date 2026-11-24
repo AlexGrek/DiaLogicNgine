@@ -1,6 +1,6 @@
 import { trace } from "../Trace"
-import Character, { CharacterDialog, createEmptyCharacter, getChar } from "../game/Character"
-import Dialog, { Actor, DialogLink, DialogWindow } from "../game/Dialog"
+import Character, { CharacterDialog, createEmptyCharacter, getChar, resolveLookImage } from "../game/Character"
+import Dialog, { Actor, DialogLink, DialogWindow, MAX_STAGE_PERSONS, StagePerson } from "../game/Dialog"
 import { chooseImage } from "../game/ImageList"
 import Loc, { getLoc } from "../game/Loc"
 import { Quest, QuestPath, getQuest } from "../game/Objectives"
@@ -18,6 +18,17 @@ export interface ActorView {
     avatar?: string
     name: string
     char: Character
+}
+
+/** A full-size person on the dialog stage. The list is ordered right-to-left. */
+export interface StagePersonView {
+    char: string
+    name: string
+    /** The look reference that was asked for (undefined = default look). */
+    look?: string
+    image: string
+    /** True when this person is the window's actor. */
+    speaking: boolean
 }
 
 export interface CharInfoRenderView {
@@ -58,6 +69,7 @@ export interface RenderLink {
 export interface DialogRenderView {
     widget: "dialog"
     actor: ActorView | null
+    stage: StagePersonView[]
     text: string
     links: RenderLink[]
     window: DialogWindow
@@ -274,6 +286,73 @@ export class RenderViewGenerator {
 
 
 
+    /** Normalise one entry returned by chooseStageScript into a StagePerson. */
+    private stageEntryFromScript(entry: unknown): StagePerson | null {
+        if (typeof entry === "string") {
+            const sep = entry.indexOf(":")
+            return sep < 0
+                ? { character: entry }
+                : { character: entry.slice(0, sep), look: entry.slice(sep + 1) || undefined }
+        }
+        if (entry && typeof entry === "object") {
+            const o = entry as Record<string, unknown>
+            const character = typeof o.character === "string" ? o.character : typeof o.char === "string" ? o.char : ""
+            const look = o.look === undefined || o.look === null ? undefined : String(o.look)
+            return { character, look, currentCharacter: o.currentCharacter === true || undefined }
+        }
+        return null
+    }
+
+    /**
+     * Persons on the window's stage, right-to-left. chooseStageScript (when set and
+     * returning an array) replaces the static `stage`; each slot's look falls back to
+     * the character's chooseLookScript, then to its default look.
+     */
+    public getCurrentWindowStage(state: State, window: DialogWindow, actor: ActorView | null): StagePersonView[] {
+        let slots: StagePerson[] = window.stage ?? []
+        if (window.chooseStageScript) {
+            const { decision } = evaluateAsAnyProcessor(this.exec.game, window.chooseStageScript, this.exec, state)
+            if (Array.isArray(decision)) {
+                slots = decision.map(e => this.stageEntryFromScript(e)).filter((e): e is StagePerson => e !== null)
+            } else if (decision !== undefined && decision !== null) {
+                console.warn(`chooseStageScript of window ${window.uid} returned a non-array; static stage used`)
+            }
+        }
+        const result: StagePersonView[] = []
+        for (const slot of slots.slice(0, MAX_STAGE_PERSONS)) {
+            const uid = slot.currentCharacter ? state.charDialog : slot.character
+            const char = uid ? getChar(this.exec.game, uid) : undefined
+            if (!char) {
+                if (uid) console.error(`Stage: cannot find character ${uid}`)
+                continue
+            }
+            let lookRef: unknown = slot.look
+            if (lookRef === undefined && char.chooseLookScript) {
+                lookRef = evaluateAsAnyProcessor(this.exec.game, char.chooseLookScript, this.exec, state).decision
+            }
+            let image = resolveLookImage(char, lookRef)
+            if (image === undefined && lookRef !== undefined && lookRef !== null) {
+                console.warn(`Stage: character ${char.uid} has no look ${JSON.stringify(lookRef)}; default look used`)
+                image = resolveLookImage(char, undefined)
+                lookRef = undefined
+            }
+            if (!image) continue
+            let name = char.displayName.main
+            if (char.chooseNameScript) {
+                const { decision } = evaluateAsAnyProcessor(this.exec.game, char.chooseNameScript, this.exec, state)
+                name = chooseText(char.displayName, decision)
+            }
+            result.push({
+                char: char.uid,
+                name,
+                look: lookRef === undefined || lookRef === null ? undefined : String(lookRef),
+                image,
+                speaking: actor?.char.uid === char.uid,
+            })
+        }
+        return result
+    }
+
     renderSpecialWidget(state: State, widget: string, _data: WindowData, _dialog: Dialog): RenderWidget {
         const [widgetType, widgetId] = widget.split("::");
         switch (widgetType) {
@@ -339,6 +418,7 @@ export class RenderViewGenerator {
         return {
             widget: "dialog",
             ...windowData,
+            stage: this.getCurrentWindowStage(state, window, windowData.actor),
             pageIndex: paging.pageIndex,
             pageCount: paging.pageCount,
             continueLink: paging.continueLink

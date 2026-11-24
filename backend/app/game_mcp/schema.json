@@ -84,6 +84,10 @@
         "chooseDescriptionScript": {
           "type": "string"
         },
+        "chooseLookScript": {
+          "description": "Picks the default look (name or index) when a stage slot does not name one.",
+          "type": "string"
+        },
         "chooseNameScript": {
           "type": "string"
         },
@@ -98,6 +102,10 @@
         },
         "displayName": {
           "$ref": "#/definitions/TextList"
+        },
+        "looks": {
+          "$ref": "#/definitions/ImageList",
+          "description": "Full-size transparent person images shown on dialog window stages; main = default look."
         },
         "overrideProps": {
           "items": {
@@ -370,6 +378,10 @@
         "chooseBackgroundScript": {
           "type": "string"
         },
+        "chooseStageScript": {
+          "description": "Returns the stage for this window (overrides `stage`); null keeps the static stage.",
+          "type": "string"
+        },
         "chooseTextScript": {
           "type": "string"
         },
@@ -387,6 +399,14 @@
             "string",
             "null"
           ]
+        },
+        "stage": {
+          "description": "Up to 3 (MAX_STAGE_PERSONS) full-size persons, right-to-left: index 0 is rightmost.",
+          "items": {
+            "$ref": "#/definitions/StagePerson"
+          },
+          "maxItems": 3,
+          "type": "array"
         },
         "tags": {
           "items": {
@@ -1646,6 +1666,28 @@
         "hello",
         "dontKnowObject",
         "dontKnowChar"
+      ],
+      "type": "object"
+    },
+    "StagePerson": {
+      "additionalProperties": false,
+      "description": "One full-size person (\"look\" sprite) shown on a dialog window's stage. Stage slots are laid out right-to-left: slot 0 is the rightmost person.",
+      "properties": {
+        "character": {
+          "description": "Character uid. Ignored when `currentCharacter` is set.",
+          "type": "string"
+        },
+        "currentCharacter": {
+          "description": "Use the character of the current conversation (state.charDialog).",
+          "type": "boolean"
+        },
+        "look": {
+          "description": "Look name from `Character.looks`; omitted = character's default look.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "character"
       ],
       "type": "object"
     },

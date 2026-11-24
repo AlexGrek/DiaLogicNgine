@@ -1,4 +1,4 @@
-import { getChar } from "../game/Character"
+import { getChar, resolveLookImage } from "../game/Character"
 import { DialogLink, DialogLinkDirection, LinkType } from "../game/Dialog"
 import { GameDescription } from "../game/GameDescription"
 import { ImageList } from "../game/ImageList"
@@ -13,7 +13,7 @@ type ImageUri = string | null | undefined
 /** Only the assets actually selected by the renderer may delay a scene change. */
 export function sceneImages(background: ImageUri, widget: RenderWidget): ImageUri[] {
     switch (widget.widget) {
-        case "dialog": return [background, widget.actor?.avatar]
+        case "dialog": return [background, widget.actor?.avatar, ...(widget.stage ?? []).map(p => p.image)]
         case "pac": return [background, widget.pac.background, ...widget.items.map(({ zone }) => zone.image)]
         case "location": return [background, ...widget.routes.map(route => route.thumbnail)]
         case "char": return [background]
@@ -38,6 +38,11 @@ export function upcomingImages(game: GameDescription, state: State): ImageUri[] 
         if (actor) {
             const uid = actor.currentCharacter ? state.charDialog : actor.character
             if (uid) imageList(getChar(game, uid)?.avatar)
+        }
+        // Static stage only: scripted stages and looks are resolved at render time.
+        for (const slot of window.stage ?? []) {
+            const char = getChar(game, (slot.currentCharacter ? state.charDialog : slot.character) ?? "")
+            if (char) images.push(resolveLookImage(char, slot.look))
         }
         if (window.specialWidget?.startsWith("pac::")) {
             const pac = game.pacWidgets?.find(p => p.id === window.specialWidget?.slice(5))

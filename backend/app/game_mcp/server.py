@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import quote, urlsplit
 
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile
 from mcp.server.fastmcp import FastMCP, Image
 from mcp.server.transport_security import TransportSecuritySettings
 from PIL import Image as PillowImage
@@ -17,7 +17,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 from app import image_storage
-from app.api.v1 import images, projects
+from app.api.v1 import bgremove, images, projects
 
 from . import authorization as auth
 from . import editor
@@ -57,7 +57,10 @@ def create_project(
 @mcp.tool()
 def editor_planes() -> dict:
     """Discover editor sections and the fields available to browse, read and patch."""
-    return {**editor.PLANES, "resources": ["Use list_images, preview_image, upload_image and delete_image."]}
+    return {
+        **editor.PLANES,
+        "resources": ["Use list_images, preview_image, upload_image, delete_image and remove_background."],
+    }
 
 
 @mcp.tool()
@@ -161,6 +164,18 @@ async def delete_image(project: str, filename: str) -> dict:
     """Remove one uploaded image and its thumbnail. Existing game references require a separate patch."""
     asset(project, filename)
     return await images.delete_image(project, filename, principal.get())
+
+
+@mcp.tool()
+async def remove_background(project: str, filename: str, model: str = "") -> dict:
+    """Cut the person out of a project image into a new transparent, cropped WebP (takes ~10-60 s). Use it for character looks: put the returned reference into chars[i].looks.main or a named looks.list entry. Empty model = onnx.bgremove.birefnet-general."""
+    asset(project, filename)
+    req = bgremove.BgRemoveRequest(project_name=project, image=filename, model=model or bgremove.DEFAULT_MODEL)
+    try:
+        result = await bgremove.remove_background_and_wait(req, principal.get())
+    except HTTPException as e:
+        raise ValueError(f"Background removal failed ({e.status_code}): {e.detail}") from e
+    return {"reference": result["filename"], "source": filename}
 
 
 class ProtectedMCP:

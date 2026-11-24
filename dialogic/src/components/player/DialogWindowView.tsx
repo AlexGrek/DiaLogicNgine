@@ -4,6 +4,7 @@ import { GameExecManager } from '../../exec/GameExecutor';
 import { State } from '../../exec/GameState';
 import { DialogRenderView } from '../../exec/RenderView';
 import DialogVariants from './DialogVariants';
+import StagePersonsView from './StagePersonsView';
 import DialogTextStage, { StageActor } from './DialogTextStage';
 import { PlayerSettings } from './PlayerSettings';
 import { useTypewriterText } from './useTypewriterText';
@@ -97,6 +98,7 @@ const DialogWindowView: React.FC<DialogWindowViewProps> = ({ game, state, onStat
             onClick={isClickable ? handleAreaClick : undefined}
             style={isClickable ? { cursor: 'pointer' } : undefined}
         >
+            <StagePersonsView persons={view.stage ?? []} alignment={visuals.dialogTextAlignment} />
             <DialogTextStage
                 morphScope="dialog"
                 alignment={visuals.dialogTextAlignment}

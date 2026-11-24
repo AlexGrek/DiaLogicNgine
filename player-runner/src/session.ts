@@ -346,6 +346,8 @@ export class GameSessionRunner {
     let pageIndex = 0;
     let pageCount = 1;
     let speaker: TurnPayload["scene"]["speaker"] = null;
+    const stage: TurnPayload["scene"]["stage"] = [];
+    const stageImages: Record<string, string> = {};
     let avatarRef: string | null = null;
     let locationInfo: TurnPayload["scene"]["location"] = null;
     let pacInfo: TurnPayload["scene"]["pac"] = null;
@@ -372,6 +374,10 @@ export class GameSessionRunner {
           name: dw.actor.name,
           has_avatar: Boolean(avatarRef),
         };
+      }
+      for (const p of dw.stage ?? []) {
+        stage.push({ char_uid: p.char, name: p.name, look: p.look ?? null, speaking: p.speaking });
+        stageImages[p.char] = p.image;
       }
       if (dw.pageIndex < dw.pageCount - 1) {
         canContinue = true;
@@ -482,6 +488,7 @@ export class GameSessionRunner {
     const availableImages: TurnAvailableImages = {
       scene: effectiveBg,
       avatar: avatarRef,
+      stage: stageImages,
       items: this.collectItemImages(state),
       routes: routeImages,
     };
@@ -498,6 +505,7 @@ export class GameSessionRunner {
         page_index: pageIndex,
         page_count: pageCount,
         speaker,
+        stage,
         location: locationInfo,
         pac: pacInfo,
         background_ref: effectiveBg,

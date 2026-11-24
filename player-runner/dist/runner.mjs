@@ -5617,6 +5617,20 @@ function createEmptyCharacter(uid) {
 function getChar(game, uid) {
   return game.chars.find((ch) => ch.uid === uid);
 }
+function resolveLookImage(ch, look) {
+  const looks = ch.looks;
+  if (!looks) return void 0;
+  if (look === void 0 || look === null || look === "" || look === "main" || look === -1) {
+    return looks.main || void 0;
+  }
+  if (typeof look === "number") {
+    return Number.isInteger(look) && look >= 0 ? looks.list[look]?.uri || void 0 : void 0;
+  }
+  if (typeof look === "string") {
+    return looks.list.find((l2) => l2.name === look)?.uri || void 0;
+  }
+  return void 0;
+}
 
 // ../dialogic/src/game/Dialog.ts
 var LINK_TYPES = [
@@ -5648,6 +5662,7 @@ function createDialogLink() {
 function createImmediateDialogLink(target) {
   return { mainDirection: { type: "push" /* Push */, direction: "", qualifiedDirection: target }, text: "", alternativeDirections: [] };
 }
+var MAX_STAGE_PERSONS = 3;
 
 // ../dialogic/src/game/Loc.ts
 function getLoc(game, uid) {
@@ -8824,6 +8839,68 @@ var RenderViewGenerator = class {
       char: character
     };
   }
+  /** Normalise one entry returned by chooseStageScript into a StagePerson. */
+  stageEntryFromScript(entry) {
+    if (typeof entry === "string") {
+      const sep = entry.indexOf(":");
+      return sep < 0 ? { character: entry } : { character: entry.slice(0, sep), look: entry.slice(sep + 1) || void 0 };
+    }
+    if (entry && typeof entry === "object") {
+      const o = entry;
+      const character = typeof o.character === "string" ? o.character : typeof o.char === "string" ? o.char : "";
+      const look = o.look === void 0 || o.look === null ? void 0 : String(o.look);
+      return { character, look, currentCharacter: o.currentCharacter === true || void 0 };
+    }
+    return null;
+  }
+  /**
+   * Persons on the window's stage, right-to-left. chooseStageScript (when set and
+   * returning an array) replaces the static `stage`; each slot's look falls back to
+   * the character's chooseLookScript, then to its default look.
+   */
+  getCurrentWindowStage(state, window, actor) {
+    let slots = window.stage ?? [];
+    if (window.chooseStageScript) {
+      const { decision } = evaluateAsAnyProcessor(this.exec.game, window.chooseStageScript, this.exec, state);
+      if (Array.isArray(decision)) {
+        slots = decision.map((e2) => this.stageEntryFromScript(e2)).filter((e2) => e2 !== null);
+      } else if (decision !== void 0 && decision !== null) {
+        console.warn(`chooseStageScript of window ${window.uid} returned a non-array; static stage used`);
+      }
+    }
+    const result = [];
+    for (const slot of slots.slice(0, MAX_STAGE_PERSONS)) {
+      const uid = slot.currentCharacter ? state.charDialog : slot.character;
+      const char = uid ? getChar(this.exec.game, uid) : void 0;
+      if (!char) {
+        if (uid) console.error(`Stage: cannot find character ${uid}`);
+        continue;
+      }
+      let lookRef = slot.look;
+      if (lookRef === void 0 && char.chooseLookScript) {
+        lookRef = evaluateAsAnyProcessor(this.exec.game, char.chooseLookScript, this.exec, state).decision;
+      }
+      let image = resolveLookImage(char, lookRef);
+      if (image === void 0 && lookRef !== void 0 && lookRef !== null) {
+        console.warn(`Stage: character ${char.uid} has no look ${JSON.stringify(lookRef)}; default look used`);
+        image = resolveLookImage(char, void 0);
+      }
+      if (!image) continue;
+      let name = char.displayName.main;
+      if (char.chooseNameScript) {
+        const { decision } = evaluateAsAnyProcessor(this.exec.game, char.chooseNameScript, this.exec, state);
+        name = chooseText(char.displayName, decision);
+      }
+      result.push({
+        char: char.uid,
+        name,
+        look: lookRef === void 0 || lookRef === null ? void 0 : String(lookRef),
+        image,
+        speaking: actor?.char.uid === char.uid
+      });
+    }
+    return result;
+  }
   renderSpecialWidget(state, widget, _data, _dialog) {
     const [widgetType, widgetId] = widget.split("::");
     switch (widgetType) {
@@ -8883,6 +8960,7 @@ var RenderViewGenerator = class {
     return {
       widget: "dialog",
       ...windowData,
+      stage: this.getCurrentWindowStage(state, window, windowData.actor),
       pageIndex: paging.pageIndex,
       pageCount: paging.pageCount,
       continueLink: paging.continueLink
@@ -10815,6 +10893,8 @@ var GameSessionRunner = class {
     let pageIndex = 0;
     let pageCount = 1;
     let speaker = null;
+    const stage = [];
+    const stageImages = {};
     let avatarRef = null;
     let locationInfo = null;
     let pacInfo = null;
@@ -10840,6 +10920,10 @@ var GameSessionRunner = class {
           name: dw.actor.name,
           has_avatar: Boolean(avatarRef)
         };
+      }
+      for (const p of dw.stage ?? []) {
+        stage.push({ char_uid: p.char, name: p.name, look: p.look ?? null, speaking: p.speaking });
+        stageImages[p.char] = p.image;
       }
       if (dw.pageIndex < dw.pageCount - 1) {
         canContinue = true;
@@ -10943,6 +11027,7 @@ var GameSessionRunner = class {
     const availableImages = {
       scene: effectiveBg,
       avatar: avatarRef,
+      stage: stageImages,
       items: this.collectItemImages(state),
       routes: routeImages
     };
@@ -10958,6 +11043,7 @@ var GameSessionRunner = class {
         page_index: pageIndex,
         page_count: pageCount,
         speaker,
+        stage,
         location: locationInfo,
         pac: pacInfo,
         background_ref: effectiveBg,

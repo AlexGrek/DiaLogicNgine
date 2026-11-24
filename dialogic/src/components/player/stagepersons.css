@@ -1,0 +1,51 @@
+/* Full-size character looks on the dialog stage (behind the text panel). */
+.stage-persons {
+    position: absolute;
+    top: 4%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    /* persons[0] is the rightmost one */
+    flex-direction: row-reverse;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Stand on the side the text panel leaves free. */
+.stage-persons--right { right: 38%; }
+.stage-persons--left { left: 38%; }
+
+.stage-person {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+    flex: 0 1 auto;
+    max-width: calc(100% / var(--stage-count, 1) + 8%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: filter 0.3s ease;
+}
+
+/* Neighbours overlap a little (row-reverse: the next sibling stands to the left). */
+.stage-person + .stage-person {
+    margin-right: -7%;
+}
+
+.stage-person--idle {
+    filter: brightness(0.7) saturate(0.85);
+}
+
+.stage-person-img {
+    display: block;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: bottom center;
+    user-select: none;
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+}

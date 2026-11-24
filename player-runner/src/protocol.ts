@@ -107,6 +107,8 @@ export interface TurnHudMeter {
 export interface TurnAvailableImages {
   scene: string | null;
   avatar: string | null;
+  /** Stage person look image by character uid. */
+  stage: Record<string, string>;
   items: Record<string, string>;
   routes: Record<string, string>;
 }
@@ -127,6 +129,13 @@ export interface TurnPayload {
       name: string;
       has_avatar: boolean;
     } | null;
+    /** Full-size persons shown on the dialog stage, right to left. */
+    stage: {
+      char_uid: string;
+      name: string;
+      look: string | null;
+      speaking: boolean;
+    }[];
     location: {
       uid: string;
       name: string;

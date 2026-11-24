@@ -254,6 +254,7 @@ class GameEditingTest(unittest.TestCase):
                         "preview_image",
                         "upload_image",
                         "delete_image",
+                        "remove_background",
                     },
                 )
                 result = await session.call_tool("editor_planes", {})

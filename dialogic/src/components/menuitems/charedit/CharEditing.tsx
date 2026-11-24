@@ -18,6 +18,8 @@ import ConfirmDeleteButtonSmall from '../../common/ConfirmDeleteButtonSmall';
 import CharDialogEditorDrawer from './CharDialogEditorDrawer';
 import { IUpds } from '../../../App';
 import CopyButton from '../../common/copypaste/CopyButton';
+import RemoveBackgroundButton from '../../common/imggen/RemoveBackgroundButton';
+import { emptyImageList } from '../../../game/ImageList';
 
 const CODE_EDITOR_UI_NAMESELECTOR: PopupCodeEditorUi = {
     arguments: DEFAULT_ARGS,
@@ -38,7 +40,7 @@ interface CharEditingProps {
     handlers: IUpds
 }
 
-type CodeEditMenu = "chooseAvatarScript" | "chooseNameScript" | "chooseDescriptionScript"
+type CodeEditMenu = "chooseAvatarScript" | "chooseNameScript" | "chooseDescriptionScript" | "chooseLookScript"
 
 const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange, onDelete, handlers }) => {
     const [ch, setCh] = useState<Character>(char);
@@ -125,6 +127,16 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                         basicPromptSuffix={game.dev?.basicPromptSuffix}
                     />
                 </Panel>
+                <Panel header="Looks (full-size stage images)" data-testid="char-looks-panel">
+                    <p className='char-editing-hint'>Full-size images with transparency (WebP/PNG), shown on dialog window stages. "main" is the default look; name the others (e.g. smile, angry).</p>
+                    <ImageListEditor
+                        imageList={ch.looks ?? emptyImageList()}
+                        onChange={value => forceUpdate({ ...ch, looks: value.main || value.list.length ? value : undefined })}
+                        quickAiPrompt={charContext ? `${charContext}, full body, standing, plain background` : 'full body character, standing, plain background'}
+                        basicPromptSuffix={game.dev?.basicPromptSuffix}
+                        entryActions={(uri, setUri) => <RemoveBackgroundButton image={uri} storageProject={storageProject} onDone={setUri} />}
+                    />
+                </Panel>
                 <Panel header="Roles">
                     <CharRoleEditing game={game} char={ch} onCharacterChange={forceUpdate} />
                 </Panel>
@@ -135,6 +147,7 @@ const CharEditing: React.FC<CharEditingProps> = ({ game, char, onCharacterChange
                     {renderCodeEditButton("chooseNameScript")}
                     {renderCodeEditButton("chooseAvatarScript")}
                     {renderCodeEditButton("chooseDescriptionScript")}
+                    {renderCodeEditButton("chooseLookScript")}
                 </Panel>
                 <Panel header="Display description">
                     <TextListEditor singleLine={false} textList={ch.description} onChange={p => setCh({ ...ch, description: p })} />

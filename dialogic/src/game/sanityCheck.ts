@@ -1,4 +1,5 @@
-import { DialogLink, DialogLinkDirection, LinkType } from "./Dialog";
+import { DialogLink, DialogLinkDirection, LinkType, MAX_STAGE_PERSONS } from "./Dialog";
+import { resolveLookImage } from "./Character";
 import { GameDescription } from "./GameDescription";
 
 /**
@@ -8,7 +9,7 @@ import { GameDescription } from "./GameDescription";
  * references that point at something that no longer exists:
  *  - dialog/location/character links whose target window, location or character
  *    is missing,
- *  - the startup dialog, actors, situations, point-and-click widgets and event
+ *  - the startup dialog, actors, stage persons and their looks, situations, point-and-click widgets and event
  *    links that reference a missing object,
  *  - image file references (server-stored filenames) that are not present on
  *    the server.
@@ -194,6 +195,22 @@ export function runSanityCheck(
                 && !charUids.has(window.actor.character)) {
                 add({ category: "reference", severity: "error", message: `Actor references missing character "${window.actor.character}"`, location: where, target: window.actor.character, dialogName: dialog.name });
             }
+            if (window.stage && window.stage.length > MAX_STAGE_PERSONS) {
+                add({ category: "reference", severity: "warning", message: `Stage lists ${window.stage.length} persons; only the first ${MAX_STAGE_PERSONS} are shown`, location: where, dialogName: dialog.name });
+            }
+            window.stage?.forEach((slot, i) => {
+                const slotWhere = `${where} → stage person ${i + 1}`;
+                if (slot.currentCharacter) return;
+                const ch = game.chars.find(c => c.uid === slot.character);
+                if (!slot.character) {
+                    add({ category: "reference", severity: "warning", message: "Stage person has no character", location: slotWhere, dialogName: dialog.name });
+                } else if (!ch) {
+                    add({ category: "reference", severity: "error", message: `Stage person references missing character "${slot.character}"`, location: slotWhere, target: slot.character, dialogName: dialog.name });
+                } else if (!resolveLookImage(ch, slot.look)) {
+                    const what = slot.look ? `look "${slot.look}"` : "default (main) look";
+                    add({ category: "reference", severity: "error", message: `Stage person "${ch.uid}" has no ${what}`, location: slotWhere, target: slot.look ?? ch.uid, dialogName: dialog.name });
+                }
+            });
             if (window.changeLocationInBg && !locUids.has(window.changeLocationInBg)) {
                 add({ category: "reference", severity: "error", message: `Background location change points to missing location "${window.changeLocationInBg}"`, location: where, target: window.changeLocationInBg, dialogName: dialog.name });
             }

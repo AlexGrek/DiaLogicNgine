@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ImageList } from '../../../game/ImageList';
 import { Input, InputGroup, Nav } from 'rsuite';
 import HomeIcon from '@rsuite/icons/legacy/Home';
@@ -17,14 +17,36 @@ interface ImageListEditorProps {
     projectName?: string;
     quickAiPrompt?: string;
     basicPromptSuffix?: string;
+    /**
+     * Extra controls for the selected entry, e.g. image post-processing. `replaceUri`
+     * swaps that entry's image in the latest list, so it is safe to call asynchronously.
+     */
+    entryActions?: (uri: string | undefined, replaceUri: (uri: string) => void) => React.ReactNode;
 }
 
-const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName, quickAiPrompt, basicPromptSuffix }) => {
+const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, projectName, quickAiPrompt, basicPromptSuffix, entryActions }) => {
     const [editingIndex, setEditingIndex] = useState<number>(-1);
     const contextProject = useProjectImages();
     const storageProject = resolveImageProject(projectName ?? contextProject);
 
     const CREATE_INDEX = -100500
+
+    const latest = useRef({ imageList, onChange });
+    latest.current = { imageList, onChange };
+
+    /** Replace `oldUri` with `newUri` wherever it still is in the most recent list. */
+    const replaceUri = (oldUri: string | undefined, newUri: string) => {
+        const { imageList: current, onChange: emit } = latest.current;
+        const copy = lodash.cloneDeep(current);
+        if (copy.main === oldUri) {
+            copy.main = newUri;
+        } else {
+            const entry = copy.list.find(e => e.uri === oldUri);
+            if (!entry) return;
+            entry.uri = newUri;
+        }
+        emit(copy);
+    }
 
     const onTextChange = (text: string | null) => {
         const copy = lodash.cloneDeep(imageList)
@@ -126,6 +148,7 @@ const ImageListEditor: React.FC<ImageListEditorProps> = ({ imageList, onChange, 
         <div>
             {editingIndex < 0 ? null : nameEditingPanel(editingName) }
             {editor}
+            {entryActions ? entryActions(editingText || undefined, (newUri) => replaceUri(editingText, newUri)) : null}
             {editingText && editingText !== "" ? displayImage(editingText) : null}
         </div>
         </div>

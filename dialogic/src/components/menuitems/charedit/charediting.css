@@ -177,3 +177,8 @@
 .behavior-editor-triggers-container > * {
     display: block;
 }
+.char-editing-hint {
+    font-size: 12px;
+    opacity: 0.7;
+    margin: 0 8px 6px;
+}

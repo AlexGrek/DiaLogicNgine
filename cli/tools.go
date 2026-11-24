@@ -57,6 +57,7 @@ var tools = []tool{
 	{server: "editor", name: "preview_image", help: "Download a 256px thumbnail (-o FILE)", params: []param{req("project", ""), req("filename", "")}, shows: true},
 	{server: "editor", name: "upload_image", help: "Upload or replace an image (≤8 MiB): upload_image PROJECT FILE [-as NAME]"}, // special-cased
 	{server: "editor", name: "delete_image", help: "Remove an image and its thumbnail", params: []param{req("project", ""), req("filename", "")}},
+	{server: "editor", name: "remove_background", help: "Cut the person out of an image into a new transparent WebP (character looks); prints the new reference", params: []param{req("project", ""), req("filename", ""), opt("model", kStr, "")}},
 
 	// ── play (/play-mcp) ────────────────────────────────────────────
 	{server: "play", name: "list_available_games", help: "Playable games (published + your own)", params: []param{opt("search", kStr, ""), opt("page", kInt, ""), opt("limit", kInt, "")}},
@@ -73,7 +74,7 @@ var tools = []tool{
 	{server: "play", name: "get_state", help: "Current scene without advancing", params: []param{req("session_code", "")}, image: true},
 	{server: "play", name: "act", help: "One move: choose_link|continue|travel|click_zone|discuss|use_item", params: []param{req("session_code", ""), req("action", "choose_link|continue|travel|click_zone|discuss|use_item"), {"index", kInt, false, true, "link/route/zone index"}, opt("target_id", kStr, "location/zone/item/topic uid"), opt("topic_type", kStr, "char|fact|item|loc (discuss)")}, image: true},
 	{server: "play", name: "inspect", help: "inventory|facts|people|places|objectives|history|summary", params: []param{req("session_code", ""), {"section", kStr, false, true, ""}}},
-	{server: "play", name: "view_image", help: "Download a session image (-o FILE)", params: []param{req("session_code", ""), {"target", kStr, false, true, "scene|avatar|item|route|pac_annotated"}, opt("target_id", kStr, "")}, shows: true},
+	{server: "play", name: "view_image", help: "Download a session image (-o FILE)", params: []param{req("session_code", ""), {"target", kStr, false, true, "scene|avatar|stage|item|route|pac_annotated"}, opt("target_id", kStr, "")}, shows: true},
 	{server: "play", name: "debug_start_game", help: "Own games: start at any position with prepared state", params: []param{req("project", ""), opt("position", kJSON, `{"kind":"window","dialog":..,"window":..}`), opt("operations", kJSON, "RFC 6902 on raw State"), opt("script", kText, "JS body; @file or -"), opt("run_entry", kBool, "default true"), opt("title", kStr, "")}, image: true},
 	{server: "play", name: "debug_read_state", help: "Own games: read raw State by JSON Pointer", params: []param{req("session_code", ""), {"path", kStr, false, true, "JSON Pointer, \"\" = all"}}},
 	{server: "play", name: "debug_edit_state", help: "Own games: patch state / run script / teleport", params: []param{req("session_code", ""), opt("operations", kJSON, ""), opt("script", kText, ""), opt("position", kJSON, ""), opt("run_entry", kBool, "")}, image: true},

@@ -117,6 +117,10 @@ export default interface Character {
     chooseDescriptionScript?: string
     chooseAvatarScript?: string
     avatar: ImageList
+    /** Full-size transparent person images shown on dialog window stages; main = default look. */
+    looks?: ImageList
+    /** Picks the default look (name or index) when a stage slot does not name one. */
+    chooseLookScript?: string
     description: TextList
     dialog?: CharacterDialog
     discussable: boolean
@@ -166,4 +170,31 @@ export function getLocEventHosts(ch: Character | undefined) {
         return [...ch.dialog.eventHosts, personal]
     }
     return []
+}
+
+/** Names a character's looks can be referenced by: "main" plus every named variant. */
+export function lookNames(ch: Character | undefined): string[] {
+    if (!ch?.looks) return []
+    const names = ch.looks.list.map(l => l.name).filter((n): n is string => !!n)
+    return ch.looks.main ? ["main", ...names] : names
+}
+
+/**
+ * Resolve a look reference to an image uri without the "! ERROR" strings chooseImage
+ * produces: null/undefined/-1/"main" pick the default look, a number picks by index,
+ * a string picks by name. Unknown references resolve to undefined.
+ */
+export function resolveLookImage(ch: Character, look: unknown): string | undefined {
+    const looks = ch.looks
+    if (!looks) return undefined
+    if (look === undefined || look === null || look === "" || look === "main" || look === -1) {
+        return looks.main || undefined
+    }
+    if (typeof look === "number") {
+        return Number.isInteger(look) && look >= 0 ? looks.list[look]?.uri || undefined : undefined
+    }
+    if (typeof look === "string") {
+        return looks.list.find(l => l.name === look)?.uri || undefined
+    }
+    return undefined
 }

@@ -128,6 +128,24 @@ export const createActor = (): Actor => {
     }
 }
 
+/** Max number of persons shown on a window's stage at once. */
+export const MAX_STAGE_PERSONS = 3
+
+/**
+ * One full-size person ("look" sprite) shown on a dialog window's stage.
+ * Stage slots are laid out right-to-left: slot 0 is the rightmost person.
+ */
+export interface StagePerson {
+    /** Character uid. Ignored when `currentCharacter` is set. */
+    character: string
+    /** Use the character of the current conversation (state.charDialog). */
+    currentCharacter?: boolean
+    /** Look name from `Character.looks`; omitted = character's default look. */
+    look?: string
+}
+
+export const createStagePerson = (character = ""): StagePerson => ({ character })
+
 export interface DialogWindow {
     text: TextList
     uid: string
@@ -137,6 +155,13 @@ export interface DialogWindow {
     chooseTextScript?: string
     chooseBackgroundScript?: string
     actor?: Actor
+    /**
+     * Up to 3 (MAX_STAGE_PERSONS) full-size persons, right-to-left: index 0 is rightmost.
+     * @maxItems 3
+     */
+    stage?: StagePerson[]
+    /** Returns the stage for this window (overrides `stage`); null keeps the static stage. */
+    chooseStageScript?: string
     tags: string[]
     changeLocationInBg?: string
     changeSituation?: string

@@ -12,6 +12,7 @@ import CodeSampleButton from './common/CodeSampleButton';
 import { ImageList } from '../game/ImageList';
 import ImageListEditor from './common/text_list/ImageListEditor';
 import ActorEditor from './common/actor/ActorEditor';
+import StageEditor from './common/actor/StageEditor';
 import LocationPicker from './linkedit/LocationPicker';
 import SituationModifier from './common/situation/SituationModifier';
 
@@ -26,8 +27,21 @@ const CODE_EDITOR_UI_TEXTSELECTOR: PopupCodeEditorUi = {
     "header": "alternative text choose"
 }
 
+const CODE_EDITOR_UI_STAGESELECTOR: PopupCodeEditorUi = {
+    arguments: DEFAULT_ARGS,
+    "functionName": "chooseStage",
+    "functionTemplates": {
+        "no action (static stage)": "",
+        "nobody": "return [];",
+        "one person": "return [{ character: 'hero', look: 'smile' }];",
+        "two persons, right to left": "return ['hero:smile', 'villain'];",
+        "depends on a fact": "return rt.facts.betrayal.known\n    ? [{ character: 'villain', look: 'angry' }]\n    : [{ character: 'villain' }];"
+    },
+    "header": "stage persons (right to left, up to 3); null keeps the static stage"
+}
 
-type CodeEditMenu = "chooseText" | "chooseBackground" | "onEntry"
+
+type CodeEditMenu = "chooseText" | "chooseBackground" | "onEntry" | "chooseStage"
 
 interface DialogWindowEditDrawerProps {
     window: DialogWindow;
@@ -75,6 +89,10 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                 modifyWindowBy(updaterBg);
                 break;
             }
+            case "chooseStage": {
+                modifyWindowBy((window: DialogWindow) => ({ ...window, chooseStageScript: upd }));
+                break;
+            }
             case "onEntry": {
                 const updaterOnEntr = (window: DialogWindow) => ({
                     ...window,
@@ -105,6 +123,10 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
             case "onEntry":
                 code = windowState.entryScript
                 ui = CODE_EDITOR_UI_TEXTSELECTOR
+                break;
+            case "chooseStage":
+                code = windowState.chooseStageScript
+                ui = CODE_EDITOR_UI_STAGESELECTOR
                 break;
         }
         return <PopupCodeEditor ui={ui} code={code || ""} game={game} onSaveClose={(s) => onSaveClose(menu, s)} open={codeEditorOpen} onAddSituation={handlers.createSituation} onAddFact={handlers.createFact} onAddItem={handlers.createItem} onAddProp={handlers.createProp}></PopupCodeEditor>
@@ -193,6 +215,9 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                                 <Panel header="Actor" defaultExpanded>
                                     <ActorEditor value={windowState.actor ? windowState.actor : null} game={game} onChange={(actor) => setWindow({ ...windowState, actor: actor })} />
                                 </Panel>
+                                <Panel header="Stage persons (looks)" data-testid="window-stage-panel">
+                                    <StageEditor game={game} value={windowState.stage} scripted={!!windowState.chooseStageScript} onChange={(stage) => modifyWindowBy(w => ({ ...w, stage }))} />
+                                </Panel>
                                 <Panel header="Misc">
                                     <Checkbox checked={windowState.changeLocationInBg !== undefined} onChange={(_value, checked) => onChangeLocationInBgCheck(checked)}>Change location</Checkbox>
                                     {windowState.changeLocationInBg === undefined ? null : <LocationPicker locs={game.locs} value={windowState.changeLocationInBg} onLocChange={onChangeLocationInBg} />}
@@ -222,6 +247,7 @@ const DialogWindowEditDrawer: React.FC<DialogWindowEditDrawerProps> = ({ window,
                                         <CodeSampleButton onClick={() => codeEdit("chooseText")} name='chooseText' code={windowState.chooseTextScript} />
                                         <CodeSampleButton onClick={() => codeEdit("chooseBackground")} name='chooseBackground' code={windowState.chooseBackgroundScript} />
                                         <CodeSampleButton onClick={() => codeEdit("onEntry")} name='onEntry' code={windowState.entryScript} />
+                                        <CodeSampleButton onClick={() => codeEdit("chooseStage")} name='chooseStage' code={windowState.chooseStageScript} />
                                     </div>
                                 </Panel>
                             </PanelGroup>
